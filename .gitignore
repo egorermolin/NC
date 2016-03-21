@@ -1,4 +1,7 @@
-target
+.idea
+.gradle
+build
+log
 *.class
 *.log
 *.debug
