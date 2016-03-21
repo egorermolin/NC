@@ -15,8 +15,8 @@ public enum TradingSessionId {
     TQBR("TQBR"), // SHARES
     TQBD("TQBD"), // SHARES
     TQDE("TQDE"), // SHARES
-    TQBD("TQIF"), // MUTUAL FUNDS
-    TQDE("TQQI"), // MUTUAL FUNDS
+    TQIF("TQIF"), // MUTUAL FUNDS
+    TQQI("TQQI"), // MUTUAL FUNDS
     TQTF("TQTF"), // ETF
     TQTD("TQTD"), // ETF
     TQOB("TQOB"), // BONDS

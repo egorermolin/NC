@@ -90,13 +90,19 @@ public class MainClass {
             @Override
             public TradingSessionId[] getAllowedTradingSessionIds(MarketType marketType) {
                 // return new TradingSessionId[] {TradingSessionId.CETS};
-                return new TradingSessionId[];
+                return new TradingSessionId[] {TradingSessionId.TQBR, TradingSessionId.TQBD, TradingSessionId.TQDE,
+                                                TradingSessionId.TQIF, TradingSessionId.TQQI,
+                                                TradingSessionId.TQTF, TradingSessionId.TQTD,
+                                                TradingSessionId.TQOB, TradingSessionId.TQOD,TradingSessionId.TQDB,
+                                                TradingSessionId.TQTC,
+                            };
             }
 
             @Override
             public ProductType[] getAllowedProductTypes(MarketType marketType) {
                 // return new ProductType[] {ProductType.CURRENCY};
-                return new ProductType[0];
+                return new ProductType[] {ProductType.EQUITY, ProductType.INDEX
+                };
             }
         });
         gwManager.start();
