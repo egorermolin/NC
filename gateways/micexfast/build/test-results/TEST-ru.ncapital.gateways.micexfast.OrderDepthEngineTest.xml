@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ru.ncapital.gateways.micexfast.OrderDepthEngineTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2016-03-14T12:45:35" hostname="ncomp39" time="0.117">
+  <properties/>
+  <testcase name="testOnDepthLevelInsertUpdateDeleteBidTwoLevels" classname="ru.ncapital.gateways.micexfast.OrderDepthEngineTest" time="0.1"/>
+  <testcase name="testOnDepthLevelInsertAndDeleteAll" classname="ru.ncapital.gateways.micexfast.OrderDepthEngineTest" time="0.004"/>
+  <testcase name="testOnDepthLevelInsert" classname="ru.ncapital.gateways.micexfast.OrderDepthEngineTest" time="0.0"/>
+  <testcase name="testOnDepthLevelInsertOffer" classname="ru.ncapital.gateways.micexfast.OrderDepthEngineTest" time="0.0"/>
+  <testcase name="testOnDepthLevelInsertUpdateDeleteOffer" classname="ru.ncapital.gateways.micexfast.OrderDepthEngineTest" time="0.001"/>
+  <testcase name="testOnDepthLevelTradedPartially2" classname="ru.ncapital.gateways.micexfast.OrderDepthEngineTest" time="0.004"/>
+  <testcase name="testOnDepthLevelInsertBid" classname="ru.ncapital.gateways.micexfast.OrderDepthEngineTest" time="0.001"/>
+  <testcase name="testOnDepthLevelInsertTwoLevelsSamePrice" classname="ru.ncapital.gateways.micexfast.OrderDepthEngineTest" time="0.001"/>
+  <testcase name="testOnDepthLevelTradedPartially" classname="ru.ncapital.gateways.micexfast.OrderDepthEngineTest" time="0.0"/>
+  <testcase name="testOnDepthLevelInsertTwoLevelsDifferentPrice2" classname="ru.ncapital.gateways.micexfast.OrderDepthEngineTest" time="0.001"/>
+  <testcase name="testOnDepthLevelInsertTwoLevelsDifferentPrice" classname="ru.ncapital.gateways.micexfast.OrderDepthEngineTest" time="0.0"/>
+  <testcase name="testOnDepthLevelTradedFully" classname="ru.ncapital.gateways.micexfast.OrderDepthEngineTest" time="0.001"/>
+  <testcase name="testOnDepthLevelInsertUpdateDeleteBid" classname="ru.ncapital.gateways.micexfast.OrderDepthEngineTest" time="0.001"/>
+  <testcase name="testOnDepthLevelInsertUpdateDeleteOfferTwoLevels" classname="ru.ncapital.gateways.micexfast.OrderDepthEngineTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

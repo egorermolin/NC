@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="OtherTests" tests="5" skipped="0" failures="0" errors="0" timestamp="2016-03-14T12:45:35" hostname="ncomp39" time="0.003">
+  <properties/>
+  <testcase name="testCurrentTimeInMillis" classname="OtherTests" time="0.0"/>
+  <testcase name="testGetMdEntryTimeInUsec" classname="OtherTests" time="0.003"/>
+  <testcase name="testConvertTodayToTicksAndBack" classname="OtherTests" time="0.0"/>
+  <testcase name="testSequenceArray" classname="OtherTests" time="0.0"/>
+  <testcase name="testSubstring" classname="OtherTests" time="0.0"/>
+  <system-out><![CDATA[45935295
+45935298667
+635935563352986670
+124535298667
+45935298667
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

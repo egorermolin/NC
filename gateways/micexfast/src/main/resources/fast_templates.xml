@@ -1,0 +1,727 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+    <!-- Logon -->
+    <template name="A" id="2101" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="A"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <string name="TargetCompID" id="56"/>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+
+        <int32 name="HeartBtInt" id="108"/>
+        <string name="Username" id="553" presence="optional"/>
+        <string name="Password" id="554" presence="optional"/>
+        <string name="DefaultApplVerID" id="1137"/>
+    </template>
+    <!-- Logout -->
+    <template name="5" id="2102" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="5"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <string name="TargetCompID" id="56"/>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+
+        <string name="Text" id="58" presence="optional"/>
+    </template>
+    <!-- Market Data - Snapshot/Full Refresh Generic-->
+    <template name="W-Generic" id="2103" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="W"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+        <string name="TradingSessionID" id="336" presence="optional"/>
+        <string name="Symbol" id="55"/>
+        <uInt32 name="LastMsgSeqNumProcessed" id="369" presence="optional"/>
+        <int32 name="RptSeq" id="83"/>
+        <uInt32 name="LastFragment" id="893" presence="optional"/>
+        <uInt32 name="RouteFirst" id="7944" presence="optional"/>
+        <int32 name="TradSesStatus" id="340" presence="optional"/>
+        <int32 name="MDSecurityTradingStatus" id="1682" presence="optional"/>
+        <uInt32 name="AuctionIndicator" id="5509" presence="optional"/>
+        <decimal name="NetChgPrevDay" id="451" presence="optional"/>
+        <sequence name="GroupMDEntries">
+            <length name="NoMDEntries" id="268"/>
+            <string name="MDEntryType" id="269" presence="optional"/>
+            <string name="MDEntryID" id="278" presence="optional"/>
+            <uInt32 name="MDEntryDate" id="272" presence="optional"/>
+            <uInt32 name="MDEntryTime" id="273" presence="optional"/>
+            <uInt32 name="OrigTime" id="9412" presence="optional"/>
+            <decimal name="MDEntryPx" id="270" presence="optional"/>
+            <decimal name="MDEntrySize" id="271" presence="optional"/>
+            <string name="QuoteCondition" id="276" presence="optional"/>
+            <string name="TradeCondition" id="277" presence="optional"/>
+            <string name="OpenCloseSettlFlag" id="286" presence="optional"/>
+            <string name="OrdType" id="40" presence="optional"/>
+            <uInt32 name="EffectiveTime" id="5902" presence="optional"/>
+            <uInt32 name="StartTime" id="9820" presence="optional"/>
+            <decimal name="AccruedInterestAmt" id="5384" presence="optional"/>
+            <decimal name="ChgFromWAPrice" id="5510" presence="optional"/>
+            <decimal name="ChgOpenInterest" id="5511" presence="optional"/>
+            <decimal name="BidMarketSize" id="5292" presence="optional"/>
+            <decimal name="AskMarketSize" id="5293" presence="optional"/>
+            <int32 name="TotalNumOfTrades" id="6139" presence="optional"/>
+            <decimal name="TradeValue" id="6143" presence="optional"/>
+            <decimal name="Yield" id="236" presence="optional"/>
+            <decimal name="TotalVolume" id="5791" presence="optional"/>
+            <int32 name="OfferNbOr" id="9168" presence="optional"/>
+            <int32 name="BidNbOr" id="9169" presence="optional"/>
+            <decimal name="ChgFromSettlmnt" id="9750" presence="optional"/>
+            <uInt32 name="SettlDate" id="64" presence="optional"/>
+            <string name="SettleType" id="5459" presence="optional"/>
+            <int32 name="SumQtyOfBest" id="10503" presence="optional"/>
+            <string name="OrderSide" id="10504" presence="optional"/>
+            <string name="OrderStatus" id="10505" presence="optional"/>
+            <decimal name="MinCurrPx" id="10509" presence="optional"/>
+            <uInt32 name="MinCurrPxChgTime" id="10510" presence="optional"/>
+            <uInt32 name="VolumeIndicator" id="7017" presence="optional"/>
+            <decimal name="Price" id="44" presence="optional"/>
+            <int32 name="PriceType" id="423" presence="optional"/>
+            <decimal name="NominalValue" id="9280" presence="optional"/>
+            <decimal name="RepoToPx" id="5677" presence="optional"/>
+            <decimal name="BuyBackPx" id="5558" presence="optional"/>
+            <uInt32 name="BuyBackDate" id="5559" presence="optional"/>
+            <string name="DealNumber" id="9885" presence="optional"><copy/></string>
+            <string name="CXFlag" id="5154" presence="optional"><copy/></string>
+            <string name="TradingSessionSubID" id="625" presence="optional"/>
+        </sequence>
+    </template>
+
+    <!-- Market Data - Incremental Refresh Generic-->
+    <template name="X-Generic" id="2104" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="X"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+        <sequence name="GroupMDEntries">
+            <length name="NoMDEntries" id="268"/>
+            <uInt32 name="MDUpdateAction" id="279" presence="optional"/>
+            <string name="MDEntryType" id="269" presence="optional"/>
+            <string name="MDEntryID" id="278" presence="optional"/>
+            <int32 name="RptSeq" id="83" presence="optional"/>
+            <uInt32 name="MDEntryDate" id="272" presence="optional"/>
+            <uInt32 name="OrigTime" id="9412" presence="optional"/>
+            <uInt32 name="SettlDate" id="64" presence="optional"/>
+            <string name="SettleType" id="5459" presence="optional"/>
+            <uInt32 name="MDEntryTime" id="273" presence="optional"/>
+            <uInt32 name="EffectiveTime" id="5902" presence="optional"/>
+            <uInt32 name="StartTime" id="9820" presence="optional"/>
+            <string name="Symbol" id="55" presence="optional"/>
+            <decimal name="MDEntryPx" id="270" presence="optional"/>
+            <decimal name="MDEntrySize" id="271" presence="optional"/>
+            <string name="QuoteCondition" id="276" presence="optional"/>
+            <string name="TradeCondition" id="277" presence="optional"/>
+            <string name="OpenCloseSettlFlag" id="286" presence="optional"/>
+            <string name="OrdType" id="40" presence="optional"/>
+            <decimal name="NetChgPrevDay" id="451" presence="optional"/>
+            <decimal name="AccruedInterestAmt" id="5384" presence="optional"/>
+            <decimal name="ChgFromWAPrice" id="5510" presence="optional"/>
+            <decimal name="ChgOpenInterest" id="5511" presence="optional"/>
+            <decimal name="BidMarketSize" id="5292" presence="optional"/>
+            <decimal name="AskMarketSize" id="5293" presence="optional"/>
+            <int32 name="TotalNumOfTrades" id="6139" presence="optional"/>
+            <decimal name="TradeValue" id="6143" presence="optional"/>
+            <decimal name="Yield" id="236" presence="optional"/>
+            <decimal name="TotalVolume" id="5791" presence="optional"/>
+            <int32 name="OfferNbOr" id="9168" presence="optional"/>
+            <int32 name="BidNbOr" id="9169" presence="optional"/>
+            <decimal name="ChgFromSettlmnt" id="9750" presence="optional"/>
+            <int32 name="SumQtyOfBest" id="10503" presence="optional"/>
+            <string name="OrderSide" id="10504" presence="optional"/>
+            <string name="OrderStatus" id="10505" presence="optional"/>
+            <decimal name="MinCurrPx" id="10509" presence="optional"/>
+            <uInt32 name="MinCurrPxChgTime" id="10510" presence="optional"/>
+            <uInt32 name="VolumeIndicator" id="7017" presence="optional"/>
+            <decimal name="Price" id="44" presence="optional"/>
+            <int32 name="PriceType" id="423" presence="optional"/>
+            <decimal name="NominalValue" id="9280" presence="optional"/>
+            <decimal name="RepoToPx" id="5677" presence="optional"/>
+            <decimal name="BuyBackPx" id="5558" presence="optional"/>
+            <uInt32 name="BuyBackDate" id="5559" presence="optional"/>
+            <string name="DealNumber" id="9885" presence="optional"><copy/></string>
+            <string name="CXFlag" id="5154" presence="optional"><copy/></string>
+            <string name="TradingSessionID" id="336" presence="optional"/>
+            <string name="TradingSessionSubID" id="625" presence="optional"/>
+        </sequence>
+    </template>
+
+
+    <!-- Market Data - Snapshot/Full Refresh OLS FOND -->
+    <template name="W-OLS-FOND" id="2410" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="W"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+        <uInt32 name="LastMsgSeqNumProcessed" id="369" presence="optional"/>
+        <int32 name="RptSeq" id="83"/>
+        <uInt32 name="LastFragment" id="893" presence="optional"/>
+        <uInt32 name="RouteFirst" id="7944" presence="optional"/>
+        <int32 name="TradSesStatus" id="340" presence="optional"/>
+        <string name="TradingSessionID" id="336" presence="optional"/>
+        <string name="Symbol" id="55"/>
+        <int32 name="MDSecurityTradingStatus" id="1682" presence="optional"/>
+        <uInt32 name="AuctionIndicator" id="5509" presence="optional"/>
+        <sequence name="GroupMDEntries">
+            <length name="NoMDEntries" id="268"/>
+            <string name="MDEntryType" id="269" presence="optional"/>
+            <string name="MDEntryID" id="278" presence="optional"/>
+            <uInt32 name="MDEntryDate" id="272" presence="optional"/>
+            <uInt32 name="MDEntryTime" id="273" presence="optional"/>
+            <uInt32 name="OrigTime" id="9412" presence="optional"/>
+            <decimal name="MDEntryPx" id="270" presence="optional"/>
+            <decimal name="MDEntrySize" id="271" presence="optional"/>
+            <string name="DealNumber" id="9885" presence="optional"><copy/></string>
+            <decimal name="Yield" id="236" presence="optional"/>
+            <string name="OrderStatus" id="10505" presence="optional"/>
+            <string name="OrdType" id="40" presence="optional"/>
+            <decimal name="TotalVolume" id="5791" presence="optional"/>
+            <string name="TradingSessionSubID" id="625" presence="optional"/>
+        </sequence>
+    </template>
+
+    <!-- Market Data - Snapshot/Full Refresh OLS CURR -->
+    <template name="W-OLS-CURR" id="3500" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="W"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+        <uInt32 name="LastMsgSeqNumProcessed" id="369" presence="optional"/>
+        <int32 name="RptSeq" id="83"/>
+        <uInt32 name="LastFragment" id="893" presence="optional"/>
+        <uInt32 name="RouteFirst" id="7944" presence="optional"/>
+        <int32 name="TradSesStatus" id="340" presence="optional"/>
+        <string name="TradingSessionID" id="336" presence="optional"/>
+        <string name="Symbol" id="55"/>
+        <int32 name="MDSecurityTradingStatus" id="1682" presence="optional"/>
+        <sequence name="GroupMDEntries">
+            <length name="NoMDEntries" id="268"/>
+            <string name="MDEntryType" id="269" presence="optional"/>
+            <string name="MDEntryID" id="278" presence="optional"/>
+            <uInt32 name="MDEntryDate" id="272" presence="optional"/>
+            <uInt32 name="MDEntryTime" id="273" presence="optional"/>
+            <uInt32 name="OrigTime" id="9412" presence="optional"/>
+            <decimal name="MDEntryPx" id="270" presence="optional"/>
+            <decimal name="MDEntrySize" id="271" presence="optional"/>
+            <string name="DealNumber" id="9885" presence="optional"><copy/></string>
+            <string name="OrderStatus" id="10505" presence="optional"/>
+            <string name="TradingSessionSubID" id="625" presence="optional"/>
+        </sequence>
+    </template>
+
+
+    <!-- Market Data - Snapshot/Full Refresh TLS FOND-->
+    <template name="W-TLS-FOND" id="2411" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="W"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+        <uInt32 name="LastMsgSeqNumProcessed" id="369" presence="optional"/>
+        <int32 name="RptSeq" id="83"/>
+        <uInt32 name="LastFragment" id="893" presence="optional"/>
+        <uInt32 name="RouteFirst" id="7944" presence="optional"/>
+        <int32 name="TradSesStatus" id="340" presence="optional"/>
+        <string name="TradingSessionID" id="336" presence="optional"/>
+        <string name="Symbol" id="55"/>
+        <int32 name="MDSecurityTradingStatus" id="1682" presence="optional"/>
+        <uInt32 name="AuctionIndicator" id="5509" presence="optional"/>
+        <sequence name="GroupMDEntries">
+            <length name="NoMDEntries" id="268"/>
+            <string name="MDEntryType" id="269"/>
+            <string name="MDEntryID" id="278" presence="optional"/>
+            <uInt32 name="MDEntryDate" id="272" presence="optional"/>
+            <uInt32 name="MDEntryTime" id="273" presence="optional"/>
+            <uInt32 name="OrigTime" id="9412" presence="optional"/>
+            <string name="OrderSide" id="10504" presence="optional"/>
+            <decimal name="MDEntryPx" id="270" presence="optional"/>
+            <decimal name="MDEntrySize" id="271" presence="optional"/>
+            <decimal name="AccruedInterestAmt" id="5384" presence="optional"/>
+            <decimal name="TradeValue" id="6143" presence="optional"/>
+            <decimal name="Yield" id="236" presence="optional"/>
+            <uInt32 name="SettlDate" id="64" presence="optional"/>
+            <string name="SettleType" id="5459" presence="optional"/>
+            <decimal name="Price" id="44" presence="optional"/>
+            <int32 name="PriceType" id="423" presence="optional"/>
+            <decimal name="RepoToPx" id="5677" presence="optional"/>
+            <decimal name="BuyBackPx" id="5558" presence="optional"/>
+            <uInt32 name="BuyBackDate" id="5559" presence="optional"/>
+            <string name="TradingSessionSubID" id="625" presence="optional"/>
+        </sequence>
+    </template>
+
+    <!-- Market Data - Snapshot/Full Refresh TLS CURR-->
+    <template name="W-TLS-CURR" id="3501" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="W"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+        <uInt32 name="LastMsgSeqNumProcessed" id="369" presence="optional"/>
+        <int32 name="RptSeq" id="83"/>
+        <uInt32 name="LastFragment" id="893" presence="optional"/>
+        <uInt32 name="RouteFirst" id="7944" presence="optional"/>
+        <int32 name="TradSesStatus" id="340" presence="optional"/>
+        <string name="TradingSessionID" id="336" presence="optional"/>
+        <string name="Symbol" id="55"/>
+        <int32 name="MDSecurityTradingStatus" id="1682" presence="optional"/>
+        <sequence name="GroupMDEntries">
+            <length name="NoMDEntries" id="268"/>
+            <string name="MDEntryType" id="269"/>
+            <string name="MDEntryID" id="278" presence="optional"/>
+            <uInt32 name="MDEntryDate" id="272" presence="optional"/>
+            <uInt32 name="MDEntryTime" id="273" presence="optional"/>
+            <uInt32 name="OrigTime" id="9412" presence="optional"/>
+            <string name="OrderSide" id="10504" presence="optional"/>
+            <decimal name="MDEntryPx" id="270" presence="optional"/>
+            <decimal name="MDEntrySize" id="271" presence="optional"/>
+            <decimal name="TradeValue" id="6143" presence="optional"/>
+            <uInt32 name="SettlDate" id="64" presence="optional"/>
+            <string name="SettleType" id="5459" presence="optional"/>
+            <decimal name="Price" id="44" presence="optional"/>
+            <int32 name="PriceType" id="423" presence="optional"/>
+            <decimal name="RepoToPx" id="5677" presence="optional"/>
+            <decimal name="BuyBackPx" id="5558" presence="optional"/>
+            <uInt32 name="BuyBackDate" id="5559" presence="optional"/>
+            <string name="TradingSessionSubID" id="625" presence="optional"/>
+        </sequence>
+    </template>
+
+
+    <!-- Market Data - Snapshot/Full Refresh OBS FOND-->
+    <template name="W-OBS-FOND" id="2412" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="W"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+        <uInt32 name="LastMsgSeqNumProcessed" id="369" presence="optional"/>
+        <int32 name="RptSeq" id="83"/>
+        <int32 name="TradSesStatus" id="340" presence="optional"/>
+        <string name="TradingSessionID" id="336" presence="optional"/>
+        <string name="Symbol" id="55"/>
+        <uInt32 name="LastFragment" id="893" presence="optional"/>
+        <uInt32 name="RouteFirst" id="7944" presence="optional"/>
+        <int32 name="MDSecurityTradingStatus" id="1682" presence="optional"/>
+        <uInt32 name="AuctionIndicator" id="5509" presence="optional"/>
+        <sequence name="GroupMDEntries">
+            <length name="NoMDEntries" id="268"/>
+            <string name="MDEntryType" id="269" presence="optional"/>
+            <string name="MDEntryID" id="278" presence="optional"/>
+            <decimal name="MDEntryPx" id="270" presence="optional"/>
+            <decimal name="MDEntrySize" id="271" presence="optional"/>
+            <uInt32 name="MDEntryTime" id="273" presence="optional"/>
+            <uInt32 name="OrigTime" id="9412" presence="optional"/>
+            <decimal name="Yield" id="236" presence="optional"/>
+            <uInt32 name="EffectiveTime" id="5902" presence="optional"/>
+            <decimal name="NominalValue" id="9280" presence="optional"/>
+            <string name="TradingSessionSubID" id="625" presence="optional"/>
+        </sequence>
+    </template>
+
+    <!-- Market Data - Snapshot/Full Refresh OBS CURR-->
+    <template name="W-OBS-CURR" id="3502" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="W"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+        <uInt32 name="LastMsgSeqNumProcessed" id="369" presence="optional"/>
+        <int32 name="RptSeq" id="83"/>
+        <int32 name="TradSesStatus" id="340" presence="optional"/>
+        <string name="TradingSessionID" id="336" presence="optional"/>
+        <string name="Symbol" id="55"/>
+        <uInt32 name="LastFragment" id="893" presence="optional"/>
+        <uInt32 name="RouteFirst" id="7944" presence="optional"/>
+        <int32 name="MDSecurityTradingStatus" id="1682" presence="optional"/>
+        <sequence name="GroupMDEntries">
+            <length name="NoMDEntries" id="268"/>
+            <string name="MDEntryType" id="269" presence="optional"/>
+            <string name="MDEntryID" id="278" presence="optional"/>
+            <decimal name="MDEntryPx" id="270" presence="optional"/>
+            <decimal name="MDEntrySize" id="271" presence="optional"/>
+            <uInt32 name="MDEntryTime" id="273" presence="optional"/>
+            <uInt32 name="OrigTime" id="9412" presence="optional"/>
+            <string name="TradingSessionSubID" id="625" presence="optional"/>
+        </sequence>
+    </template>
+
+
+    <!-- Market Data - Incremental Refresh MSR FOND-->
+    <template name="X-MSR-FOND" id="2423" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="X"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+        <sequence name="GroupMDEntries">
+            <length name="NoMDEntries" id="268"/>
+            <uInt32 name="MDUpdateAction" id="279" presence="optional"/>
+            <string name="MDEntryType" id="269" presence="optional"/>
+            <string name="MDEntryID" id="278" presence="optional"/>
+            <string name="Symbol" id="55" presence="optional"/>
+            <int32 name="RptSeq" id="83" presence="optional"/>
+            <decimal name="MDEntryPx" id="270" presence="optional"/>
+            <decimal name="MDEntrySize" id="271" presence="optional"/>
+            <uInt32 name="MDEntryDate" id="272" presence="optional"/>
+            <uInt32 name="MDEntryTime" id="273" presence="optional"/>
+            <uInt32 name="StartTime" id="9820" presence="optional"/>
+            <string name="QuoteCondition" id="276" presence="optional"/>
+            <string name="TradeCondition" id="277" presence="optional"/>
+            <string name="OpenCloseSettlFlag" id="286" presence="optional"/>
+            <decimal name="NetChgPrevDay" id="451" presence="optional"/>
+            <decimal name="AccruedInterestAmt" id="5384" presence="optional"/>
+            <decimal name="ChgFromWAPrice" id="5510" presence="optional"/>
+            <decimal name="ChgOpenInterest" id="5511" presence="optional"/>
+            <decimal name="BidMarketSize" id="5292" presence="optional"/>
+            <decimal name="AskMarketSize" id="5293" presence="optional"/>
+            <int32 name="TotalNumOfTrades" id="6139" presence="optional"/>
+            <decimal name="TradeValue" id="6143" presence="optional"/>
+            <decimal name="Yield" id="236" presence="optional"/>
+            <int32 name="OfferNbOr" id="9168" presence="optional"/>
+            <int32 name="BidNbOr" id="9169" presence="optional"/>
+            <decimal name="ChgFromSettlmnt" id="9750" presence="optional"/>
+            <decimal name="MinCurrPx" id="10509" presence="optional"/>
+            <uInt32 name="MinCurrPxChgTime" id="10510" presence="optional"/>
+            <uInt32 name="VolumeIndicator" id="7017" presence="optional"/>
+            <uInt32 name="SettlDate" id="64" presence="optional"/>
+            <string name="SettleType" id="5459" presence="optional"/>
+            <string name="CXFlag" id="5154" presence="optional"><copy/></string>
+            <string name="TradingSessionID" id="336" presence="optional"/>
+            <string name="TradingSessionSubID" id="625" presence="optional"/>
+        </sequence>
+    </template>
+
+    <!-- Market Data - Incremental Refresh MSR CURR-->
+    <template name="X-MSR-CURR" id="3513" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="X"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+        <sequence name="GroupMDEntries">
+            <length name="NoMDEntries" id="268"/>
+            <uInt32 name="MDUpdateAction" id="279" presence="optional"/>
+            <string name="MDEntryType" id="269" presence="optional"/>
+            <string name="MDEntryID" id="278" presence="optional"/>
+            <string name="Symbol" id="55" presence="optional"/>
+            <int32 name="RptSeq" id="83" presence="optional"/>
+            <decimal name="MDEntryPx" id="270" presence="optional"/>
+            <decimal name="MDEntrySize" id="271" presence="optional"/>
+            <uInt32 name="MDEntryDate" id="272" presence="optional"/>
+            <uInt32 name="MDEntryTime" id="273" presence="optional"/>
+            <string name="QuoteCondition" id="276" presence="optional"/>
+            <string name="TradeCondition" id="277" presence="optional"/>
+            <string name="OpenCloseSettlFlag" id="286" presence="optional"/>
+            <decimal name="NetChgPrevDay" id="451" presence="optional"/>
+            <decimal name="ChgFromWAPrice" id="5510" presence="optional"/>
+            <decimal name="ChgOpenInterest" id="5511" presence="optional"/>
+            <int32 name="TotalNumOfTrades" id="6139" presence="optional"/>
+            <decimal name="TradeValue" id="6143" presence="optional"/>
+            <int32 name="OfferNbOr" id="9168" presence="optional"/>
+            <int32 name="BidNbOr" id="9169" presence="optional"/>
+            <decimal name="ChgFromSettlmnt" id="9750" presence="optional"/>
+            <uInt32 name="SettlDate" id="64" presence="optional"/>
+            <string name="SettleType" id="5459" presence="optional"/>
+            <string name="CXFlag" id="5154" presence="optional"><copy/></string>
+            <string name="TradingSessionID" id="336" presence="optional"/>
+            <string name="TradingSessionSubID" id="625" presence="optional"/>
+        </sequence>
+    </template>
+
+
+    <!-- Market Data - Incremental Refresh OLR FOND-->
+    <template name="X-OLR-FOND" id="2420" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="X"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+        <sequence name="GroupMDEntries">
+            <length name="NoMDEntries" id="268"/>
+            <uInt32 name="MDUpdateAction" id="279" presence="optional"/>
+            <string name="MDEntryType" id="269" presence="optional"/>
+            <string name="MDEntryID" id="278" presence="optional"/>
+            <string name="Symbol" id="55" presence="optional"/>
+            <int32 name="RptSeq" id="83" presence="optional"/>
+            <uInt32 name="MDEntryDate" id="272" presence="optional"/>
+            <uInt32 name="MDEntryTime" id="273" presence="optional"/>
+            <uInt32 name="OrigTime" id="9412" presence="optional"/>
+            <decimal name="MDEntryPx" id="270" presence="optional"/>
+            <decimal name="MDEntrySize" id="271" presence="optional"/>
+            <string name="DealNumber" id="9885" presence="optional"><copy/></string>
+            <decimal name="Yield" id="236" presence="optional"/>
+            <string name="OrderStatus" id="10505" presence="optional"/>
+            <string name="OrdType" id="40" presence="optional"/>
+            <decimal name="TotalVolume" id="5791" presence="optional"/>
+            <string name="TradingSessionID" id="336" presence="optional"/>
+            <string name="TradingSessionSubID" id="625" presence="optional"/>
+        </sequence>
+    </template>
+
+    <!-- Market Data - Incremental Refresh OLR CURR-->
+    <template name="X-OLR-CURR" id="3510" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="X"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+        <sequence name="GroupMDEntries">
+            <length name="NoMDEntries" id="268"/>
+            <uInt32 name="MDUpdateAction" id="279" presence="optional"/>
+            <string name="MDEntryType" id="269" presence="optional"/>
+            <string name="MDEntryID" id="278" presence="optional"/>
+            <string name="Symbol" id="55" presence="optional"/>
+            <int32 name="RptSeq" id="83" presence="optional"/>
+            <uInt32 name="MDEntryDate" id="272" presence="optional"/>
+            <uInt32 name="MDEntryTime" id="273" presence="optional"/>
+            <uInt32 name="OrigTime" id="9412" presence="optional"/>
+            <decimal name="MDEntryPx" id="270" presence="optional"/>
+            <decimal name="MDEntrySize" id="271" presence="optional"/>
+            <string name="DealNumber" id="9885" presence="optional"><copy/></string>
+            <string name="OrderStatus" id="10505" presence="optional"/>
+            <string name="TradingSessionID" id="336" presence="optional"/>
+            <string name="TradingSessionSubID" id="625" presence="optional"/>
+        </sequence>
+    </template>
+
+
+
+    <!-- Market Data - Incremental Refresh OBR FOND-->
+    <template name="X-OBR-FOND" id="2422" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="X"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+        <sequence name="GroupMDEntries">
+            <length name="NoMDEntries" id="268"/>
+            <uInt32 name="MDUpdateAction" id="279" presence="optional"/>
+            <string name="MDEntryType" id="269" presence="optional"/>
+            <string name="MDEntryID" id="278" presence="optional"/>
+            <string name="Symbol" id="55" presence="optional"/>
+            <int32 name="RptSeq" id="83" presence="optional"/>
+            <decimal name="MDEntryPx" id="270" presence="optional"/>
+            <decimal name="MDEntrySize" id="271" presence="optional"/>
+            <uInt32 name="MDEntryTime" id="273" presence="optional"/>
+            <uInt32 name="OrigTime" id="9412" presence="optional"/>
+            <decimal name="Yield" id="236" presence="optional"/>
+            <uInt32 name="EffectiveTime" id="5902" presence="optional"/>
+            <decimal name="NominalValue" id="9280" presence="optional"/>
+            <string name="TradingSessionID" id="336" presence="optional"/>
+            <string name="TradingSessionSubID" id="625" presence="optional"/>
+        </sequence>
+    </template>
+
+    <!-- Market Data - Incremental Refresh OBR CURR-->
+    <template name="X-OBR-CURR" id="3512" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="X"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+        <sequence name="GroupMDEntries">
+            <length name="NoMDEntries" id="268"/>
+            <uInt32 name="MDUpdateAction" id="279" presence="optional"/>
+            <string name="MDEntryType" id="269" presence="optional"/>
+            <string name="MDEntryID" id="278" presence="optional"/>
+            <string name="Symbol" id="55" presence="optional"/>
+            <int32 name="RptSeq" id="83" presence="optional"/>
+            <decimal name="MDEntryPx" id="270" presence="optional"/>
+            <decimal name="MDEntrySize" id="271" presence="optional"/>
+            <uInt32 name="MDEntryTime" id="273" presence="optional"/>
+            <uInt32 name="OrigTime" id="9412" presence="optional"/>
+            <string name="TradingSessionID" id="336" presence="optional"/>
+            <string name="TradingSessionSubID" id="625" presence="optional"/>
+        </sequence>
+    </template>
+
+    <!-- Market Data - Incremental Refresh TLR FOND-->
+    <template name="X-TLR-FOND" id="2421" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="X"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+        <sequence name="GroupMDEntries">
+            <length name="NoMDEntries" id="268"/>
+            <uInt32 name="MDUpdateAction" id="279" presence="optional"/>
+            <string name="MDEntryType" id="269"/>
+            <string name="MDEntryID" id="278" presence="optional"/>
+            <string name="Symbol" id="55" presence="optional"/>
+            <int32 name="RptSeq" id="83" presence="optional"/>
+            <uInt32 name="MDEntryDate" id="272" presence="optional"/>
+            <uInt32 name="MDEntryTime" id="273" presence="optional"/>
+            <uInt32 name="OrigTime" id="9412" presence="optional"/>
+            <string name="OrderSide" id="10504" presence="optional"/>
+            <decimal name="MDEntryPx" id="270" presence="optional"/>
+            <decimal name="MDEntrySize" id="271" presence="optional"/>
+            <decimal name="AccruedInterestAmt" id="5384" presence="optional"/>
+            <decimal name="TradeValue" id="6143" presence="optional"/>
+            <decimal name="Yield" id="236" presence="optional"/>
+            <uInt32 name="SettlDate" id="64" presence="optional"/>
+            <string name="SettleType" id="5459" presence="optional"/>
+            <decimal name="Price" id="44" presence="optional"/>
+            <int32 name="PriceType" id="423" presence="optional"/>
+            <decimal name="RepoToPx" id="5677" presence="optional"/>
+            <decimal name="BuyBackPx" id="5558" presence="optional"/>
+            <uInt32 name="BuyBackDate" id="5559" presence="optional"/>
+            <string name="TradingSessionID" id="336" presence="optional"/>
+            <string name="TradingSessionSubID" id="625" presence="optional"/>
+        </sequence>
+    </template>
+
+
+    <!-- Market Data - Incremental Refresh TLR CURR-->
+    <template name="X-TLR-CURR" id="3511" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="X"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+        <sequence name="GroupMDEntries">
+            <length name="NoMDEntries" id="268"/>
+            <uInt32 name="MDUpdateAction" id="279" presence="optional"/>
+            <string name="MDEntryType" id="269"/>
+            <string name="MDEntryID" id="278" presence="optional"/>
+            <string name="Symbol" id="55" presence="optional"/>
+            <int32 name="RptSeq" id="83" presence="optional"/>
+            <uInt32 name="MDEntryDate" id="272" presence="optional"/>
+            <uInt32 name="MDEntryTime" id="273" presence="optional"/>
+            <uInt32 name="OrigTime" id="9412" presence="optional"/>
+            <string name="OrderSide" id="10504" presence="optional"/>
+            <decimal name="MDEntryPx" id="270" presence="optional"/>
+            <decimal name="MDEntrySize" id="271" presence="optional"/>
+            <decimal name="TradeValue" id="6143" presence="optional"/>
+            <uInt32 name="SettlDate" id="64" presence="optional"/>
+            <string name="SettleType" id="5459" presence="optional"/>
+            <decimal name="Price" id="44" presence="optional"/>
+            <int32 name="PriceType" id="423" presence="optional"/>
+            <decimal name="RepoToPx" id="5677" presence="optional"/>
+            <decimal name="BuyBackPx" id="5558" presence="optional"/>
+            <uInt32 name="BuyBackDate" id="5559" presence="optional"/>
+            <string name="TradingSessionID" id="336" presence="optional"/>
+            <string name="TradingSessionSubID" id="625" presence="optional"/>
+        </sequence>
+    </template>
+
+
+    <!-- Security Definition -->
+    <template name="d" id="2115" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="d"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"><increment/></uInt32>
+        <uInt64 name="SendingTime" id="52"/>
+        <string name="MessageEncoding" id="347"><default value="UTF-8"/></string>
+        <int32 name="TotNumReports" id="911" presence="optional"/>
+        <string name="Symbol" id="55" presence="optional"/>
+        <byteVector name="SecurityID" id="48" presence="optional"/>
+        <byteVector name="SecurityIDSource" id="22" presence="optional"/>
+        <int32 name="Product" id="460" presence="optional"/>
+        <byteVector name="CFICode" id="461" presence="optional"/>
+        <byteVector name="SecurityType" id="167" presence="optional"/>
+        <uInt32 name="MaturityDate" id="541" presence="optional"/>
+        <uInt32 name="SettlDate" id="64" presence="optional"/>
+        <string name="SettleType" id="5459" presence="optional"/>
+        <decimal name="OrigIssueAmt" id="5850" presence="optional"/>
+        <uInt32 name="CouponPaymentDate" id="224" presence="optional"/>
+        <decimal name="CouponRate" id="223" presence="optional"/>
+        <uInt32 name="SettlFixingDate" id="9119" presence="optional"/>
+        <decimal name="DividendNetPx" id="9982" presence="optional"/>
+        <byteVector name="SecurityDesc" id="107" presence="optional"/>
+        <byteVector name="EncodedSecurityDesc" id="351" presence="optional"/>
+        <byteVector name="QuoteText" id="9696" presence="optional"/>
+        <sequence name="GroupInstrAttrib" presence="optional">
+            <length name="NoInstrAttrib" id="870"/>
+            <int32 name="InstrAttribType" id="871"/>
+            <byteVector name="InstrAttribValue" id="872" presence="optional"/>
+        </sequence>
+        <string name="Currency" id="15" presence="optional"/>
+        <sequence name="MarketSegmentGrp" presence="optional">
+            <length name="NoMarketSegments" id="1310"/>
+            <decimal name="RoundLot" id="561" presence="optional"/>
+            <sequence name="TradingSessionRulesGrp" presence="optional">
+                <length name="NoTradingSessionRules" id="1309"/>
+                <string name="TradingSessionID" id="336"/>
+                <string name="TradingSessionSubID" id="625" presence="optional"/>
+                <int32 name="SecurityTradingStatus" id="326" presence="optional"/>
+                <int32 name="OrderNote" id="9680" presence="optional"/>
+            </sequence>
+        </sequence>
+        <string name="SettlCurrency" id="120" presence="optional"/>
+        <int32 name="PriceType" id="423" presence="optional"/>
+        <string name="StateSecurityID" id="5217" presence="optional"/>
+        <byteVector name="EncodedShortSecurityDesc" id="5383" presence="optional"/>
+        <byteVector name="MarketCode" id="5385" presence="optional"/>
+        <decimal name="MinPriceIncrement" id="969" presence="optional"/>
+        <decimal name="MktShareLimit" id="5387" presence="optional"/>
+        <decimal name="MktShareThreshold" id="5388" presence="optional"/>
+        <decimal name="MaxOrdersVolume" id="5389" presence="optional"/>
+        <decimal name="PriceMvmLimit" id="5470" presence="optional"/>
+        <decimal name="FaceValue" id="5508" presence="optional"/>
+        <decimal name="BaseSwapPx" id="5556" presence="optional"/>
+        <decimal name="RepoToPx" id="5677" presence="optional"/>
+        <decimal name="BuyBackPx" id="5558" presence="optional"/>
+        <uInt32 name="BuyBackDate" id="5559" presence="optional"/>
+        <decimal name="NoSharesIssued" id="7595" presence="optional"/>
+        <decimal name="HighLimit" id="9199" presence="optional"/>
+        <decimal name="LowLimit" id="9200" presence="optional"/>
+        <int32 name="NumOfDaysToMaturity" id="10508" presence="optional"/>
+    </template>
+    <!-- Security Status -->
+    <template name="f" id="2106" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="f"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+        <string name="Symbol" id="55"/>
+        <string name="TradingSessionID" id="336" presence="optional"/>
+        <string name="TradingSessionSubID" id="625" presence="optional"/>
+        <int32 name="SecurityTradingStatus" id="326" presence="optional"/>
+        <uInt32 name="AuctionIndicator" id="5509" presence="optional"/>
+    </template>
+    <!-- Trading Session Status -->
+    <template name="h" id="2107" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="h"/></string>
+        <string name="ApplVerID" id="1128"><constant value="9"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+        <int32 name="TradSesStatus" id="340"/>
+        <string name="Text" id="58" presence="optional"/>
+        <string name="TradingSessionID" id="336"/>
+    </template>
+    <!-- Heartbeat -->
+    <template name="0" id="2108" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <string name="MessageType" id="35"><constant value="0"/></string>
+        <string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+        <string name="SenderCompID" id="49"><constant value="MOEX"/></string>
+        <uInt32 name="MsgSeqNum" id="34"/>
+        <uInt64 name="SendingTime" id="52"/>
+    </template>
+</templates>

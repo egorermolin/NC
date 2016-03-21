@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - Class IncrementalProcessorTest</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>Class IncrementalProcessorTest</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/default-package.html">default-package</a> &gt; IncrementalProcessorTest</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">9</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">1.888s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success" id="successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div id="tabs">
+<ul class="tabLinks">
+<li>
+<a href="#tab0">Tests</a>
+</li>
+<li>
+<a href="#tab1">Standard output</a>
+</li>
+</ul>
+<div id="tab0" class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="success">testIncremental</td>
+<td>0.018s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">testIncremental2Symbols</td>
+<td>0.019s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">testIncrementalManyMessagesWith2Channels</td>
+<td>1.396s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">testIncrementalOutOfSequence</td>
+<td>0.019s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">testIncrementalOutOfSequence2</td>
+<td>0.021s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">testIncrementalOutOfSequenceFailed</td>
+<td>0.019s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">testIncrementalOutOfSequenceWith2Channels</td>
+<td>0.024s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">testIncrementalWith2Channels</td>
+<td>0.020s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">testIncrementalWith2ChannelsWithFailover</td>
+<td>0.352s</td>
+<td class="success">passed</td>
+</tr>
+</table>
+</div>
+<div id="tab1" class="tab">
+<h2>Standard output</h2>
+<span class="code">
+<pre>15:45:33 INFO  Test worker-SequenceValidator - Start Recovering SYMB:CETS
+15:45:33 INFO  Test worker-SequenceValidator - Stop Recovering SYMB:CETS
+15:45:33 DEBUG Test worker-SequenceValidator - OutOfSequence [Symbol: SYMB:CETS][Expected: 249][Received: 1]
+15:45:33 INFO  Test worker-SequenceValidator - Start Recovering SYMB:CETS
+15:45:33 INFO  Test worker-SequenceValidator - Stop Recovering SYMB:CETS
+15:45:33 INFO  Test worker-SequenceValidator - Start Recovering SYMB:CETS
+15:45:33 INFO  Test worker-SequenceValidator - Stop Recovering SYMB:CETS
+15:45:33 DEBUG Test worker-SequenceValidator - OutOfSequence [Symbol: SYMB:CETS][Expected: 100][Received: 102]
+15:45:33 INFO  Test worker-SequenceValidator - Start Recovering SYMB:CETS
+15:45:33 DEBUG Test worker-SequenceValidator - InSequence [Symbol: SYMB:CETS][Received: 100]
+15:45:33 DEBUG Test worker-SequenceValidator - InSequence [Symbol: SYMB:CETS][Received: 101]
+15:45:33 INFO  Test worker-SequenceValidator - Stop Recovering SYMB:CETS
+15:45:33 INFO  Test worker-SequenceValidator - Start Recovering SYMB:CETS
+15:45:33 INFO  Test worker-SequenceValidator - Stop Recovering SYMB:CETS
+15:45:35 INFO  Test worker-SequenceValidator - Start Recovering SYMB:CETS
+15:45:35 INFO  Test worker-SequenceValidator - Stop Recovering SYMB:CETS
+15:45:35 INFO  Test worker-SequenceValidator - Start Recovering SYMB:CETS
+15:45:35 INFO  Test worker-SequenceValidator - Stop Recovering SYMB:CETS
+15:45:35 DEBUG Test worker-SequenceValidator - OutOfSequence [Symbol: SYMB:CETS][Expected: 100][Received: 101]
+15:45:35 INFO  Test worker-SequenceValidator - Start Recovering SYMB:CETS
+15:45:35 DEBUG Test worker-SequenceValidator - InSequence [Symbol: SYMB:CETS][Received: 100]
+15:45:35 INFO  Test worker-SequenceValidator - Stop Recovering SYMB:CETS
+15:45:35 INFO  Test worker-SequenceValidator - Start Recovering SYMB:CETS
+15:45:35 INFO  Test worker-SequenceValidator - Stop Recovering SYMB:CETS
+15:45:35 INFO  Test worker-SequenceValidator - Start Recovering SYMB2:CETS
+15:45:35 INFO  Test worker-SequenceValidator - Stop Recovering SYMB2:CETS
+15:45:35 INFO  Test worker-SequenceValidator - Start Recovering SYMB:CETS
+15:45:35 INFO  Test worker-SequenceValidator - Stop Recovering SYMB:CETS
+15:45:35 INFO  Test worker-SequenceValidator - Start Recovering SYMB:CETS
+15:45:35 INFO  Test worker-SequenceValidator - Stop Recovering SYMB:CETS
+15:45:35 DEBUG Test worker-SequenceValidator - OutOfSequence [Symbol: SYMB:CETS][Expected: 100][Received: 102]
+15:45:35 INFO  Test worker-SequenceValidator - Start Recovering SYMB:CETS
+15:45:35 DEBUG Test worker-SequenceValidator - InSequence [Symbol: SYMB:CETS][Received: 100]
+15:45:35 INFO  Test worker-SequenceValidator - Stop Recovering SYMB:CETS
+15:45:35 INFO  Test worker-SequenceValidator - Start Recovering SYMB:CETS
+15:45:35 INFO  Test worker-SequenceValidator - Stop Recovering SYMB:CETS
+</pre>
+</span>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="http://www.gradle.org">Gradle 2.10</a> at 14.03.2016 15:45:35</p>
+</div>
+</div>
+</body>
+</html>
