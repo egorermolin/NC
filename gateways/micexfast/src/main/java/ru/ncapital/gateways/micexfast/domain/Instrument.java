@@ -61,7 +61,7 @@ public class Instrument {
     NumOfDaysToMaturity: 80 -> null(null)
 
     */
-    private String symbol;
+    private String securityId;
 
     private String currency;
 
@@ -79,12 +79,12 @@ public class Instrument {
 
     private ProductType productType;
 
-    public Instrument(String symbol) {
-        this.symbol = symbol;
+    public Instrument(String securityId) {
+        this.securityId = securityId;
     }
 
-    public String getSymbol() {
-        return symbol;
+    public String getSecurityId() {
+        return securityId;
     }
 
     public String getCurrency() {
@@ -152,7 +152,7 @@ public class Instrument {
     @Override
     public String toString() {
         return "Instrument{" +
-                "symbol='" + symbol + '\'' +
+                "securityId='" + securityId + '\'' +
                 ", currency='" + currency + '\'' +
                 ", description='" + description + '\'' +
                 ", lotSize=" + lotSize +

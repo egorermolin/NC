@@ -4,7 +4,7 @@ package ru.ncapital.gateways.micexfast.domain;
  * Created by egore on 1/28/16.
  */
 public class PublicTrade {
-    private String symbol;
+    private String securityId;
 
     private String id;
 
@@ -16,16 +16,16 @@ public class PublicTrade {
 
     private long lastTime;
 
-    public PublicTrade(String symbol, String id,  double lastPx, double lastSize, boolean isBid) {
-        this.symbol = symbol;
+    public PublicTrade(String securityId, String id, double lastPx, double lastSize, boolean isBid) {
+        this.securityId = securityId;
         this.id = id;
         this.lastPx = lastPx;
         this.lastSize = lastSize;
         this.isBid = isBid;
     }
 
-    public String getSymbol() {
-        return symbol;
+    public String getSecurityId() {
+        return securityId;
     }
 
     public String getId() {
@@ -55,7 +55,7 @@ public class PublicTrade {
     @Override
     public String toString() {
         return "PublicTrade{" +
-                "symbol='" + symbol + '\'' +
+                "securityId='" + securityId + '\'' +
                 ", id=" + id +
                 ", isBid=" + isBid +
                 ", lastPx=" + lastPx +

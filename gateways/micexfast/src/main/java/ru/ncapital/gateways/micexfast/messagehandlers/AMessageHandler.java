@@ -4,6 +4,7 @@ import org.openfast.GroupValue;
 import org.openfast.Message;
 import org.openfast.SequenceValue;
 import org.slf4j.Logger;
+import ru.ncapital.gateways.micexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
 import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
 
@@ -18,18 +19,21 @@ public abstract class AMessageHandler implements IMessageHandler {
 
     private Set<TradingSessionId> allowedTradingSessionIds = new HashSet<TradingSessionId>();
 
-    private Set<String> allowedSymbols = new HashSet<String>();
+    private Set<String> allowedSecurityIds = new HashSet<String>();
 
     protected Logger logger = getLogger();
 
     protected MarketDataManager marketDataManager;
 
-    protected AMessageHandler(MarketDataManager marketDataManager, TradingSessionId[] tradingSessionIds, String[] symbols) {
+    protected boolean addBoardToSecurityId = false;
+
+    protected AMessageHandler(MarketDataManager marketDataManager, IGatewayConfiguration configuration) {
         this.marketDataManager = marketDataManager;
-        this.allowedTradingSessionIds.addAll(Arrays.asList(tradingSessionIds));
-        this.allowedSymbols.addAll(Arrays.asList(symbols));
-        if (allowedSymbols.contains("*"))
-            allowedSymbols.clear();
+        this.addBoardToSecurityId = configuration.addBoardToSecurityId();
+        this.allowedTradingSessionIds.addAll(Arrays.asList(configuration.getAllowedTradingSessionIds(configuration.getMarketType())));
+        this.allowedSecurityIds.addAll(Arrays.asList(configuration.getAllowedSecurityIds(configuration.getMarketType())));
+        if (allowedSecurityIds.contains("*"))
+            allowedSecurityIds.clear();
     }
 
     @Override
@@ -39,7 +43,7 @@ public abstract class AMessageHandler implements IMessageHandler {
         boolean firstFragment = readMessage.getInt("RouteFirst") == 1;
         boolean lastFragment = readMessage.getInt("LastFragment") == 1;
 
-        if (allowedSymbols.isEmpty() || allowedTradingSessionIds.contains(TradingSessionId.convert(tradingSessionId))) {
+        if (allowedSecurityIds.isEmpty() || allowedTradingSessionIds.contains(TradingSessionId.convert(tradingSessionId))) {
         } else {
             if (logger.isTraceEnabled())
                 logger.trace("Snapshot Filtered by TradingSessionId" + symbol + ":" + tradingSessionId);
@@ -47,7 +51,7 @@ public abstract class AMessageHandler implements IMessageHandler {
             return;
         }
 
-        if (allowedSymbols.isEmpty() || allowedSymbols.contains(symbol)) {
+        if (allowedSecurityIds.isEmpty() || allowedSecurityIds.contains(symbol)) {
         } else {
             if (logger.isTraceEnabled())
                 logger.trace("Snapshot Filtered bySymbol" + symbol + ":" + tradingSessionId);
@@ -58,16 +62,20 @@ public abstract class AMessageHandler implements IMessageHandler {
         if (logger.isTraceEnabled())
             logger.trace("SNAPSHOT " + readMessage);
 
+        String securityId = symbol;
+        if (addBoardToSecurityId)
+            securityId += ":" + tradingSessionId;
+
         if (firstFragment)
-            onBeforeSnapshot(symbol, inTime);
+            onBeforeSnapshot(securityId, inTime);
 
         SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
         for (int i = 0; i < mdEntries.getLength(); ++i) {
-            onSnapshotMdEntry(symbol, mdEntries.get(i), inTime);
+            onSnapshotMdEntry(securityId, mdEntries.get(i), inTime);
         }
 
         if (lastFragment)
-            onAfterSnapshot(symbol, inTime);
+            onAfterSnapshot(securityId, inTime);
     }
 
     @Override
@@ -85,7 +93,7 @@ public abstract class AMessageHandler implements IMessageHandler {
             return;
         }
 
-        if (allowedSymbols.isEmpty() || allowedSymbols.contains(symbol)) {
+        if (allowedSecurityIds.isEmpty() || allowedSecurityIds.contains(symbol)) {
         } else {
             if (logger.isTraceEnabled())
                 logger.trace("Incremental Filtered by Symbol " + symbol);
@@ -96,16 +104,20 @@ public abstract class AMessageHandler implements IMessageHandler {
         if (logger.isTraceEnabled())
             logger.trace("INCREMENTAL " + mdEntry);
 
-        onIncrementalMdEntry(symbol, mdEntry, inTime);
+        String securityId = symbol;
+        if (addBoardToSecurityId)
+            securityId += ":" + tradingSessionId;
+
+        onIncrementalMdEntry(securityId, mdEntry, inTime);
     }
 
     protected abstract Logger getLogger();
 
-    protected abstract void onBeforeSnapshot(String symbol, long inTime);
+    protected abstract void onBeforeSnapshot(String securityId, long inTime);
 
-    protected abstract void onAfterSnapshot(String symbol, long inTime);
+    protected abstract void onAfterSnapshot(String securityId, long inTime);
 
-    protected abstract void onSnapshotMdEntry(String symbol, GroupValue mdEntry, long inTime);
+    protected abstract void onSnapshotMdEntry(String securityId, GroupValue mdEntry, long inTime);
 
-    protected abstract void onIncrementalMdEntry(String symbol, GroupValue mdEntry, long inTime);
+    protected abstract void onIncrementalMdEntry(String securityId, GroupValue mdEntry, long inTime);
 }

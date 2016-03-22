@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by egore on 12/7/15.
@@ -62,9 +61,9 @@ public class MarketDataManager {
         this.marketDataHandler = configuration.getMarketDataHandler();
         this.performanceLogger = configuration.getPerformanceLogger();
 
-        IMessageHandler messageHandlerForOrderList = messageHandlerFactory.createOrderListMessageHandler(configuration.getAllowedTradingSessionIds(configuration.getMarketType()), configuration.getAllowedSymbols(configuration.getMarketType()));
-        IMessageHandler messageHandlerForStatistics = messageHandlerFactory.createStatisticsMessageHandler(configuration.getAllowedTradingSessionIds(configuration.getMarketType()), configuration.getAllowedSymbols(configuration.getMarketType()));
-        IMessageHandler messageHandlerForPublicTrades = messageHandlerFactory.createPublicTradesMessageHandler(configuration.getAllowedTradingSessionIds(configuration.getMarketType()), configuration.getAllowedSymbols(configuration.getMarketType()));
+        IMessageHandler messageHandlerForOrderList = messageHandlerFactory.createOrderListMessageHandler(configuration);
+        IMessageHandler messageHandlerForStatistics = messageHandlerFactory.createStatisticsMessageHandler(configuration);
+        IMessageHandler messageHandlerForPublicTrades = messageHandlerFactory.createPublicTradesMessageHandler(configuration);
 
         IMessageSequenceValidator sequenceValidatorForOrderList = messageSequenceValidatorFactory.createMessageSequenceValidatorForOrderList();
         IMessageSequenceValidator sequenceValidatorForStatistics = messageSequenceValidatorFactory.createMessageSequenceValidatorForStatistics();
@@ -111,16 +110,16 @@ public class MarketDataManager {
 
     public void onBBO(BBO newBBO, long inTimeInTicks) {
         if (logger.isTraceEnabled())
-            logger.trace("onBBO " + newBBO.getSymbol());
+            logger.trace("onBBO " + newBBO.getSecurityId());
 
-        if (!bbos.containsKey(newBBO.getSymbol()))
-            bbos.put(newBBO.getSymbol(), new BBO(newBBO.getSymbol()));
+        if (!bbos.containsKey(newBBO.getSecurityId()))
+            bbos.put(newBBO.getSecurityId(), new BBO(newBBO.getSecurityId()));
 
-        BBO currentBBO = bbos.get(newBBO.getSymbol());
+        BBO currentBBO = bbos.get(newBBO.getSecurityId());
         synchronized (currentBBO) {
             boolean[] changed = orderDepthEngine.updateBBO(currentBBO, newBBO);
 
-            if (subscriptions.containsKey(newBBO.getSymbol())) {
+            if (subscriptions.containsKey(newBBO.getSecurityId())) {
                 if (changed[0])
                     marketDataHandler.onBBO(currentBBO, inTimeInTicks);
                 if (changed[1])
@@ -133,17 +132,17 @@ public class MarketDataManager {
 
     public void onDepthLevels(DepthLevel[] depthLevels, long inTimeInTicks) {
         if (logger.isTraceEnabled())
-            logger.trace("onDepthLevel " + depthLevels[0].getSymbol());
+            logger.trace("onDepthLevel " + depthLevels[0].getSecurityId());
 
-        if (!bbos.containsKey(depthLevels[0].getSymbol()))
-            bbos.put(depthLevels[0].getSymbol(), new BBO(depthLevels[0].getSymbol()));
+        if (!bbos.containsKey(depthLevels[0].getSecurityId()))
+            bbos.put(depthLevels[0].getSecurityId(), new BBO(depthLevels[0].getSecurityId()));
 
-        BBO bbo = bbos.get(depthLevels[0].getSymbol());
+        BBO bbo = bbos.get(depthLevels[0].getSecurityId());
         synchronized (bbo) {
             List<DepthLevel> depthLevelsToSend = new ArrayList<DepthLevel>();
             orderDepthEngine.onDepthLevels(depthLevels, depthLevelsToSend);
 
-            if (subscriptions.containsKey(depthLevels[0].getSymbol()))
+            if (subscriptions.containsKey(depthLevels[0].getSecurityId()))
                 marketDataHandler.onDepthLevels(depthLevelsToSend.toArray(new DepthLevel[0]), inTimeInTicks);
         }
 
@@ -157,16 +156,16 @@ public class MarketDataManager {
 
     public void onPublicTrade(PublicTrade publicTrade, long inTimeInTicks) {
         if (logger.isTraceEnabled())
-            logger.trace("onPublicTrade " + publicTrade.getSymbol());
+            logger.trace("onPublicTrade " + publicTrade.getSecurityId());
 
-        if (!bbos.containsKey(publicTrade.getSymbol()))
-            bbos.put(publicTrade.getSymbol(), new BBO(publicTrade.getSymbol()));
+        if (!bbos.containsKey(publicTrade.getSecurityId()))
+            bbos.put(publicTrade.getSecurityId(), new BBO(publicTrade.getSecurityId()));
 
-        BBO bbo = bbos.get(publicTrade.getSymbol());
+        BBO bbo = bbos.get(publicTrade.getSecurityId());
         synchronized (bbo) {
             orderDepthEngine.onPublicTrade(publicTrade);
 
-            if (subscriptions.containsKey(publicTrade.getSymbol()))
+            if (subscriptions.containsKey(publicTrade.getSecurityId()))
                 marketDataHandler.onPublicTrade(publicTrade, inTimeInTicks);
         }
     }

@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import org.openfast.GroupValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.ncapital.gateways.micexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
 import ru.ncapital.gateways.micexfast.Utils;
 import ru.ncapital.gateways.micexfast.domain.BBO;
@@ -20,10 +21,9 @@ public class StatisticsMessageHandler extends AMessageHandler {
 
     @AssistedInject
     public StatisticsMessageHandler(MarketDataManager marketDataManager,
-                                    @Assisted TradingSessionId[] allowedTradingSessionIds,
-                                    @Assisted String[] allowedSymbols) {
+                                    @Assisted IGatewayConfiguration configuration) {
 
-        super(marketDataManager, allowedTradingSessionIds, allowedSymbols);
+        super(marketDataManager, configuration);
     }
 
     @Override
@@ -32,7 +32,7 @@ public class StatisticsMessageHandler extends AMessageHandler {
     }
 
     @Override
-    protected void onSnapshotMdEntry(String symbol, GroupValue mdEntry, long inTime) {
+    protected void onSnapshotMdEntry(String securityId, GroupValue mdEntry, long inTime) {
         MdEntryType mdEntryType = MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
 
         if (mdEntryType == null)
@@ -74,19 +74,19 @@ public class StatisticsMessageHandler extends AMessageHandler {
     }
 
     @Override
-    protected void onIncrementalMdEntry(String symbol, GroupValue mdEntry, long inTime) {
-        onBeforeSnapshot(symbol, inTime);
-        onSnapshotMdEntry(symbol, mdEntry, inTime);
-        onAfterSnapshot(symbol, inTime);
+    protected void onIncrementalMdEntry(String securityId, GroupValue mdEntry, long inTime) {
+        onBeforeSnapshot(securityId, inTime);
+        onSnapshotMdEntry(securityId, mdEntry, inTime);
+        onAfterSnapshot(securityId, inTime);
     }
 
     @Override
-    protected void onBeforeSnapshot(String symbol, long inTime) {
-        bbo = new BBO(symbol);
+    protected void onBeforeSnapshot(String securityId, long inTime) {
+        bbo = new BBO(securityId);
     }
 
     @Override
-    protected void onAfterSnapshot(String symbol, long inTime) {
+    protected void onAfterSnapshot(String securityId, long inTime) {
         marketDataManager.onBBO(bbo, inTime);
     }
 

@@ -14,7 +14,7 @@ import java.util.*;
  */
 
 class SequenceNumber {
-    String symbol;
+    String securityId;
 
     int lastSeqNum;
 }
@@ -29,11 +29,11 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
         }
     };
 
-    private Map<String, Map<Integer, GroupValue>> storedMdEntriesBySymbol = new HashMap<String, Map<Integer, GroupValue>>();
+    private Map<String, Map<Integer, GroupValue>> storedMdEntriesBySecurityId = new HashMap<String, Map<Integer, GroupValue>>();
 
     private Map<String, GroupValue[]> storedMdEntriesToProcess = new HashMap<String, GroupValue[]>();
 
-    private Set<String> symbolsToRecover = new HashSet<String>();
+    private Set<String> securityIdsToRecover = new HashSet<String>();
 
     protected Map<String, SequenceNumber> sequenceNumbers = new HashMap<String, SequenceNumber>();
 
@@ -44,23 +44,23 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
         this.type = type;
     }
 
-    private SequenceNumber getSequenceNumber(String symbol) {
-        SequenceNumber sequenceNumber = sequenceNumbers.get(symbol);
+    private SequenceNumber getSequenceNumber(String securityId) {
+        SequenceNumber sequenceNumber = sequenceNumbers.get(securityId);
         if (sequenceNumber == null) {
             sequenceNumber = new SequenceNumber();
-            sequenceNumber.symbol = symbol;
+            sequenceNumber.securityId = securityId;
 
-            sequenceNumbers.put(symbol, sequenceNumber);
+            sequenceNumbers.put(securityId, sequenceNumber);
         }
         return sequenceNumber;
     }
 
     @Override
-    public boolean onSnapshotSeq(String symbol, int seqNum) {
+    public boolean onSnapshotSeq(String securityId, int seqNum) {
         if (logger.get().isTraceEnabled())
-            logger.get().trace("SNAP -> " + symbol + " " + seqNum);
+            logger.get().trace("SNAP -> " + securityId + " " + seqNum);
 
-        SequenceNumber sequenceNumber = getSequenceNumber(symbol);
+        SequenceNumber sequenceNumber = getSequenceNumber(securityId);
 
         synchronized (sequenceNumber) {
             sequenceNumber.lastSeqNum = seqNum;
@@ -70,23 +70,23 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
     }
 
     @Override
-    public boolean onIncrementalSeq(String symbol, int seqNum) {
+    public boolean onIncrementalSeq(String securityId, int seqNum) {
         if (logger.get().isTraceEnabled())
-            logger.get().trace("INC -> " + symbol + " " + seqNum);
+            logger.get().trace("INC -> " + securityId + " " + seqNum);
 
-        SequenceNumber sequenceNumber = getSequenceNumber(symbol);
+        SequenceNumber sequenceNumber = getSequenceNumber(securityId);
 
         synchronized (sequenceNumber) {
             if (sequenceNumber.lastSeqNum + 1 != seqNum) {
-                if (sequenceNumber.lastSeqNum > 0 && !isRecovering(symbol))
+                if (sequenceNumber.lastSeqNum > 0 && !isRecovering(securityId))
                     if (logger.get().isDebugEnabled())
-                        logger.get().debug("OutOfSequence [Symbol: " + symbol + "][Expected: " + (sequenceNumber.lastSeqNum + 1) + "][Received: " + seqNum + "]");
+                        logger.get().debug("OutOfSequence [Symbol: " + securityId + "][Expected: " + (sequenceNumber.lastSeqNum + 1) + "][Received: " + seqNum + "]");
 
                 return false;
             } else {
-                if (isRecovering(symbol))
+                if (isRecovering(securityId))
                     if (logger.get().isDebugEnabled())
-                        logger.get().debug("InSequence [Symbol: " + symbol + "][Received: " + seqNum + "]");
+                        logger.get().debug("InSequence [Symbol: " + securityId + "][Received: " + seqNum + "]");
             }
 
             sequenceNumber.lastSeqNum = seqNum;
@@ -96,29 +96,29 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
     }
 
     @Override
-    public void storeIncremental(GroupValue mdEntry, String symbol, int seqNum) {
+    public void storeIncremental(GroupValue mdEntry, String securityId, int seqNum) {
         if (logger.get().isTraceEnabled())
-            logger.get().trace("STORE -> " + symbol + " " + seqNum);
+            logger.get().trace("STORE -> " + securityId + " " + seqNum);
 
-        SequenceNumber sequenceNumber = getSequenceNumber(symbol);
+        SequenceNumber sequenceNumber = getSequenceNumber(securityId);
 
         synchronized (sequenceNumber) {
-            if (!storedMdEntriesBySymbol.containsKey(symbol)) {
-                storedMdEntriesBySymbol.put(symbol, new TreeMap<Integer, GroupValue>());
+            if (!storedMdEntriesBySecurityId.containsKey(securityId)) {
+                storedMdEntriesBySecurityId.put(securityId, new TreeMap<Integer, GroupValue>());
             }
 
-            Map<Integer, GroupValue> storedMdEntries = storedMdEntriesBySymbol.get(symbol);
+            Map<Integer, GroupValue> storedMdEntries = storedMdEntriesBySecurityId.get(securityId);
 
             storedMdEntries.put(seqNum, mdEntry);
         }
     }
 
     @Override
-    public void startRecovering(String symbol) {
-        logger.get().info("Start Recovering " + symbol);
+    public void startRecovering(String securityId) {
+        logger.get().info("Start Recovering " + securityId);
 
-        symbolsToRecover.add(symbol);
-        marketDataManager.onBBO(new BBO(symbol.contains(":") ? symbol.substring(0, symbol.indexOf(':')) : symbol) {
+        securityIdsToRecover.add(securityId);
+        marketDataManager.onBBO(new BBO(securityId.contains(":") ? securityId.substring(0, securityId.indexOf(':')) : securityId) {
             {
                 setInRecovery(true, type.equals("OrderList") ? 0 : 1);
             }
@@ -126,16 +126,16 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
     }
 
     @Override
-    public GroupValue[] stopRecovering(String symbol) {
-        SequenceNumber sequenceNumber = getSequenceNumber(symbol);
+    public GroupValue[] stopRecovering(String securityId) {
+        SequenceNumber sequenceNumber = getSequenceNumber(securityId);
         synchronized (sequenceNumber) {
             //check incrementals are in sequence
-            Map<Integer, GroupValue> storedMdEntries = storedMdEntriesBySymbol.get(symbol);
+            Map<Integer, GroupValue> storedMdEntries = storedMdEntriesBySecurityId.get(securityId);
             if (storedMdEntries == null || storedMdEntries.size() == 0) {
-                logger.get().info("Stop Recovering " + symbol);
+                logger.get().info("Stop Recovering " + securityId);
 
-                symbolsToRecover.remove(symbol);
-                marketDataManager.onBBO(new BBO(symbol.contains(":") ? symbol.substring(0, symbol.indexOf(':')) : symbol) {
+                securityIdsToRecover.remove(securityId);
+                marketDataManager.onBBO(new BBO(securityId.contains(":") ? securityId.substring(0, securityId.indexOf(':')) : securityId) {
                     {
                         setInRecovery(false, type.equals("OrderList") ? 0 : 1);
                     }
@@ -162,29 +162,29 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
                     }
                 }
 
-                storedMdEntriesToProcess.put(symbol, mdEntriesToProcess.toArray(new GroupValue[mdEntriesToProcess.size()]));
+                storedMdEntriesToProcess.put(securityId, mdEntriesToProcess.toArray(new GroupValue[mdEntriesToProcess.size()]));
                 storedMdEntries.clear();
                 mdEntriesToProcess.clear();
             }
         }
 
-        logger.get().info("Stop Recovering " + symbol);
+        logger.get().info("Stop Recovering " + securityId);
 
-        symbolsToRecover.remove(symbol);
-        marketDataManager.onBBO(new BBO(symbol.contains(":") ? symbol.substring(0, symbol.indexOf(':')) : symbol) {
+        securityIdsToRecover.remove(securityId);
+        marketDataManager.onBBO(new BBO(securityId.contains(":") ? securityId.substring(0, securityId.indexOf(':')) : securityId) {
             {
                 setInRecovery(false, type.equals("OrderList") ? 0 : 1);
             }
         }, 0);
 
-        return storedMdEntriesToProcess.remove(symbol);
+        return storedMdEntriesToProcess.remove(securityId);
     }
 
     @Override
-    public boolean isRecovering(String symbol) {
-        return symbolsToRecover.contains(symbol);
+    public boolean isRecovering(String securityId) {
+        return securityIdsToRecover.contains(securityId);
     }
 
     @Override
-    public String[] getRecovering() { return symbolsToRecover.toArray(new String[symbolsToRecover.size()]);}
+    public String[] getRecovering() { return securityIdsToRecover.toArray(new String[securityIdsToRecover.size()]);}
 }

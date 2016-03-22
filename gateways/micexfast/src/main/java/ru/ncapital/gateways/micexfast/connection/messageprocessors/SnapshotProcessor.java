@@ -1,19 +1,11 @@
 package ru.ncapital.gateways.micexfast.connection.messageprocessors;
 
-import org.openfast.Context;
 import org.openfast.GroupValue;
 import org.openfast.Message;
-import org.openfast.MessageHandler;
-import org.openfast.codec.Coder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.micexfast.Utils;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidator;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by egore on 1/11/16.
@@ -34,17 +26,17 @@ public class SnapshotProcessor extends Processor {
         this.sequenceValidator = sequenceValidator;
     }
 
-    private void processSnapshotsAndIncrementals(Iterable<Message> messages, String symbol, int rptSeqNum) {
+    private void processSnapshotsAndIncrementals(Iterable<Message> messages, String securityId, int rptSeqNum) {
         synchronized (sequenceValidator) {
-            if (sequenceValidator.onSnapshotSeq(symbol, rptSeqNum)) {
+            if (sequenceValidator.onSnapshotSeq(securityId, rptSeqNum)) {
                 for (Message message : messages)
                     messageHandler.onSnapshot(message, getInTimestamp());
 
                 // finished recovering
-                GroupValue[] mdEntriesToProcess = sequenceValidator.stopRecovering(symbol);
+                GroupValue[] mdEntriesToProcess = sequenceValidator.stopRecovering(securityId);
                 if (mdEntriesToProcess != null)
                     for (GroupValue mdEntry : mdEntriesToProcess) {
-                        sequenceValidator.onIncrementalSeq(symbol, mdEntry.getInt("RptSeq"));
+                        sequenceValidator.onIncrementalSeq(securityId, mdEntry.getInt("RptSeq"));
 
                         messageHandler.onIncremental(mdEntry, getInTimestamp());
                     }
@@ -71,22 +63,22 @@ public class SnapshotProcessor extends Processor {
     @Override
     public void processMessage(final Message readMessage) {
         int seqNum = readMessage.getInt("MsgSeqNum");
-        String symbol = readMessage.getString("Symbol") + ":" + readMessage.getString("TradingSessionID");
+        String securityId = readMessage.getString("Symbol") + ":" + readMessage.getString("TradingSessionID");
         int rptSeqNum = readMessage.getInt("RptSeq");
         boolean firstFragment = readMessage.getInt("RouteFirst") == 1;
         boolean lastFragment = readMessage.getInt("LastFragment") == 1;
 
         if (firstFragment)
-            fragmentedSnapshots.put(symbol, Collections.synchronizedMap(new TreeMap<Integer, Message>()));
+            fragmentedSnapshots.put(securityId, Collections.synchronizedMap(new TreeMap<Integer, Message>()));
 
-        Map<Integer, Message> messages = fragmentedSnapshots.get(symbol);
+        Map<Integer, Message> messages = fragmentedSnapshots.get(securityId);
         if (messages == null)
             return;
 
         messages.put(seqNum, readMessage);
 
         if (lastFragment && checkSeqNums(messages.keySet()))
-            processSnapshotsAndIncrementals(messages.values(), symbol, rptSeqNum);
+            processSnapshotsAndIncrementals(messages.values(), securityId, rptSeqNum);
     }
 
     @Override
@@ -100,7 +92,7 @@ public class SnapshotProcessor extends Processor {
                     // new snapshot cycle
                     sendingTimeOfSnapshotStart = sendingTime;
                     reset();
-                    printRecoveringSymbols();
+                    printRecoveringSecurityIds();
                 } else
                     return false;
             }
@@ -109,20 +101,20 @@ public class SnapshotProcessor extends Processor {
                 return false;
         }
 
-        String symbol = readMessage.getString("Symbol") + ":" + readMessage.getString("TradingSessionID");
-        if (!sequenceValidator.isRecovering(symbol))
+        String securityId = readMessage.getString("Symbol") + ":" + readMessage.getString("TradingSessionID");
+        if (!sequenceValidator.isRecovering(securityId))
             return false;
 
         return true;
     }
 
-    private void printRecoveringSymbols() {
-        String [] recoveringSymbols = sequenceValidator.getRecovering();
+    private void printRecoveringSecurityIds() {
+        String [] recoveringSecurityIds = sequenceValidator.getRecovering();
         StringBuilder sb = new StringBuilder("Recovering ");
-        if (recoveringSymbols != null && recoveringSymbols.length > 0) {
+        if (recoveringSecurityIds != null && recoveringSecurityIds.length > 0) {
             wasRecovering = true;
             boolean first = true;
-            for (String s : recoveringSymbols) {
+            for (String s : recoveringSecurityIds) {
                 if (first)
                     first = false;
                 else

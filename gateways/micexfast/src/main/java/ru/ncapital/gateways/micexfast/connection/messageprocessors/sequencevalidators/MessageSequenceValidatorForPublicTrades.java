@@ -9,9 +9,9 @@ public class MessageSequenceValidatorForPublicTrades extends MessageSequenceVali
     }
 
     @Override
-    public boolean onIncrementalSeq(String symbol, int seqNum) {
+    public boolean onIncrementalSeq(String securityId, int seqNum) {
         if (logger.get().isTraceEnabled())
-            logger.get().trace("INC -> " + symbol + "-" + seqNum);
+            logger.get().trace("INC -> " + securityId + "-" + seqNum);
 
         return true;
     }

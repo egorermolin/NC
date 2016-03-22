@@ -35,6 +35,11 @@ public class NullGatewayConfiguration implements IGatewayConfiguration {
     }
 
     @Override
+    public boolean addBoardToSecurityId() {
+        return false;
+    }
+
+    @Override
     public TradingSessionId[] getAllowedTradingSessionIds(MarketType marketType) {
         return new TradingSessionId[0];
     }
@@ -45,7 +50,7 @@ public class NullGatewayConfiguration implements IGatewayConfiguration {
     }
 
     @Override
-    public String[] getAllowedSymbols(MarketType marketType) {
+    public String[] getAllowedSecurityIds(MarketType marketType) {
         return new String[] {"*"};
     }
 

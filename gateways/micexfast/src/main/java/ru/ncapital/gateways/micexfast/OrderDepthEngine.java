@@ -7,7 +7,6 @@ import ru.ncapital.gateways.micexfast.domain.DepthLevel;
 import ru.ncapital.gateways.micexfast.domain.MdUpdateAction;
 import ru.ncapital.gateways.micexfast.domain.PublicTrade;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,15 +30,15 @@ public class OrderDepthEngine {
         this.publicTrades = new HashMap<String, PublicTrade>();
     }
 
-    private OrderDepth getOrderDepth(String symbol, boolean isBid) {
-        OrderDepth depth = isBid ? bids.get(symbol) : offers.get(symbol);
+    private OrderDepth getOrderDepth(String securityId, boolean isBid) {
+        OrderDepth depth = isBid ? bids.get(securityId) : offers.get(securityId);
         if (depth == null) {
             if (isBid) {
-                bids.put(symbol, depth = new OrderDepth(true));
-                offers.put(symbol, new OrderDepth(false));
+                bids.put(securityId, depth = new OrderDepth(true));
+                offers.put(securityId, new OrderDepth(false));
             } else {
-                bids.put(symbol, new OrderDepth(true));
-                offers.put(symbol, depth = new OrderDepth(false));
+                bids.put(securityId, new OrderDepth(true));
+                offers.put(securityId, depth = new OrderDepth(false));
             }
         }
         return depth;
@@ -50,10 +49,10 @@ public class OrderDepthEngine {
 
     public void onDepthLevel(DepthLevel depthLevel, List<DepthLevel> depthLevelsToSend) {
         if (depthLevel.getMdUpdateAction() == MdUpdateAction.SNAPSHOT) {
-            getOrderDepth(depthLevel.getSymbol(), true).clearDepth();
-            getOrderDepth(depthLevel.getSymbol(), false).clearDepth();
+            getOrderDepth(depthLevel.getSecurityId(), true).clearDepth();
+            getOrderDepth(depthLevel.getSecurityId(), false).clearDepth();
         } else {
-            getOrderDepth(depthLevel.getSymbol(), depthLevel.isBid()).onDepthLevel(depthLevel);
+            getOrderDepth(depthLevel.getSecurityId(), depthLevel.isBid()).onDepthLevel(depthLevel);
         }
         depthLevelsToSend.add(depthLevel);
     }
@@ -63,13 +62,13 @@ public class OrderDepthEngine {
             onDepthLevel(depthLevel, depthLevelsToSend);
     }
 
-    public BBO getBBO(String symbol) {
-        return getBBO(new BBO(symbol));
+    public BBO getBBO(String securityId) {
+        return getBBO(new BBO(securityId));
     }
 
     public BBO getBBO(BBO bbo) {
-        OrderDepth bidDepth = bids.get(bbo.getSymbol());
-        OrderDepth offerDepth = offers.get(bbo.getSymbol());
+        OrderDepth bidDepth = bids.get(bbo.getSecurityId());
+        OrderDepth offerDepth = offers.get(bbo.getSecurityId());
 
         bidDepth.extractBBO(bbo);
         offerDepth.extractBBO(bbo);
@@ -142,9 +141,9 @@ public class OrderDepthEngine {
         return changed;
     }
 
-    public void getDepthLevels(String symbol, List<DepthLevel> depthLevels) {
-        OrderDepth bidDepth = bids.get(symbol);
-        OrderDepth offerDepth = offers.get(symbol);
+    public void getDepthLevels(String securityId, List<DepthLevel> depthLevels) {
+        OrderDepth bidDepth = bids.get(securityId);
+        OrderDepth offerDepth = offers.get(securityId);
 
         if (bidDepth != null)
             bidDepth.extractDepthLevels(depthLevels);

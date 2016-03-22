@@ -4,7 +4,7 @@ package ru.ncapital.gateways.micexfast.domain;
  * Created by egore on 12/14/15.
  */
 public class DepthLevel implements Comparable<DepthLevel> {
-    public String symbol;
+    public String securityId;
 
     public String mdEntryId;
 
@@ -20,8 +20,8 @@ public class DepthLevel implements Comparable<DepthLevel> {
 
     public String dealNumber;
 
-    public DepthLevel(String symbol, MdUpdateAction mdUpdateAction, String mdEntryId, double mdEntryPx, double mdEntrySize, String dealNumber, boolean isBid) {
-        this.symbol = symbol;
+    public DepthLevel(String securityId, MdUpdateAction mdUpdateAction, String mdEntryId, double mdEntryPx, double mdEntrySize, String dealNumber, boolean isBid) {
+        this.securityId = securityId;
         this.mdUpdateAction = mdUpdateAction;
         this.mdEntryId = mdEntryId;
         this.mdEntryPx = mdEntryPx;
@@ -30,8 +30,8 @@ public class DepthLevel implements Comparable<DepthLevel> {
         this.isBid = isBid;
     }
 
-    public DepthLevel(String symbol, MdUpdateAction mdUpdateAction) {
-        this.symbol = symbol;
+    public DepthLevel(String securityId, MdUpdateAction mdUpdateAction) {
+        this.securityId = securityId;
         this.mdUpdateAction = mdUpdateAction;
     }
 
@@ -43,8 +43,8 @@ public class DepthLevel implements Comparable<DepthLevel> {
         this.mdEntrySize = mdEntrySize;
     }
 
-    public String getSymbol() {
-        return symbol;
+    public String getSecurityId() {
+        return securityId;
     }
 
     public String getMdEntryId() {
@@ -92,7 +92,7 @@ public class DepthLevel implements Comparable<DepthLevel> {
     @Override
     public String toString() {
         return "DepthLevel{" +
-                "symbol='" + symbol + '\'' +
+                "securityId='" + securityId + '\'' +
                 ", mdEntryId='" + mdEntryId + '\'' +
                 ", mdUpdateAction=" + mdUpdateAction +
                 ", mdEntryPx=" + mdEntryPx +

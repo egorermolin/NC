@@ -17,7 +17,6 @@ import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -28,7 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class InstrumentManager implements MessageHandler {
     private Map<String, Instrument> instruments = new ConcurrentHashMap<String, Instrument>();
 
-    private Set<String> ignoredSymbols = new HashSet<String>();
+    private Set<String> ignoredSecurityIds = new HashSet<String>();
 
     private Logger logger = LoggerFactory.getLogger("InstrumentManager");
 
@@ -43,20 +42,23 @@ public class InstrumentManager implements MessageHandler {
 
     private Set<ProductType> allowedProductTypes = new HashSet<ProductType>();
 
-    private Set<String> allowedSymbols = new HashSet<String>();
+    private Set<String> allowedSecurityIds = new HashSet<String>();
 
     @Inject
     private MarketDataManager marketDataManager;
 
     private IMarketDataHandler marketDataHandler;
 
+    private boolean addBoardToSecurityId;
+
     public InstrumentManager configure(IGatewayConfiguration configuration) {
         this.marketDataHandler = configuration.getMarketDataHandler();
+        this.addBoardToSecurityId = configuration.addBoardToSecurityId();
         this.allowedTradingSessionIds.addAll(Arrays.asList(configuration.getAllowedTradingSessionIds(configuration.getMarketType())));
         this.allowedProductTypes.addAll(Arrays.asList(configuration.getAllowedProductTypes(configuration.getMarketType())));
-        this.allowedSymbols.addAll(Arrays.asList(configuration.getAllowedSymbols(configuration.getMarketType())));
-        if (allowedSymbols.contains("*"))
-            allowedSymbols.clear();
+        this.allowedSecurityIds.addAll(Arrays.asList(configuration.getAllowedSecurityIds(configuration.getMarketType())));
+        if (allowedSecurityIds.contains("*"))
+            allowedSecurityIds.clear();
 
         return this;
     }
@@ -65,6 +67,7 @@ public class InstrumentManager implements MessageHandler {
     public void handleMessage(Message readMessage, Context context, Coder coder) {
         String symbol;
         String tradingSessionId;
+        String securityId;
         Instrument instrument;
         final StringBuilder tradingStatus = new StringBuilder();
 
@@ -88,7 +91,11 @@ public class InstrumentManager implements MessageHandler {
                 if (logger.isTraceEnabled())
                     logger.trace("Instrument Status Received " + symbol + ":" + tradingSessionId);
 
-                instrument = instruments.get(symbol);
+                securityId = symbol;
+                if (addBoardToSecurityId)
+                    securityId += ":" + tradingSessionId;
+
+                instrument = instruments.get(securityId);
                 if (instrument == null)
                     break;
 
@@ -104,7 +111,7 @@ public class InstrumentManager implements MessageHandler {
                 instrument.setTradingStatus(tradingStatus.toString());
 
                 // send to client
-                marketDataManager.onBBO(new BBO(symbol) {
+                marketDataManager.onBBO(new BBO(securityId) {
                     {
                         setTradingStatus(tradingStatus.toString());
                     }
@@ -131,7 +138,7 @@ public class InstrumentManager implements MessageHandler {
                     if (logger.isDebugEnabled())
                         logger.debug("Instrument Filtered " + symbol + ":" + tradingSessionId);
 
-                    ignoredSymbols.add(symbol + ":" + tradingSessionId);
+                    ignoredSecurityIds.add(symbol + ":" + tradingSessionId);
                     break;
                 }
 
@@ -140,24 +147,28 @@ public class InstrumentManager implements MessageHandler {
                     if (logger.isDebugEnabled())
                         logger.debug("Instrument Filtered by ProductType" + symbol + ":" + tradingSessionId + ":" + readMessage.getInt("Product"));
 
-                    ignoredSymbols.add(symbol + ":" + tradingSessionId);
+                    ignoredSecurityIds.add(symbol + ":" + tradingSessionId);
                     break;
                 }
 
-                if (allowedSymbols.isEmpty() || allowedSymbols.contains(symbol)) {
+                if (allowedSecurityIds.isEmpty() || allowedSecurityIds.contains(symbol)) {
                 } else {
                     if (logger.isTraceEnabled())
                         logger.trace("Instrument Filtered by Symbol" + symbol);
 
-                    ignoredSymbols.add(symbol + ":" + tradingSessionId);
+                    ignoredSecurityIds.add(symbol + ":" + tradingSessionId);
                     break;
                 }
 
                 if (logger.isDebugEnabled())
                     logger.debug("Instrument Received " + symbol + ":" + tradingSessionId + " " + ProductType.convert(readMessage.getInt("Product")));
 
-                instrument = new Instrument(symbol + ":" + tradingSessionId);
-                if (instruments.containsKey(instrument.getSymbol()))
+                securityId = symbol;
+                if (addBoardToSecurityId)
+                    securityId += ":" + tradingSessionId;
+
+                instrument = new Instrument(securityId);
+                if (instruments.containsKey(instrument.getSecurityId()))
                     break;
 
                 if (readMessage.getValue("Currency") != null)
@@ -183,24 +194,24 @@ public class InstrumentManager implements MessageHandler {
                 else
                     tradingStatus.append("18");
                 instrument.setTradingStatus(tradingStatus.toString());
-                instruments.put(instrument.getSymbol(), instrument);
+                instruments.put(instrument.getSecurityId(), instrument);
 
                 // send to client
-                marketDataManager.onBBO(new BBO(symbol) {
+                marketDataManager.onBBO(new BBO(securityId) {
                     {
                         setTradingStatus(tradingStatus.toString());
                     }
                 }, Utils.currentTimeInTicks());
 
                 if (logger.isTraceEnabled())
-                    logger.trace("ADDED INSTRUMENT " + instrument.getSymbol());
+                    logger.trace("ADDED INSTRUMENT " + instrument.getSecurityId());
 
                 break;
         }
 
-        if (instruments.size() + ignoredSymbols.size() == numberOfInstruments) {
+        if (instruments.size() + ignoredSecurityIds.size() == numberOfInstruments) {
             if (!instrumentsDownloaded.getAndSet(true)) {
-                logger.info("FINISHED INSTRUMENTS " + numberOfInstruments);
+                logger.info("FINISHED INSTRUMENTS " + (numberOfInstruments - ignoredSecurityIds.size()));
                 connectionManager.stopInstrument();
                 marketDataHandler.onInstruments(instruments.values().toArray(new Instrument[instruments.size()]));
             }

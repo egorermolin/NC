@@ -4,7 +4,7 @@ package ru.ncapital.gateways.micexfast.domain;
  * Created by egore on 12/7/15.
  */
 public class BBO {
-    private final String symbol;
+    private final String securityId;
 
     private double bidPx;
 
@@ -34,12 +34,12 @@ public class BBO {
 
     private boolean[] isInRecoverySet = new boolean[] {false, false};
 
-    public BBO(String symbol) {
-        this.symbol = symbol;
+    public BBO(String securityId) {
+        this.securityId = securityId;
     }
 
-    public String getSymbol() {
-        return symbol;
+    public String getSecurityId() {
+        return securityId;
     }
 
     public double getBidPx() {
@@ -154,7 +154,7 @@ public class BBO {
     @Override
     public String toString() {
         return "BBO{" +
-                "symbol='" + symbol + '\'' +
+                "securityId='" + securityId + '\'' +
                 ", bidPx=" + bidPx +
                 ", offerPx=" + offerPx +
                 ", bidSize=" + bidSize +

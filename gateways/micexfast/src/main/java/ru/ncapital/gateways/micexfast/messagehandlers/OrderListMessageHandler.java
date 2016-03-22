@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import org.openfast.GroupValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.ncapital.gateways.micexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
 import ru.ncapital.gateways.micexfast.Utils;
 import ru.ncapital.gateways.micexfast.domain.DepthLevel;
@@ -28,10 +29,9 @@ public class OrderListMessageHandler extends AMessageHandler {
 
     @AssistedInject
     public OrderListMessageHandler(MarketDataManager marketDataManager,
-                                   @Assisted TradingSessionId[] allowedTradingSessionIds,
-                                   @Assisted String[] allowedSymbols) {
+                                   @Assisted IGatewayConfiguration configuration) {
 
-        super(marketDataManager, allowedTradingSessionIds, allowedSymbols);
+        super(marketDataManager, configuration);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class OrderListMessageHandler extends AMessageHandler {
     }
 
     @Override
-    protected void onSnapshotMdEntry(String symbol, GroupValue mdEntry, long inTime) {
+    protected void onSnapshotMdEntry(String securityId, GroupValue mdEntry, long inTime) {
         MdEntryType mdEntryType = MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
 
         if (mdEntryType == null) {
@@ -52,7 +52,7 @@ public class OrderListMessageHandler extends AMessageHandler {
         switch (mdEntryType) {
             case BID:
                 depthLevel =
-                        new DepthLevel(symbol,
+                        new DepthLevel(securityId,
                                 MdUpdateAction.INSERT,
                                 mdEntry.getString("MDEntryID"),
                                 mdEntry.getDouble("MDEntryPx"),
@@ -64,7 +64,7 @@ public class OrderListMessageHandler extends AMessageHandler {
                 break;
             case OFFER:
                 depthLevel =
-                        new DepthLevel(symbol,
+                        new DepthLevel(securityId,
                                 MdUpdateAction.INSERT,
                                 mdEntry.getString("MDEntryID"),
                                 mdEntry.getDouble("MDEntryPx"),
@@ -75,7 +75,7 @@ public class OrderListMessageHandler extends AMessageHandler {
                 depthLevel.setMdEntryTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
             case EMPTY:
-                depthLevel = new DepthLevel(symbol, MdUpdateAction.SNAPSHOT);
+                depthLevel = new DepthLevel(securityId, MdUpdateAction.SNAPSHOT);
                 break;
             default:
                 logger.warn("Unhandled snapshot mdEntry " + mdEntry.toString());
@@ -83,17 +83,17 @@ public class OrderListMessageHandler extends AMessageHandler {
         }
 
         if (depthLevel != null) {
-            List<DepthLevel> depthLevelList = depthLevelMap.get(symbol);
+            List<DepthLevel> depthLevelList = depthLevelMap.get(securityId);
             if (depthLevelList == null) {
                 depthLevelList = new ArrayList<DepthLevel>();
-                depthLevelMap.put(symbol, depthLevelList);
+                depthLevelMap.put(securityId, depthLevelList);
             }
             depthLevelList.add(depthLevel);
         }
     }
 
     @Override
-    public void onIncrementalMdEntry(String symbol, GroupValue mdEntry, long inTime) {
+    public void onIncrementalMdEntry(String securityId, GroupValue mdEntry, long inTime) {
         MdEntryType mdEntryType = MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
         MdUpdateAction mdUpdateAction = MdUpdateAction.convert(mdEntry.getString("MDUpdateAction").charAt(0));
 
@@ -106,7 +106,7 @@ public class OrderListMessageHandler extends AMessageHandler {
         switch (mdEntryType) {
             case BID:
                 depthLevel =
-                        new DepthLevel(symbol,
+                        new DepthLevel(securityId,
                                 mdUpdateAction,
                                 mdEntry.getString("MDEntryID"),
                                 mdEntry.getDouble("MDEntryPx"),
@@ -118,7 +118,7 @@ public class OrderListMessageHandler extends AMessageHandler {
                 break;
             case OFFER:
                 depthLevel =
-                        new DepthLevel(symbol,
+                        new DepthLevel(securityId,
                                 mdUpdateAction,
                                 mdEntry.getString("MDEntryID"),
                                 mdEntry.getDouble("MDEntryPx"),
@@ -129,7 +129,7 @@ public class OrderListMessageHandler extends AMessageHandler {
                 depthLevel.setMdEntryTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
             case EMPTY:
-                depthLevel = new DepthLevel(symbol, MdUpdateAction.SNAPSHOT);
+                depthLevel = new DepthLevel(securityId, MdUpdateAction.SNAPSHOT);
                 break;
             default:
                 logger.warn("Unhandled incremental mdEntry " + mdEntry.toString());
@@ -137,24 +137,24 @@ public class OrderListMessageHandler extends AMessageHandler {
         }
 
         if (depthLevel != null) {
-            List<DepthLevel> depthLevelList = depthLevelMap.get(symbol);
+            List<DepthLevel> depthLevelList = depthLevelMap.get(securityId);
             if (depthLevelList == null) {
                 depthLevelList = new ArrayList<DepthLevel>();
-                depthLevelMap.put(symbol, depthLevelList);
+                depthLevelMap.put(securityId, depthLevelList);
             }
             depthLevelList.add(depthLevel);
         }
     }
 
     @Override
-    protected void onBeforeSnapshot(String symbol, long inTime) {
+    protected void onBeforeSnapshot(String securityId, long inTime) {
         List<DepthLevel> depthLevelList = new ArrayList<DepthLevel>();
-        depthLevelMap.put(symbol, depthLevelList);
-        depthLevelList.add(new DepthLevel(symbol, MdUpdateAction.SNAPSHOT));
+        depthLevelMap.put(securityId, depthLevelList);
+        depthLevelList.add(new DepthLevel(securityId, MdUpdateAction.SNAPSHOT));
     }
 
     @Override
-    protected void onAfterSnapshot(String symbol, long inTime) {
+    protected void onAfterSnapshot(String securityId, long inTime) {
         for (List<DepthLevel> depthLevelList : depthLevelMap.values()) {
             marketDataManager.onDepthLevels(depthLevelList.toArray(new DepthLevel[0]), inTime);
         }

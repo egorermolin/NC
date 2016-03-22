@@ -24,32 +24,32 @@ public class IncrementalProcessor extends Processor {
             SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
             for (int i = 0; i < mdEntries.getLength(); ++i) {
                 GroupValue mdEntry = mdEntries.get(i);
-                String symbol = mdEntry.getString("Symbol") + ":" + mdEntry.getString("TradingSessionID");
+                String securityId = mdEntry.getString("Symbol") + ":" + mdEntry.getString("TradingSessionID");
                 int rptSeqNum = mdEntry.getInt("RptSeq");
 
-                if (sequenceValidator.isRecovering(symbol)) {
-                    if (sequenceValidator.onIncrementalSeq(symbol, rptSeqNum)) {
+                if (sequenceValidator.isRecovering(securityId)) {
+                    if (sequenceValidator.onIncrementalSeq(securityId, rptSeqNum)) {
                         messageHandler.onIncremental(mdEntry, inTime);
 
                         // finished recovering
-                        GroupValue[] mdEntriesToProcess = sequenceValidator.stopRecovering(symbol);
+                        GroupValue[] mdEntriesToProcess = sequenceValidator.stopRecovering(securityId);
                         if (mdEntriesToProcess != null)
                             for (GroupValue mdEntryToProcess : mdEntriesToProcess) {
-                                sequenceValidator.onIncrementalSeq(symbol, mdEntryToProcess.getInt("RptSeq"));
+                                sequenceValidator.onIncrementalSeq(securityId, mdEntryToProcess.getInt("RptSeq"));
 
                                 messageHandler.onIncremental(mdEntryToProcess, inTime);
                             }
                     } else {
-                        sequenceValidator.storeIncremental(mdEntry, symbol, rptSeqNum);
+                        sequenceValidator.storeIncremental(mdEntry, securityId, rptSeqNum);
                     }
                     continue;
                 }
 
-                if (sequenceValidator.onIncrementalSeq(symbol, rptSeqNum)) {
+                if (sequenceValidator.onIncrementalSeq(securityId, rptSeqNum)) {
                     messageHandler.onIncremental(mdEntry, inTime);
                 } else {
-                    sequenceValidator.storeIncremental(mdEntry, symbol, rptSeqNum);
-                    sequenceValidator.startRecovering(symbol);
+                    sequenceValidator.storeIncremental(mdEntry, securityId, rptSeqNum);
+                    sequenceValidator.startRecovering(securityId);
                 }
             }
             messageHandler.flushIncrementals(inTime);

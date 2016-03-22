@@ -19,11 +19,13 @@ public interface IGatewayConfiguration {
 
     MarketType getMarketType();
 
+    boolean addBoardToSecurityId();
+
     TradingSessionId[] getAllowedTradingSessionIds(MarketType marketType);
 
     ProductType[] getAllowedProductTypes(MarketType marketType);
 
-    String[] getAllowedSymbols(MarketType marketType);
+    String[] getAllowedSecurityIds(MarketType marketType);
 
     IGatewayPerformanceLogger getPerformanceLogger();
 }
