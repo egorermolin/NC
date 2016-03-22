@@ -215,8 +215,10 @@ public class MulticastReceiver {
                     break;
 
                 case CURR_ORDER_LIST_INCR_A:
+                case FOND_ORDER_LIST_INCR_A:
                     marketDataManager.setIncrementalProcessorForOrderListIsPrimary(true);
                 case CURR_ORDER_LIST_INCR_B:
+                case FOND_ORDER_LIST_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-OLR-CURR"), marketDataManager.getIncrementalProcessorForOrderList());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
                     inputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorForOrderListInTimestamp());
@@ -224,14 +226,18 @@ public class MulticastReceiver {
 
                 case CURR_ORDER_LIST_SNAP_A:
                 case CURR_ORDER_LIST_SNAP_B:
+                case FOND_ORDER_LIST_SNAP_A:
+                case FOND_ORDER_LIST_SNAP_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("W-OLS-CURR"), marketDataManager.getSnapshotProcessorForOrderList());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
                     inputStream.setInTimestamp(inTimestamp = marketDataManager.getSnapshotProcessorForOrderListInTimestamp());
                     break;
 
                 case CURR_STATISTICS_INCR_A:
+                case FOND_STATISTICS_INCR_A:
                     marketDataManager.setIncrementalProcessorForStatisticsIsPrimary(true);
                 case CURR_STATISTICS_INCR_B:
+                case FOND_STATISTICS_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-MSR-CURR"), marketDataManager.getIncrementalProcessorForStatistics());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
                     inputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorForStatisticsInTimestamp());

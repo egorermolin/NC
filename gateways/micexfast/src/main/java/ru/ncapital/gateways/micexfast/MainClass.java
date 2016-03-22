@@ -43,6 +43,7 @@ public class MainClass {
 
                     @Override
                     public void onBBO(BBO bbo, long inTime) {
+                        logger.info("BBO " + bbo.getSecurityId());
                     }
 
                     @Override
@@ -113,11 +114,11 @@ public class MainClass {
 
         for (Instrument instrument : instruments) {
             logger.info("Instrument " + instrument.toString());
-            //gwManager.subscribeForMarketData(instrument.getSecurityId());
+            gwManager.subscribeForMarketData(instrument.getSecurityId());
         }
 
         try {
-            Thread.sleep(2000);
+            Thread.sleep(10000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
