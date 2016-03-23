@@ -1,6 +1,7 @@
 group 'micexfast'
 version '1.0-SNAPSHOT'
 
+apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'groovy'
 
@@ -16,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    compile files('src\\main\\libs\\System.jar')
+    compile files('src/main/libs/System.jar')
     compile 'com.google.guava:guava:19.0'
     compile 'com.google.inject:guice:4.0'
     compile 'com.google.inject.extensions:guice-assistedinject:4.0'
