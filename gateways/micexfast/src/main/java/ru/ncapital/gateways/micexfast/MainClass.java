@@ -92,9 +92,9 @@ public class MainClass {
             public TradingSessionId[] getAllowedTradingSessionIds(MarketType marketType) {
                 // return new TradingSessionId[] {TradingSessionId.CETS};
                 return new TradingSessionId[] {TradingSessionId.TQBR, TradingSessionId.TQBD, TradingSessionId.TQDE,
-                                                TradingSessionId.TQIF, TradingSessionId.TQQI,
+                                                TradingSessionId.TQIF,
                                                 TradingSessionId.TQTF, TradingSessionId.TQTD,
-                                                TradingSessionId.TQOB, TradingSessionId.TQOD,TradingSessionId.TQDB,
+                                                TradingSessionId.TQOB, TradingSessionId.TQOD,
                                                 TradingSessionId.TQTC,
                             };
             }

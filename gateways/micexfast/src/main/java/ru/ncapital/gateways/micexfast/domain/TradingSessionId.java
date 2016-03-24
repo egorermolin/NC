@@ -9,19 +9,16 @@ import java.util.Map;
 public enum TradingSessionId {
     // CURR
     CETS("CETS"),
-    CNDG("CNDG"),
 
     // FOND
     TQBR("TQBR"), // SHARES
     TQBD("TQBD"), // SHARES
     TQDE("TQDE"), // SHARES
     TQIF("TQIF"), // MUTUAL FUNDS
-    TQQI("TQQI"), // MUTUAL FUNDS
     TQTF("TQTF"), // ETF
     TQTD("TQTD"), // ETF
     TQOB("TQOB"), // BONDS
     TQOD("TQOD"), // BONDS
-    TQDB("TQDB"), // BONDS
     TQTC("TQTC"); // ETC
 
     private String description;

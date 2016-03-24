@@ -25,9 +25,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Singleton
 public class InstrumentManager implements MessageHandler {
-    private Map<String, Instrument> instruments = new ConcurrentHashMap<String, Instrument>();
+    private Map<String, Instrument> instruments = Collections.synchronizedMap(new HashMap<String, Instrument>());
 
-    private Set<String> ignoredSecurityIds = new HashSet<String>();
+    private Set<String> ignoredSecurityIds = Collections.synchronizedSet(new HashSet<String>());
 
     private Logger logger = LoggerFactory.getLogger("InstrumentManager");
 
@@ -133,6 +133,14 @@ public class InstrumentManager implements MessageHandler {
 
                 tradingSessionId = tradingSession.getString("TradingSessionID");
 
+                securityId = symbol;
+                if (addBoardToSecurityId)
+                    securityId += ":" + tradingSessionId;
+
+                instrument = new Instrument(securityId);
+                if (instruments.containsKey(instrument.getSecurityId()) || ignoredSecurityIds.contains(instrument.getSecurityId()))
+                    break;
+
                 if (allowedTradingSessionIds.isEmpty() || allowedTradingSessionIds.contains(TradingSessionId.convert(tradingSessionId))) {
                 } else {
                     if (logger.isDebugEnabled())
@@ -160,16 +168,11 @@ public class InstrumentManager implements MessageHandler {
                     break;
                 }
 
+                if (!instruments.put(instrument.getSecurityId(), instrument))
+                    break;
+
                 if (logger.isDebugEnabled())
                     logger.debug("Instrument Received " + symbol + ":" + tradingSessionId + " " + ProductType.convert(readMessage.getInt("Product")));
-
-                securityId = symbol;
-                if (addBoardToSecurityId)
-                    securityId += ":" + tradingSessionId;
-
-                instrument = new Instrument(securityId);
-                if (instruments.containsKey(instrument.getSecurityId()))
-                    break;
 
                 if (readMessage.getValue("Currency") != null)
                     instrument.setCurrency(readMessage.getString("Currency"));
@@ -194,7 +197,6 @@ public class InstrumentManager implements MessageHandler {
                 else
                     tradingStatus.append("18");
                 instrument.setTradingStatus(tradingStatus.toString());
-                instruments.put(instrument.getSecurityId(), instrument);
 
                 // send to client
                 marketDataManager.onBBO(new BBO(securityId) {
