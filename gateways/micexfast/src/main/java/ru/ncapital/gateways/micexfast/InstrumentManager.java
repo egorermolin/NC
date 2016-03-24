@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Singleton
 public class InstrumentManager implements MessageHandler {
-    private Map<String, Instrument> instruments = new ConcurrentHashMap<String, Instrument>();
+    private ConcurrentHashMap<String, Instrument> instruments = new ConcurrentHashMap<String, Instrument>();
 
     private Map<String, Instrument> ignoredInstruments = new ConcurrentHashMap<String, Instrument>();
 

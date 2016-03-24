@@ -40,17 +40,17 @@ public class NullGatewayConfiguration implements IGatewayConfiguration {
     }
 
     @Override
-    public TradingSessionId[] getAllowedTradingSessionIds(MarketType marketType) {
+    public TradingSessionId[] getAllowedTradingSessionIds() {
         return new TradingSessionId[0];
     }
 
     @Override
-    public ProductType[] getAllowedProductTypes(MarketType marketType) {
+    public ProductType[] getAllowedProductTypes() {
         return new ProductType[0];
     }
 
     @Override
-    public String[] getAllowedSecurityIds(MarketType marketType) {
+    public String[] getAllowedSecurityIds() {
         return new String[] {"*"};
     }
 
