@@ -21,11 +21,11 @@ public interface IGatewayConfiguration {
 
     boolean addBoardToSecurityId();
 
-    TradingSessionId[] getAllowedTradingSessionIds(MarketType marketType);
+    TradingSessionId[] getAllowedTradingSessionIds();
 
-    ProductType[] getAllowedProductTypes(MarketType marketType);
+    ProductType[] getAllowedProductTypes();
 
-    String[] getAllowedSecurityIds(MarketType marketType);
+    String[] getAllowedSecurityIds();
 
     IGatewayPerformanceLogger getPerformanceLogger();
 }
