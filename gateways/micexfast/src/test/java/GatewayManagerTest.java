@@ -40,12 +40,12 @@ public class GatewayManagerTest {
             }
 
             @Override
-            public TradingSessionId[] getAllowedTradingSessionIds(MarketType marketType) {
+            public TradingSessionId[] getAllowedTradingSessionIds() {
                 return new TradingSessionId[] {TradingSessionId.CETS};
             }
 
             @Override
-            public ProductType[] getAllowedProductTypes(MarketType marketType) {
+            public ProductType[] getAllowedProductTypes() {
                 return new ProductType[]{ProductType.CURRENCY};
             }
         });

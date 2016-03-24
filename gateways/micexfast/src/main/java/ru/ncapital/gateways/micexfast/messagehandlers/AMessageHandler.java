@@ -30,8 +30,8 @@ public abstract class AMessageHandler implements IMessageHandler {
     protected AMessageHandler(MarketDataManager marketDataManager, IGatewayConfiguration configuration) {
         this.marketDataManager = marketDataManager;
         this.addBoardToSecurityId = configuration.addBoardToSecurityId();
-        this.allowedTradingSessionIds.addAll(Arrays.asList(configuration.getAllowedTradingSessionIds(configuration.getMarketType())));
-        this.allowedSecurityIds.addAll(Arrays.asList(configuration.getAllowedSecurityIds(configuration.getMarketType())));
+        this.allowedTradingSessionIds.addAll(Arrays.asList(configuration.getAllowedTradingSessionIds()));
+        this.allowedSecurityIds.addAll(Arrays.asList(configuration.getAllowedSecurityIds()));
         if (allowedSecurityIds.contains("*"))
             allowedSecurityIds.clear();
     }

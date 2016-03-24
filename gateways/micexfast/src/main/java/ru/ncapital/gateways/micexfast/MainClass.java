@@ -89,21 +89,24 @@ public class MainClass {
             public MarketType getMarketType() { return MarketType.FOND; }
 
             @Override
-            public TradingSessionId[] getAllowedTradingSessionIds(MarketType marketType) {
-                // return new TradingSessionId[] {TradingSessionId.CETS};
-                return new TradingSessionId[] {TradingSessionId.TQBR, TradingSessionId.TQBD, TradingSessionId.TQDE,
+            public TradingSessionId[] getAllowedTradingSessionIds() {
+                if (getMarketType() == MarketType.FOND)
+                  return new TradingSessionId[] {TradingSessionId.TQBR, TradingSessionId.TQBD, TradingSessionId.TQDE,
                                                 TradingSessionId.TQIF,
                                                 TradingSessionId.TQTF, TradingSessionId.TQTD,
                                                 TradingSessionId.TQOB, TradingSessionId.TQOD,
                                                 TradingSessionId.TQTC,
                             };
+                else
+                  return new TradingSessionId[] {TradingSessionId.CETS};
             }
 
             @Override
-            public ProductType[] getAllowedProductTypes(MarketType marketType) {
-                // return new ProductType[] {ProductType.CURRENCY};
-                return new ProductType[] {ProductType.EQUITY, ProductType.INDEX
-                };
+            public ProductType[] getAllowedProductTypes() {
+                if (getMarketType() == MarketType.FOND)
+                  return new ProductType[] {ProductType.EQUITY, ProductType.INDEX};
+                else
+                  return new ProductType[] {ProductType.CURRENCY};
             }
         });
         gwManager.start();
