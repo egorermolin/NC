@@ -45,6 +45,8 @@ public class IncrementalProcessorTest {
         sequenceValidator = Guice.createInjector(new GatewayModule()).getInstance(MessageSequenceValidatorFactory.class).createMessageSequenceValidatorForOrderList();
         incrementalProcessor = new IncrementalProcessor(marketDataHandler, sequenceValidator);
         incrementalProcessor.setIsPrimary(true);
+        Mockito.when(marketDataHandler.isAllowedUpdate("SYMB", "CETS")).thenReturn(true);
+        Mockito.when(marketDataHandler.isAllowedUpdate("SYMB2", "CETS")).thenReturn(true);
     }
 
     private Message getIncermentalMock(int seqNum, int numMdEntries) {
