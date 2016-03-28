@@ -45,9 +45,17 @@ public class MessageSequenceValidatorTest {
 
     @Test
     public void testRecovering() {
+        assert sequenceValidator.isRecovering("SYMB");
+        sequenceValidator.onSnapshotSeq("SYMB", 100);
+        sequenceValidator.stopRecovering("SYMB");
         assert !sequenceValidator.isRecovering("SYMB");
+    }
+
+    @Test
+    public void testRecovering2() {
         sequenceValidator.startRecovering("SYMB");
         assert sequenceValidator.isRecovering("SYMB");
+        sequenceValidator.onSnapshotSeq("SYMB", 100);
         sequenceValidator.stopRecovering("SYMB");
         assert !sequenceValidator.isRecovering("SYMB");
     }

@@ -15,4 +15,9 @@ public class MessageSequenceValidatorForPublicTrades extends MessageSequenceVali
 
         return true;
     }
+
+    @Override
+    public boolean isRecovering(String securityId) {
+        return false;
+    }
 }
