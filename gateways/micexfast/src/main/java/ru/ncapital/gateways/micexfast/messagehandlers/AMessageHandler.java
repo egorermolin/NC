@@ -37,6 +37,11 @@ public abstract class AMessageHandler implements IMessageHandler {
     }
 
     @Override
+    public boolean isAllowedUpdate(String symbol, String trandingSessionId) {
+        return this.marketDataManager.isAllowedInstrument(symbol, trandingSessionId);
+    }
+
+    @Override
     public void onSnapshot(Message readMessage, long inTime) {
         String symbol = readMessage.getString("Symbol");
         String tradingSessionId = readMessage.getString("TradingSessionID");

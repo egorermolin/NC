@@ -24,8 +24,13 @@ public class IncrementalProcessor extends Processor {
             SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
             for (int i = 0; i < mdEntries.getLength(); ++i) {
                 GroupValue mdEntry = mdEntries.get(i);
-                String securityId = mdEntry.getString("Symbol") + ":" + mdEntry.getString("TradingSessionID");
+                String symbol = mdEntry.getString("Symbol");
+                String tradingSessionId = mdEntry.getString("TradingSessionID");
+                String securityId = symbol + ":" + tradingSessionId;
                 int rptSeqNum = mdEntry.getInt("RptSeq");
+
+                if (!messageHandler.isAllowedUpdate(symbol, tradingSessionId))
+                    continue;
 
                 if (sequenceValidator.isRecovering(securityId)) {
                     if (sequenceValidator.onIncrementalSeq(securityId, rptSeqNum)) {
