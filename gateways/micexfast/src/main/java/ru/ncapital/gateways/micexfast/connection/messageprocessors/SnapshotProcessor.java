@@ -63,7 +63,9 @@ public class SnapshotProcessor extends Processor {
     @Override
     public void processMessage(final Message readMessage) {
         int seqNum = readMessage.getInt("MsgSeqNum");
-        String securityId = readMessage.getString("Symbol") + ":" + readMessage.getString("TradingSessionID");
+        String symbol = readMessage.getString("Symbol");
+        String tradingSessionId = readMessage.getString("TradingSessionID");
+        String securityId = symbol + ":" + tradingSessionId;
         int rptSeqNum = readMessage.getInt("RptSeq");
         boolean firstFragment = readMessage.getInt("RouteFirst") == 1;
         boolean lastFragment = readMessage.getInt("LastFragment") == 1;
@@ -83,6 +85,9 @@ public class SnapshotProcessor extends Processor {
 
     @Override
     protected boolean checkSequence(Message readMessage) {
+        String symbol = readMessage.getString("Symbol");
+        String tradingSessionId = readMessage.getString("TradingSessionID");
+        String securityId = symbol + ":" + tradingSessionId;
         int seqNum = readMessage.getInt("MsgSeqNum");
         long sendingTime = readMessage.getLong("SendingTime");
 
@@ -101,7 +106,9 @@ public class SnapshotProcessor extends Processor {
                 return false;
         }
 
-        String securityId = readMessage.getString("Symbol") + ":" + readMessage.getString("TradingSessionID");
+        if (!messageHandler.isAllowedUpdate(symbol, tradingSessionId))
+            return false;
+
         if (!sequenceValidator.isRecovering(securityId))
             return false;
 

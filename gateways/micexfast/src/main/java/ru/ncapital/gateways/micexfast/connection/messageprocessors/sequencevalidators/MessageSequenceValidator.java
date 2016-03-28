@@ -182,6 +182,13 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
 
     @Override
     public boolean isRecovering(String securityId) {
+        SequenceNumber sequenceNumber = getSequenceNumber(securityId);
+
+        synchronized (sequenceNumber) {
+            if (sequenceNumber.lastSeqNum == 0)
+                return true;
+        }
+
         return securityIdsToRecover.contains(securityId);
     }
 
