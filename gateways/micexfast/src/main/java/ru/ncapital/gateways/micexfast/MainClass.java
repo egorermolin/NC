@@ -89,6 +89,11 @@ public class MainClass {
             public MarketType getMarketType() { return MarketType.FOND; }
 
             @Override
+            public boolean addBoardToSecurityId() {
+                return getMarketType() == MarketType.FOND;
+            }
+
+            @Override
             public TradingSessionId[] getAllowedTradingSessionIds() {
                 if (getMarketType() == MarketType.FOND)
                   return new TradingSessionId[] {TradingSessionId.TQBR, TradingSessionId.TQBD, TradingSessionId.TQDE,

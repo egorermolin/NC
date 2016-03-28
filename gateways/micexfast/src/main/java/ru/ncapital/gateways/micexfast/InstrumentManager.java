@@ -84,7 +84,7 @@ public class InstrumentManager implements MessageHandler {
         if (allowedProductTypes.isEmpty() || allowedProductTypes.contains(instrument.getProductType())) {
         } else {
             if (logger.isDebugEnabled())
-                logger.debug("Instrument Filtered by ProductType [SecurityId: " + instrument.getSecurityId() + "][Product: " + instrument.getProductType().getDescription());
+                logger.debug("Instrument Filtered by ProductType [SecurityId: " + instrument.getSecurityId() + "][Product: " + instrument.getProductType() + "]");
 
             ignoredInstruments.put(instrument.getSecurityId(), instrument);
             return false;
@@ -134,6 +134,8 @@ public class InstrumentManager implements MessageHandler {
                 tradingSessionId = tradingSession.getString("TradingSessionID");
 
                 instrument = new Instrument(symbol, tradingSessionId, addBoardToSecurityId);
+                instrument.setProductType(readMessage.getInt("Product"));
+
                 if (!checkAndAddInstrument(instrument))
                     break;
 
@@ -145,8 +147,7 @@ public class InstrumentManager implements MessageHandler {
                 else
                     instrument.setCurrency("RUB");
 
-                instrument.setProductType(readMessage.getInt("Product"));
-                instrument.setUnderlying(readMessage.getString("EncodedShortSecurityDesc"));
+                instrument.setUnderlying(addBoardToSecurityId ? instrument.getSymbol() : readMessage.getString("EncodedShortSecurityDesc"));
                 instrument.setDescription(readMessage.getString("SecurityDesc"));
                 if (readMessage.getValue("MinPriceIncrement") != null) {
                     instrument.setTickSize(readMessage.getDouble("MinPriceIncrement"));
@@ -185,7 +186,7 @@ public class InstrumentManager implements MessageHandler {
                     if (instruments.size() + ignoredInstruments.size() % 1000 == 0) {
                         int added = (instruments.size() + ignoredInstruments.size()) / 1000;
                         if (addedInstruments.add(added)) {
-                            logger.info("ADDED INSTRUMENTS " + added * 1000);
+                            logger.info("PROCESSED INSTRUMENTS " + added * 1000);
                         }
                     }
                 }
