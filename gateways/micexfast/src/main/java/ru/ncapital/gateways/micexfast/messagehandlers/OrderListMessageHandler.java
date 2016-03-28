@@ -75,7 +75,6 @@ public class OrderListMessageHandler extends AMessageHandler {
                 depthLevel.setMdEntryTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
             case EMPTY:
-                depthLevel = new DepthLevel(securityId, MdUpdateAction.SNAPSHOT);
                 break;
             default:
                 logger.warn("Unhandled snapshot mdEntry " + mdEntry.toString());
