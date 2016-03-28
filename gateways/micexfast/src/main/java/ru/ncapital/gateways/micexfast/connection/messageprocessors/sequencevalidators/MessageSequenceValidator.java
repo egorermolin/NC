@@ -185,8 +185,10 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
         SequenceNumber sequenceNumber = getSequenceNumber(securityId);
 
         synchronized (sequenceNumber) {
-            if (sequenceNumber.lastSeqNum == 0)
+            if (sequenceNumber.lastSeqNum == 0) {
+                startRecovering(securityId);
                 return true;
+            }
         }
 
         return securityIdsToRecover.contains(securityId);
