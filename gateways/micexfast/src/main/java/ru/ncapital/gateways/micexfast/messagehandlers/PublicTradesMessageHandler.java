@@ -48,10 +48,8 @@ public class PublicTradesMessageHandler extends AMessageHandler {
     protected void onIncrementalMdEntry(String securityId, GroupValue mdEntry, long inTime) {
         MdEntryType mdEntryType = MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
 
-        if (mdEntryType == null) {
-            logger.error("Unknown mdEntryType : " + mdEntry);
+        if (mdEntryType == null)
             return;
-        }
 
         PublicTrade publicTrade = null;
         switch (mdEntryType) {

@@ -43,10 +43,8 @@ public class OrderListMessageHandler extends AMessageHandler {
     protected void onSnapshotMdEntry(String securityId, GroupValue mdEntry, long inTime) {
         MdEntryType mdEntryType = MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
 
-        if (mdEntryType == null) {
-            logger.error("Unknown mdEntryType : " + mdEntry);
+        if (mdEntryType == null)
             return;
-        }
 
         DepthLevel depthLevel = null;
         switch (mdEntryType) {
@@ -96,10 +94,8 @@ public class OrderListMessageHandler extends AMessageHandler {
         MdEntryType mdEntryType = MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
         MdUpdateAction mdUpdateAction = MdUpdateAction.convert(mdEntry.getString("MDUpdateAction").charAt(0));
 
-        if (mdEntryType == null) {
-            logger.error("Unknown mdEntryType : " + mdEntry);
+        if (mdEntryType == null)
             return;
-        }
 
         DepthLevel depthLevel = null;
         switch (mdEntryType) {
