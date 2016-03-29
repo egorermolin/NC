@@ -15,7 +15,7 @@ import java.util.*;
 class SequenceNumber {
     String securityId;
 
-    int lastSeqNum;
+    int lastSeqNum = -1;
 }
 
 public class MessageSequenceValidator implements IMessageSequenceValidator {
@@ -176,7 +176,7 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
         if (isSnapshot) {
             SequenceNumber sequenceNumber = getSequenceNumber(securityId);
             synchronized (sequenceNumber) {
-                if (sequenceNumber.lastSeqNum == 0) {
+                if (sequenceNumber.lastSeqNum == -1) {
                     startRecovering(securityId);
                     return true;
                 }

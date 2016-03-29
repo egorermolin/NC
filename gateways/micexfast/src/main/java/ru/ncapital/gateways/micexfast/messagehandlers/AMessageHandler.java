@@ -17,10 +17,6 @@ import java.util.Set;
  */
 public abstract class AMessageHandler implements IMessageHandler {
 
-    private Set<TradingSessionId> allowedTradingSessionIds = new HashSet<TradingSessionId>();
-
-    private Set<String> allowedSecurityIds = new HashSet<String>();
-
     protected Logger logger = getLogger();
 
     protected MarketDataManager marketDataManager;
@@ -30,10 +26,6 @@ public abstract class AMessageHandler implements IMessageHandler {
     protected AMessageHandler(MarketDataManager marketDataManager, IGatewayConfiguration configuration) {
         this.marketDataManager = marketDataManager;
         this.addBoardToSecurityId = configuration.addBoardToSecurityId();
-        this.allowedTradingSessionIds.addAll(Arrays.asList(configuration.getAllowedTradingSessionIds()));
-        this.allowedSecurityIds.addAll(Arrays.asList(configuration.getAllowedSecurityIds()));
-        if (allowedSecurityIds.contains("*"))
-            allowedSecurityIds.clear();
     }
 
     @Override
@@ -47,25 +39,6 @@ public abstract class AMessageHandler implements IMessageHandler {
         String tradingSessionId = readMessage.getString("TradingSessionID");
         boolean firstFragment = readMessage.getInt("RouteFirst") == 1;
         boolean lastFragment = readMessage.getInt("LastFragment") == 1;
-
-        if (allowedSecurityIds.isEmpty() || allowedTradingSessionIds.contains(TradingSessionId.convert(tradingSessionId))) {
-        } else {
-            if (logger.isTraceEnabled())
-                logger.trace("Snapshot Filtered by TradingSessionId" + symbol + ":" + tradingSessionId);
-
-            return;
-        }
-
-        if (allowedSecurityIds.isEmpty() || allowedSecurityIds.contains(symbol)) {
-        } else {
-            if (logger.isTraceEnabled())
-                logger.trace("Snapshot Filtered bySymbol" + symbol + ":" + tradingSessionId);
-
-            return;
-        }
-
-        if (logger.isTraceEnabled())
-            logger.trace("SNAPSHOT " + readMessage);
 
         String securityId = symbol;
         if (addBoardToSecurityId)
@@ -88,30 +61,11 @@ public abstract class AMessageHandler implements IMessageHandler {
         String symbol = mdEntry.getString("Symbol");
         String tradingSessionId = mdEntry.getString("TradingSessionID");
 
-        beforeIncremental(mdEntry, inTime);
-
-        if (allowedTradingSessionIds.isEmpty() || allowedTradingSessionIds.contains(TradingSessionId.convert(tradingSessionId))) {
-        } else {
-            if (logger.isTraceEnabled())
-                logger.trace("Incremental Filtered by TradingSessionId " + symbol + ":" + tradingSessionId);
-
-            return;
-        }
-
-        if (allowedSecurityIds.isEmpty() || allowedSecurityIds.contains(symbol)) {
-        } else {
-            if (logger.isTraceEnabled())
-                logger.trace("Incremental Filtered by Symbol " + symbol);
-
-            return;
-        }
-
-        if (logger.isTraceEnabled())
-            logger.trace("INCREMENTAL " + mdEntry);
-
         String securityId = symbol;
         if (addBoardToSecurityId)
             securityId += ":" + tradingSessionId;
+
+        beforeIncremental(mdEntry, inTime);
 
         onIncrementalMdEntry(securityId, mdEntry, inTime);
     }
