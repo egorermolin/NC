@@ -78,13 +78,13 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
 
         synchronized (sequenceNumber) {
             if (sequenceNumber.lastSeqNum + 1 != seqNum) {
-                if (sequenceNumber.lastSeqNum > 0 && !isRecovering(securityId))
+                if (sequenceNumber.lastSeqNum > 0 && !isRecovering(securityId, false))
                     if (logger.get().isDebugEnabled())
                         logger.get().debug("OutOfSequence [Symbol: " + securityId + "][Expected: " + (sequenceNumber.lastSeqNum + 1) + "][Received: " + seqNum + "]");
 
                 return false;
             } else {
-                if (isRecovering(securityId))
+                if (isRecovering(securityId, false))
                     if (logger.get().isDebugEnabled())
                         logger.get().debug("InSequence [Symbol: " + securityId + "][Received: " + seqNum + "]");
             }
@@ -181,15 +181,17 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
     }
 
     @Override
-    public boolean isRecovering(String securityId) {
+    public boolean isRecovering(String securityId, boolean isSnapshot) {
         if (securityIdsToRecover.contains(securityId))
             return true;
 
-        SequenceNumber sequenceNumber = getSequenceNumber(securityId);
-        synchronized (sequenceNumber) {
-            if (sequenceNumber.lastSeqNum == 0) {
-                startRecovering(securityId);
-                return true;
+        if (isSnapshot) {
+            SequenceNumber sequenceNumber = getSequenceNumber(securityId);
+            synchronized (sequenceNumber) {
+                if (sequenceNumber.lastSeqNum == 0) {
+                    startRecovering(securityId);
+                    return true;
+                }
             }
         }
 

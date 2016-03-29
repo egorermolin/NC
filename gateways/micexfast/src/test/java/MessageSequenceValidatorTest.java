@@ -44,20 +44,21 @@ public class MessageSequenceValidatorTest {
     }
 
     @Test
-    public void testRecovering() {
-        assert sequenceValidator.isRecovering("SYMB");
+    public void testRecoveringSnapshot() {
+        assert sequenceValidator.isRecovering("SYMB", true);
         sequenceValidator.onSnapshotSeq("SYMB", 100);
         sequenceValidator.stopRecovering("SYMB");
-        assert !sequenceValidator.isRecovering("SYMB");
+        assert !sequenceValidator.isRecovering("SYMB", true);
     }
 
     @Test
-    public void testRecovering2() {
+    public void testRecoveringIncremental() {
+        assert !sequenceValidator.isRecovering("SYMB", false);
         sequenceValidator.startRecovering("SYMB");
-        assert sequenceValidator.isRecovering("SYMB");
+        assert sequenceValidator.isRecovering("SYMB", false);
         sequenceValidator.onSnapshotSeq("SYMB", 100);
         sequenceValidator.stopRecovering("SYMB");
-        assert !sequenceValidator.isRecovering("SYMB");
+        assert !sequenceValidator.isRecovering("SYMB", false);
     }
 
     @Test
@@ -92,7 +93,7 @@ public class MessageSequenceValidatorTest {
 
         assert sequenceValidator.onSnapshotSeq("SYMB", 100);
         assert Arrays.equals(sequenceValidator.stopRecovering("SYMB"), new GroupValue[]{mdEntry2, mdEntry3});
-        assert !sequenceValidator.isRecovering("SYMB");
+        assert !sequenceValidator.isRecovering("SYMB", false);
     }
 
     @Test
@@ -108,7 +109,7 @@ public class MessageSequenceValidatorTest {
 
         assert sequenceValidator.onSnapshotSeq("SYMB", 100);
         assert sequenceValidator.stopRecovering("SYMB") == null;
-        assert sequenceValidator.isRecovering("SYMB");
+        assert sequenceValidator.isRecovering("SYMB", false);
     }
 
 }

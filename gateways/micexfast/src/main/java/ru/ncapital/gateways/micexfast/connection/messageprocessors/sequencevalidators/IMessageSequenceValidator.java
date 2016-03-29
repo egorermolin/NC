@@ -16,7 +16,7 @@ public interface IMessageSequenceValidator {
 
     GroupValue[] stopRecovering(String securityId);
 
-    boolean isRecovering(String securityId);
+    boolean isRecovering(String securityId, boolean isSnapshot);
 
     String[] getRecovering();
 }

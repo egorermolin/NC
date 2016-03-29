@@ -32,7 +32,7 @@ public class IncrementalProcessor extends Processor {
                 if (!messageHandler.isAllowedUpdate(symbol, tradingSessionId))
                     continue;
 
-                if (sequenceValidator.isRecovering(securityId)) {
+                if (sequenceValidator.isRecovering(securityId, false)) {
                     if (sequenceValidator.onIncrementalSeq(securityId, rptSeqNum)) {
                         messageHandler.onIncremental(mdEntry, inTime);
 

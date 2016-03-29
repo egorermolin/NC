@@ -109,7 +109,7 @@ public class SnapshotProcessor extends Processor {
         if (!messageHandler.isAllowedUpdate(symbol, tradingSessionId))
             return false;
 
-        if (!sequenceValidator.isRecovering(securityId))
+        if (!sequenceValidator.isRecovering(securityId, true))
             return false;
 
         return true;

@@ -17,7 +17,7 @@ public class MessageSequenceValidatorForPublicTrades extends MessageSequenceVali
     }
 
     @Override
-    public boolean isRecovering(String securityId) {
+    public boolean isRecovering(String securityId, boolean isSnapshot) {
         return false;
     }
 }

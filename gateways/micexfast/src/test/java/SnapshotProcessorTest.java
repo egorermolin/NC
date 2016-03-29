@@ -40,8 +40,8 @@ public class SnapshotProcessorTest {
 
         snapshotProcessor = new SnapshotProcessor(marketDataHandler, sequenceValidator);
 
-        Mockito.when(sequenceValidator.isRecovering("SYMB:CETS")).thenReturn(true);
-        Mockito.when(sequenceValidator.isRecovering("SYMB2:CETS")).thenReturn(true);
+        Mockito.when(sequenceValidator.isRecovering("SYMB:CETS", true)).thenReturn(true);
+        Mockito.when(sequenceValidator.isRecovering("SYMB2:CETS", true)).thenReturn(true);
         Mockito.when(sequenceValidator.onSnapshotSeq(Mockito.eq("SYMB:CETS"), Mockito.anyInt())).thenReturn(true);
         Mockito.when(sequenceValidator.onSnapshotSeq(Mockito.eq("SYMB2:CETS"), Mockito.anyInt())).thenReturn(true);
         Mockito.when(sequenceValidator.getRecovering()).thenReturn(new String[]{"SYMB:CETS", "SYMB2:CETS"});
@@ -64,7 +64,7 @@ public class SnapshotProcessorTest {
         snapshotProcessor.handleMessage(message, context, coder);
 
         Mockito.verify(marketDataHandler).onSnapshot(Mockito.eq(message), Mockito.anyLong());
-        Mockito.verify(sequenceValidator).isRecovering("SYMB:CETS");
+        Mockito.verify(sequenceValidator).isRecovering("SYMB:CETS", true);
         Mockito.verify(sequenceValidator).stopRecovering("SYMB:CETS");
     }
 
@@ -91,8 +91,8 @@ public class SnapshotProcessorTest {
         snapshotProcessor.handleMessage(message2, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(2)).onSnapshot(messageCaptor.capture(), Mockito.anyLong());
-        Mockito.verify(sequenceValidator).isRecovering("SYMB:CETS");
-        Mockito.verify(sequenceValidator).isRecovering("SYMB2:CETS");
+        Mockito.verify(sequenceValidator).isRecovering("SYMB:CETS", true);
+        Mockito.verify(sequenceValidator).isRecovering("SYMB2:CETS", true);
         Mockito.verify(sequenceValidator).stopRecovering("SYMB:CETS");
         Mockito.verify(sequenceValidator).stopRecovering("SYMB2:CETS");
     }
@@ -295,7 +295,7 @@ public class SnapshotProcessorTest {
         Mockito.when(message3.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message3.getInt("LastFragment")).thenReturn(1);
 
-        Mockito.when(sequenceValidator.isRecovering("SYMB:CETS")).thenReturn(false);
+        Mockito.when(sequenceValidator.isRecovering("SYMB:CETS", true)).thenReturn(false);
 
         snapshotProcessor.handleMessage(message, context, coder);
         Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message), Mockito.anyLong());
@@ -307,7 +307,7 @@ public class SnapshotProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2), Mockito.anyLong());
         Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message3), Mockito.anyLong());
 
-        Mockito.when(sequenceValidator.isRecovering("SYMB:CETS")).thenReturn(true);
+        Mockito.when(sequenceValidator.isRecovering("SYMB:CETS", true)).thenReturn(true);
 
         snapshotProcessor.handleMessage(message3, context, coder);
         Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.any(Message.class), Mockito.anyLong());
