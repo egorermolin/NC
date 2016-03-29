@@ -5,7 +5,6 @@ import org.openfast.GroupValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
-import ru.ncapital.gateways.micexfast.domain.BBO;
 
 import java.util.*;
 
@@ -118,11 +117,7 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
         logger.get().info("Start Recovering " + securityId);
 
         securityIdsToRecover.add(securityId);
-        marketDataManager.onBBO(new BBO(securityId.contains(":") ? securityId.substring(0, securityId.indexOf(':')) : securityId) {
-            {
-                setInRecovery(true, type.equals("OrderList") ? 0 : 1);
-            }
-        }, 0);
+        marketDataManager.setRecovery(securityId, true, type.equals("OrderList"));
     }
 
     @Override
@@ -135,11 +130,8 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
                 logger.get().info("Stop Recovering " + securityId);
 
                 securityIdsToRecover.remove(securityId);
-                marketDataManager.onBBO(new BBO(securityId.contains(":") ? securityId.substring(0, securityId.indexOf(':')) : securityId) {
-                    {
-                        setInRecovery(false, type.equals("OrderList") ? 0 : 1);
-                    }
-                }, 0);
+                marketDataManager.setRecovery(securityId, false, type.equals("OrderList"));
+
                 return null;
             }
 
@@ -171,11 +163,7 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
         logger.get().info("Stop Recovering " + securityId);
 
         securityIdsToRecover.remove(securityId);
-        marketDataManager.onBBO(new BBO(securityId.contains(":") ? securityId.substring(0, securityId.indexOf(':')) : securityId) {
-            {
-                setInRecovery(false, type.equals("OrderList") ? 0 : 1);
-            }
-        }, 0);
+        marketDataManager.setRecovery(securityId, false, type.equals("OrderList"));
 
         return storedMdEntriesToProcess.remove(securityId);
     }

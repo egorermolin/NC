@@ -235,4 +235,15 @@ public class MarketDataManager {
         else
             return bbos.containsKey(symbol);
     }
+
+    public void setRecovery(String securityId, boolean isUp, boolean orderList) {
+        String updatedSecurityId = securityId;
+        if (!addTradinsgSessionIdToSymbol && securityId.contains(":"))
+            updatedSecurityId = securityId.substring(0, securityId.indexOf(':'));
+
+        BBO bbo = new BBO(updatedSecurityId);
+        bbo.setInRecovery(isUp, orderList ? 0 : 1);
+
+        onBBO(bbo, 0);
+    }
 }

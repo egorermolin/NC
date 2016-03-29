@@ -45,39 +45,39 @@ public class MessageSequenceValidatorTest {
 
     @Test
     public void testRecoveringSnapshot() {
-        assert sequenceValidator.isRecovering("SYMB", true);
-        sequenceValidator.onSnapshotSeq("SYMB", 100);
-        sequenceValidator.stopRecovering("SYMB");
-        assert !sequenceValidator.isRecovering("SYMB", true);
+        assert sequenceValidator.isRecovering("SYMB:CETS", true);
+        sequenceValidator.onSnapshotSeq("SYMB:CETS", 100);
+        sequenceValidator.stopRecovering("SYMB:CETS");
+        assert !sequenceValidator.isRecovering("SYMB:CETS", true);
     }
 
     @Test
     public void testRecoveringIncremental() {
-        assert !sequenceValidator.isRecovering("SYMB", false);
-        sequenceValidator.startRecovering("SYMB");
-        assert sequenceValidator.isRecovering("SYMB", false);
-        sequenceValidator.onSnapshotSeq("SYMB", 100);
-        sequenceValidator.stopRecovering("SYMB");
-        assert !sequenceValidator.isRecovering("SYMB", false);
+        assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+        sequenceValidator.startRecovering("SYMB:CETS");
+        assert sequenceValidator.isRecovering("SYMB:CETS", false);
+        sequenceValidator.onSnapshotSeq("SYMB:CETS", 100);
+        sequenceValidator.stopRecovering("SYMB:CETS");
+        assert !sequenceValidator.isRecovering("SYMB:CETS", false);
     }
 
     @Test
     public void testOnSnapshot() {
-        assert sequenceValidator.onSnapshotSeq("SYMB", 10);
+        assert sequenceValidator.onSnapshotSeq("SYMB:CETS", 10);
     }
 
     @Test
     public void testOnIncremental() {
-        assert sequenceValidator.onSnapshotSeq("SYMB", 10);
-        assert sequenceValidator.onIncrementalSeq("SYMB", 11);
-        assert sequenceValidator.onIncrementalSeq("SYMB", 12);
-        assert sequenceValidator.onIncrementalSeq("SYMB", 13);
+        assert sequenceValidator.onSnapshotSeq("SYMB:CETS", 10);
+        assert sequenceValidator.onIncrementalSeq("SYMB:CETS", 11);
+        assert sequenceValidator.onIncrementalSeq("SYMB:CETS", 12);
+        assert sequenceValidator.onIncrementalSeq("SYMB:CETS", 13);
     }
 
     @Test
     public void testOnIncrementalOutOfSequence() {
-        assert sequenceValidator.onSnapshotSeq("SYMB", 10);
-        assert !sequenceValidator.onIncrementalSeq("SYMB", 12);
+        assert sequenceValidator.onSnapshotSeq("SYMB:CETS", 10);
+        assert !sequenceValidator.onIncrementalSeq("SYMB:CETS", 12);
     }
 
     @Test
@@ -86,14 +86,14 @@ public class MessageSequenceValidatorTest {
         GroupValue mdEntry2 = Mockito.mock(GroupValue.class);
         GroupValue mdEntry3 = Mockito.mock(GroupValue.class);
 
-        sequenceValidator.startRecovering("SYMB");
-        sequenceValidator.storeIncremental(mdEntry1, "SYMB", 100);
-        sequenceValidator.storeIncremental(mdEntry2, "SYMB", 101);
-        sequenceValidator.storeIncremental(mdEntry3, "SYMB", 102);
+        sequenceValidator.startRecovering("SYMB:CETS");
+        sequenceValidator.storeIncremental(mdEntry1, "SYMB:CETS", 100);
+        sequenceValidator.storeIncremental(mdEntry2, "SYMB:CETS", 101);
+        sequenceValidator.storeIncremental(mdEntry3, "SYMB:CETS", 102);
 
-        assert sequenceValidator.onSnapshotSeq("SYMB", 100);
-        assert Arrays.equals(sequenceValidator.stopRecovering("SYMB"), new GroupValue[]{mdEntry2, mdEntry3});
-        assert !sequenceValidator.isRecovering("SYMB", false);
+        assert sequenceValidator.onSnapshotSeq("SYMB:CETS", 100);
+        assert Arrays.equals(sequenceValidator.stopRecovering("SYMB:CETS"), new GroupValue[]{mdEntry2, mdEntry3});
+        assert !sequenceValidator.isRecovering("SYMB:CETS", false);
     }
 
     @Test
@@ -102,14 +102,14 @@ public class MessageSequenceValidatorTest {
         GroupValue mdEntry2 = Mockito.mock(GroupValue.class);
         GroupValue mdEntry3 = Mockito.mock(GroupValue.class);
 
-        sequenceValidator.startRecovering("SYMB");
-        sequenceValidator.storeIncremental(mdEntry1, "SYMB", 100);
-        sequenceValidator.storeIncremental(mdEntry2, "SYMB", 101);
-        sequenceValidator.storeIncremental(mdEntry3, "SYMB", 104);
+        sequenceValidator.startRecovering("SYMB:CETS");
+        sequenceValidator.storeIncremental(mdEntry1, "SYMB:CETS", 100);
+        sequenceValidator.storeIncremental(mdEntry2, "SYMB:CETS", 101);
+        sequenceValidator.storeIncremental(mdEntry3, "SYMB:CETS", 104);
 
-        assert sequenceValidator.onSnapshotSeq("SYMB", 100);
-        assert sequenceValidator.stopRecovering("SYMB") == null;
-        assert sequenceValidator.isRecovering("SYMB", false);
+        assert sequenceValidator.onSnapshotSeq("SYMB:CETS", 100);
+        assert sequenceValidator.stopRecovering("SYMB:CETS") == null;
+        assert sequenceValidator.isRecovering("SYMB:CETS", false);
     }
 
 }
