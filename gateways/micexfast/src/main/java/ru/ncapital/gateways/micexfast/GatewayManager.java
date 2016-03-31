@@ -77,13 +77,15 @@ public class GatewayManager implements IGatewayManager {
     }
 
     public static void setLogLevel(Level level, boolean full) {
-        String[] loggers = {"GatewayManager", "InstrumentManager",
+        String[] loggers = {"GatewayManager",
                 "HeartbeatProcessor",
+            "CURR-IDF-A-Processor", "CURR-IDF-B-Processor",
             "CURR-OLR-A-Processor", "CURR-OLR-B-Processor",
             "CURR-OLS-A-Processor", "CURR-OLS-B-Processor",
             "CURR-MSR-A-Processor", "CURR-MSR-B-Processor",
             "CURR-MSS-A-Processor", "CURR-MSS-B-Processor",
             "CURR-TLR-A-Processor", "CURR-TLR-A-Processor",
+            "FOND-IDF-A-Processor", "FOND-IDF-B-Processor",
             "FOND-OLR-A-Processor", "FOND-OLR-B-Processor",
             "FOND-OLS-A-Processor", "FOND-OLS-B-Processor",
             "FOND-MSR-A-Processor", "FOND-MSR-B-Processor",

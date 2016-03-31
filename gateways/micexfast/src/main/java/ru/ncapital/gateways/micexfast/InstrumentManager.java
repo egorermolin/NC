@@ -33,8 +33,6 @@ public class InstrumentManager extends Processor {
 
     private Set<Integer> addedInstruments = new HashSet<Integer>();
 
-    private Logger logger = LoggerFactory.getLogger("InstrumentManager");
-
     private int numberOfInstruments;
 
     private AtomicBoolean instrumentsDownloaded = new AtomicBoolean(false);
@@ -56,7 +54,7 @@ public class InstrumentManager extends Processor {
     private IMarketDataHandler marketDataHandler;
 
     private long sendingTimeOfInstrumentStart;
-
+    
     public InstrumentManager configure(IGatewayConfiguration configuration) {
         this.marketDataHandler = configuration.getMarketDataHandler();
         this.addBoardToSecurityId = configuration.addBoardToSecurityId();
@@ -71,23 +69,23 @@ public class InstrumentManager extends Processor {
 
     private boolean isAllowedInstrument(Instrument instrument) {
         if (instruments.containsKey(instrument.getSecurityId())) {
-            if (logger.isTraceEnabled())
-                logger.trace("Instrument Duplicate [Symbol: " + instrument.getSymbol() + "][TradingSessionId: " + instrument.getTradingSessionId() + "]");
+            if (getLogger().isTraceEnabled())
+                getLogger().trace("Instrument Duplicate [Symbol: " + instrument.getSymbol() + "][TradingSessionId: " + instrument.getTradingSessionId() + "]");
 
             return false;
         }
 
         if (ignoredInstruments.containsKey(instrument.getSecurityId())) {
-            if (logger.isTraceEnabled())
-                logger.trace("Instrument Ignored Duplicate [Symbol: " + instrument.getSymbol() + "][TradingSessionId: " + instrument.getTradingSessionId() + "]");
+            if (getLogger().isTraceEnabled())
+                getLogger().trace("Instrument Duplicate Ignored [Symbol: " + instrument.getSymbol() + "][TradingSessionId: " + instrument.getTradingSessionId() + "]");
 
             return false;
         }
 
         if (allowedTradingSessionIds.isEmpty() || allowedTradingSessionIds.contains(TradingSessionId.convert(instrument.getTradingSessionId()))) {
         } else {
-            if (logger.isTraceEnabled())
-                logger.trace("Instrument Ignored by TradingSessionId [Symbol: " + instrument.getSymbol() + "][TradingSessionId: " + instrument.getTradingSessionId() + "]");
+            if (getLogger().isTraceEnabled())
+                getLogger().trace("Instrument Ignored by TradingSessionId [Symbol: " + instrument.getSymbol() + "][TradingSessionId: " + instrument.getTradingSessionId() + "]");
 
             ignoredInstruments.put(instrument.getSecurityId(), instrument);
             return false;
@@ -95,8 +93,8 @@ public class InstrumentManager extends Processor {
 
         if (allowedProductTypes.isEmpty() || allowedProductTypes.contains(instrument.getProductType())) {
         } else {
-            if (logger.isTraceEnabled())
-                logger.trace("Instrument Ignored by ProductType [SecurityId: " + instrument.getSecurityId() + "][Product: " + instrument.getProductType() + "]");
+            if (getLogger().isTraceEnabled())
+                getLogger().trace("Instrument Ignored by ProductType [SecurityId: " + instrument.getSecurityId() + "][Product: " + instrument.getProductType() + "]");
 
             ignoredInstruments.put(instrument.getSecurityId(), instrument);
             return false;
@@ -104,8 +102,8 @@ public class InstrumentManager extends Processor {
 
         if (allowedSecurityIds.isEmpty() || allowedSecurityIds.contains(instrument.getSecurityId())) {
         } else {
-            if (logger.isTraceEnabled())
-                logger.trace("Instrument Ignored by SecurityId [SecurityId: " + instrument.getSecurityId() + "]");
+            if (getLogger().isTraceEnabled())
+                getLogger().trace("Instrument Ignored by SecurityId [SecurityId: " + instrument.getSecurityId() + "]");
 
             ignoredInstruments.put(instrument.getSecurityId(), instrument);
             return false;
@@ -173,9 +171,6 @@ public class InstrumentManager extends Processor {
                 break;
 
             case 'd':
-                if (logger.isTraceEnabled())
-                    logger.trace("Instrument Message Received " + readMessage.getInt("MsgSeqNum"));
-
                 if (numberOfInstruments == 0)
                     numberOfInstruments = readMessage.getInt("TotNumReports");
                 else
@@ -192,8 +187,8 @@ public class InstrumentManager extends Processor {
                 if (!isAllowedInstrument(instrument))
                     break;
 
-                if (logger.isDebugEnabled())
-                    logger.debug("Instrument Received " + symbol + ":" + tradingSessionId + " " + ProductType.convert(readMessage.getInt("Product")));
+                if (getLogger().isDebugEnabled())
+                    getLogger().debug("Instrument Received " + symbol + ":" + tradingSessionId + " " + ProductType.convert(readMessage.getInt("Product")));
 
                 if (readMessage.getValue("Currency") != null)
                     instrument.setCurrency(readMessage.getString("Currency"));
@@ -224,7 +219,7 @@ public class InstrumentManager extends Processor {
 
         if (instruments.size() + ignoredInstruments.size() == numberOfInstruments) {
             if (!instrumentsDownloaded.getAndSet(true)) {
-                logger.info("FINISHED INSTRUMENTS " + (numberOfInstruments - ignoredInstruments.size()));
+                getLogger().info("FINISHED INSTRUMENTS " + (numberOfInstruments - ignoredInstruments.size()));
                 connectionManager.stopInstrument();
                 marketDataHandler.onInstruments(instruments.values().toArray(new Instrument[instruments.size()]));
             }
@@ -234,7 +229,7 @@ public class InstrumentManager extends Processor {
                     if (instruments.size() + ignoredInstruments.size() % 1000 == 0) {
                         int added = (instruments.size() + ignoredInstruments.size()) / 1000;
                         if (addedInstruments.add(added)) {
-                            logger.info("PROCESSED INSTRUMENTS " + added * 1000);
+                            getLogger().info("PROCESSED INSTRUMENTS " + added * 1000);
                         }
                     }
                 }
