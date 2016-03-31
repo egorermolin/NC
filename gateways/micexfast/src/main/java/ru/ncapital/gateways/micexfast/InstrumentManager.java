@@ -10,6 +10,8 @@ import org.openfast.codec.Coder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.micexfast.connection.ConnectionManager;
+import ru.ncapital.gateways.micexfast.connection.messageprocessors.Processor;
+import ru.ncapital.gateways.micexfast.connection.messageprocessors.SequenceArray;
 import ru.ncapital.gateways.micexfast.domain.BBO;
 import ru.ncapital.gateways.micexfast.domain.Instrument;
 import ru.ncapital.gateways.micexfast.domain.ProductType;
@@ -24,10 +26,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 
 @Singleton
-public class InstrumentManager implements MessageHandler {
+public class InstrumentManager extends Processor {
     private ConcurrentHashMap<String, Instrument> instruments = new ConcurrentHashMap<String, Instrument>();
 
-    private Map<String, Instrument> ignoredInstruments = new ConcurrentHashMap<String, Instrument>();
+    private ConcurrentHashMap<String, Instrument> ignoredInstruments = new ConcurrentHashMap<String, Instrument>();
 
     private Set<Integer> addedInstruments = new HashSet<Integer>();
 
@@ -53,6 +55,8 @@ public class InstrumentManager implements MessageHandler {
 
     private IMarketDataHandler marketDataHandler;
 
+    private long sendingTimeOfInstrumentStart;
+
     public InstrumentManager configure(IGatewayConfiguration configuration) {
         this.marketDataHandler = configuration.getMarketDataHandler();
         this.addBoardToSecurityId = configuration.addBoardToSecurityId();
@@ -65,17 +69,25 @@ public class InstrumentManager implements MessageHandler {
         return this;
     }
 
-    private boolean checkAndAddInstrument(Instrument instrument) {
-        if (instruments.containsKey(instrument.getSecurityId()))
-            return false;
+    private boolean isAllowedInstrument(Instrument instrument) {
+        if (instruments.containsKey(instrument.getSecurityId())) {
+            if (logger.isTraceEnabled())
+                logger.trace("Instrument Duplicate [Symbol: " + instrument.getSymbol() + "][TradingSessionId: " + instrument.getTradingSessionId() + "]");
 
-        if (ignoredInstruments.containsKey(instrument.getSecurityId()))
             return false;
+        }
+
+        if (ignoredInstruments.containsKey(instrument.getSecurityId())) {
+            if (logger.isTraceEnabled())
+                logger.trace("Instrument Ignored Duplicate [Symbol: " + instrument.getSymbol() + "][TradingSessionId: " + instrument.getTradingSessionId() + "]");
+
+            return false;
+        }
 
         if (allowedTradingSessionIds.isEmpty() || allowedTradingSessionIds.contains(TradingSessionId.convert(instrument.getTradingSessionId()))) {
         } else {
-            if (logger.isDebugEnabled())
-                logger.debug("Instrument Filtered by TradingSessionId [Symbol: " + instrument.getSymbol() + "][TradingSessionId: " + instrument.getTradingSessionId() + "]");
+            if (logger.isTraceEnabled())
+                logger.trace("Instrument Ignored by TradingSessionId [Symbol: " + instrument.getSymbol() + "][TradingSessionId: " + instrument.getTradingSessionId() + "]");
 
             ignoredInstruments.put(instrument.getSecurityId(), instrument);
             return false;
@@ -83,8 +95,8 @@ public class InstrumentManager implements MessageHandler {
 
         if (allowedProductTypes.isEmpty() || allowedProductTypes.contains(instrument.getProductType())) {
         } else {
-            if (logger.isDebugEnabled())
-                logger.debug("Instrument Filtered by ProductType [SecurityId: " + instrument.getSecurityId() + "][Product: " + instrument.getProductType() + "]");
+            if (logger.isTraceEnabled())
+                logger.trace("Instrument Ignored by ProductType [SecurityId: " + instrument.getSecurityId() + "][Product: " + instrument.getProductType() + "]");
 
             ignoredInstruments.put(instrument.getSecurityId(), instrument);
             return false;
@@ -93,7 +105,7 @@ public class InstrumentManager implements MessageHandler {
         if (allowedSecurityIds.isEmpty() || allowedSecurityIds.contains(instrument.getSecurityId())) {
         } else {
             if (logger.isTraceEnabled())
-                logger.trace("Instrument Filtered by SecurityId [SecurityId: " + instrument.getSecurityId() + "]");
+                logger.trace("Instrument Ignored by SecurityId [SecurityId: " + instrument.getSecurityId() + "]");
 
             ignoredInstruments.put(instrument.getSecurityId(), instrument);
             return false;
@@ -106,12 +118,54 @@ public class InstrumentManager implements MessageHandler {
     }
 
     @Override
-    public void handleMessage(Message readMessage, Context context, Coder coder) {
+    protected boolean checkSequence(Message readMessage) {
+        int seqNum = readMessage.getInt("MsgSeqNum");
+        long sendingTime = readMessage.getLong("SendingTime");
+
+        if (seqNum == 1) {
+            synchronized (this) {
+                if (sendingTimeOfInstrumentStart < sendingTime) {
+                    // new snapshot cycle
+                    sendingTimeOfInstrumentStart = sendingTime;
+                    reset();
+                } else
+                    return false;
+            }
+        } else {
+            if (sequenceArray.checkSequence(seqNum) == SequenceArray.Result.DUPLICATE)
+                return false;
+        }
+
+        return true;
+    }
+
+    private void reset() {
+        sequenceArray.clear();
+    }
+
+    private String buildTradingStatus(Message readMessage) {
+        GroupValue tradingSession = readMessage.getSequence("MarketSegmentGrp").get(0)
+                .getSequence("TradingSessionRulesGrp").get(0);
+
+        StringBuilder tradingStatus = new StringBuilder();
+
+        if (tradingSession.getValue("TradingSessionSubID") != null)
+            tradingStatus.append(tradingSession.getString("TradingSessionSubID")).append("-");
+        else
+            tradingStatus.append("NA-");
+        if (tradingSession.getValue("SecurityTradingStatus") != null)
+            tradingStatus.append(tradingSession.getInt("SecurityTradingStatus"));
+        else
+            tradingStatus.append("18");
+
+        return tradingStatus.toString();
+    }
+
+    @Override
+    protected void processMessage(Message readMessage) {
         String symbol;
         String tradingSessionId;
-        String securityId;
-        Instrument instrument;
-        final StringBuilder tradingStatus = new StringBuilder();
+        final Instrument instrument;
 
         switch (readMessage.getString("MessageType").charAt(0)) {
             case 'f':
@@ -124,19 +178,18 @@ public class InstrumentManager implements MessageHandler {
 
                 if (numberOfInstruments == 0)
                     numberOfInstruments = readMessage.getInt("TotNumReports");
-                else if (numberOfInstruments == instruments.size())
-                    break;
-
-                GroupValue tradingSession = readMessage.getSequence("MarketSegmentGrp").get(0)
-                                                       .getSequence("TradingSessionRulesGrp").get(0);
+                else
+                    if (numberOfInstruments == (instruments.size() + ignoredInstruments.size()))
+                        break;
 
                 symbol = readMessage.getString("Symbol");
-                tradingSessionId = tradingSession.getString("TradingSessionID");
+                tradingSessionId = readMessage.getSequence("MarketSegmentGrp").get(0)
+                        .getSequence("TradingSessionRulesGrp").get(0).getString("TradingSessionID");
 
                 instrument = new Instrument(symbol, tradingSessionId, addBoardToSecurityId);
                 instrument.setProductType(readMessage.getInt("Product"));
 
-                if (!checkAndAddInstrument(instrument))
+                if (!isAllowedInstrument(instrument))
                     break;
 
                 if (logger.isDebugEnabled())
@@ -155,20 +208,15 @@ public class InstrumentManager implements MessageHandler {
                 }
                 if (readMessage.getSequence("MarketSegmentGrp").get(0).getValue("RoundLot") != null)
                     instrument.setLotSize(readMessage.getSequence("MarketSegmentGrp").get(0).getInt("RoundLot"));
-                if (tradingSession.getValue("TradingSessionSubID") != null)
-                    tradingStatus.append(tradingSession.getString("TradingSessionSubID")).append("-");
-                else
-                    tradingStatus.append("NA-");
-                if (tradingSession.getValue("SecurityTradingStatus") != null)
-                    tradingStatus.append(tradingSession.getInt("SecurityTradingStatus"));
-                else
-                    tradingStatus.append("18");
-                instrument.setTradingStatus(tradingStatus.toString());
+
+                instrument.setTradingStatus(buildTradingStatus(readMessage));
 
                 // send to client
                 marketDataManager.onBBO(new BBO(instrument.getSecurityId()) {
                     {
-                        setTradingStatus(tradingStatus.toString());
+                        setTradingStatus(instrument.getTradingStatus());
+                        setInRecovery(true, 0);
+                        setInRecovery(true, 1);
                     }
                 }, Utils.currentTimeInTicks());
                 break;
@@ -193,4 +241,5 @@ public class InstrumentManager implements MessageHandler {
             }
         }
     }
+
 }
