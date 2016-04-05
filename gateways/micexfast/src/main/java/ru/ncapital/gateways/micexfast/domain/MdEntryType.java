@@ -18,6 +18,8 @@ public enum MdEntryType {
     HIGH('7', "HIGH"),
     LOW('8', "LOW");
 
+
+
     private char type;
 
     private String description;

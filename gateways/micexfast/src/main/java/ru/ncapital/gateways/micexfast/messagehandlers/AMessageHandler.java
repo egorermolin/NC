@@ -21,11 +21,8 @@ public abstract class AMessageHandler implements IMessageHandler {
 
     protected MarketDataManager marketDataManager;
 
-    protected boolean addBoardToSecurityId = false;
-
     protected AMessageHandler(MarketDataManager marketDataManager, IGatewayConfiguration configuration) {
         this.marketDataManager = marketDataManager;
-        this.addBoardToSecurityId = configuration.addBoardToSecurityId();
     }
 
     @Override
@@ -37,12 +34,9 @@ public abstract class AMessageHandler implements IMessageHandler {
     public void onSnapshot(Message readMessage, long inTime) {
         String symbol = readMessage.getString("Symbol");
         String tradingSessionId = readMessage.getString("TradingSessionID");
+        String securityId = symbol + ":" + tradingSessionId;
         boolean firstFragment = readMessage.getInt("RouteFirst") == 1;
         boolean lastFragment = readMessage.getInt("LastFragment") == 1;
-
-        String securityId = symbol;
-        if (addBoardToSecurityId)
-            securityId += ":" + tradingSessionId;
 
         if (firstFragment)
             onBeforeSnapshot(securityId, inTime);
@@ -60,10 +54,7 @@ public abstract class AMessageHandler implements IMessageHandler {
     public void onIncremental(GroupValue mdEntry, long inTime) {
         String symbol = mdEntry.getString("Symbol");
         String tradingSessionId = mdEntry.getString("TradingSessionID");
-
-        String securityId = symbol;
-        if (addBoardToSecurityId)
-            securityId += ":" + tradingSessionId;
+        String securityId = symbol + ":" + tradingSessionId;
 
         beforeIncremental(mdEntry, inTime);
 

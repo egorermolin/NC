@@ -19,8 +19,6 @@ public interface IGatewayConfiguration {
 
     MarketType getMarketType();
 
-    boolean addBoardToSecurityId();
-
     TradingSessionId[] getAllowedTradingSessionIds();
 
     ProductType[] getAllowedProductTypes();

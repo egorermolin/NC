@@ -6,7 +6,7 @@ import java.util.HashMap;
  * Created by egore on 12/15/15.
  */
 public enum MdUpdateAction {
-    INSERT('0', "I"), UPDATE('1', "U"), DELETE('2', "D"), SNAPSHOT('J', "S");
+    INSERT('0', "INSERT"), UPDATE('1', "UPDATE"), DELETE('2', "DELETE"), SNAPSHOT('J', "SNAPSHOT");
     
     private char action;
 

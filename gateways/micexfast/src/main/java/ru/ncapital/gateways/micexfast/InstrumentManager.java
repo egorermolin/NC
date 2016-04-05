@@ -43,8 +43,6 @@ public class InstrumentManager extends Processor {
 
     private Set<String> allowedSecurityIds = new HashSet<String>();
 
-    private boolean addBoardToSecurityId;
-
     @Inject
     private ConnectionManager connectionManager;
 
@@ -57,7 +55,6 @@ public class InstrumentManager extends Processor {
     
     public InstrumentManager configure(IGatewayConfiguration configuration) {
         this.marketDataHandler = configuration.getMarketDataHandler();
-        this.addBoardToSecurityId = configuration.addBoardToSecurityId();
         this.allowedTradingSessionIds.addAll(Arrays.asList(configuration.getAllowedTradingSessionIds()));
         this.allowedProductTypes.addAll(Arrays.asList(configuration.getAllowedProductTypes()));
         this.allowedSecurityIds.addAll(Arrays.asList(configuration.getAllowedSecurityIds()));
@@ -181,7 +178,7 @@ public class InstrumentManager extends Processor {
                 tradingSessionId = readMessage.getSequence("MarketSegmentGrp").get(0)
                         .getSequence("TradingSessionRulesGrp").get(0).getString("TradingSessionID");
 
-                instrument = new Instrument(symbol, tradingSessionId, addBoardToSecurityId);
+                instrument = new Instrument(symbol, tradingSessionId);
                 instrument.setProductType(readMessage.getInt("Product"));
 
                 if (!isAllowedInstrument(instrument))
@@ -195,7 +192,7 @@ public class InstrumentManager extends Processor {
                 else
                     instrument.setCurrency("RUB");
 
-                instrument.setUnderlying(addBoardToSecurityId ? instrument.getSymbol() : readMessage.getString("EncodedShortSecurityDesc"));
+                instrument.setUnderlying(readMessage.getString("EncodedShortSecurityDesc"));
                 instrument.setDescription(readMessage.getString("SecurityDesc"));
                 if (readMessage.getValue("MinPriceIncrement") != null) {
                     instrument.setTickSize(readMessage.getDouble("MinPriceIncrement"));
@@ -236,5 +233,4 @@ public class InstrumentManager extends Processor {
             }
         }
     }
-
 }

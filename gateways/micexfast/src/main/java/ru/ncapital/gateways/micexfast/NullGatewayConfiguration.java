@@ -35,11 +35,6 @@ public class NullGatewayConfiguration implements IGatewayConfiguration {
     }
 
     @Override
-    public boolean addBoardToSecurityId() {
-        return false;
-    }
-
-    @Override
     public TradingSessionId[] getAllowedTradingSessionIds() {
         return new TradingSessionId[0];
     }

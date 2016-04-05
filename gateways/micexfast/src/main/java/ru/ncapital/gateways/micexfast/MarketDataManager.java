@@ -57,12 +57,9 @@ public class MarketDataManager {
 
     private IGatewayPerformanceLogger performanceLogger;
 
-    private boolean addTradinsgSessionIdToSymbol;
-
     public MarketDataManager configure(IGatewayConfiguration configuration) {
         this.marketDataHandler = configuration.getMarketDataHandler();
         this.performanceLogger = configuration.getPerformanceLogger();
-        this.addTradinsgSessionIdToSymbol = configuration.addBoardToSecurityId();
 
         IMessageHandler messageHandlerForOrderList = messageHandlerFactory.createOrderListMessageHandler(configuration);
         IMessageHandler messageHandlerForStatistics = messageHandlerFactory.createStatisticsMessageHandler(configuration);
@@ -229,21 +226,13 @@ public class MarketDataManager {
         this.incrementalProcessorForPublicTrades.setIsPrimary(isPrimary);
     }
 
-    public boolean isAllowedInstrument(String symbol, String trandingSessionId) {
-        if (this.addTradinsgSessionIdToSymbol)
-            return bbos.containsKey(symbol + ":" + trandingSessionId);
-        else
-            return bbos.containsKey(symbol);
+    public boolean isAllowedInstrument(String symbol, String tradingSessionId) {
+        return bbos.containsKey(symbol + ":" + tradingSessionId);
     }
 
     public void setRecovery(String securityId, boolean isUp, boolean orderList) {
-        String updatedSecurityId = securityId;
-        if (!addTradinsgSessionIdToSymbol && securityId.contains(":"))
-            updatedSecurityId = securityId.substring(0, securityId.indexOf(':'));
-
-        BBO bbo = new BBO(updatedSecurityId);
+        BBO bbo = new BBO(securityId);
         bbo.setInRecovery(isUp, orderList ? 0 : 1);
-
         onBBO(bbo, 0);
     }
 }

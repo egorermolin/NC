@@ -27,10 +27,10 @@ public class Instrument {
 
     private ProductType productType;
 
-    public Instrument(String symbol, String tradingSessionId, boolean addTradingSessionIdToSecurityId) {
+    public Instrument(String symbol, String tradingSessionId) {
         this.symbol = symbol;
         this.tradingSessionId = tradingSessionId;
-        this.securityId = symbol + (addTradingSessionIdToSecurityId ? (":" + tradingSessionId) : "");
+        this.securityId = symbol + ":" + tradingSessionId;
     }
 
     public String getSymbol() {
