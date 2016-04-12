@@ -148,6 +148,7 @@ public class InstrumentManager extends Processor {
             tradingStatus.append(tradingSession.getString("TradingSessionSubID")).append("-");
         else
             tradingStatus.append("NA-");
+
         if (tradingSession.getValue("SecurityTradingStatus") != null)
             tradingStatus.append(tradingSession.getInt("SecurityTradingStatus"));
         else
@@ -180,7 +181,14 @@ public class InstrumentManager extends Processor {
                         .getSequence("TradingSessionRulesGrp").get(0).getString("TradingSessionID");
 
                 instrument = new Instrument(symbol, tradingSessionId);
-                instrument.setProductType(readMessage.getInt("Product"));
+
+                if (readMessage.getValue("Product") == null) {
+                    if (getLogger().isTraceEnabled())
+                        getLogger().trace("Instrument Ignored by ProductType [SecurityId: " + instrument.getSecurityId() + "][ProductType: NULL]");
+
+                    break;
+                } else
+                    instrument.setProductType(readMessage.getInt("Product"));
 
                 if (!isAllowedInstrument(instrument))
                     break;
@@ -193,12 +201,17 @@ public class InstrumentManager extends Processor {
                 else
                     instrument.setCurrency("RUB");
 
-                instrument.setUnderlying(readMessage.getString("EncodedShortSecurityDesc"));
-                instrument.setDescription(readMessage.getString("SecurityDesc"));
+                if (readMessage.getValue("EncodedShortSecurityDesc") != null)
+                    instrument.setUnderlying(readMessage.getString("EncodedShortSecurityDesc"));
+
+                if (readMessage.getValue("SecurityDesc") != null)
+                    instrument.setDescription(readMessage.getString("SecurityDesc"));
+
                 if (readMessage.getValue("MinPriceIncrement") != null) {
                     instrument.setTickSize(readMessage.getDouble("MinPriceIncrement"));
                     instrument.setMultiplier(readMessage.getDouble("FaceValue") / instrument.getTickSize());
                 }
+
                 if (readMessage.getSequence("MarketSegmentGrp").get(0).getValue("RoundLot") != null)
                     instrument.setLotSize(readMessage.getSequence("MarketSegmentGrp").get(0).getInt("RoundLot"));
 
