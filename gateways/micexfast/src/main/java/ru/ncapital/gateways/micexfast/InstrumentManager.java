@@ -208,8 +208,6 @@ public class InstrumentManager extends Processor {
                 marketDataManager.onBBO(new BBO(instrument.getSecurityId()) {
                     {
                         setTradingStatus(instrument.getTradingStatus());
-                        setInRecovery(true, 0);
-                        setInRecovery(true, 1);
                     }
                 }, Utils.currentTimeInTicks());
                 break;

@@ -315,8 +315,9 @@ public class MulticastReceiver {
                 messageReader.readMessage();
                 received = inTimestamp.get();
             } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-                e.printStackTrace(System.err);
+                logger.error(e.toString());
+                for (StackTraceElement trace : e.getStackTrace())
+                    logger.error(trace.toString());
             }
         }
     }
