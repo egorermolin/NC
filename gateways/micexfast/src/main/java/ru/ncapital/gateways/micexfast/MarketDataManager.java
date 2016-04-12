@@ -104,7 +104,15 @@ public class MarketDataManager {
     }
 
     private BBO getOrCreateBBO(String securityId) {
-        return bbos.putIfAbsent(securityId, new BBO(securityId));
+        BBO bbo = bbos.get(securityId);
+        if (bbo == null) {
+            bbo = new BBO(securityId);
+            if (bbos.putIfAbsent(securityId, bbo) == null)
+                return bbo;
+
+            return bbos.get(securityId);
+        }
+        return bbo;
     }
 
     public void onBBO(BBO newBBO, long inTimeInTicks) {
@@ -150,9 +158,6 @@ public class MarketDataManager {
     public void onPublicTrade(PublicTrade publicTrade, long inTimeInTicks) {
         if (logger.isTraceEnabled())
             logger.trace("onPublicTrade " + publicTrade.getSecurityId());
-
-        if (!bbos.containsKey(publicTrade.getSecurityId()))
-            bbos.put(publicTrade.getSecurityId(), new BBO(publicTrade.getSecurityId()));
 
         BBO currentBBO = getOrCreateBBO(publicTrade.getSecurityId());
         synchronized (currentBBO) {
