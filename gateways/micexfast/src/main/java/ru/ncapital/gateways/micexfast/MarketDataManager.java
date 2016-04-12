@@ -26,9 +26,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
 public class MarketDataManager {
-    private Map<String, Subscription> subscriptions = new ConcurrentHashMap<String, Subscription>();
+    private ConcurrentHashMap<String, Subscription> subscriptions = new ConcurrentHashMap<String, Subscription>();
 
-    private Map<String, BBO> bbos = new ConcurrentHashMap<String, BBO>();
+    private ConcurrentHashMap<String, BBO> bbos = new ConcurrentHashMap<String, BBO>();
 
     private Logger logger = LoggerFactory.getLogger("MarketDataManager");
 
@@ -84,38 +84,34 @@ public class MarketDataManager {
         if (logger.isTraceEnabled())
             logger.trace("onSubscribe " + subscription.getSubscriptionKey());
 
-        if (!subscriptions.containsKey(subscription.getSubscriptionKey())) {
+        if (subscriptions.putIfAbsent(subscription.getSubscriptionKey(), subscription) == null) {
             if (logger.isDebugEnabled())
-                logger.debug("Adding subscription for " + subscription.getSubscriptionKey());
-
-            subscriptions.put(subscription.getSubscriptionKey(), subscription);
+                logger.debug("Added subscription for " + subscription.getSubscriptionKey());
         }
 
-        if (!bbos.containsKey(subscription.getSubscriptionKey()))
-            bbos.put(subscription.getSubscriptionKey(), new BBO(subscription.getSubscriptionKey()));
-
-        BBO bbo = bbos.get(subscription.getSubscriptionKey());
-        synchronized (bbo) {
+        BBO currentBBO = getOrCreateBBO(subscription.getSubscriptionKey());
+        synchronized (currentBBO) {
             List<DepthLevel> depthLevelsToSend = new ArrayList<DepthLevel>();
             depthLevelsToSend.add(new DepthLevel(subscription.getSubscriptionKey(), MdUpdateAction.SNAPSHOT));
             orderDepthEngine.getDepthLevels(subscription.getSubscriptionKey(), depthLevelsToSend);
 
-            marketDataHandler.onBBO(bbo, inTimeInTicks);
+            marketDataHandler.onBBO(currentBBO, inTimeInTicks);
             marketDataHandler.onDepthLevels(depthLevelsToSend.toArray(new DepthLevel[0]), inTimeInTicks);
-            marketDataHandler.onStatistics(bbo, inTimeInTicks);
-            marketDataHandler.onTradingStatus(bbo, inTimeInTicks);
+            marketDataHandler.onStatistics(currentBBO, inTimeInTicks);
+            marketDataHandler.onTradingStatus(currentBBO, inTimeInTicks);
         }
         return true;
+    }
+
+    private BBO getOrCreateBBO(String securityId) {
+        return bbos.putIfAbsent(securityId, new BBO(securityId));
     }
 
     public void onBBO(BBO newBBO, long inTimeInTicks) {
         if (logger.isTraceEnabled())
             logger.trace("onBBO " + newBBO.getSecurityId());
 
-        if (!bbos.containsKey(newBBO.getSecurityId()))
-            bbos.put(newBBO.getSecurityId(), new BBO(newBBO.getSecurityId()));
-
-        BBO currentBBO = bbos.get(newBBO.getSecurityId());
+        BBO currentBBO = getOrCreateBBO(newBBO.getSecurityId());
         synchronized (currentBBO) {
             boolean[] changed = orderDepthEngine.updateBBO(currentBBO, newBBO);
 
@@ -134,11 +130,8 @@ public class MarketDataManager {
         if (logger.isTraceEnabled())
             logger.trace("onDepthLevel " + depthLevels[0].getSecurityId());
 
-        if (!bbos.containsKey(depthLevels[0].getSecurityId()))
-            bbos.put(depthLevels[0].getSecurityId(), new BBO(depthLevels[0].getSecurityId()));
-
-        BBO bbo = bbos.get(depthLevels[0].getSecurityId());
-        synchronized (bbo) {
+        BBO currentBBO = getOrCreateBBO(depthLevels[0].getSecurityId());
+        synchronized (currentBBO) {
             List<DepthLevel> depthLevelsToSend = new ArrayList<DepthLevel>();
             orderDepthEngine.onDepthLevels(depthLevels, depthLevelsToSend);
 
@@ -161,8 +154,8 @@ public class MarketDataManager {
         if (!bbos.containsKey(publicTrade.getSecurityId()))
             bbos.put(publicTrade.getSecurityId(), new BBO(publicTrade.getSecurityId()));
 
-        BBO bbo = bbos.get(publicTrade.getSecurityId());
-        synchronized (bbo) {
+        BBO currentBBO = getOrCreateBBO(publicTrade.getSecurityId());
+        synchronized (currentBBO) {
             orderDepthEngine.onPublicTrade(publicTrade);
 
             if (subscriptions.containsKey(publicTrade.getSecurityId()))
