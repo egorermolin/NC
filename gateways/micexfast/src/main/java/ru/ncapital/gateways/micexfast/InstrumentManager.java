@@ -139,17 +139,22 @@ public class InstrumentManager extends Processor {
     }
 
     private String buildTradingStatus(Message readMessage) {
-        GroupValue tradingSession = readMessage.getSequence("MarketSegmentGrp").get(0)
-                .getSequence("TradingSessionRulesGrp").get(0);
+        GroupValue tradingSession = null;
+
+        if (readMessage.getSequence("MarketSegmentGrp") != null && readMessage.getSequence("MarketSegmentGrp").getLength() > 0) {
+            GroupValue marketSegmentGrp = readMessage.getSequence("MarketSegmentGrp").get(0);
+            if (marketSegmentGrp.getSequence("TradingSessionRulesGrp") != null && marketSegmentGrp.getSequence("TradingSessionRulesGrp").getLength() > 0) {
+                tradingSession = marketSegmentGrp.getSequence("TradingSessionRulesGrp").get(0);
+            }
+        }
 
         StringBuilder tradingStatus = new StringBuilder();
-
-        if (tradingSession.getValue("TradingSessionSubID") != null)
+        if (tradingSession != null && tradingSession.getValue("TradingSessionSubID") != null)
             tradingStatus.append(tradingSession.getString("TradingSessionSubID")).append("-");
         else
             tradingStatus.append("NA-");
 
-        if (tradingSession.getValue("SecurityTradingStatus") != null)
+        if (tradingSession != null && tradingSession.getValue("SecurityTradingStatus") != null)
             tradingStatus.append(tradingSession.getInt("SecurityTradingStatus"));
         else
             tradingStatus.append("18");
@@ -160,7 +165,7 @@ public class InstrumentManager extends Processor {
     @Override
     protected void processMessage(Message readMessage) {
         String symbol;
-        String tradingSessionId;
+        String tradingSessionId = "";
         final Instrument instrument;
 
         switch (readMessage.getString("MessageType").charAt(0)) {
@@ -177,18 +182,21 @@ public class InstrumentManager extends Processor {
                         break;
 
                 symbol = readMessage.getString("Symbol");
-                tradingSessionId = readMessage.getSequence("MarketSegmentGrp").get(0)
-                        .getSequence("TradingSessionRulesGrp").get(0).getString("TradingSessionID");
+                if (readMessage.getSequence("MarketSegmentGrp") != null && readMessage.getSequence("MarketSegmentGrp").getLength() > 0) {
+                    GroupValue marketSegmentGrp = readMessage.getSequence("MarketSegmentGrp").get(0);
+                    if (marketSegmentGrp.getSequence("TradingSessionRulesGrp") != null && marketSegmentGrp.getSequence("TradingSessionRulesGrp").getLength() > 0) {
+                        GroupValue tradingSessionRulesGrp = marketSegmentGrp.getSequence("TradingSessionRulesGrp").get(0);
+                        if (tradingSessionRulesGrp.getValue("TradingSessionID") != null)
+                            tradingSessionId = tradingSessionRulesGrp.getString("TradingSessionID");
+                    }
+                }
 
                 instrument = new Instrument(symbol, tradingSessionId);
 
-                if (readMessage.getValue("Product") == null) {
-                    if (getLogger().isTraceEnabled())
-                        getLogger().trace("Instrument Ignored by ProductType [SecurityId: " + instrument.getSecurityId() + "][ProductType: NULL]");
-
-                    break;
-                } else
+                if (readMessage.getValue("Product") != null) {
                     instrument.setProductType(readMessage.getInt("Product"));
+                } else
+                    instrument.setProductType(-1);
 
                 if (!isAllowedInstrument(instrument))
                     break;

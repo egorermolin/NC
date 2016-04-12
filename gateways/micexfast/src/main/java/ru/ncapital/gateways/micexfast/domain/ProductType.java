@@ -15,7 +15,8 @@ public enum ProductType {
     MORTGAGE(10, "MORT"),
     MUNICIPAL(11, "MUNI"),
     OTHER(12, "OTHER"),
-    FINANCING(13, "FIN");
+    FINANCING(13, "FIN"),
+    UNKNOWN(-1, "UNKNOWN");
 
     private int product;
 
