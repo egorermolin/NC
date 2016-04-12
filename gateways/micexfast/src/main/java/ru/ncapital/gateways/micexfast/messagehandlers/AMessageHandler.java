@@ -6,6 +6,7 @@ import org.openfast.SequenceValue;
 import org.slf4j.Logger;
 import ru.ncapital.gateways.micexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
+import ru.ncapital.gateways.micexfast.domain.Instrument;
 import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
 
 import java.util.Arrays;
@@ -34,7 +35,7 @@ public abstract class AMessageHandler implements IMessageHandler {
     public void onSnapshot(Message readMessage, long inTime) {
         String symbol = readMessage.getString("Symbol");
         String tradingSessionId = readMessage.getString("TradingSessionID");
-        String securityId = symbol + ":" + tradingSessionId;
+        String securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
         boolean firstFragment = readMessage.getInt("RouteFirst") == 1;
         boolean lastFragment = readMessage.getInt("LastFragment") == 1;
 
@@ -54,7 +55,7 @@ public abstract class AMessageHandler implements IMessageHandler {
     public void onIncremental(GroupValue mdEntry, long inTime) {
         String symbol = mdEntry.getString("Symbol");
         String tradingSessionId = mdEntry.getString("TradingSessionID");
-        String securityId = symbol + ":" + tradingSessionId;
+        String securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
 
         beforeIncremental(mdEntry, inTime);
 

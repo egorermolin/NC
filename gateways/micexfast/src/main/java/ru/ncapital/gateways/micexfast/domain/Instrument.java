@@ -5,6 +5,8 @@ package ru.ncapital.gateways.micexfast.domain;
  */
 public class Instrument {
 
+    public static String BOARD_SEPARATOR = ";";
+
     private String symbol;
 
     private String tradingSessionId;
@@ -30,7 +32,7 @@ public class Instrument {
     public Instrument(String symbol, String tradingSessionId) {
         this.symbol = symbol;
         this.tradingSessionId = tradingSessionId;
-        this.securityId = symbol + ":" + tradingSessionId;
+        this.securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
     }
 
     public String getSymbol() {

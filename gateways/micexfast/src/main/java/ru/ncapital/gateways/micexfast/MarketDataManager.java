@@ -227,7 +227,7 @@ public class MarketDataManager {
     }
 
     public boolean isAllowedInstrument(String symbol, String tradingSessionId) {
-        return bbos.containsKey(symbol + ":" + tradingSessionId);
+        return bbos.containsKey(symbol + Instrument.BOARD_SEPARATOR + tradingSessionId);
     }
 
     public void setRecovery(String securityId, boolean isUp, boolean orderList) {

@@ -168,9 +168,10 @@ public class InstrumentManager extends Processor {
                 break;
 
             case 'd':
-                if (numberOfInstruments == 0)
+                if (numberOfInstruments == 0) {
                     numberOfInstruments = readMessage.getInt("TotNumReports");
-                else
+                    getLogger().info("EXPECTING INSTRUMENTS " + numberOfInstruments);
+                } else
                     if (numberOfInstruments == (instruments.size() + ignoredInstruments.size()))
                         break;
 
@@ -185,7 +186,7 @@ public class InstrumentManager extends Processor {
                     break;
 
                 if (getLogger().isDebugEnabled())
-                    getLogger().debug("Instrument Received " + symbol + ":" + tradingSessionId + " " + ProductType.convert(readMessage.getInt("Product")));
+                    getLogger().debug("Instrument Received " + symbol + Instrument.BOARD_SEPARATOR + tradingSessionId + " " + ProductType.convert(readMessage.getInt("Product")));
 
                 if (readMessage.getValue("Currency") != null)
                     instrument.setCurrency(readMessage.getString("Currency"));
@@ -216,17 +217,17 @@ public class InstrumentManager extends Processor {
 
         if (instruments.size() + ignoredInstruments.size() == numberOfInstruments) {
             if (!instrumentsDownloaded.getAndSet(true)) {
-                getLogger().info("FINISHED INSTRUMENTS " + (numberOfInstruments - ignoredInstruments.size()));
+                getLogger().info("FINISHED INSTRUMENTS " + instruments.size());
                 connectionManager.stopInstrument();
                 marketDataHandler.onInstruments(instruments.values().toArray(new Instrument[instruments.size()]));
             }
         } else {
-            if (instruments.size() + ignoredInstruments.size() % 1000 == 0) {
+            if ((instruments.size() + ignoredInstruments.size()) % 1000 == 0) {
                 synchronized (this) {
-                    if (instruments.size() + ignoredInstruments.size() % 1000 == 0) {
+                    if ((instruments.size() + ignoredInstruments.size()) % 1000 == 0) {
                         int added = (instruments.size() + ignoredInstruments.size()) / 1000;
                         if (addedInstruments.add(added)) {
-                            getLogger().info("PROCESSED INSTRUMENTS " + added * 1000);
+                            getLogger().info("PROCESSED INSTRUMENTS " + (instruments.size() + ignoredInstruments.size()));
                         }
                     }
                 }

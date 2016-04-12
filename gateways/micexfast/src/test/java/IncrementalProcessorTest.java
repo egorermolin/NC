@@ -69,9 +69,9 @@ public class IncrementalProcessorTest {
 
     @Test
     public void testIncremental() {
-        sequenceValidator.startRecovering("SYMB:CETS");
-        sequenceValidator.onSnapshotSeq("SYMB:CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB:CETS") == null;
+        sequenceValidator.startRecovering("SYMB;CETS");
+        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
+        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
 
         Message message = getIncermentalMock(1, 1);
         GroupValue entry1 = message.getSequence("GroupMDEntries").get(0);
@@ -96,18 +96,18 @@ public class IncrementalProcessorTest {
         incrementalProcessor.handleMessage(message, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry2), Mockito.anyLong());
-        assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
     }
 
     @Test
     public void testIncremental2Symbols() {
-        sequenceValidator.startRecovering("SYMB:CETS");
-        sequenceValidator.onSnapshotSeq("SYMB:CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB:CETS") == null;
+        sequenceValidator.startRecovering("SYMB;CETS");
+        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
+        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
 
-        sequenceValidator.startRecovering("SYMB2:CETS");
-        sequenceValidator.onSnapshotSeq("SYMB2:CETS", 199);
-        assert sequenceValidator.stopRecovering("SYMB2:CETS") == null;
+        sequenceValidator.startRecovering("SYMB2;CETS");
+        sequenceValidator.onSnapshotSeq("SYMB2;CETS", 199);
+        assert sequenceValidator.stopRecovering("SYMB2;CETS") == null;
 
         Message message = getIncermentalMock(1, 2);
         GroupValue entry1 = message.getSequence("GroupMDEntries").get(0);
@@ -125,15 +125,15 @@ public class IncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry1), Mockito.anyLong());
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry2), Mockito.anyLong());
 
-        assert !sequenceValidator.isRecovering("SYMB:CETS", false);
-        assert !sequenceValidator.isRecovering("SYMB2:CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB2;CETS", false);
     }
 
     @Test
     public void testIncrementalOutOfSequence() {
-        sequenceValidator.startRecovering("SYMB:CETS");
-        sequenceValidator.onSnapshotSeq("SYMB:CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB:CETS") == null;
+        sequenceValidator.startRecovering("SYMB;CETS");
+        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
+        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
 
         // ===
 
@@ -147,7 +147,7 @@ public class IncrementalProcessorTest {
         incrementalProcessor.handleMessage(message1, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.anyLong());
-        assert sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert sequenceValidator.isRecovering("SYMB;CETS", false);
 
         // ===
 
@@ -163,14 +163,14 @@ public class IncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry11), Mockito.anyLong());
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry21), Mockito.anyLong());
 
-        assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
     }
 
     @Test
     public void testIncrementalOutOfSequence2() {
-        sequenceValidator.startRecovering("SYMB:CETS");
-        sequenceValidator.onSnapshotSeq("SYMB:CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB:CETS") == null;
+        sequenceValidator.startRecovering("SYMB;CETS");
+        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
+        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
 
         // ===
 
@@ -189,7 +189,7 @@ public class IncrementalProcessorTest {
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.anyLong());
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry12), Mockito.anyLong());
-        assert sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert sequenceValidator.isRecovering("SYMB;CETS", false);
 
         // ===
 
@@ -211,14 +211,14 @@ public class IncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry21), Mockito.anyLong());
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry22), Mockito.anyLong());
 
-        assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
     }
 
     @Test
     public void testIncrementalOutOfSequenceFailed() {
-        sequenceValidator.startRecovering("SYMB:CETS");
-        sequenceValidator.onSnapshotSeq("SYMB:CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB:CETS") == null;
+        sequenceValidator.startRecovering("SYMB;CETS");
+        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
+        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
 
         // ===
 
@@ -232,7 +232,7 @@ public class IncrementalProcessorTest {
         incrementalProcessor.handleMessage(message1, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.anyLong());
-        assert sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert sequenceValidator.isRecovering("SYMB;CETS", false);
 
         // ===
 
@@ -248,19 +248,19 @@ public class IncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry21), Mockito.anyLong());
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.anyLong());
 
-        assert sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert sequenceValidator.isRecovering("SYMB;CETS", false);
 
         // ===
 
-        sequenceValidator.onSnapshotSeq("SYMB:CETS", 102);
-        assert sequenceValidator.stopRecovering("SYMB:CETS").length == 0;
+        sequenceValidator.onSnapshotSeq("SYMB;CETS", 102);
+        assert sequenceValidator.stopRecovering("SYMB;CETS").length == 0;
     }
 
     @Test
     public void testIncrementalWith2Channels() {
-        sequenceValidator.startRecovering("SYMB:CETS");
-        sequenceValidator.onSnapshotSeq("SYMB:CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB:CETS") == null;
+        sequenceValidator.startRecovering("SYMB;CETS");
+        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
+        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
 
         // ===
 
@@ -275,7 +275,7 @@ public class IncrementalProcessorTest {
         incrementalProcessor.handleMessage(message1, context, coder);
 
         Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(entry11), Mockito.anyLong());
-        assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
 
         // ===
 
@@ -290,7 +290,7 @@ public class IncrementalProcessorTest {
         incrementalProcessor.handleMessage(message2, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry21), Mockito.anyLong());
-        assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
 
         // ===
 
@@ -306,7 +306,7 @@ public class IncrementalProcessorTest {
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry31), Mockito.anyLong());
 
-        assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
 
         // ===
 
@@ -321,14 +321,14 @@ public class IncrementalProcessorTest {
         incrementalProcessor.handleMessage(message4, context, coder);
 
         Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(entry41), Mockito.anyLong());
-        assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
     }
 
     @Test
     public void testIncrementalWith2ChannelsWithFailover() {
-        sequenceValidator.startRecovering("SYMB:CETS");
-        sequenceValidator.onSnapshotSeq("SYMB:CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB:CETS") == null;
+        sequenceValidator.startRecovering("SYMB;CETS");
+        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
+        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
 
         // ===
 
@@ -344,7 +344,7 @@ public class IncrementalProcessorTest {
             incrementalProcessor.handleMessage(message1, context, coder);
 
             Mockito.verify(marketDataHandler, Mockito.times(i % 2)).onIncremental(Mockito.eq(entry11), Mockito.anyLong());
-            assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+            assert !sequenceValidator.isRecovering("SYMB;CETS", false);
 
             // ===
 
@@ -359,7 +359,7 @@ public class IncrementalProcessorTest {
             incrementalProcessor.handleMessage(message2, context, coder);
 
             Mockito.verify(marketDataHandler, Mockito.times(1 - i % 2)).onIncremental(Mockito.eq(entry21), Mockito.anyLong());
-            assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+            assert !sequenceValidator.isRecovering("SYMB;CETS", false);
         }
 
         // ===
@@ -375,7 +375,7 @@ public class IncrementalProcessorTest {
         incrementalProcessor.handleMessage(message3, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry31), Mockito.anyLong());
-        assert sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert sequenceValidator.isRecovering("SYMB;CETS", false);
 
         // ===
 
@@ -390,17 +390,17 @@ public class IncrementalProcessorTest {
         incrementalProcessor.handleMessage(message4, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry41), Mockito.anyLong());
-        assert sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert sequenceValidator.isRecovering("SYMB;CETS", false);
 
-        sequenceValidator.onSnapshotSeq("SYMB:CETS", 1);
-        assert sequenceValidator.stopRecovering("SYMB:CETS").length == 0;
+        sequenceValidator.onSnapshotSeq("SYMB;CETS", 1);
+        assert sequenceValidator.stopRecovering("SYMB;CETS").length == 0;
     }
 
     @Test
     public void testIncrementalManyMessagesWith2Channels() {
-        sequenceValidator.startRecovering("SYMB:CETS");
-        sequenceValidator.onSnapshotSeq("SYMB:CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB:CETS") == null;
+        sequenceValidator.startRecovering("SYMB;CETS");
+        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
+        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
 
         for (int i = 1; i < 1000; ++i) {
             Message message1 = getIncermentalMock(i, 1);
@@ -414,7 +414,7 @@ public class IncrementalProcessorTest {
             incrementalProcessor.handleMessage(message1, context, coder);
 
             Mockito.verify(marketDataHandler, Mockito.times(i % 2)).onIncremental(Mockito.eq(entry11), Mockito.anyLong());
-            assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+            assert !sequenceValidator.isRecovering("SYMB;CETS", false);
 
             // ===
 
@@ -429,15 +429,15 @@ public class IncrementalProcessorTest {
             incrementalProcessor.handleMessage(message2, context, coder);
 
             Mockito.verify(marketDataHandler, Mockito.times(1 - i % 2)).onIncremental(Mockito.eq(entry21), Mockito.anyLong());
-            assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+            assert !sequenceValidator.isRecovering("SYMB;CETS", false);
         }
     }
 
     @Test
     public void testIncrementalOutOfSequenceWith2Channels() {
-        sequenceValidator.startRecovering("SYMB:CETS");
-        sequenceValidator.onSnapshotSeq("SYMB:CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB:CETS") == null;
+        sequenceValidator.startRecovering("SYMB;CETS");
+        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
+        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
 
         // ===
 
@@ -452,7 +452,7 @@ public class IncrementalProcessorTest {
         incrementalProcessor.handleMessage(message1, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.anyLong());
-        assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
 
         // ===
 
@@ -467,7 +467,7 @@ public class IncrementalProcessorTest {
         incrementalProcessor.handleMessage(message2, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry21), Mockito.anyLong());
-        assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
 
         // ===
 
@@ -486,7 +486,7 @@ public class IncrementalProcessorTest {
         marketDataHandlerInOrder.verify(marketDataHandler).onIncremental(Mockito.eq(entry21), Mockito.anyLong());
         marketDataHandlerInOrder.verify(marketDataHandler).onIncremental(Mockito.eq(entry31), Mockito.anyLong());
 
-        assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
 
         // ===
 
@@ -501,6 +501,6 @@ public class IncrementalProcessorTest {
         incrementalProcessor.handleMessage(message4, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry41), Mockito.anyLong());
-        assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
     }
 }

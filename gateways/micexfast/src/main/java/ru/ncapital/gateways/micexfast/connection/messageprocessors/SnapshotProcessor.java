@@ -3,6 +3,7 @@ package ru.ncapital.gateways.micexfast.connection.messageprocessors;
 import org.openfast.GroupValue;
 import org.openfast.Message;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
+import ru.ncapital.gateways.micexfast.domain.Instrument;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
 
 import java.util.*;
@@ -65,7 +66,7 @@ public class SnapshotProcessor extends Processor {
         int seqNum = readMessage.getInt("MsgSeqNum");
         String symbol = readMessage.getString("Symbol");
         String tradingSessionId = readMessage.getString("TradingSessionID");
-        String securityId = symbol + ":" + tradingSessionId;
+        String securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
         int rptSeqNum = readMessage.getInt("RptSeq");
         boolean firstFragment = readMessage.getInt("RouteFirst") == 1;
         boolean lastFragment = readMessage.getInt("LastFragment") == 1;
@@ -87,7 +88,7 @@ public class SnapshotProcessor extends Processor {
     protected boolean checkSequence(Message readMessage) {
         String symbol = readMessage.getString("Symbol");
         String tradingSessionId = readMessage.getString("TradingSessionID");
-        String securityId = symbol + ":" + tradingSessionId;
+        String securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
         int seqNum = readMessage.getInt("MsgSeqNum");
         long sendingTime = readMessage.getLong("SendingTime");
 

@@ -2,6 +2,7 @@ package ru.ncapital.gateways.micexfast.connection.messageprocessors;
 
 import org.openfast.*;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
+import ru.ncapital.gateways.micexfast.domain.Instrument;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
 
 /**
@@ -26,7 +27,7 @@ public class IncrementalProcessor extends Processor {
                 GroupValue mdEntry = mdEntries.get(i);
                 String symbol = mdEntry.getString("Symbol");
                 String tradingSessionId = mdEntry.getString("TradingSessionID");
-                String securityId = symbol + ":" + tradingSessionId;
+                String securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
                 int rptSeqNum = mdEntry.getInt("RptSeq");
 
                 if (!messageHandler.isAllowedUpdate(symbol, tradingSessionId))
