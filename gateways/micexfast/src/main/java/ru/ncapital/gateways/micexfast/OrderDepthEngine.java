@@ -126,6 +126,10 @@ public class OrderDepthEngine {
             previousBBO.setClosePx(newBBO.getClosePx());
         }
         if (newBBO.getTradingStatus() != null && !newBBO.getTradingStatus().equals(previousBBO.getTradingStatus())) {
+            logger.info("Trading Status UPDATE [SecurityId: " + newBBO.getSecurityId() +
+                    "][PrevTradingStatus: " + previousBBO.getTradingStatus() +
+                    "][NewTradingStatus: " + newBBO.getTradingStatus() + "]");
+
             changed[2] = true;
             previousBBO.setTradingStatus(newBBO.getTradingStatus());
         }
