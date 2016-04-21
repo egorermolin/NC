@@ -170,7 +170,7 @@ public class InstrumentManager extends Processor {
 
         switch (readMessage.getString("MessageType").charAt(0)) {
             case 'f':
-                // TODO not supported
+                getLogger().info("Received Instrument Status UPDATE " + readMessage.toString());
                 break;
 
             case 'd':

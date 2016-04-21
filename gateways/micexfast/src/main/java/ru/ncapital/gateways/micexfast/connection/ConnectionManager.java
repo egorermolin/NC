@@ -193,9 +193,11 @@ public class ConnectionManager {
         switch(marketType) {
             case CURR:
                 starter.execute(new MulticastReceiverStarter(logger, multicastReceivers.get(ConnectionId.CURR_INSTRUMENT_INCR_A)));
+                starter.execute(new MulticastReceiverStarter(logger, multicastReceivers.get(ConnectionId.CURR_INSTRUMENT_INCR_B)));
                 break;
             case FOND:
                 starter.execute(new MulticastReceiverStarter(logger, multicastReceivers.get(ConnectionId.FOND_INSTRUMENT_INCR_A)));
+                starter.execute(new MulticastReceiverStarter(logger, multicastReceivers.get(ConnectionId.FOND_INSTRUMENT_INCR_B)));
                 break;
         }
     }
@@ -204,9 +206,11 @@ public class ConnectionManager {
         switch(marketType) {
             case CURR:
                 starter.execute(new MulticastReceiverStopper(logger, multicastReceivers.get(ConnectionId.CURR_INSTRUMENT_INCR_A)));
+                starter.execute(new MulticastReceiverStarter(logger, multicastReceivers.get(ConnectionId.CURR_INSTRUMENT_INCR_B)));
                 break;
             case FOND:
                 starter.execute(new MulticastReceiverStopper(logger, multicastReceivers.get(ConnectionId.FOND_INSTRUMENT_INCR_A)));
+                starter.execute(new MulticastReceiverStarter(logger, multicastReceivers.get(ConnectionId.FOND_INSTRUMENT_INCR_B)));
                 break;
         }
     }

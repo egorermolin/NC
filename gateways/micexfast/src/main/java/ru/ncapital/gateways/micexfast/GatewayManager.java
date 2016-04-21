@@ -113,6 +113,7 @@ public class GatewayManager implements IGatewayManager {
     public void start() {
         if (!started.getAndSet(true)) {
             connectionManager.startInstrument();
+            connectionManager.startInstrumentStatus();
             connectionManager.startIncremental(withStatistics, withPublicTrade);
             connectionManager.startSnapshot(withStatistics);
         }
@@ -124,6 +125,7 @@ public class GatewayManager implements IGatewayManager {
             connectionManager.stopSnapshot(withStatistics);
             connectionManager.stopIncremental(withStatistics, withPublicTrade);
             connectionManager.stopInstrument();
+            connectionManager.stopInstrumentStatus();
             connectionManager.shutdown();
         }
     }
