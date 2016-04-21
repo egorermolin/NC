@@ -76,7 +76,7 @@ public class GatewayManager implements IGatewayManager {
         org.apache.log4j.Logger.getRootLogger().addAppender(appender);
     }
 
-    public static void setLogLevel(Level level, boolean full) {
+    public static void setLogLevel(Level level) {
         String[] loggers = {"GatewayManager",
                 "HeartbeatProcessor",
             "CURR-IDF-A-Processor", "CURR-IDF-B-Processor",
