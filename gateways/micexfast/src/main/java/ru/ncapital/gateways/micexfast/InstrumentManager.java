@@ -148,6 +148,9 @@ public class InstrumentManager extends Processor {
         if (ignoredInstruments.containsKey(instrument.getSecurityId()))
             return false;
 
+        if (instrument.getProductType() == null)
+            return false;
+
         if (allowedTradingSessionIds.isEmpty() || allowedTradingSessionIds.contains(TradingSessionId.convert(instrument.getTradingSessionId()))) {
         } else {
             if (getLogger().isTraceEnabled())
