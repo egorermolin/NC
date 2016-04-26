@@ -142,10 +142,10 @@ public class InstrumentManager extends Processor {
     }
 
     public boolean isAllowedInstrument(Instrument instrument) {
-        if (instruments.contains(instrument.getSecurityId()))
+        if (instruments.containsKey(instrument.getSecurityId()))
             return true;
 
-        if (ignoredInstruments.contains(instrument.getSecurityId()))
+        if (ignoredInstruments.containsKey(instrument.getSecurityId()))
             return false;
 
         if (allowedTradingSessionIds.isEmpty() || allowedTradingSessionIds.contains(TradingSessionId.convert(instrument.getTradingSessionId()))) {

@@ -19,6 +19,8 @@ import ru.ncapital.gateways.micexfast.domain.ProductType;
 import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -143,7 +145,7 @@ public class InstrumentManagerTest {
 
         switch (num) {
             // added
-            case 101:
+            case 1:
                 when(message.getString("Symbol")).thenReturn("SBER");
                 when(message.getValue("TradingSessionID")).thenReturn(mock(FieldValue.class));
                 when(message.getString("TradingSessionID")).thenReturn(TradingSessionId.TQBR.getDescription());
@@ -153,7 +155,7 @@ public class InstrumentManagerTest {
                 when(message.getInt("SecurityTradingStatus")).thenReturn(17);
                 break;
 
-            case 102:
+            case 2:
                 when(message.getString("Symbol")).thenReturn("ROSN");
                 when(message.getValue("TradingSessionID")).thenReturn(mock(FieldValue.class));
                 when(message.getString("TradingSessionID")).thenReturn(TradingSessionId.TQBR.getDescription());
@@ -164,7 +166,7 @@ public class InstrumentManagerTest {
                 break;
 
             //ignored
-            case 103:
+            case 3:
                 when(message.getString("Symbol")).thenReturn("LUKL");
                 when(message.getValue("TradingSessionID")).thenReturn(mock(FieldValue.class));
                 when(message.getString("TradingSessionID")).thenReturn(TradingSessionId.TQBR.getDescription());
@@ -174,7 +176,7 @@ public class InstrumentManagerTest {
                 when(message.getInt("SecurityTradingStatus")).thenReturn(17);
                 break;
 
-            case 104:
+            case 4:
                 when(message.getString("Symbol")).thenReturn("LUKL");
                 when(message.getValue("TradingSessionID")).thenReturn(mock(FieldValue.class));
                 when(message.getString("TradingSessionID")).thenReturn(TradingSessionId.TQIF.getDescription());
@@ -184,7 +186,7 @@ public class InstrumentManagerTest {
                 when(message.getInt("SecurityTradingStatus")).thenReturn(17);
                 break;
 
-            case 105:
+            case 5:
                 when(message.getString("Symbol")).thenReturn("VTBB");
                 when(message.getValue("TradingSessionID")).thenReturn(mock(FieldValue.class));
                 when(message.getString("TradingSessionID")).thenReturn(TradingSessionId.TQBR.getDescription());
@@ -199,10 +201,24 @@ public class InstrumentManagerTest {
     }
 
     @Test
+    public void isAllowedInstrument() {
+        testInstrumentAddAndFinish();
+
+        assertTrue(instrumentManager.isAllowedInstrument(new Instrument("SBER", "TQBR")));
+        assertTrue(instrumentManager.isAllowedInstrument(new Instrument("ROSN", "TQBR")));
+        assertFalse(instrumentManager.isAllowedInstrument(new Instrument("LUKL", "TQBR")));
+        assertFalse(instrumentManager.isAllowedInstrument(new Instrument("LUKL", "TQIF")));
+        assertFalse(instrumentManager.isAllowedInstrument(new Instrument("VTBB", "TQBR")));
+    }
+
+
+    @Test
     public void testInstrumentStatus() {
         testInstrumentAddAndFinish();
 
-        for (int i : new int [] {101, 101, 102, 102, 103, 103, 104, 104, 105, 105})
+        Mockito.reset(marketDataManager);
+
+        for (int i : new int [] {1, 1, 2, 2, 3, 3, 4, 4, 5, 5})
             instrumentManager.handleMessage(getInstrumentStatusMessageMock(i), context, coder);
 
         ArgumentCaptor<BBO> bboCapture = ArgumentCaptor.forClass(BBO.class);
