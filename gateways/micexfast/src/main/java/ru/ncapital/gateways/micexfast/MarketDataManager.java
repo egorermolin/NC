@@ -55,6 +55,9 @@ public class MarketDataManager {
     @Inject
     private HeartbeatProcessor heartbeatProcessor;
 
+    @Inject
+    private InstrumentManager instrumentManager;
+
     private IGatewayPerformanceLogger performanceLogger;
 
     public MarketDataManager configure(IGatewayConfiguration configuration) {
@@ -229,7 +232,8 @@ public class MarketDataManager {
     }
 
     public boolean isAllowedInstrument(String symbol, String tradingSessionId) {
-        return bbos.containsKey(symbol + Instrument.BOARD_SEPARATOR + tradingSessionId);
+        //return bbos.containsKey(symbol + Instrument.BOARD_SEPARATOR + tradingSessionId);
+        return instrumentManager.isAllowedInstrument(new Instrument(symbol, tradingSessionId));
     }
 
     public void setRecovery(String securityId, boolean isUp, boolean orderList) {

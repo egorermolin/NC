@@ -141,7 +141,7 @@ public class InstrumentManager extends Processor {
         return false;
     }
 
-    private boolean isAllowedInstrument(Instrument instrument) {
+    public boolean isAllowedInstrument(Instrument instrument) {
         if (instruments.contains(instrument.getSecurityId()))
             return true;
 
