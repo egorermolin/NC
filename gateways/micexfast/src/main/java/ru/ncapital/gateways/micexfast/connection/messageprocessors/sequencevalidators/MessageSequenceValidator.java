@@ -165,7 +165,7 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
 
         GroupValue[] mdEntriesToProcess = storedMdEntriesToProcess.remove(securityId);
 
-        logger.get().info("Stop Recovering " + securityId + ". Number of queued incremental entries " + mdEntriesToProcess.length);
+        logger.get().info("Stop Recovering " + securityId + " Number of queued incremental entries " + mdEntriesToProcess.length);
 
         return mdEntriesToProcess;
     }
