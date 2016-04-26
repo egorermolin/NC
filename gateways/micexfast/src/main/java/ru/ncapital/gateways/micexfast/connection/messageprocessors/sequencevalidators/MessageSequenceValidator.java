@@ -39,6 +39,8 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
     @Inject
     private MarketDataManager marketDataManager;
 
+    private int numberOfMissingSequneces = 0;
+
     protected MessageSequenceValidator(String type) {
         this.type = type;
     }
@@ -77,9 +79,12 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
 
         synchronized (sequenceNumber) {
             if (sequenceNumber.lastSeqNum + 1 != seqNum) {
-                if (sequenceNumber.lastSeqNum > 0 && !isRecovering(securityId, false))
+                if (sequenceNumber.lastSeqNum > 0 && !isRecovering(securityId, false)) {
                     if (logger.get().isDebugEnabled())
                         logger.get().debug("OutOfSequence [Symbol: " + securityId + "][Expected: " + (sequenceNumber.lastSeqNum + 1) + "][Received: " + seqNum + "]");
+
+                    numberOfMissingSequneces = seqNum - sequenceNumber.lastSeqNum;
+                }
 
                 return false;
             } else {
@@ -114,7 +119,7 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
 
     @Override
     public void startRecovering(String securityId) {
-        logger.get().info("Start Recovering " + securityId);
+        logger.get().info("Start Recovering " + securityId + " Missing " + numberOfMissingSequneces + " sequences");
 
         securityIdsToRecover.add(securityId);
         marketDataManager.setRecovery(securityId, true, type.equals("OrderList"));
@@ -159,6 +164,7 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
                 mdEntriesToProcess.clear();
             }
         }
+
 
         securityIdsToRecover.remove(securityId);
         marketDataManager.setRecovery(securityId, false, type.equals("OrderList"));
