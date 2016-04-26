@@ -55,7 +55,6 @@ public class MarketDataManager {
     @Inject
     private HeartbeatProcessor heartbeatProcessor;
 
-    @Inject
     private InstrumentManager instrumentManager;
 
     private IGatewayPerformanceLogger performanceLogger;
@@ -232,7 +231,7 @@ public class MarketDataManager {
     }
 
     public boolean isAllowedInstrument(String symbol, String tradingSessionId) {
-        //return bbos.containsKey(symbol + Instrument.BOARD_SEPARATOR + tradingSessionId);
+        // return bbos.containsKey(symbol + Instrument.BOARD_SEPARATOR + tradingSessionId);
         return instrumentManager.isAllowedInstrument(new Instrument(symbol, tradingSessionId));
     }
 
@@ -240,5 +239,9 @@ public class MarketDataManager {
         BBO bbo = new BBO(securityId);
         bbo.setInRecovery(isUp, orderList ? 0 : 1);
         onBBO(bbo, 0);
+    }
+
+    public void setInstrumentManager(InstrumentManager instrumentManager) {
+        this.instrumentManager = instrumentManager;
     }
 }

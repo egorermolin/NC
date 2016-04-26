@@ -39,6 +39,9 @@ public class GatewayManager implements IGatewayManager {
         this.withPublicTrade = withPublicTrade;
         this.withStatistics = withStatistics;
 
+        // hack to avoid circular injection
+        marketDataManager.setInstrumentManager(instrumentManager);
+
         return this;
     }
 
