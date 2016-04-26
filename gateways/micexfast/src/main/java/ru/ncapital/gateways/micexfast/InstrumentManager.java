@@ -170,7 +170,8 @@ public class InstrumentManager extends Processor {
 
         switch (readMessage.getString("MessageType").charAt(0)) {
             case 'f':
-                getLogger().info("Received Instrument Status UPDATE " + readMessage.toString());
+                if (instruments.contains(readMessage.getString("Symbol") + Instrument.BOARD_SEPARATOR + readMessage.getString("TradingSessionID")))
+                    getLogger().info("Received Instrument Status UPDATE " + readMessage.toString());
                 break;
 
             case 'd':

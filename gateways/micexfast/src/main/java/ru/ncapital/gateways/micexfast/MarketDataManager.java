@@ -151,7 +151,7 @@ public class MarketDataManager {
             for (DepthLevel depthLevel : depthLevels) {
                 if (depthLevel.getMdEntryTime() > 0 && inTimeInTicks > 0) {
                     if ((inTimeInTicks - depthLevel.getMdEntryTime()) / 10000 > 1000)
-                        logger.warn("onDepthLevels " + depthLevel.toString() + " processing time exceeds limit of 1s " + ((inTimeInTicks - depthLevel.getMdEntryTime()) / 10000));
+                        logger.warn("onDepthLevels " + depthLevel.toString() + " processing time " + ((inTimeInTicks - depthLevel.getMdEntryTime()) / 10000) + "ms exceeds limit of 1000ms");
 
                     performanceLogger.notify(depthLevel.getMdEntryTime(), inTimeInTicks, "external");
                 }
