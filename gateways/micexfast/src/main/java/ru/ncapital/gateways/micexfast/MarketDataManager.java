@@ -136,7 +136,7 @@ public class MarketDataManager {
         }
     }
 
-    public void onDepthLevels(DepthLevel[] depthLevels, long inTimeInTicks) {
+    public void onDepthLevels(DepthLevel[] depthLevels, boolean afterSnapshot, long inTimeInTicks) {
         if (logger.isTraceEnabled())
             logger.trace("onDepthLevel " + depthLevels[0].getSecurityId());
 
@@ -149,7 +149,7 @@ public class MarketDataManager {
                 marketDataHandler.onDepthLevels(depthLevelsToSend.toArray(new DepthLevel[0]), inTimeInTicks);
         }
 
-        if (depthLevels[0].getMdUpdateAction() != MdUpdateAction.SNAPSHOT && performanceLogger != null) {
+        if (!afterSnapshot && performanceLogger != null) {
             for (DepthLevel depthLevel : depthLevels) {
                 if (depthLevel.getMdEntryTime() > 0 && inTimeInTicks > 0) {
                     if ((inTimeInTicks - depthLevel.getMdEntryTime()) / 10000 > 1000)

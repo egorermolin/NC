@@ -71,7 +71,7 @@ public class PublicTradesMessageHandler extends AMessageHandler {
     }
 
     @Override
-    public void flushIncrementals(long inTime) {
+    public void flushIncrementals(boolean afterSnapshot, long inTime) {
     }
 
     @Override

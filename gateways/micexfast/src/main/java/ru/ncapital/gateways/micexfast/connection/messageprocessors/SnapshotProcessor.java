@@ -35,12 +35,14 @@ public class SnapshotProcessor extends Processor {
 
                 // finished recovering
                 GroupValue[] mdEntriesToProcess = sequenceValidator.stopRecovering(securityId);
-                if (mdEntriesToProcess != null)
+                if (mdEntriesToProcess != null) {
                     for (GroupValue mdEntry : mdEntriesToProcess) {
                         sequenceValidator.onIncrementalSeq(securityId, mdEntry.getInt("RptSeq"));
 
                         messageHandler.onIncremental(mdEntry, getInTimestamp());
                     }
+                    messageHandler.flushIncrementals(true, getInTimestamp());
+                }
             }
         }
     }

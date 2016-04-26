@@ -186,6 +186,7 @@ public class SnapshotProcessorTest {
         Mockito.verify(sequenceValidator).onIncrementalSeq("SYMB;CETS", 102);
         Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(incMdEntry1), Mockito.anyLong());
         Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(incMdEntry2), Mockito.anyLong());
+        Mockito.verify(marketDataHandler).flushIncrementals(Mockito.eq(true), Mockito.anyLong());
     }
 
     @Test
@@ -224,6 +225,7 @@ public class SnapshotProcessorTest {
         Mockito.verify(sequenceValidator).onIncrementalSeq("SYMB;CETS", 102);
         Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(incMdEntry1), Mockito.anyLong());
         Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(incMdEntry2), Mockito.anyLong());
+        Mockito.verify(marketDataHandler).flushIncrementals(Mockito.eq(true), Mockito.anyLong());
 
         assert messageCaptor.getAllValues().get(0).getInt("MsgSeqNum") == 1;
         assert messageCaptor.getAllValues().get(1).getInt("MsgSeqNum") == 2;

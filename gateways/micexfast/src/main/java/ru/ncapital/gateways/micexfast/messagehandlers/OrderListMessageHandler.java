@@ -151,7 +151,7 @@ public class OrderListMessageHandler extends AMessageHandler {
     @Override
     protected void onAfterSnapshot(String securityId, long inTime) {
         for (List<DepthLevel> depthLevelList : depthLevelMap.values()) {
-            marketDataManager.onDepthLevels(depthLevelList.toArray(new DepthLevel[0]), inTime);
+            marketDataManager.onDepthLevels(depthLevelList.toArray(new DepthLevel[0]), true, inTime);
         }
         depthLevelMap.clear();
     }
@@ -167,9 +167,9 @@ public class OrderListMessageHandler extends AMessageHandler {
     }
 
     @Override
-    public void flushIncrementals(long inTime) {
+    public void flushIncrementals(boolean afterSnapshot, long inTime) {
         for (List<DepthLevel> depthLevelList : depthLevelMap.values()) {
-            marketDataManager.onDepthLevels(depthLevelList.toArray(new DepthLevel[0]), inTime);
+            marketDataManager.onDepthLevels(depthLevelList.toArray(new DepthLevel[0]), afterSnapshot, inTime);
         }
         depthLevelMap.clear();
     }

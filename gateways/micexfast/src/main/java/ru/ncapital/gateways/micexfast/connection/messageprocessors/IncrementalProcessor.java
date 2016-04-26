@@ -58,7 +58,7 @@ public class IncrementalProcessor extends Processor {
                     sequenceValidator.startRecovering(securityId);
                 }
             }
-            messageHandler.flushIncrementals(inTime);
+            messageHandler.flushIncrementals(false, inTime);
         }
     }
 }
