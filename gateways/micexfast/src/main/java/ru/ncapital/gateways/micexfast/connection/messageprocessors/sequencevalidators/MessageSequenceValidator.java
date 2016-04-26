@@ -160,12 +160,14 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
             }
         }
 
-        logger.get().info("Stop Recovering " + securityId);
-
         securityIdsToRecover.remove(securityId);
         marketDataManager.setRecovery(securityId, false, type.equals("OrderList"));
 
-        return storedMdEntriesToProcess.remove(securityId);
+        GroupValue[] mdEntriesToProcess = storedMdEntriesToProcess.remove(securityId);
+
+        logger.get().info("Stop Recovering " + securityId + ". Number of queued incremental entries " + mdEntriesToProcess.length);
+
+        return mdEntriesToProcess;
     }
 
     @Override

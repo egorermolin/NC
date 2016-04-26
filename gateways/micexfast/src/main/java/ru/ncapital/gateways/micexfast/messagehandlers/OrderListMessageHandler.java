@@ -134,7 +134,7 @@ public class OrderListMessageHandler extends AMessageHandler {
         if (depthLevel != null) {
             List<DepthLevel> depthLevelList = depthLevelMap.get(securityId);
             if (depthLevelList == null) {
-                depthLevelList = new ArrayList<DepthLevel>();
+                depthLevelList = new ArrayList<>();
                 depthLevelMap.put(securityId, depthLevelList);
             }
             depthLevelList.add(depthLevel);
@@ -143,7 +143,7 @@ public class OrderListMessageHandler extends AMessageHandler {
 
     @Override
     protected void onBeforeSnapshot(String securityId, long inTime) {
-        List<DepthLevel> depthLevelList = new ArrayList<DepthLevel>();
+        List<DepthLevel> depthLevelList = new ArrayList<>();
         depthLevelMap.put(securityId, depthLevelList);
         depthLevelList.add(new DepthLevel(securityId, MdUpdateAction.SNAPSHOT));
     }
@@ -159,7 +159,7 @@ public class OrderListMessageHandler extends AMessageHandler {
     @Override
     public void beforeIncremental(GroupValue mdEntry, long inTime) {
         String dealNumber = mdEntry.getString("DealNumber");
-        if (dealNumber!= null && lastDealNumber != dealNumber) {
+        if (dealNumber != null && lastDealNumber != dealNumber) {
             lastDealNumber = dealNumber;
         } else {
             mdEntry.setString("DealNumber", null);
