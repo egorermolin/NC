@@ -53,8 +53,8 @@ public class InstrumentManager extends Processor {
 
     private long sendingTimeOfInstrumentStart;
 
-    private AtomicBoolean receivedFirstInstrumentStatus = new AtomicBoolean(false);
-    
+    protected SequenceArray sequenceArrayForInstrumentStatus = new SequenceArray();
+
     public InstrumentManager configure(IGatewayConfiguration configuration) {
         this.marketDataHandler = configuration.getMarketDataHandler();
         this.allowedTradingSessionIds.addAll(Arrays.asList(configuration.getAllowedTradingSessionIds()));
@@ -90,12 +90,7 @@ public class InstrumentManager extends Processor {
                 break;
 
             case 'f':
-                if (!receivedFirstInstrumentStatus.getAndSet(true)) {
-                    // we received first instrument status
-                    reset();
-                }
-
-                if (sequenceArray.checkSequence(seqNum) == SequenceArray.Result.DUPLICATE)
+                if (sequenceArrayForInstrumentStatus.checkSequence(seqNum) == SequenceArray.Result.DUPLICATE)
                     return false;
 
                 break;
@@ -220,27 +215,6 @@ public class InstrumentManager extends Processor {
         return tradingStatus.toString();
     }
 
-    private void checkInstrumentFinish() {
-        if (instruments.size() + ignoredInstruments.size() == numberOfInstruments) {
-            if (!instrumentsDownloaded.getAndSet(true)) {
-                getLogger().info("FINISHED INSTRUMENTS " + instruments.size());
-                connectionManager.stopInstrument();
-                marketDataHandler.onInstruments(instruments.values().toArray(new Instrument[instruments.size()]));
-            }
-        } else {
-            if ((instruments.size() + ignoredInstruments.size()) % 1000 == 0) {
-                synchronized (this) {
-                    if ((instruments.size() + ignoredInstruments.size()) % 1000 == 0) {
-                        int added = (instruments.size() + ignoredInstruments.size()) / 1000;
-                        if (addedInstruments.add(added)) {
-                            getLogger().info("PROCESSED INSTRUMENTS " + (instruments.size() + ignoredInstruments.size()));
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     private Instrument getInstrument(Message readMessage) {
         String symbol = readMessage.getString("Symbol");
         String tradingSessionId = "UNKNOWN";
@@ -326,6 +300,28 @@ public class InstrumentManager extends Processor {
                 break;
         }
     }
+
+    private void checkInstrumentFinish() {
+        if (instruments.size() + ignoredInstruments.size() == numberOfInstruments) {
+            if (!instrumentsDownloaded.getAndSet(true)) {
+                getLogger().info("FINISHED INSTRUMENTS " + instruments.size());
+                connectionManager.stopInstrument();
+                marketDataHandler.onInstruments(instruments.values().toArray(new Instrument[instruments.size()]));
+            }
+        } else {
+            if ((instruments.size() + ignoredInstruments.size()) % 1000 == 0) {
+                synchronized (this) {
+                    if ((instruments.size() + ignoredInstruments.size()) % 1000 == 0) {
+                        int added = (instruments.size() + ignoredInstruments.size()) / 1000;
+                        if (addedInstruments.add(added)) {
+                            getLogger().info("PROCESSED INSTRUMENTS " + (instruments.size() + ignoredInstruments.size()));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     public void setMarketDataManager(MarketDataManager marketDataManager) {
         this.marketDataManager = marketDataManager;
