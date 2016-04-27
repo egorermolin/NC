@@ -57,10 +57,4 @@ public class GatewayManagerTest {
 
         assert md.getHeartbeatProcessor() != null;
     }
-
-    @Ignore
-    @Test
-    public void testUtils() {
-        assert Utils.currentTimeInTicks() > 0;
-    }
 }

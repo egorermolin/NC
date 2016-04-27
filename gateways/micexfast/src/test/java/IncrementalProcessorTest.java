@@ -4,10 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openfast.Context;
-import org.openfast.GroupValue;
-import org.openfast.Message;
-import org.openfast.SequenceValue;
+import org.openfast.*;
 import org.openfast.codec.Coder;
 import ru.ncapital.gateways.micexfast.GatewayModule;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.IncrementalProcessor;
@@ -18,6 +15,8 @@ import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalid
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
 
 import java.util.concurrent.atomic.AtomicLong;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * Created by egore on 1/13/16.
@@ -50,17 +49,17 @@ public class IncrementalProcessorTest {
     }
 
     private Message getIncermentalMock(int seqNum, int numMdEntries) {
-        Message message = Mockito.mock(Message.class);
+        Message message = mock(Message.class);
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(seqNum);
         Mockito.when(message.getString("MessageType")).thenReturn("X");
         Mockito.when(message.getLong("SendingTime")).thenReturn(123L);
 
-        SequenceValue mdEntries = Mockito.mock(SequenceValue.class);
+        SequenceValue mdEntries = mock(SequenceValue.class);
         Mockito.when(message.getSequence("GroupMDEntries")).thenReturn(mdEntries);
         Mockito.when(mdEntries.getLength()).thenReturn(numMdEntries);
 
         for (int i = 0; i < numMdEntries; ++i) {
-            GroupValue mdEntry = Mockito.mock(GroupValue.class);
+            GroupValue mdEntry = mock(GroupValue.class);
             Mockito.when(mdEntries.get(i)).thenReturn(mdEntry);
         }
 
@@ -79,6 +78,7 @@ public class IncrementalProcessorTest {
         Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(true);
         incrementalProcessor.handleMessage(message, context, coder);
@@ -92,6 +92,7 @@ public class IncrementalProcessorTest {
         Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(false);
         incrementalProcessor.handleMessage(message, context, coder);
@@ -122,6 +123,9 @@ public class IncrementalProcessorTest {
         Mockito.when(message.getSequence("GroupMDEntries").get(1).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
         Mockito.when(message.getSequence("GroupMDEntries").get(1).getInt("RptSeq")).thenReturn(200);
+        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message.getSequence("GroupMDEntries").get(1).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+
 
         incrementalProcessor.handleMessage(message, context, coder);
 
@@ -147,6 +151,7 @@ public class IncrementalProcessorTest {
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(101);
+        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.handleMessage(message1, context, coder);
 
@@ -162,6 +167,7 @@ public class IncrementalProcessorTest {
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.handleMessage(message2, context, coder);
 
@@ -187,9 +193,11 @@ public class IncrementalProcessorTest {
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(102);
+        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
         Mockito.when(message1.getSequence("GroupMDEntries").get(1).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message1.getSequence("GroupMDEntries").get(1).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message1.getSequence("GroupMDEntries").get(1).getInt("RptSeq")).thenReturn(103);
+        Mockito.when(message1.getSequence("GroupMDEntries").get(1).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.handleMessage(message1, context, coder);
 
@@ -206,9 +214,11 @@ public class IncrementalProcessorTest {
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getSequence("GroupMDEntries").get(1).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message2.getSequence("GroupMDEntries").get(1).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message2.getSequence("GroupMDEntries").get(1).getInt("RptSeq")).thenReturn(101);
+        Mockito.when(message2.getSequence("GroupMDEntries").get(1).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.handleMessage(message2, context, coder);
 
@@ -234,6 +244,7 @@ public class IncrementalProcessorTest {
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(102);
+        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.handleMessage(message1, context, coder);
 
@@ -248,6 +259,7 @@ public class IncrementalProcessorTest {
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.handleMessage(message2, context, coder);
 
@@ -276,6 +288,7 @@ public class IncrementalProcessorTest {
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(true);
         incrementalProcessor.handleMessage(message1, context, coder);
@@ -291,6 +304,7 @@ public class IncrementalProcessorTest {
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(false);
         incrementalProcessor.handleMessage(message2, context, coder);
@@ -306,6 +320,7 @@ public class IncrementalProcessorTest {
         Mockito.when(message3.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message3.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message3.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(101);
+        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(false);
         incrementalProcessor.handleMessage(message3, context, coder);
@@ -322,6 +337,7 @@ public class IncrementalProcessorTest {
         Mockito.when(message4.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message4.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message4.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(101);
+        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(true);
         incrementalProcessor.handleMessage(message4, context, coder);
@@ -345,6 +361,7 @@ public class IncrementalProcessorTest {
             Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
             Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
             Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(99 + i);
+            Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
             incrementalProcessor.setIsPrimary(i % 2 == 1);
             incrementalProcessor.handleMessage(message1, context, coder);
@@ -360,6 +377,7 @@ public class IncrementalProcessorTest {
             Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
             Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
             Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(99 + i);
+            Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
             incrementalProcessor.setIsPrimary(i % 2 == 0);
             incrementalProcessor.handleMessage(message2, context, coder);
@@ -376,6 +394,7 @@ public class IncrementalProcessorTest {
         Mockito.when(message3.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message3.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message3.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(1);
+        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(true);
         incrementalProcessor.handleMessage(message3, context, coder);
@@ -391,6 +410,7 @@ public class IncrementalProcessorTest {
         Mockito.when(message4.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message4.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message4.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(1);
+        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(false);
         incrementalProcessor.handleMessage(message4, context, coder);
@@ -415,6 +435,7 @@ public class IncrementalProcessorTest {
             Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
             Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
             Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(99 + i);
+            Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
             incrementalProcessor.setIsPrimary(i % 2 == 1);
             incrementalProcessor.handleMessage(message1, context, coder);
@@ -430,6 +451,7 @@ public class IncrementalProcessorTest {
             Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
             Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
             Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(99 + i);
+            Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
             incrementalProcessor.setIsPrimary(i % 2 == 0);
             incrementalProcessor.handleMessage(message2, context, coder);
@@ -453,6 +475,7 @@ public class IncrementalProcessorTest {
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(false);
         incrementalProcessor.handleMessage(message1, context, coder);
@@ -468,6 +491,7 @@ public class IncrementalProcessorTest {
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(101);
+        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(false);
         incrementalProcessor.handleMessage(message2, context, coder);
@@ -483,6 +507,7 @@ public class IncrementalProcessorTest {
         Mockito.when(message3.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message3.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message3.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(102);
+        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(true);
         incrementalProcessor.handleMessage(message3, context, coder);
@@ -502,6 +527,7 @@ public class IncrementalProcessorTest {
         Mockito.when(message4.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message4.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message4.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(102);
+        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(false);
         incrementalProcessor.handleMessage(message4, context, coder);
