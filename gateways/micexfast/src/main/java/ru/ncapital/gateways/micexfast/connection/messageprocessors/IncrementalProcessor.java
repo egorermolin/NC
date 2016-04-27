@@ -28,6 +28,11 @@ public class IncrementalProcessor extends Processor {
                 String symbol = mdEntry.getString("Symbol");
                 String tradingSessionId = mdEntry.getString("TradingSessionID");
                 String securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
+                if (mdEntry.getValue("RptSeq") == null) {
+                    getLogger().warn("RptSeq is missing in " + mdEntry + "\n Original Message " + readMessage);
+                    continue;
+                }
+
                 int rptSeqNum = mdEntry.getInt("RptSeq");
 
                 if (!messageHandler.isAllowedUpdate(symbol, tradingSessionId))

@@ -16,6 +16,8 @@ class SequenceNumber {
     String securityId;
 
     int lastSeqNum = -1;
+
+    int numberOfMissingSequences = 0;
 }
 
 public class MessageSequenceValidator implements IMessageSequenceValidator {
@@ -38,8 +40,6 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
 
     @Inject
     private MarketDataManager marketDataManager;
-
-    private int numberOfMissingSequneces = 0;
 
     protected MessageSequenceValidator(String type) {
         this.type = type;
@@ -83,14 +83,17 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
                     if (logger.get().isDebugEnabled())
                         logger.get().debug("OutOfSequence [Symbol: " + securityId + "][Expected: " + (sequenceNumber.lastSeqNum + 1) + "][Received: " + seqNum + "]");
 
-                    numberOfMissingSequneces = seqNum - sequenceNumber.lastSeqNum;
+                    sequenceNumber.numberOfMissingSequences = seqNum - sequenceNumber.lastSeqNum;
                 }
 
                 return false;
             } else {
-                if (isRecovering(securityId, false))
+                if (isRecovering(securityId, false)) {
                     if (logger.get().isDebugEnabled())
                         logger.get().debug("InSequence [Symbol: " + securityId + "][Received: " + seqNum + "]");
+
+                    sequenceNumber.numberOfMissingSequences = 0;
+                }
             }
 
             sequenceNumber.lastSeqNum = seqNum;
@@ -119,7 +122,13 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
 
     @Override
     public void startRecovering(String securityId) {
-        logger.get().info("Start Recovering " + securityId + " Missing " + numberOfMissingSequneces + " sequences");
+        SequenceNumber sequenceNumber = getSequenceNumber(securityId);
+        synchronized (sequenceNumber) {
+            if (sequenceNumber.numberOfMissingSequences > 0)
+                logger.get().info("Start Recovering " + securityId + " Missing " + sequenceNumber.numberOfMissingSequences + " sequences");
+            else
+                logger.get().info("Start Recovering " + securityId);
+        }
 
         securityIdsToRecover.add(securityId);
         marketDataManager.setRecovery(securityId, true, type.equals("OrderList"));
@@ -132,6 +141,8 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
             //check incrementals are in sequence
             Map<Integer, GroupValue> storedMdEntries = storedMdEntriesBySecurityId.get(securityId);
             if (storedMdEntries == null || storedMdEntries.size() == 0) {
+                sequenceNumber.numberOfMissingSequences = 0;
+
                 logger.get().info("Stop Recovering " + securityId);
 
                 securityIdsToRecover.remove(securityId);
@@ -163,8 +174,9 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
                 storedMdEntries.clear();
                 mdEntriesToProcess.clear();
             }
-        }
 
+            sequenceNumber.numberOfMissingSequences = 0;
+        }
 
         securityIdsToRecover.remove(securityId);
         marketDataManager.setRecovery(securityId, false, type.equals("OrderList"));
