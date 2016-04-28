@@ -20,8 +20,6 @@ public class DepthLevel implements Comparable<DepthLevel> {
 
     public String dealNumber;
 
-    public boolean fromSnapshot = false;
-
     public DepthLevel(String securityId, MdUpdateAction mdUpdateAction, String mdEntryId, double mdEntryPx, double mdEntrySize, String dealNumber, boolean isBid) {
         this.securityId = securityId;
         this.mdUpdateAction = mdUpdateAction;
@@ -79,14 +77,6 @@ public class DepthLevel implements Comparable<DepthLevel> {
 
     public void setMdEntryTime(long mdEntryTime) {
         this.mdEntryTime = mdEntryTime;
-    }
-
-    public void setFromSnapshot(boolean fromSnapshot) {
-        this.fromSnapshot = fromSnapshot;
-    }
-
-    public boolean isFromSnapshot() {
-        return this.fromSnapshot;
     }
 
     @Override
