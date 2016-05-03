@@ -4,10 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.micexfast.ConfigurationManager;
-import ru.ncapital.gateways.micexfast.IGatewayConfiguration;
-import ru.ncapital.gateways.micexfast.InstrumentManager;
-import ru.ncapital.gateways.micexfast.MarketDataManager;
+import ru.ncapital.gateways.micexfast.*;
 import ru.ncapital.gateways.micexfast.connection.multicast.MulticastReceiver;
 import ru.ncapital.gateways.micexfast.connection.multicast.MulticastReceiverStarter;
 import ru.ncapital.gateways.micexfast.connection.multicast.MulticastReceiverStopper;
@@ -40,7 +37,7 @@ public class ConnectionManager {
                 mcr.init("info");
                 multicastReceivers.put(connectionId, mcr);
             } catch (IOException e) {
-                e.printStackTrace();
+                Utils.printStackTrace(e, logger);
                 logger.error("Failed to init MulticastReceiver " + connectionId);
             }
         }
@@ -222,7 +219,7 @@ public class ConnectionManager {
                 Thread.sleep(1000);
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Utils.printStackTrace(e, logger);
         }
     }
 }

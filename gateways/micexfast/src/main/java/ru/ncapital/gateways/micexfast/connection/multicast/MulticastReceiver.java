@@ -21,6 +21,7 @@ import ru.ncapital.gateways.micexfast.performance.IGatewayPerformanceLogger;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.*;
+import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.MembershipKey;
 import java.util.ArrayList;
@@ -32,7 +33,8 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Created by egore on 12/8/15.
  */
-public class MulticastReceiver {
+public class MulticastReceiver implements IEventListener {
+
     private class Statistics {
         private int totalNumberOfMessages = 0;
 
@@ -87,6 +89,8 @@ public class MulticastReceiver {
 
     private InstrumentManager instrumentManager;
 
+    private final boolean asynch;
+
     private volatile boolean running;
 
     private Logger logger;
@@ -99,6 +103,7 @@ public class MulticastReceiver {
 
     public MulticastReceiver(ConnectionId connectionId, ConfigurationManager configurationManager, MarketDataManager marketDataManager, InstrumentManager instumentManager) {
         this.connectionId = connectionId;
+        this.asynch = configurationManager.isAsynchChannelReader();
         this.connection = configurationManager.getConnection(connectionId);
         this.intf = this.connectionId.isPrimary() ? configurationManager.getPrimaryNetworkInterface() : configurationManager.getSecondaryNetworkInterface();
         this.fastTemplatesFile = configurationManager.getFastTemplatesFile();
@@ -137,8 +142,9 @@ public class MulticastReceiver {
         try {
             connect();
             run();
-        } catch (Exception e) {
-            logger.error(e.toString(), e);
+            multicastInputStream.start();
+        } catch (IOException e) {
+            Utils.printStackTrace(e, logger);
             running = false;
         }
     }
@@ -147,10 +153,11 @@ public class MulticastReceiver {
         running = false;
 
         try {
+            multicastInputStream.stop();
             disconnect();
             destroy();
         } catch (IOException e) {
-            e.printStackTrace();
+            Utils.printStackTrace(e, logger);
         }
     }
 
@@ -165,7 +172,7 @@ public class MulticastReceiver {
                                 "[Source: " + connection.getSource() + "(" + InetAddress.getByName(connection.getSource()) + ")]" +
                                 "[Key: " + membership.toString() + "]");
 
-        multicastInputStream = new MicexFastMulticastInputStream(channel, logger);
+        multicastInputStream = new MicexFastMulticastInputStream(channel, logger, this, asynch);
         messageReader = new MessageInputStream(multicastInputStream);
 
         for (MessageTemplate template : new XMLMessageTemplateLoader()
@@ -309,6 +316,20 @@ public class MulticastReceiver {
             membership.drop();
     }
 
+    @Override
+    public void onException(Exception e) {
+        if (e instanceof AsynchronousCloseException) {
+            logger.info("Channel closed");
+        } else {
+            logger.warn("Failed to read from channel, restarting ...");
+            Utils.printStackTrace(e, logger);
+
+            stop();
+
+            start();
+        }
+    }
+
     private void run() throws IOException {
         logger.info("READY...");
 
@@ -317,9 +338,7 @@ public class MulticastReceiver {
                 messageReader.readMessage();
                 received = inTimestamp.get();
             } catch (Exception e) {
-                logger.error(e.toString());
-                for (StackTraceElement trace : e.getStackTrace())
-                    logger.error(trace.toString());
+                Utils.printStackTrace(e, logger);
             }
         }
     }

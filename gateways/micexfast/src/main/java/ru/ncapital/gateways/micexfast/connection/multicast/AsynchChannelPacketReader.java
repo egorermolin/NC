@@ -1,17 +1,20 @@
 package ru.ncapital.gateways.micexfast.connection.multicast;
 
+import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.micexfast.Utils;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by egore on 12/9/15.
  */
-public class AsynchChannelReader implements Runnable {
+public class AsynchChannelPacketReader implements Runnable {
 
-    private IEventReceiver eventReceiver;
+    private IEventListener eventReceiver;
 
     private BlockingQueue<ChannelPacket> packetQueue;
 
@@ -23,10 +26,13 @@ public class AsynchChannelReader implements Runnable {
 
     private volatile boolean running = true;
 
-    public AsynchChannelReader(DatagramChannel channel, BlockingQueue queue, IEventReceiver eventReceiver) {
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    public AsynchChannelPacketReader(DatagramChannel channel, BlockingQueue queue, IEventListener eventReceiver) {
         this.channel = channel;
         this.packetQueue = queue;
         this.eventReceiver = eventReceiver;
+        this.executor = Executors.newSingleThreadExecutor();
     }
 
     @Override
@@ -38,12 +44,24 @@ public class AsynchChannelReader implements Runnable {
 
                 packetQueue.offer(new ChannelPacket(bytebuffer, inTimestamp));
             } catch (Exception e) {
-                eventReceiver.onDisconnect();
+                eventReceiver.onException(e);
             }
         }
     }
 
+    public void start() {
+        executor.execute(this);
+    }
+
     public void stop() {
         running = false;
+        executor.shutdown();
+        try {
+            while (!executor.isTerminated()) {
+                Thread.sleep(1000);
+            }
+        } catch (Exception e) {
+            Utils.printStackTrace(e, LoggerFactory.getLogger("AsynchChannelPacketReader"));
+        }
     }
 }

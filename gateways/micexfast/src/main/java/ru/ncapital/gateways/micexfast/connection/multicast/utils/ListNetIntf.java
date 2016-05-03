@@ -1,4 +1,4 @@
-package ru.ncapital.gateways.micexfast.connection.multicast;
+package ru.ncapital.gateways.micexfast.connection.multicast.utils;
 
 import java.io.*;
 import java.net.*;

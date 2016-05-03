@@ -3,9 +3,7 @@ package ru.ncapital.gateways.micexfast.connection.multicast;
 /**
  * Created by egore on 5/2/16.
  */
-public interface IEventReceiver {
+public interface IEventListener {
 
-    void onDisconnect();
-
-    void onPacketRead();
+    void onException(Exception e);
 }

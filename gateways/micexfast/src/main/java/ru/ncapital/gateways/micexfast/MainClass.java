@@ -123,10 +123,9 @@ public class MainClass {
         try {
             Thread.sleep(10000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Utils.printStackTrace(e, logger);
         }
 
         gwManager.stop();
-
     }
 }

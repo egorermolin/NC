@@ -1,9 +1,11 @@
 package ru.ncapital.gateways.micexfast.xml;
 
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import ru.ncapital.gateways.micexfast.Utils;
 import ru.ncapital.gateways.micexfast.connection.Connection;
 import ru.ncapital.gateways.micexfast.connection.ConnectionId;
 
@@ -78,11 +80,11 @@ public class XMLReader {
             }
 
         } catch (SAXException e) {
-            e.printStackTrace();
+            Utils.printStackTrace(e, LoggerFactory.getLogger("XMLReader"));
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
+            Utils.printStackTrace(e, LoggerFactory.getLogger("XMLReader"));
         } catch (IOException e) {
-            e.printStackTrace();
+            Utils.printStackTrace(e, LoggerFactory.getLogger("XMLReader"));
         }
 
         return connectionsMap;

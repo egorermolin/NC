@@ -23,10 +23,13 @@ public class ConfigurationManager {
 
     private Map<ConnectionId, Connection> connections;
 
+    private boolean asynchChannelReader;
+
     public ConfigurationManager configure(IGatewayConfiguration configuration) {
         this.fastTemplatesFile = configuration.getFastTemplatesFile();
         this.networkInterface = configuration.getNetworkInterface();
         this.connections = new XMLReader().read(configuration.getConnectionsFile());
+        this.asynchChannelReader = configuration.isAsynchChannelReader();
 
         return this;
     }
@@ -65,5 +68,9 @@ public class ConfigurationManager {
         }
 
         return true;
+    }
+
+    public boolean isAsynchChannelReader() {
+        return asynchChannelReader;
     }
 }

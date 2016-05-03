@@ -1,6 +1,7 @@
 package ru.ncapital.gateways.micexfast;
 
 import org.openfast.GroupValue;
+import org.slf4j.Logger;
 
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -95,5 +96,11 @@ public class Utils {
         long entryTimeInMicros = 1000000 * (entryTimeToday / 10000 * 3600 + ((entryTimeToday / 100) % 100) * 60 + (entryTimeToday % 100)) + entryTimeMicros;
 
         return entryTimeInMicros;
+    }
+
+    public static void printStackTrace(Exception e, Logger logger) {
+        logger.error(e.toString());
+        for (StackTraceElement trace : e.getStackTrace())
+            logger.error(trace.toString());
     }
 }

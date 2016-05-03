@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -20,6 +21,8 @@ public class MicexFastMulticastInputStream extends InputStream {
 
     private DatagramChannel channel;
 
+    private AsynchChannelPacketReader packetReader;
+
     private ByteBuffer bytebuffer;
 
     final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
@@ -30,7 +33,7 @@ public class MicexFastMulticastInputStream extends InputStream {
 
     private BlockingQueue<ChannelPacket> packetQueue;
 
-    private final boolean synch;
+    private final boolean asynch;
 
     public static char[] byteToHex(byte b) {
         char[] hex = new char[2];
@@ -40,24 +43,16 @@ public class MicexFastMulticastInputStream extends InputStream {
         return hex;
     }
 
-    public MicexFastMulticastInputStream(DatagramChannel channel, Logger logger) {
+    public MicexFastMulticastInputStream(DatagramChannel channel, Logger logger, IEventListener eventListener, boolean asynch) {
         this.logger = logger;
         this.channel = channel;
         this.bytebuffer = ByteBuffer.allocate(BUFFER_LENGTH);
         this.bytebuffer.clear();
         this.bytebuffer.flip();
-        this.synch = true;
-    }
-
-    public MicexFastMulticastInputStream(DatagramChannel channel, Logger logger, boolean synch) {
-        this.logger = logger;
-        this.channel = channel;
-        this.bytebuffer = ByteBuffer.allocate(BUFFER_LENGTH);
-        this.bytebuffer.clear();
-        this.bytebuffer.flip();
-        this.synch = synch;
-        if (!this.synch) {
-            // TODO create packetReader
+        this.asynch = asynch;
+        if (this.asynch) {
+            packetQueue = new ArrayBlockingQueue<ChannelPacket>(10000);
+            packetReader = new AsynchChannelPacketReader(channel, packetQueue, eventListener);
         }
     }
 
@@ -93,10 +88,7 @@ public class MicexFastMulticastInputStream extends InputStream {
     public int read() throws IOException {
         if (!bytebuffer.hasRemaining()) {
             bytebuffer.clear();
-            if (synch) {
-                channel.receive(bytebuffer);
-                inTimestamp.set(Utils.currentTimeInTicks());
-            } else {
+            if (asynch) {
                 try {
                     ChannelPacket packet = packetQueue.take();
                     bytebuffer.put(packet.getByteBuffer());
@@ -104,6 +96,9 @@ public class MicexFastMulticastInputStream extends InputStream {
                 } catch (InterruptedException e) {
                     throw new IOException("Reading from queue interrupted");
                 }
+            } else {
+                channel.receive(bytebuffer);
+                inTimestamp.set(Utils.currentTimeInTicks());
             }
             bytebuffer.flip();
 
@@ -112,5 +107,17 @@ public class MicexFastMulticastInputStream extends InputStream {
         }
 
         return (bytebuffer.get() & 0xFF);
+    }
+
+    public void start() {
+        if (asynch) {
+            packetReader.run();
+        }
+    }
+
+    public void stop() {
+        if (asynch) {
+            packetReader.stop();
+        }
     }
 }

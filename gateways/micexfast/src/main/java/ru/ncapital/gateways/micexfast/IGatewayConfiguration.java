@@ -26,4 +26,6 @@ public interface IGatewayConfiguration {
     String[] getAllowedSecurityIds();
 
     IGatewayPerformanceLogger getPerformanceLogger();
+
+    boolean isAsynchChannelReader();
 }

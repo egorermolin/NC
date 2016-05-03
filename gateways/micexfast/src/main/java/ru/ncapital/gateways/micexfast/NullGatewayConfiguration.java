@@ -53,4 +53,9 @@ public class NullGatewayConfiguration implements IGatewayConfiguration {
     public IGatewayPerformanceLogger getPerformanceLogger() {
         return null;
     }
+
+    @Override
+    public boolean isAsynchChannelReader() {
+        return false;
+    }
 }

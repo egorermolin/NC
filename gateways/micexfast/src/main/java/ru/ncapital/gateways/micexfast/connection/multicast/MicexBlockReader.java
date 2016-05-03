@@ -5,13 +5,14 @@ import org.openfast.MessageBlockReader;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.channels.AsynchronousCloseException;
 
 /**
  * Created by egore on 04.02.2016.
  */
 public class MicexBlockReader implements MessageBlockReader {
         private volatile boolean isFinished = false;
+
+        IEventListener eventListener;
 
         @Override
         public boolean readBlock(InputStream in) {
@@ -21,10 +22,8 @@ public class MicexBlockReader implements MessageBlockReader {
             }
             try {
                 in.read(new byte[4]);
-            } catch (AsynchronousCloseException e) {
-                return false;
             } catch (IOException e) {
-                e.printStackTrace();
+                eventListener.onException(e);
                 return false;
             }
             return true;
@@ -36,7 +35,7 @@ public class MicexBlockReader implements MessageBlockReader {
                 if (in.available() == 0)
                     isFinished = true;
             } catch (IOException e) {
-                e.printStackTrace();
+                eventListener.onException(e);
             }
         }
 }
