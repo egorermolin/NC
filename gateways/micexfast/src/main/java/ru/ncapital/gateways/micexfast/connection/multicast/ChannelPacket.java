@@ -15,8 +15,8 @@ public class ChannelPacket {
     public ChannelPacket(ByteBuffer buffer, long inTimestamp) {
         this.byteBuffer = ByteBuffer.allocate(BUFFER_LENGTH);
         this.byteBuffer.clear();
-        this.byteBuffer.flip();
         this.byteBuffer.put(buffer);
+        this.byteBuffer.flip();
         this.inTimestamp = inTimestamp;
     }
 

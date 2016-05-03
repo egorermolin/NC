@@ -111,7 +111,7 @@ public class MicexFastMulticastInputStream extends InputStream {
 
     public void start() {
         if (asynch) {
-            packetReader.run();
+            packetReader.start();
         }
     }
 

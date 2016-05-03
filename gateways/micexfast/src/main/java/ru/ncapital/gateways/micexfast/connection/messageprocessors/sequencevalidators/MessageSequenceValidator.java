@@ -125,7 +125,7 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
         SequenceNumber sequenceNumber = getSequenceNumber(securityId);
         synchronized (sequenceNumber) {
             logger.get().info("Start Recovering " + securityId
-                    + (sequenceNumber.numberOfMissingSequences > 0 ? (" " + sequenceNumber.numberOfMissingSequences) : ""));
+                    + ((sequenceNumber.numberOfMissingSequences > 0) ? (" " + sequenceNumber.numberOfMissingSequences) : ""));
         }
 
         securityIdsToRecover.add(securityId);
@@ -182,7 +182,7 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
         GroupValue[] mdEntriesToProcess = storedMdEntriesToProcess.remove(securityId);
 
         logger.get().info("Stop Recovering "
-                + securityId + (mdEntriesToProcess.length > 0 ? (" " + mdEntriesToProcess.length) : ""));
+                + securityId + ((mdEntriesToProcess.length > 0) ? (" " + mdEntriesToProcess.length) : ""));
 
         return mdEntriesToProcess;
     }

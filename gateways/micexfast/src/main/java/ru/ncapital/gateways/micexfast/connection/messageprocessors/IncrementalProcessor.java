@@ -25,14 +25,14 @@ public class IncrementalProcessor extends Processor {
             SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
             for (int i = 0; i < mdEntries.getLength(); ++i) {
                 GroupValue mdEntry = mdEntries.get(i);
-                String symbol = mdEntry.getString("Symbol");
-                String tradingSessionId = mdEntry.getString("TradingSessionID");
-                String securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
                 if (mdEntry.getValue("RptSeq") == null) {
-                    getLogger().warn("RptSeq is missing in " + mdEntry + "\nOriginal Message " + readMessage);
+                    getLogger().warn("Market Reset received " + readMessage);
                     continue;
                 }
 
+                String symbol = mdEntry.getString("Symbol");
+                String tradingSessionId = mdEntry.getString("TradingSessionID");
+                String securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
                 int rptSeqNum = mdEntry.getInt("RptSeq");
 
                 if (!messageHandler.isAllowedUpdate(symbol, tradingSessionId))

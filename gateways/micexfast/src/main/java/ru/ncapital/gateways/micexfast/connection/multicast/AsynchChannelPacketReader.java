@@ -30,6 +30,9 @@ public class AsynchChannelPacketReader implements Runnable {
 
     public AsynchChannelPacketReader(DatagramChannel channel, BlockingQueue queue, IEventListener eventReceiver) {
         this.channel = channel;
+        this.bytebuffer = ByteBuffer.allocate(BUFFER_LENGTH);
+        this.bytebuffer.clear();
+        this.bytebuffer.flip();
         this.packetQueue = queue;
         this.eventReceiver = eventReceiver;
         this.executor = Executors.newSingleThreadExecutor();
@@ -37,11 +40,14 @@ public class AsynchChannelPacketReader implements Runnable {
 
     @Override
     public void run() {
+        System.out.println(channel);
         while (running) {
             try {
-                channel.read(bytebuffer);
+                bytebuffer.clear();
+                channel.receive(bytebuffer);
                 long inTimestamp = Utils.currentTimeInTicks();
 
+                bytebuffer.flip();
                 packetQueue.offer(new ChannelPacket(bytebuffer, inTimestamp));
             } catch (Exception e) {
                 eventReceiver.onException(e);

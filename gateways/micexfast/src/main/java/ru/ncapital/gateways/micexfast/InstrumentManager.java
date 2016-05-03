@@ -281,8 +281,12 @@ public class InstrumentManager extends Processor {
 
             case 'd':
                 if (numberOfInstruments == 0) {
-                    numberOfInstruments = readMessage.getInt("TotNumReports");
-                    getLogger().info("EXPECTING INSTRUMENTS " + numberOfInstruments);
+                    synchronized (this) {
+                        if (numberOfInstruments == 0) {
+                            numberOfInstruments = readMessage.getInt("TotNumReports");
+                            getLogger().info("EXPECTING INSTRUMENTS " + numberOfInstruments);
+                        }
+                    }
                 } else if (numberOfInstruments == (instruments.size() + ignoredInstruments.size()))
                     break;
 

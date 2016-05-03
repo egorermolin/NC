@@ -21,6 +21,7 @@ import ru.ncapital.gateways.micexfast.performance.IGatewayPerformanceLogger;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.*;
+import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.MembershipKey;
@@ -141,8 +142,8 @@ public class MulticastReceiver implements IEventListener {
 
         try {
             connect();
-            run();
             multicastInputStream.start();
+            run();
         } catch (IOException e) {
             Utils.printStackTrace(e, logger);
             running = false;
@@ -153,8 +154,8 @@ public class MulticastReceiver implements IEventListener {
         running = false;
 
         try {
-            multicastInputStream.stop();
             disconnect();
+            multicastInputStream.stop();
             destroy();
         } catch (IOException e) {
             Utils.printStackTrace(e, logger);
@@ -171,6 +172,9 @@ public class MulticastReceiver implements IEventListener {
                                 "[Interface: " + intf + "(" + NetworkInterface.getByName(intf).toString() + ")]" +
                                 "[Source: " + connection.getSource() + "(" + InetAddress.getByName(connection.getSource()) + ")]" +
                                 "[Key: " + membership.toString() + "]");
+
+        System.out.println(channel);
+        channel.receive(ByteBuffer.allocate(1500));
 
         multicastInputStream = new MicexFastMulticastInputStream(channel, logger, this, asynch);
         messageReader = new MessageInputStream(multicastInputStream);
@@ -398,6 +402,11 @@ public class MulticastReceiver implements IEventListener {
                             @Override
                             public String getConnectionsFile() {
                                 return args[3];
+                            }
+
+                            @Override
+                            public boolean isAsynchChannelReader() {
+                                return true;
                             }
                         }),
                 null, null);
