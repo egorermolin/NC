@@ -48,6 +48,7 @@ public class MicexFastMulticastInputStream extends InputStream {
         this.channel = channel;
         this.bytebuffer = ByteBuffer.allocate(BUFFER_LENGTH);
         this.bytebuffer.clear();
+        this.bytebuffer.flip();
         this.asynch = asynch;
         if (this.asynch) {
             packetQueue = new ArrayBlockingQueue<ChannelPacket>(10000);
@@ -66,7 +67,7 @@ public class MicexFastMulticastInputStream extends InputStream {
                           + (bb.get(3) & 0xFF) * 256.* 256 * 256);
     }
 
-    private String bufferToString(ByteBuffer buf) {
+    private static String bufferToString(ByteBuffer buf) {
         StringBuilder sb = new StringBuilder("Received " + buf.remaining() + " - " + getSeqNum(buf) + " = ");
         int count = 0;
 

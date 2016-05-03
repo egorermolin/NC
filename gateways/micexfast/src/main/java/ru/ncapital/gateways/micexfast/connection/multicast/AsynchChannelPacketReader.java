@@ -12,7 +12,7 @@ import java.util.concurrent.Executors;
 /**
  * Created by egore on 12/9/15.
  */
-public class AsynchChannelPacketReader implements Runnable {
+public class AsynchChannelPacketReader implements Runnable, IChannelPacketReader {
 
     private IEventListener eventReceiver;
 
@@ -32,7 +32,6 @@ public class AsynchChannelPacketReader implements Runnable {
         this.channel = channel;
         this.bytebuffer = ByteBuffer.allocate(BUFFER_LENGTH);
         this.bytebuffer.clear();
-        this.bytebuffer.flip();
         this.packetQueue = queue;
         this.eventReceiver = eventReceiver;
         this.executor = Executors.newSingleThreadExecutor();
@@ -40,7 +39,6 @@ public class AsynchChannelPacketReader implements Runnable {
 
     @Override
     public void run() {
-        System.out.println(channel);
         while (running) {
             try {
                 bytebuffer.clear();

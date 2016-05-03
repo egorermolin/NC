@@ -173,9 +173,6 @@ public class MulticastReceiver implements IEventListener {
                                 "[Source: " + connection.getSource() + "(" + InetAddress.getByName(connection.getSource()) + ")]" +
                                 "[Key: " + membership.toString() + "]");
 
-        System.out.println(channel);
-        channel.receive(ByteBuffer.allocate(1500));
-
         multicastInputStream = new MicexFastMulticastInputStream(channel, logger, this, asynch);
         messageReader = new MessageInputStream(multicastInputStream);
 
@@ -342,6 +339,7 @@ public class MulticastReceiver implements IEventListener {
                 messageReader.readMessage();
                 received = inTimestamp.get();
             } catch (Exception e) {
+                logger.error("Exception occured while reading message");
                 Utils.printStackTrace(e, logger);
             }
         }
