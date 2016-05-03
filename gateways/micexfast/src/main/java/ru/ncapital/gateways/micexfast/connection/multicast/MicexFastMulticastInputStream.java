@@ -48,7 +48,6 @@ public class MicexFastMulticastInputStream extends InputStream {
         this.channel = channel;
         this.bytebuffer = ByteBuffer.allocate(BUFFER_LENGTH);
         this.bytebuffer.clear();
-        this.bytebuffer.flip();
         this.asynch = asynch;
         if (this.asynch) {
             packetQueue = new ArrayBlockingQueue<ChannelPacket>(10000);

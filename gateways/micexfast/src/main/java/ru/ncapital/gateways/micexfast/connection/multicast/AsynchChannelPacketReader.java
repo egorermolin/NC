@@ -46,8 +46,8 @@ public class AsynchChannelPacketReader implements Runnable {
                 bytebuffer.clear();
                 channel.receive(bytebuffer);
                 long inTimestamp = Utils.currentTimeInTicks();
-
                 bytebuffer.flip();
+
                 packetQueue.offer(new ChannelPacket(bytebuffer, inTimestamp));
             } catch (Exception e) {
                 eventReceiver.onException(e);
