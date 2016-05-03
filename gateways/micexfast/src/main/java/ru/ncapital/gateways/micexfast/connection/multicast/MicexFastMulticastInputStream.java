@@ -1,5 +1,6 @@
 package ru.ncapital.gateways.micexfast.connection.multicast;
 
+import cli.System.IO.EndOfStreamException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.micexfast.Utils;
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -26,6 +28,10 @@ public class MicexFastMulticastInputStream extends InputStream {
 
     private ThreadLocal<Long> inTimestamp;
 
+    private BlockingQueue<ChannelPacket> packetQueue;
+
+    private final boolean synch;
+
     public static char[] byteToHex(byte b) {
         char[] hex = new char[2];
         int v = b & 0xFF;
@@ -40,6 +46,19 @@ public class MicexFastMulticastInputStream extends InputStream {
         this.bytebuffer = ByteBuffer.allocate(BUFFER_LENGTH);
         this.bytebuffer.clear();
         this.bytebuffer.flip();
+        this.synch = true;
+    }
+
+    public MicexFastMulticastInputStream(DatagramChannel channel, Logger logger, boolean synch) {
+        this.logger = logger;
+        this.channel = channel;
+        this.bytebuffer = ByteBuffer.allocate(BUFFER_LENGTH);
+        this.bytebuffer.clear();
+        this.bytebuffer.flip();
+        this.synch = synch;
+        if (!this.synch) {
+            // TODO create packetReader
+        }
     }
 
     public void setInTimestamp(ThreadLocal<Long> inTimestamp) {
@@ -74,8 +93,18 @@ public class MicexFastMulticastInputStream extends InputStream {
     public int read() throws IOException {
         if (!bytebuffer.hasRemaining()) {
             bytebuffer.clear();
-            channel.receive(bytebuffer);
-            inTimestamp.set(Utils.currentTimeInTicks());
+            if (synch) {
+                channel.receive(bytebuffer);
+                inTimestamp.set(Utils.currentTimeInTicks());
+            } else {
+                try {
+                    ChannelPacket packet = packetQueue.take();
+                    bytebuffer.put(packet.getByteBuffer());
+                    inTimestamp.set(packet.getInTimestamp());
+                } catch (InterruptedException e) {
+                    throw new IOException("Reading from queue interrupted");
+                }
+            }
             bytebuffer.flip();
 
             if (logger.isTraceEnabled())

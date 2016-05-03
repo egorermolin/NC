@@ -79,6 +79,8 @@ public class MulticastReceiver {
 
     private MessageInputStream messageReader;
 
+    private MicexFastMulticastInputStream multicastInputStream;
+
     private String fastTemplatesFile;
 
     private MarketDataManager marketDataManager;
@@ -163,8 +165,8 @@ public class MulticastReceiver {
                                 "[Source: " + connection.getSource() + "(" + InetAddress.getByName(connection.getSource()) + ")]" +
                                 "[Key: " + membership.toString() + "]");
 
-        MicexFastMulticastInputStream inputStream = new MicexFastMulticastInputStream(channel, logger);
-        messageReader = new MessageInputStream(inputStream);
+        multicastInputStream = new MicexFastMulticastInputStream(channel, logger);
+        messageReader = new MessageInputStream(multicastInputStream);
 
         for (MessageTemplate template : new XMLMessageTemplateLoader()
                 .load(new FileInputStream(fastTemplatesFile)))
@@ -180,7 +182,7 @@ public class MulticastReceiver {
                     stats.addValue(currentTime - sendingTime % (1000L * 100L * 100L * 100L));
                 }
             });
-            inputStream.setInTimestamp(inTimestamp = new ThreadLocal<Long>() {
+            multicastInputStream.setInTimestamp(inTimestamp = new ThreadLocal<Long>() {
                 @Override
                 public Long initialValue() {
                     return new Long(0);
@@ -194,7 +196,7 @@ public class MulticastReceiver {
                 case FOND_INSTRUMENT_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("f"), instrumentManager);
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    inputStream.setInTimestamp(inTimestamp = new ThreadLocal<Long>() {
+                    multicastInputStream.setInTimestamp(inTimestamp = new ThreadLocal<Long>() {
                         @Override
                         public Long initialValue() {
                             return new Long(0);
@@ -208,7 +210,7 @@ public class MulticastReceiver {
                 case CURR_INSTRUMENT_SNAP_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("d"), instrumentManager);
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    inputStream.setInTimestamp(inTimestamp = new ThreadLocal<Long>() {
+                    multicastInputStream.setInTimestamp(inTimestamp = new ThreadLocal<Long>() {
                         @Override
                         public Long initialValue() {
                             return new Long(0);
@@ -221,7 +223,7 @@ public class MulticastReceiver {
                 case CURR_ORDER_LIST_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-OLR-CURR"), marketDataManager.getIncrementalProcessorForOrderList());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    inputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorForOrderListInTimestamp());
+                    multicastInputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorForOrderListInTimestamp());
                     break;
 
                 case FOND_ORDER_LIST_INCR_A:
@@ -229,21 +231,21 @@ public class MulticastReceiver {
                 case FOND_ORDER_LIST_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-OLR-FOND"), marketDataManager.getIncrementalProcessorForOrderList());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    inputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorForOrderListInTimestamp());
+                    multicastInputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorForOrderListInTimestamp());
                     break;
 
                 case CURR_ORDER_LIST_SNAP_A:
                 case CURR_ORDER_LIST_SNAP_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("W-OLS-CURR"), marketDataManager.getSnapshotProcessorForOrderList());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    inputStream.setInTimestamp(inTimestamp = marketDataManager.getSnapshotProcessorForOrderListInTimestamp());
+                    multicastInputStream.setInTimestamp(inTimestamp = marketDataManager.getSnapshotProcessorForOrderListInTimestamp());
                     break;
 
                 case FOND_ORDER_LIST_SNAP_A:
                 case FOND_ORDER_LIST_SNAP_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("W-OLS-FOND"), marketDataManager.getSnapshotProcessorForOrderList());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    inputStream.setInTimestamp(inTimestamp = marketDataManager.getSnapshotProcessorForOrderListInTimestamp());
+                    multicastInputStream.setInTimestamp(inTimestamp = marketDataManager.getSnapshotProcessorForOrderListInTimestamp());
                     break;
 
                 case CURR_STATISTICS_INCR_A:
@@ -251,7 +253,7 @@ public class MulticastReceiver {
                 case CURR_STATISTICS_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-MSR-CURR"), marketDataManager.getIncrementalProcessorForStatistics());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    inputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorForStatisticsInTimestamp());
+                    multicastInputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorForStatisticsInTimestamp());
                     break;
 
                 case FOND_STATISTICS_INCR_A:
@@ -259,7 +261,7 @@ public class MulticastReceiver {
                 case FOND_STATISTICS_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-MSR-FOND"), marketDataManager.getIncrementalProcessorForStatistics());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    inputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorForStatisticsInTimestamp());
+                    multicastInputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorForStatisticsInTimestamp());
                     break;
 
                 case CURR_STATISTICS_SNAP_A:
@@ -268,7 +270,7 @@ public class MulticastReceiver {
                 case FOND_STATISTICS_SNAP_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("W-Generic"), marketDataManager.getSnapshotProcessorForStatistics());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    inputStream.setInTimestamp(inTimestamp = marketDataManager.getSnapshotProcessorForStatisticsInTimestamp());
+                    multicastInputStream.setInTimestamp(inTimestamp = marketDataManager.getSnapshotProcessorForStatisticsInTimestamp());
                     break;
 
                 case CURR_PUB_TRADES_INCR_A:
@@ -276,7 +278,7 @@ public class MulticastReceiver {
                 case CURR_PUB_TRADES_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-TLR-CURR"), marketDataManager.getIncrementalProcessorForPublicTrades());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    inputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorForPublicTradesInTimestamp());
+                    multicastInputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorForPublicTradesInTimestamp());
                     break;
 
                 case FOND_PUB_TRADES_INCR_A:
@@ -284,7 +286,7 @@ public class MulticastReceiver {
                 case FOND_PUB_TRADES_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-TLR-FOND"), marketDataManager.getIncrementalProcessorForPublicTrades());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    inputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorForPublicTradesInTimestamp());
+                    multicastInputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorForPublicTradesInTimestamp());
                     break;
             }
         }
@@ -360,22 +362,27 @@ public class MulticastReceiver {
             return;
         }
 
-        final MulticastReceiver mr = new MulticastReceiver(ConnectionId.convert(args[0]), new ConfigurationManager().configure(new NullGatewayConfiguration() {
-            @Override
-            public String getFastTemplatesFile() {
-                return args[1];
-            }
+        final MulticastReceiver mr = new MulticastReceiver(
+                ConnectionId.convert(args[0]),
+                new ConfigurationManager().configure(
+                        new NullGatewayConfiguration() {
+                            @Override
+                            public String getFastTemplatesFile() {
+                                return args[1];
+                            }
 
-            @Override
-            public String getNetworkInterface() {
-                return args[2];
-            }
+                            @Override
+                            public String getNetworkInterface() {
+                                return args[2];
+                            }
 
-            @Override
-            public String getConnectionsFile() {
-                return args[3];
-            }
-        }), null, null);
+                            @Override
+                            public String getConnectionsFile() {
+                                return args[3];
+                            }
+                        }),
+                null, null);
+
         mr.init(args.length > 4 ? args[4] : "info");
 
         Executors.newSingleThreadExecutor().execute(new Runnable() {

@@ -19,7 +19,6 @@ public class MicexBlockReader implements MessageBlockReader {
                 isFinished = false;
                 return false;
             }
-
             try {
                 in.read(new byte[4]);
             } catch (AsynchronousCloseException e) {

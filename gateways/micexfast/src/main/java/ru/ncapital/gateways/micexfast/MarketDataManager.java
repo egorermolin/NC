@@ -231,7 +231,6 @@ public class MarketDataManager {
     }
 
     public boolean isAllowedInstrument(String symbol, String tradingSessionId) {
-        // return bbos.containsKey(symbol + Instrument.BOARD_SEPARATOR + tradingSessionId);
         return instrumentManager.isAllowedInstrument(new Instrument(symbol, tradingSessionId));
     }
 
