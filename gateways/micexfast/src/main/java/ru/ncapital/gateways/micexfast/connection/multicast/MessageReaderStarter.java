@@ -5,10 +5,10 @@ import org.slf4j.Logger;
 /**
  * Created by egore on 12/15/15.
  */
-public class MulticastReceiverStarter implements Runnable {
-    private MulticastReceiver mcr;
+public class MessageReaderStarter implements Runnable {
+    private MessageReader mcr;
 
-    public MulticastReceiverStarter(Logger logger, MulticastReceiver mcr) {
+    public MessageReaderStarter(Logger logger, MessageReader mcr) {
         this.mcr = mcr;
 
         logger.info("START " + mcr);

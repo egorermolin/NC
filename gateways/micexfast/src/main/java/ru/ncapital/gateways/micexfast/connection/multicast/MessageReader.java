@@ -14,14 +14,10 @@ import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.micexfast.*;
 import ru.ncapital.gateways.micexfast.connection.Connection;
 import ru.ncapital.gateways.micexfast.connection.ConnectionId;
-import ru.ncapital.gateways.micexfast.domain.ProductType;
-import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
-import ru.ncapital.gateways.micexfast.performance.IGatewayPerformanceLogger;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.*;
-import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.MembershipKey;
@@ -29,12 +25,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by egore on 12/8/15.
  */
-public class MulticastReceiver implements IEventListener {
+public class MessageReader implements IMulticastEventListener {
 
     private class Statistics {
         private int totalNumberOfMessages = 0;
@@ -102,7 +97,7 @@ public class MulticastReceiver implements IEventListener {
 
     private long received;
 
-    public MulticastReceiver(ConnectionId connectionId, ConfigurationManager configurationManager, MarketDataManager marketDataManager, InstrumentManager instumentManager) {
+    public MessageReader(ConnectionId connectionId, ConfigurationManager configurationManager, MarketDataManager marketDataManager, InstrumentManager instumentManager) {
         this.connectionId = connectionId;
         this.asynch = configurationManager.isAsynchChannelReader();
         this.connection = configurationManager.getConnection(connectionId);
@@ -112,20 +107,27 @@ public class MulticastReceiver implements IEventListener {
         this.marketDataManager = marketDataManager;
         this.instrumentManager = instumentManager;
 
-        this.logger = LoggerFactory.getLogger(connectionId.getConnectionId() + "-MulticastReceiver");
+        this.logger = LoggerFactory.getLogger(connectionId.getConnectionId() + "-MessageReader");
 
         if (logger.isDebugEnabled())
             logger.debug("Created [Connection: " + connectionId.getConnectionId() + "]");
     }
 
-    public void init(String level) throws IOException {
-        this.level = level;
-        this.channel = DatagramChannel.open(StandardProtocolFamily.INET)
+    public DatagramChannel openChannel() throws IOException {
+        return DatagramChannel.open(StandardProtocolFamily.INET)
                 .setOption(StandardSocketOptions.SO_REUSEADDR, true)
                 .bind(new InetSocketAddress(connection.getPort()));
+    }
 
+    public NetworkInterface getNetworkInterface(String name) throws SocketException {
+        return NetworkInterface.getByName(name);
+    }
+
+    public void init(String level) throws IOException {
+        this.level = level;
+        this.channel = openChannel();
         this.channel.setOption(StandardSocketOptions.SO_RCVBUF, 1000000);
-        this.channel.setOption(StandardSocketOptions.IP_MULTICAST_IF, NetworkInterface.getByName(intf));
+        this.channel.setOption(StandardSocketOptions.IP_MULTICAST_IF, getNetworkInterface(intf));
 
         if (logger.isDebugEnabled())
             logger.debug("Opened channel on [Port: " + connection.getPort() + "]");
@@ -139,10 +141,8 @@ public class MulticastReceiver implements IEventListener {
         Thread.currentThread().setName(connectionId.toString());
 
         running = true;
-
         try {
             connect();
-            multicastInputStream.start();
             run();
         } catch (IOException e) {
             Utils.printStackTrace(e, logger);
@@ -152,10 +152,8 @@ public class MulticastReceiver implements IEventListener {
 
     public void stop() {
         running = false;
-
         try {
             disconnect();
-            multicastInputStream.stop();
             destroy();
         } catch (IOException e) {
             Utils.printStackTrace(e, logger);
@@ -169,11 +167,11 @@ public class MulticastReceiver implements IEventListener {
 
         if (logger.isDebugEnabled())
             logger.debug("Joined [Group: " + connection.getIp() + "(" + InetAddress.getByName(connection.getIp()) + ")]" +
-                                "[Interface: " + intf + "(" + NetworkInterface.getByName(intf).toString() + ")]" +
+                                "[Interface: " + intf + "(" + getNetworkInterface(intf).toString() + ")]" +
                                 "[Source: " + connection.getSource() + "(" + InetAddress.getByName(connection.getSource()) + ")]" +
                                 "[Key: " + membership.toString() + "]");
 
-        multicastInputStream = new MicexFastMulticastInputStream(channel, logger, this, asynch);
+        multicastInputStream = new MicexFastMulticastInputStream(this, channel, logger, asynch);
         messageReader = new MessageInputStream(multicastInputStream);
 
         for (MessageTemplate template : new XMLMessageTemplateLoader()
@@ -299,7 +297,7 @@ public class MulticastReceiver implements IEventListener {
             }
         }
 
-        messageReader.setBlockReader(new MicexBlockReader());
+        messageReader.setBlockReader(new MicexFastMessageBlockReader(this));
 
         if ("debug".equals(level))
             enableDebug();
@@ -313,6 +311,8 @@ public class MulticastReceiver implements IEventListener {
     }
 
     private void disconnect() throws IOException {
+        multicastInputStream.stop();
+
         if (membership != null)
             membership.drop();
     }
@@ -322,18 +322,16 @@ public class MulticastReceiver implements IEventListener {
         if (e instanceof AsynchronousCloseException) {
             logger.info("Channel closed");
         } else {
-            logger.warn("Failed to read from channel, restarting ...");
             Utils.printStackTrace(e, logger);
 
             stop();
-
-            start();
         }
     }
 
     private void run() throws IOException {
         logger.info("READY...");
 
+        multicastInputStream.start();
         while (running) {
             try {
                 messageReader.readMessage();
@@ -351,7 +349,7 @@ public class MulticastReceiver implements IEventListener {
     }
 
     public void enableDebug() {
-        org.apache.log4j.Logger.getLogger(connectionId + "-MulticastReceiver").setLevel(Level.TRACE);
+        org.apache.log4j.Logger.getLogger(connectionId + "-MessageReader").setLevel(Level.TRACE);
         messageReader.getContext().setLogger(new FastMessageLogger() {
             @Override
             public void log(Message message, byte[] bytes, Direction direction) {
@@ -367,7 +365,7 @@ public class MulticastReceiver implements IEventListener {
     }
 
     public static void main(final String[] args) throws IOException {
-        // org.apache.log4j.Logger.getLogger("MulticastReceiver").setLevel(Level.INFO);
+        // org.apache.log4j.Logger.getLogger("MessageReader").setLevel(Level.INFO);
         GatewayManager.addConsoleAppender("%d{HH:mm:ss} %m%n", Level.TRACE);
         GatewayManager.addFileAppender("log/log.mr.out", "%d{HH:mm:ss} %m%n", Level.TRACE);
         if (args.length < 4) {
@@ -383,7 +381,7 @@ public class MulticastReceiver implements IEventListener {
             return;
         }
 
-        final MulticastReceiver mr = new MulticastReceiver(
+        final MessageReader mr = new MessageReader(
                 ConnectionId.convert(args[0]),
                 new ConfigurationManager().configure(
                         new NullGatewayConfiguration() {

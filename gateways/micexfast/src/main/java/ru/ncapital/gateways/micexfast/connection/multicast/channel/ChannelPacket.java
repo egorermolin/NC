@@ -1,4 +1,4 @@
-package ru.ncapital.gateways.micexfast.connection.multicast;
+package ru.ncapital.gateways.micexfast.connection.multicast.channel;
 
 import java.nio.ByteBuffer;
 

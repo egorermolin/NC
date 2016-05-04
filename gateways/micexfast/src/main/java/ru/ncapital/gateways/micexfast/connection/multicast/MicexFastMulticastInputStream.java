@@ -1,9 +1,8 @@
 package ru.ncapital.gateways.micexfast.connection.multicast;
 
-import cli.System.IO.EndOfStreamException;
+import com.google.inject.Inject;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.micexfast.Utils;
+import ru.ncapital.gateways.micexfast.connection.multicast.channel.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +10,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by egore on 12/10/15.
@@ -19,9 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class MicexFastMulticastInputStream extends InputStream {
     private static final int BUFFER_LENGTH = 1500;
 
-    private DatagramChannel channel;
-
-    private AsynchChannelPacketReader packetReader;
+    private IChannelPacketReader packetReader;
 
     private ByteBuffer bytebuffer;
 
@@ -31,9 +27,7 @@ public class MicexFastMulticastInputStream extends InputStream {
 
     private ThreadLocal<Long> inTimestamp;
 
-    private BlockingQueue<ChannelPacket> packetQueue;
-
-    private final boolean asynch;
+    private ChannelPacketReaderFactory channelPacketReaderFactory = new ChannelPacketReaderFactory();
 
     public static char[] byteToHex(byte b) {
         char[] hex = new char[2];
@@ -43,17 +37,12 @@ public class MicexFastMulticastInputStream extends InputStream {
         return hex;
     }
 
-    public MicexFastMulticastInputStream(DatagramChannel channel, Logger logger, IEventListener eventListener, boolean asynch) {
+    public MicexFastMulticastInputStream(IMulticastEventListener eventListener, DatagramChannel channel, Logger logger, boolean asynch) {
         this.logger = logger;
-        this.channel = channel;
         this.bytebuffer = ByteBuffer.allocate(BUFFER_LENGTH);
         this.bytebuffer.clear();
         this.bytebuffer.flip();
-        this.asynch = asynch;
-        if (this.asynch) {
-            packetQueue = new ArrayBlockingQueue<ChannelPacket>(10000);
-            packetReader = new AsynchChannelPacketReader(channel, packetQueue, eventListener);
-        }
+        packetReader = channelPacketReaderFactory.create(eventListener, channel, asynch);
     }
 
     public void setInTimestamp(ThreadLocal<Long> inTimestamp) {
@@ -88,18 +77,9 @@ public class MicexFastMulticastInputStream extends InputStream {
     public int read() throws IOException {
         if (!bytebuffer.hasRemaining()) {
             bytebuffer.clear();
-            if (asynch) {
-                try {
-                    ChannelPacket packet = packetQueue.take();
-                    bytebuffer.put(packet.getByteBuffer());
-                    inTimestamp.set(packet.getInTimestamp());
-                } catch (InterruptedException e) {
-                    throw new IOException("Reading from queue interrupted");
-                }
-            } else {
-                channel.receive(bytebuffer);
-                inTimestamp.set(Utils.currentTimeInTicks());
-            }
+            ChannelPacket packet = packetReader.nextPacket();
+            bytebuffer.put(packet.getByteBuffer());
+            inTimestamp.set(packet.getInTimestamp());
             bytebuffer.flip();
 
             if (logger.isTraceEnabled())
@@ -110,14 +90,10 @@ public class MicexFastMulticastInputStream extends InputStream {
     }
 
     public void start() {
-        if (asynch) {
-            packetReader.start();
-        }
+        packetReader.start();
     }
 
     public void stop() {
-        if (asynch) {
-            packetReader.stop();
-        }
+        packetReader.stop();
     }
 }
