@@ -91,7 +91,7 @@ public class StatisticsMessageHandler extends AMessageHandler {
     }
 
     @Override
-    public void flushIncrementals(boolean afterSnapshot, long inTime) {
+    public void flushIncrementals(long inTime) {
     }
 
     @Override
