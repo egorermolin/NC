@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import org.openfast.MessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.ncapital.gateways.micexfast.connection.ConnectionManager;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.HeartbeatProcessor;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.IncrementalProcessor;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.SnapshotProcessor;
@@ -55,6 +56,9 @@ public class MarketDataManager {
     @Inject
     private HeartbeatProcessor heartbeatProcessor;
 
+    @Inject
+    private ConnectionManager connectionManager;
+
     private InstrumentManager instrumentManager;
 
     private IGatewayPerformanceLogger performanceLogger;
@@ -77,6 +81,9 @@ public class MarketDataManager {
         incrementalProcessorForOrderList = new IncrementalProcessor(messageHandlerForOrderList, sequenceValidatorForOrderList);
         incrementalProcessorForStatistics = new IncrementalProcessor(messageHandlerForStatistics, sequenceValidatorForStatistics);
         incrementalProcessorForPublicTrades = new IncrementalProcessor(messageHandlerForPublicTrades, sequenceValidatorForPublicTrades);
+
+        connectionManager.scheduleSnapshot(sequenceValidatorForOrderList);
+        connectionManager.scheduleSnapshot(sequenceValidatorForStatistics);
 
         return this;
     }

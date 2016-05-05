@@ -79,7 +79,7 @@ public class PublicTradesMessageHandler extends AMessageHandler {
     }
 
     @Override
-    public String getType() {
-        return "PublicTradesMessageHandler";
+    public MessageHandlerType getType() {
+        return MessageHandlerType.PUBLIC_TRADES;
     }
 }

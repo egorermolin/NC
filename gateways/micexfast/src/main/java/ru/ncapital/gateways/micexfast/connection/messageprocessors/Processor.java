@@ -1,11 +1,13 @@
 package ru.ncapital.gateways.micexfast.connection.messageprocessors;
 
+import com.google.inject.Inject;
 import org.openfast.Context;
 import org.openfast.Message;
 import org.openfast.MessageHandler;
 import org.openfast.codec.Coder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.ncapital.gateways.micexfast.connection.ConnectionManager;
 
 import java.util.*;
 
@@ -15,6 +17,9 @@ import java.util.*;
 public abstract class Processor extends BaseProcessorWithMessageBackup implements MessageHandler {
 
     protected SequenceArray sequenceArray = new SequenceArray();
+
+    @Inject
+    protected ConnectionManager connectionManager;
 
     @Override
     public void handleMessage(Message readMessage, Context context, Coder coder) {

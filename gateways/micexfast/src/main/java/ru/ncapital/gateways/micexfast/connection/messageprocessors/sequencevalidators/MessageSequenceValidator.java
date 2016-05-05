@@ -5,11 +5,12 @@ import org.openfast.GroupValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
+import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
 import java.util.*;
 
 public class MessageSequenceValidator implements IMessageSequenceValidator {
-    protected String type;
+    private MessageHandlerType type;
 
     protected ThreadLocal<Logger> logger = new ThreadLocal<Logger>() {
         @Override
@@ -29,8 +30,13 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
     @Inject
     private MarketDataManager marketDataManager;
 
-    protected MessageSequenceValidator(String type) {
+    protected MessageSequenceValidator(MessageHandlerType type) {
         this.type = type;
+    }
+
+    @Override
+    public MessageHandlerType getType() {
+        return type;
     }
 
     private SequenceNumber getSequenceNumber(String securityId) {

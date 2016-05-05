@@ -5,6 +5,7 @@ import org.openfast.Message;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.micexfast.domain.Instrument;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
+import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
 import java.util.*;
 
@@ -145,8 +146,5 @@ public class SnapshotProcessor extends Processor {
         fragmentedSnapshots.clear();
         if (sequenceValidator.isRecovering())
             printRecoveringSecurityIds();
-        else {
-            // TODO stop snapshot channel and schedule a check
-        }
     }
 }

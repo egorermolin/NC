@@ -99,7 +99,7 @@ public class StatisticsMessageHandler extends AMessageHandler {
     }
 
     @Override
-    public String getType() {
-        return "Statistic";
+    public MessageHandlerType getType() {
+        return MessageHandlerType.STATISTICS;
     }
 }

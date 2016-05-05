@@ -175,7 +175,7 @@ public class OrderListMessageHandler extends AMessageHandler {
     }
 
     @Override
-    public String getType() {
-        return "OrderList";
+    public MessageHandlerType getType() {
+        return MessageHandlerType.ORDER_LIST;
     }
 }

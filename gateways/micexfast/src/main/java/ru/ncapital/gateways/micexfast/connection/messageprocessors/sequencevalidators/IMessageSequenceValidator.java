@@ -1,6 +1,8 @@
 package ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators;
 
 import org.openfast.GroupValue;
+import org.openfast.Message;
+import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
 /**
  * Created by egore on 2/3/16.
@@ -21,4 +23,6 @@ public interface IMessageSequenceValidator {
     boolean isRecovering();
 
     String[] getRecovering();
+
+    MessageHandlerType getType();
 }

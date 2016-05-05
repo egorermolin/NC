@@ -17,5 +17,5 @@ public interface IMessageHandler {
 
     void flushIncrementals(long inTime);
 
-    String getType();
+    MessageHandlerType getType();
 }

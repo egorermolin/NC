@@ -1,11 +1,13 @@
 package ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators;
 
+import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
+
 /**
  * Created by egore on 1/28/16.
  */
 public class MessageSequenceValidatorForPublicTrades extends MessageSequenceValidator {
     public MessageSequenceValidatorForPublicTrades() {
-        super("PublicTrade");
+        super(MessageHandlerType.PUBLIC_TRADES);
     }
 
     @Override

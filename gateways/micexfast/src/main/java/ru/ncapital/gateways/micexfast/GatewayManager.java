@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.micexfast.connection.ConnectionManager;
 import ru.ncapital.gateways.micexfast.domain.Instrument;
 import ru.ncapital.gateways.micexfast.domain.Subscription;
+import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 import ru.ncapital.gateways.micexfast.performance.IGatewayPerformanceLogger;
 
 import java.net.NetworkInterface;
@@ -83,12 +84,14 @@ public class GatewayManager implements IGatewayManager {
         String[] loggers = {"GatewayManager",
                 "HeartbeatProcessor",
             "CURR-IDF-A-Processor", "CURR-IDF-B-Processor",
+            "CURR-ISF-A-Processor", "CURR-ISF-B-Processor",
             "CURR-OLR-A-Processor", "CURR-OLR-B-Processor",
             "CURR-OLS-A-Processor", "CURR-OLS-B-Processor",
             "CURR-MSR-A-Processor", "CURR-MSR-B-Processor",
             "CURR-MSS-A-Processor", "CURR-MSS-B-Processor",
             "CURR-TLR-A-Processor", "CURR-TLR-A-Processor",
             "FOND-IDF-A-Processor", "FOND-IDF-B-Processor",
+            "FOND-ISF-A-Processor", "FOND-ISF-B-Processor",
             "FOND-OLR-A-Processor", "FOND-OLR-B-Processor",
             "FOND-OLS-A-Processor", "FOND-OLS-B-Processor",
             "FOND-MSR-A-Processor", "FOND-MSR-B-Processor",
@@ -117,16 +120,20 @@ public class GatewayManager implements IGatewayManager {
         if (!started.getAndSet(true)) {
             connectionManager.startInstrument();
             connectionManager.startInstrumentStatus();
-            connectionManager.startIncremental(withStatistics, withPublicTrade);
-            connectionManager.startSnapshot(withStatistics);
+            for (MessageHandlerType type : MessageHandlerType.values()) {
+                connectionManager.startIncremental(type);
+                connectionManager.startSnapshot(type);
+            }
         }
     }
 
     @Override
     public void stop() {
         if (started.getAndSet(false)) {
-            connectionManager.stopSnapshot(withStatistics);
-            connectionManager.stopIncremental(withStatistics, withPublicTrade);
+            for (MessageHandlerType type : MessageHandlerType.values()) {
+                connectionManager.startIncremental(type);
+                connectionManager.startSnapshot(type);
+            }
             connectionManager.stopInstrument();
             connectionManager.stopInstrumentStatus();
             connectionManager.shutdown();
