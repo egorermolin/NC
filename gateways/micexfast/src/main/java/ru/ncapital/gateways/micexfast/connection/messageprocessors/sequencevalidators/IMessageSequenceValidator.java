@@ -18,5 +18,7 @@ public interface IMessageSequenceValidator {
 
     boolean isRecovering(String securityId, boolean isSnapshot);
 
+    boolean isRecovering();
+
     String[] getRecovering();
 }

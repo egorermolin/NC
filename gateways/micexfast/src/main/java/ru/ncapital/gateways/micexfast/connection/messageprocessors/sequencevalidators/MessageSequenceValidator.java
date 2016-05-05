@@ -8,18 +8,6 @@ import ru.ncapital.gateways.micexfast.MarketDataManager;
 
 import java.util.*;
 
-/**
- * Created by egore on 12/28/15.
- */
-
-class SequenceNumber {
-    String securityId;
-
-    int lastSeqNum = -1;
-
-    int numberOfMissingSequences = 0;
-}
-
 public class MessageSequenceValidator implements IMessageSequenceValidator {
     protected String type;
 
@@ -203,6 +191,11 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
         }
 
         return false;
+    }
+
+    @Override
+    public boolean isRecovering() {
+        return !securityIdsToRecover.isEmpty();
     }
 
     @Override

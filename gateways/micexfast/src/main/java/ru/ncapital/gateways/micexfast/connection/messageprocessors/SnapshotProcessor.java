@@ -100,7 +100,6 @@ public class SnapshotProcessor extends Processor {
                     // new snapshot cycle
                     sendingTimeOfSnapshotStart = sendingTime;
                     reset();
-                    printRecoveringSecurityIds();
                 } else
                     return false;
             }
@@ -144,5 +143,10 @@ public class SnapshotProcessor extends Processor {
     private void reset() {
         sequenceArray.clear();
         fragmentedSnapshots.clear();
+        if (sequenceValidator.isRecovering())
+            printRecoveringSecurityIds();
+        else {
+            // TODO stop snapshot channel and schedule a check
+        }
     }
 }
