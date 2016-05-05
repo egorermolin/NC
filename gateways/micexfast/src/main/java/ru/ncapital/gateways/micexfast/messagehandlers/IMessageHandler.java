@@ -15,7 +15,7 @@ public interface IMessageHandler {
 
     void beforeIncremental(GroupValue mdEntry, long inTime);
 
-    void flushIncrementals(boolean afterSnapshot, long inTime);
+    void flushIncrementals(long inTime);
 
     String getType();
 }

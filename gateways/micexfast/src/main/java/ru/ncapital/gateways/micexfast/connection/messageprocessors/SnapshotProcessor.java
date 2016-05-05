@@ -41,7 +41,7 @@ public class SnapshotProcessor extends Processor {
 
                         messageHandler.onIncremental(mdEntry, getInTimestamp());
                     }
-                    messageHandler.flushIncrementals(true, getInTimestamp());
+                    messageHandler.flushIncrementals(0);
                 }
             }
         }

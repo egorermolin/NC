@@ -136,7 +136,7 @@ public class MarketDataManager {
         }
     }
 
-    public void onDepthLevels(DepthLevel[] depthLevels, boolean afterSnapshot, long inTimeInTicks) {
+    public void onDepthLevels(DepthLevel[] depthLevels, long inTimeInTicks) {
         if (logger.isTraceEnabled())
             logger.trace("onDepthLevel " + depthLevels[0].getSecurityId());
 
@@ -149,15 +149,19 @@ public class MarketDataManager {
                 marketDataHandler.onDepthLevels(depthLevelsToSend.toArray(new DepthLevel[0]), inTimeInTicks);
         }
 
-        if (!afterSnapshot && performanceLogger != null) {
-            for (DepthLevel depthLevel : depthLevels) {
-                if (depthLevel.getMdEntryTime() > 0 && inTimeInTicks > 0) {
-                    if ((inTimeInTicks - depthLevel.getMdEntryTime()) / 10000 > 1500)
-                        logger.warn("onDepthLevels " + depthLevel.toString() + " processing time " + ((inTimeInTicks - depthLevel.getMdEntryTime()) / 10000) + "ms exceeds limit of 1500ms");
+        if (inTimeInTicks > 0)
+            logPerformance(depthLevels, inTimeInTicks);
+    }
 
-                    performanceLogger.notify(depthLevel.getMdEntryTime(), inTimeInTicks, "external");
-                }
-            }
+    private void logPerformance(DepthLevel[] depthLevels, long inTimeInTicks) {
+        if (performanceLogger == null)
+            return;
+
+        for (DepthLevel depthLevel : depthLevels) {
+            if (depthLevel.getMdEntryTime() == 0)
+                continue;
+
+            performanceLogger.notify(depthLevel.getMdEntryTime(), inTimeInTicks, "external");
         }
     }
 
