@@ -80,11 +80,11 @@ public class XMLReader {
             }
 
         } catch (SAXException e) {
-            Utils.printStackTrace(e, LoggerFactory.getLogger("XMLReader"));
+            Utils.printStackTrace(e, LoggerFactory.getLogger("XMLReader"), "Exception occurred while reading XML");
         } catch (ParserConfigurationException e) {
-            Utils.printStackTrace(e, LoggerFactory.getLogger("XMLReader"));
+            Utils.printStackTrace(e, LoggerFactory.getLogger("XMLReader"), "Exception occurred while reading XML");
         } catch (IOException e) {
-            Utils.printStackTrace(e, LoggerFactory.getLogger("XMLReader"));
+            Utils.printStackTrace(e, LoggerFactory.getLogger("XMLReader"), "Exception occurred while reading XML");
         }
 
         return connectionsMap;

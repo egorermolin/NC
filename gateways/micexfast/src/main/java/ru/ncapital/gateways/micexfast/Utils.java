@@ -98,9 +98,12 @@ public class Utils {
         return entryTimeInMicros;
     }
 
-    public static void printStackTrace(Exception e, Logger logger) {
+    public static void printStackTrace(Exception e, Logger logger, String message) {
+        if (message != null)
+            logger.error(message);
+
         logger.error(e.toString());
         for (StackTraceElement trace : e.getStackTrace())
-            logger.error(trace.toString());
+           logger.error("--> " + trace.toString());
     }
 }

@@ -123,7 +123,7 @@ public class MainClass {
         try {
             Thread.sleep(10000);
         } catch (InterruptedException e) {
-            Utils.printStackTrace(e, logger);
+            Utils.printStackTrace(e, logger, "InterruptedException occurred..");
         }
 
         gwManager.stop();

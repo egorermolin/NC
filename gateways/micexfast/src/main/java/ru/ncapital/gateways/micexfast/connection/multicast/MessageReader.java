@@ -119,6 +119,10 @@ public class MessageReader implements IMulticastEventListener {
                 .bind(new InetSocketAddress(connection.getPort()));
     }
 
+    public void closeChannel() throws IOException {
+        channel.close();
+    }
+
     public NetworkInterface getNetworkInterface(String name) throws SocketException {
         return NetworkInterface.getByName(name);
     }
@@ -134,7 +138,7 @@ public class MessageReader implements IMulticastEventListener {
     }
 
     public void destroy() throws IOException {
-        channel.close();
+        closeChannel();
     }
 
     public void start() {
@@ -145,7 +149,7 @@ public class MessageReader implements IMulticastEventListener {
             connect();
             run();
         } catch (IOException e) {
-            Utils.printStackTrace(e, logger);
+            Utils.printStackTrace(e, logger, "IOException occurred while starting..");
             running = false;
         }
     }
@@ -156,8 +160,13 @@ public class MessageReader implements IMulticastEventListener {
             disconnect();
             destroy();
         } catch (IOException e) {
-            Utils.printStackTrace(e, logger);
+            Utils.printStackTrace(e, logger, "IOException occurred while starting..");
         }
+    }
+
+
+    public boolean isRunning() {
+        return running;
     }
 
     private void connect() throws IOException {
@@ -311,7 +320,8 @@ public class MessageReader implements IMulticastEventListener {
     }
 
     private void disconnect() throws IOException {
-        multicastInputStream.stop();
+        if (multicastInputStream.isRunning())
+            multicastInputStream.stop();
 
         if (membership != null)
             membership.drop();
@@ -320,25 +330,26 @@ public class MessageReader implements IMulticastEventListener {
     @Override
     public void onException(Exception e) {
         if (e instanceof AsynchronousCloseException) {
-            logger.info("Channel closed");
-        } else {
-            Utils.printStackTrace(e, logger);
 
-            stop();
+        } if (e instanceof IOException) {
+            Utils.printStackTrace(e, logger, "IOException occurred..");
+        } else {
+            Utils.printStackTrace(e, logger, "Exception occurred..");
         }
     }
 
     private void run() throws IOException {
         logger.info("READY...");
 
-        multicastInputStream.start();
+        if (!multicastInputStream.isRunning())
+            multicastInputStream.start();
+
         while (running) {
             try {
                 messageReader.readMessage();
                 received = inTimestamp.get();
             } catch (Exception e) {
-                logger.error("Exception occured while reading message");
-                Utils.printStackTrace(e, logger);
+                Utils.printStackTrace(e, logger, "Exception occurred while reading message..");
             }
         }
     }

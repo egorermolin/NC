@@ -37,8 +37,7 @@ public class ConnectionManager {
                 mcr.init("info");
                 multicastReceivers.put(connectionId, mcr);
             } catch (IOException e) {
-                Utils.printStackTrace(e, logger);
-                logger.error("Failed to init MessageReader " + connectionId);
+                Utils.printStackTrace(e, logger, "IOException occurred while opening channel..");
             }
         }
     }
@@ -219,7 +218,7 @@ public class ConnectionManager {
                 Thread.sleep(1000);
             }
         } catch (InterruptedException e) {
-            Utils.printStackTrace(e, logger);
+            Utils.printStackTrace(e, logger, "InterruptedException occurred..");
         }
     }
 }

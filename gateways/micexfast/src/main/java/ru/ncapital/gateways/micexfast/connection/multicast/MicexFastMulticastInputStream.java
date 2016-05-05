@@ -29,6 +29,8 @@ public class MicexFastMulticastInputStream extends InputStream {
 
     private ChannelPacketReaderFactory channelPacketReaderFactory = new ChannelPacketReaderFactory();
 
+    private volatile boolean running = false;
+
     public static char[] byteToHex(byte b) {
         char[] hex = new char[2];
         int v = b & 0xFF;
@@ -57,14 +59,16 @@ public class MicexFastMulticastInputStream extends InputStream {
     }
 
     private static String bufferToString(ByteBuffer buf) {
-        StringBuilder sb = new StringBuilder("Received " + buf.remaining() + " - " + getSeqNum(buf) + " = ");
-        int count = 0;
+        StringBuilder sb = new StringBuilder("Received ").append(buf.remaining());
+        if (buf.hasRemaining()) {
+            sb.append(" - ").append(getSeqNum(buf)).append(" = ");
 
-        while (count < buf.remaining()) {
-            sb.append(byteToHex(buf.get(count))).append(' ');
-            count++;
+            int count = 0;
+            while (count < buf.remaining()) {
+                sb.append(byteToHex(buf.get(count))).append(' ');
+                count++;
+            }
         }
-
         return sb.toString();
     }
 
@@ -75,9 +79,12 @@ public class MicexFastMulticastInputStream extends InputStream {
 
     @Override
     public int read() throws IOException {
-        if (!bytebuffer.hasRemaining()) {
+        while (!bytebuffer.hasRemaining()) {
             bytebuffer.clear();
             ChannelPacket packet = packetReader.nextPacket();
+            if (packet == null)
+                throw new IOException("Cannot read next packet from channel");
+
             bytebuffer.put(packet.getByteBuffer());
             inTimestamp.set(packet.getInTimestamp());
             bytebuffer.flip();
@@ -90,10 +97,16 @@ public class MicexFastMulticastInputStream extends InputStream {
     }
 
     public void start() {
+        running = true;
         packetReader.start();
     }
 
     public void stop() {
         packetReader.stop();
+        running = false;
+    }
+
+    public boolean isRunning() {
+        return running;
     }
 }

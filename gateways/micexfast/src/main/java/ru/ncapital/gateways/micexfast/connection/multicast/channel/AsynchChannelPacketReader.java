@@ -54,7 +54,7 @@ public class AsynchChannelPacketReader extends AChannelPacketReader {
                 Thread.sleep(1000);
             }
         } catch (Exception e) {
-            Utils.printStackTrace(e, LoggerFactory.getLogger("AsynchChannelPacketReader"));
+            eventReceiver.onException(e);
         }
     }
 
@@ -64,7 +64,7 @@ public class AsynchChannelPacketReader extends AChannelPacketReader {
             try {
                 return packetQueue.take();
             } catch (Exception e) {
-                Utils.printStackTrace(e, LoggerFactory.getLogger("AsynchChannelPacketReader"));
+                eventReceiver.onException(e);
             }
         }
         return null;
