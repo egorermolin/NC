@@ -10,10 +10,12 @@ import ru.ncapital.gateways.micexfast.connection.messageprocessors.HeartbeatProc
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.IncrementalProcessor;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.SnapshotProcessor;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
+import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IProcessor;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
 import ru.ncapital.gateways.micexfast.domain.*;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerFactory;
+import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 import ru.ncapital.gateways.micexfast.performance.IGatewayPerformanceLogger;
 
 import java.util.ArrayList;
@@ -37,15 +39,15 @@ public class MarketDataManager {
 
     private IMarketDataHandler marketDataHandler;
 
-    private SnapshotProcessor snapshotProcessorForOrderList;
+    private IProcessor snapshotProcessorForOrderList;
 
-    private SnapshotProcessor snapshotProcessorForStatistics;
+    private IProcessor snapshotProcessorForStatistics;
 
-    private IncrementalProcessor incrementalProcessorForOrderList;
+    private IProcessor incrementalProcessorForOrderList;
 
-    private IncrementalProcessor incrementalProcessorForStatistics;
+    private IProcessor incrementalProcessorForStatistics;
 
-    private IncrementalProcessor incrementalProcessorForPublicTrades;
+    private IProcessor incrementalProcessorForPublicTrades;
 
     @Inject
     private MessageSequenceValidatorFactory messageSequenceValidatorFactory;
@@ -55,9 +57,6 @@ public class MarketDataManager {
 
     @Inject
     private HeartbeatProcessor heartbeatProcessor;
-
-    @Inject
-    private ConnectionManager connectionManager;
 
     private InstrumentManager instrumentManager;
 
@@ -81,9 +80,6 @@ public class MarketDataManager {
         incrementalProcessorForOrderList = new IncrementalProcessor(messageHandlerForOrderList, sequenceValidatorForOrderList);
         incrementalProcessorForStatistics = new IncrementalProcessor(messageHandlerForStatistics, sequenceValidatorForStatistics);
         incrementalProcessorForPublicTrades = new IncrementalProcessor(messageHandlerForPublicTrades, sequenceValidatorForPublicTrades);
-
-        connectionManager.scheduleSnapshot(sequenceValidatorForOrderList);
-        connectionManager.scheduleSnapshot(sequenceValidatorForStatistics);
 
         return this;
     }
@@ -185,60 +181,44 @@ public class MarketDataManager {
         }
     }
 
-    public MessageHandler getSnapshotProcessorForOrderList() {
-        return snapshotProcessorForOrderList;
-    }
-
-    public MessageHandler getSnapshotProcessorForStatistics() {
-        return snapshotProcessorForStatistics;
-    }
-
-    public MessageHandler getIncrementalProcessorForOrderList() {
-        return incrementalProcessorForOrderList;
-    }
-
-    public MessageHandler getIncrementalProcessorForStatistics() {
-        return incrementalProcessorForStatistics;
-    }
-
-    public MessageHandler getIncrementalProcessorForPublicTrades() {
-        return incrementalProcessorForPublicTrades;
-    }
-
-    public MessageHandler getHeartbeatProcessor() {
+    public IProcessor getHeartbeatProcessor() {
         return heartbeatProcessor;
     }
 
-    public ThreadLocal<Long> getIncrementalProcessorForOrderListInTimestamp() {
-        return incrementalProcessorForOrderList.getInTimestampHolder();
+    public IProcessor getSnapshotProcessor(MessageHandlerType type) {
+        switch (type) {
+            case ORDER_LIST:
+                return snapshotProcessorForOrderList;
+            case STATISTICS:
+                return snapshotProcessorForStatistics;
+        }
+
+        throw new RuntimeException("Unknown Snapshot Processor " + type);
     }
 
-    public ThreadLocal<Long> getIncrementalProcessorForStatisticsInTimestamp() {
-        return incrementalProcessorForStatistics.getInTimestampHolder();
+    public IProcessor getIncrementalProcessor(MessageHandlerType type) {
+        switch (type) {
+            case ORDER_LIST:
+                return incrementalProcessorForOrderList;
+            case PUBLIC_TRADES:
+                return incrementalProcessorForPublicTrades;
+            case STATISTICS:
+                return incrementalProcessorForStatistics;
+        }
+
+        throw new RuntimeException("Unknown Incremental Processor " + type);
     }
 
-    public ThreadLocal<Long> getIncrementalProcessorForPublicTradesInTimestamp() {
-        return incrementalProcessorForPublicTrades.getInTimestampHolder();
+    public ThreadLocal<Long> getSnapshotProcessorInTimestamp(MessageHandlerType type) {
+        return getSnapshotProcessor(type).getInTimestampHolder();
     }
 
-    public ThreadLocal<Long> getSnapshotProcessorForOrderListInTimestamp() {
-        return snapshotProcessorForOrderList.getInTimestampHolder();
+    public ThreadLocal<Long> getIncrementalProcessorInTimestamp(MessageHandlerType type) {
+        return getIncrementalProcessor(type).getInTimestampHolder();
     }
 
-    public ThreadLocal<Long> getSnapshotProcessorForStatisticsInTimestamp() {
-        return snapshotProcessorForStatistics.getInTimestampHolder();
-    }
-
-    public void setIncrementalProcessorForOrderListIsPrimary(boolean isPrimary) {
-        this.incrementalProcessorForOrderList.setIsPrimary(isPrimary);
-    }
-
-    public void setIncrementalProcessorForStatisticsIsPrimary(boolean isPrimary) {
-        this.incrementalProcessorForStatistics.setIsPrimary(isPrimary);
-    }
-
-    public void setIncrementalProcessorForPublicTradesIsPrimary(boolean isPrimary) {
-        this.incrementalProcessorForPublicTrades.setIsPrimary(isPrimary);
+    public void setIncrementalProcessorIsPrimary(MessageHandlerType type, boolean isPrimary) {
+        getIncrementalProcessor(type).setIsPrimary(isPrimary);
     }
 
     public boolean isAllowedInstrument(String symbol, String tradingSessionId) {

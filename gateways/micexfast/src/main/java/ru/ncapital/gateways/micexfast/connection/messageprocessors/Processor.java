@@ -8,18 +8,36 @@ import org.openfast.codec.Coder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.micexfast.connection.ConnectionManager;
+import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
+import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IProcessor;
+import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
 
 import java.util.*;
 
 /**
  * Created by egore on 24.02.2016.
  */
-public abstract class Processor extends BaseProcessorWithMessageBackup implements MessageHandler {
+public abstract class Processor extends BaseProcessorWithMessageBackup implements IProcessor {
 
     protected SequenceArray sequenceArray = new SequenceArray();
 
-    @Inject
-    protected ConnectionManager connectionManager;
+    protected IMessageSequenceValidator sequenceValidator;
+
+    protected IMessageHandler messageHandler;
+
+    protected Processor(IMessageHandler messageHandler, IMessageSequenceValidator sequenceValidator) {
+        this.messageHandler = messageHandler;
+        this.sequenceValidator = sequenceValidator;
+    }
+
+    protected Processor() {
+
+    }
+
+    @Override
+    public IMessageSequenceValidator getSequenceValidator() {
+        return sequenceValidator;
+    }
 
     @Override
     public void handleMessage(Message readMessage, Context context, Coder coder) {

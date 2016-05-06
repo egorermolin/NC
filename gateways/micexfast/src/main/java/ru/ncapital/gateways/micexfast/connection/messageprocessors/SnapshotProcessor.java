@@ -13,9 +13,6 @@ import java.util.*;
  * Created by egore on 1/11/16.
  */
 public class SnapshotProcessor extends Processor {
-    private IMessageHandler messageHandler;
-
-    private IMessageSequenceValidator sequenceValidator;
 
     private Map<String, Map<Integer, Message>> fragmentedSnapshots = new HashMap<String, Map<Integer, Message>>();
 
@@ -24,8 +21,7 @@ public class SnapshotProcessor extends Processor {
     private boolean wasRecovering;
 
     public SnapshotProcessor(IMessageHandler messageHandler, IMessageSequenceValidator sequenceValidator) {
-        this.messageHandler = messageHandler;
-        this.sequenceValidator = sequenceValidator;
+        super(messageHandler, sequenceValidator);
     }
 
     private void processSnapshotsAndIncrementals(Iterable<Message> messages, String securityId, int rptSeqNum) {

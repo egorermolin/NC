@@ -118,6 +118,8 @@ public class GatewayManager implements IGatewayManager {
     @Override
     public void start() {
         if (!started.getAndSet(true)) {
+            connectionManager.scheduleSnapshotWatcher(marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST).getSequenceValidator());
+            connectionManager.scheduleSnapshotWatcher(marketDataManager.getIncrementalProcessor(MessageHandlerType.STATISTICS).getSequenceValidator());
             connectionManager.startInstrument();
             connectionManager.startInstrumentStatus();
             for (MessageHandlerType type : MessageHandlerType.values()) {
@@ -131,11 +133,12 @@ public class GatewayManager implements IGatewayManager {
     public void stop() {
         if (started.getAndSet(false)) {
             for (MessageHandlerType type : MessageHandlerType.values()) {
-                connectionManager.startIncremental(type);
-                connectionManager.startSnapshot(type);
+                connectionManager.stopIncremental(type);
+                connectionManager.stopSnapshot(type);
             }
             connectionManager.stopInstrument();
             connectionManager.stopInstrumentStatus();
+            connectionManager.stopSnapshotWatchers();
             connectionManager.shutdown();
         }
     }

@@ -10,6 +10,7 @@ import org.openfast.codec.Coder;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidator;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.SnapshotProcessor;
+import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
 /**
  * Created by egore on 1/11/16.
@@ -36,7 +37,7 @@ public class SnapshotProcessorTest {
 
     @Before
     public void setup() {
-        Mockito.when(marketDataHandler.getType()).thenReturn("Test");
+        Mockito.when(marketDataHandler.getType()).thenReturn(MessageHandlerType.ORDER_LIST);
 
         snapshotProcessor = new SnapshotProcessor(marketDataHandler, sequenceValidator);
 

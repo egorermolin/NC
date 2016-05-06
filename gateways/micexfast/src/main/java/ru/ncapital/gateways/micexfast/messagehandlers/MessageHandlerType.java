@@ -12,7 +12,8 @@ import org.openfast.MessageHandler;
 public enum MessageHandlerType {
     ORDER_LIST("OrderList"),
     STATISTICS("Statistics"),
-    PUBLIC_TRADES("PublicTrades");
+    PUBLIC_TRADES("PublicTrades"),
+    HEARTBEAT("Heartbeat");
 
     private String description;
 

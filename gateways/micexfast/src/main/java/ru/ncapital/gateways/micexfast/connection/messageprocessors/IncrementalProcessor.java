@@ -9,13 +9,9 @@ import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
  * Created by egore on 1/11/16.
  */
 public class IncrementalProcessor extends Processor {
-    private IMessageHandler messageHandler;
-
-    private IMessageSequenceValidator sequenceValidator;
 
     public IncrementalProcessor(IMessageHandler messageHandler, IMessageSequenceValidator sequenceValidator) {
-        this.messageHandler = messageHandler;
-        this.sequenceValidator = sequenceValidator;
+        super(messageHandler, sequenceValidator);
     }
 
     @Override

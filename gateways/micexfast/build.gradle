@@ -73,3 +73,9 @@ task genMulticastReceiver(dependsOn: copyLibs, type: Exec) {
     executable = ikvmDir + '\\ikvmc.exe'
     args = myArgs
 }
+
+test {
+    testLogging {
+        exceptionFormat = 'full'
+    }
+}

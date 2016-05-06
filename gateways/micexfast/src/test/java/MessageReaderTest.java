@@ -20,7 +20,9 @@ import ru.ncapital.gateways.micexfast.InstrumentManager;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
 import ru.ncapital.gateways.micexfast.connection.Connection;
 import ru.ncapital.gateways.micexfast.connection.ConnectionId;
+import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IProcessor;
 import ru.ncapital.gateways.micexfast.connection.multicast.MessageReader;
+import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -65,7 +67,7 @@ public class MessageReaderTest {
     private MembershipKey membershipKey;
 
     @Mock
-    private MessageHandler messageHandler;
+    private IProcessor processor;
 
     private MessageReader testableReader;
 
@@ -83,13 +85,13 @@ public class MessageReaderTest {
         when(configurationManager.isAsynchChannelReader()).thenReturn(false);
         messageReaderSynch = createMessageReader();
 
-        when(marketDataManager.getIncrementalProcessorForOrderListInTimestamp()).thenReturn(new ThreadLocal<Long>() {
+        when(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.ORDER_LIST)).thenReturn(new ThreadLocal<Long>() {
             @Override
             public Long initialValue() {
                 return new Long(0);
             }
         });
-        when(marketDataManager.getIncrementalProcessorForOrderList()).thenReturn(messageHandler);
+        when(marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST)).thenReturn(processor);
     }
 
     private MessageReader createMessageReader() {
@@ -200,7 +202,7 @@ public class MessageReaderTest {
         }
 
         ArgumentCaptor<org.openfast.Message> messageCaptor = ArgumentCaptor.forClass(org.openfast.Message.class);
-        verify(messageHandler).handleMessage(messageCaptor.capture(), any(Context.class), any(Coder.class));
+        verify(processor).handleMessage(messageCaptor.capture(), any(Context.class), any(Coder.class));
 
         assertEquals(20151211075748086L, messageCaptor.getValue().getLong("SendingTime"));
     }
@@ -247,7 +249,7 @@ public class MessageReaderTest {
         }
 
         ArgumentCaptor<org.openfast.Message> messageCaptor = ArgumentCaptor.forClass(org.openfast.Message.class);
-        verify(messageHandler, atLeastOnce()).handleMessage(messageCaptor.capture(), any(Context.class), any(Coder.class));
+        verify(processor, atLeastOnce()).handleMessage(messageCaptor.capture(), any(Context.class), any(Coder.class));
 
         assertEquals(20151211075748086L, messageCaptor.getValue().getLong("SendingTime"));
     }

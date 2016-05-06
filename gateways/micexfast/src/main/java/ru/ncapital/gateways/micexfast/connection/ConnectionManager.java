@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by egore on 12/19/15.
@@ -27,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 public class ConnectionManager {
     private final ExecutorService starter = Executors.newCachedThreadPool();
 
-    private final ScheduledExecutorService snapshotStarter = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService snapshotWatcherStarter = Executors.newScheduledThreadPool(1);
 
     private Map<ConnectionId, MessageReader> multicastReceivers = new HashMap<ConnectionId, MessageReader>();
 
@@ -267,24 +268,35 @@ public class ConnectionManager {
         }
     }
 
-    public void scheduleSnapshotWatch(IMessageSequenceValidator sequenceValidatorToWatch) {
-        snapshotStarter.scheduleAtFixedRate(new Runnable() {
+    public void scheduleSnapshotWatcher(final IMessageSequenceValidator sequenceValidatorToWatch) {
+        snapshotWatcherStarter.scheduleAtFixedRate(new Runnable() {
             private IMessageSequenceValidator sequenceValidator = sequenceValidatorToWatch;
 
-            private boolean isRecovering = sequenceValidator.isRecovering();
+            private AtomicBoolean isRecovering = new AtomicBoolean(false);
 
             @Override
             public void run() {
                 synchronized (sequenceValidator) {
-                    if (sequenceValidator.isRecovering() && !isRecovering) {
-                        ConnectionManager.this.startSnapshot(sequenceValidator.getType());
-                        isRecovering = true;
-                    } else if (!sequenceValidator.isRecovering() && isRecovering) {
-                        ConnectionManager.this.stopSnapshot(sequenceValidator.getType());
-                        isRecovering = false;
+                    if (sequenceValidator.isRecovering()) {
+                        if (!isRecovering.getAndSet(true))
+                            startSnapshot(sequenceValidator.getType());
+                    } else {
+                        if (isRecovering.getAndSet(false))
+                            stopSnapshot(sequenceValidator.getType());
                     }
                 }
             }
         }, 600, 1, TimeUnit.SECONDS);
+    }
+
+    public void stopSnapshotWatchers() {
+        snapshotWatcherStarter.shutdown();
+        try {
+            while (!snapshotWatcherStarter.isTerminated()) {
+                Thread.sleep(1000);
+            }
+        } catch (InterruptedException e) {
+            Utils.printStackTrace(e, logger, "InterruptedException occurred..");
+        }
     }
 }
