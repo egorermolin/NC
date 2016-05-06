@@ -7,6 +7,7 @@ import org.openfast.FieldValue;
 import org.openfast.GroupValue;
 import ru.ncapital.gateways.micexfast.Utils;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.SequenceArray;
+import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
 /**
  * Created by egore on 27.01.2016.
@@ -71,5 +72,12 @@ public class OtherTests {
         assert sa.checkSequence(5) == SequenceArray.Result.DUPLICATE;
         assert sa.checkSequence(6) == SequenceArray.Result.DUPLICATE;
         assert sa.checkSequence(7) == SequenceArray.Result.DUPLICATE;
+    }
+
+    @Test
+    public void testMessageHandlerType() {
+        assert MessageHandlerType.ORDER_LIST.equals("OrderList");
+        assert MessageHandlerType.STATISTICS.equals("Statistics");
+        assert MessageHandlerType.PUBLIC_TRADES.equals("PublicTrades");
     }
 }

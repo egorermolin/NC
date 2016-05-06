@@ -25,4 +25,8 @@ public enum MessageHandlerType {
     public String toString() {
         return description;
     }
+
+    public boolean equals(String type) {
+        return description.equals(type);
+    }
 }
