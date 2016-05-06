@@ -63,8 +63,8 @@ public class MarketDataManager {
     private IGatewayPerformanceLogger performanceLogger;
 
     public MarketDataManager configure(IGatewayConfiguration configuration) {
-        this.marketDataHandler = configuration.getMarketDataHandler();
-        this.performanceLogger = configuration.getPerformanceLogger();
+        marketDataHandler = configuration.getMarketDataHandler();
+        performanceLogger = configuration.getPerformanceLogger();
 
         IMessageHandler messageHandlerForOrderList = messageHandlerFactory.createOrderListMessageHandler(configuration);
         IMessageHandler messageHandlerForStatistics = messageHandlerFactory.createStatisticsMessageHandler(configuration);
