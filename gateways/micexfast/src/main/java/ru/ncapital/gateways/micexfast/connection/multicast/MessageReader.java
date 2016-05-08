@@ -121,37 +121,39 @@ public class MessageReader implements IMulticastEventListener {
                 .bind(new InetSocketAddress(connection.getPort()));
     }
 
-    public void closeChannel() throws IOException {
-        channel.close();
-    }
-
     public NetworkInterface getNetworkInterface(String name) throws SocketException {
         return NetworkInterface.getByName(name);
     }
 
     public void init(String level) throws IOException {
         this.level = level;
-        this.channel = openChannel();
-        this.channel.setOption(StandardSocketOptions.SO_RCVBUF, 1000000);
-        this.channel.setOption(StandardSocketOptions.IP_MULTICAST_IF, getNetworkInterface(intf));
+    }
+
+    public void create() throws IOException {
+        channel = openChannel();
+        channel.setOption(StandardSocketOptions.SO_RCVBUF, 1000000);
+        channel.setOption(StandardSocketOptions.IP_MULTICAST_IF, getNetworkInterface(intf));
 
         if (logger.isDebugEnabled())
             logger.debug("Opened channel on [Port: " + connection.getPort() + "]");
     }
 
     public void destroy() throws IOException {
-        closeChannel();
+        channel.disconnect();
+        channel.close();
+        channel = null;
     }
 
     public void start() {
         Thread.currentThread().setName(connectionId.toString());
 
         if (running.getAndSet(true)) {
-            logger.warn("start(): Already started..");
+            logger.warn("Already started..");
             return;
         }
 
         try {
+            create();
             connect();
             run();
         } catch (IOException e) {
@@ -162,7 +164,7 @@ public class MessageReader implements IMulticastEventListener {
 
     public void stop() {
         if (!running.getAndSet(false)) {
-            logger.warn("start(): Already stopped..");
+            logger.warn("Already stopped..");
             return;
         }
 

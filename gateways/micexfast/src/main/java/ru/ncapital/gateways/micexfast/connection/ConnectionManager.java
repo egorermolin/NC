@@ -272,11 +272,14 @@ public class ConnectionManager {
         snapshotWatcherStarter.scheduleAtFixedRate(new Runnable() {
             private IMessageSequenceValidator sequenceValidator = sequenceValidatorToWatch;
 
-            private AtomicBoolean isRecovering = new AtomicBoolean(false);
+            private AtomicBoolean isRecovering;
 
             @Override
             public void run() {
                 synchronized (sequenceValidator) {
+                    if (isRecovering == null)
+                        isRecovering = new AtomicBoolean(sequenceValidator.isRecovering());
+
                     if (sequenceValidator.isRecovering()) {
                         if (!isRecovering.getAndSet(true))
                             startSnapshot(sequenceValidator.getType());
