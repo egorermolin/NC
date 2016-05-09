@@ -102,7 +102,7 @@ public class MessageReaderTest {
             }
 
             @Override
-            public void closeChannel() throws IOException {
+            public void destroy() throws IOException {
 
             }
 
