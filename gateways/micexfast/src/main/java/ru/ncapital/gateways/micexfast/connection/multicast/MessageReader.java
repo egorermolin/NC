@@ -351,7 +351,7 @@ public class MessageReader implements IMulticastEventListener {
     }
 
     private void run() throws IOException {
-        logger.info("READY...");
+        logger.debug("STARTED");
 
         if (!multicastInputStream.isRunning())
             multicastInputStream.start();

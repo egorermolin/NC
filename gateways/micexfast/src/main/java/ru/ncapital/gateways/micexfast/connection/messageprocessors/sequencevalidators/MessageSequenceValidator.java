@@ -77,7 +77,7 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
                     if (logger.get().isDebugEnabled())
                         logger.get().debug("OutOfSequence [Symbol: " + securityId + "][Expected: " + (sequenceNumber.lastSeqNum + 1) + "][Received: " + seqNum + "]");
 
-                    sequenceNumber.numberOfMissingSequences = seqNum - sequenceNumber.lastSeqNum;
+                    sequenceNumber.numberOfMissingSequences = seqNum - sequenceNumber.lastSeqNum - 1;
                 }
 
                 return false;
