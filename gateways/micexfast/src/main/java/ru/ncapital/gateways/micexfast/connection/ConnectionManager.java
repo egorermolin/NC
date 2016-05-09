@@ -277,8 +277,11 @@ public class ConnectionManager {
             @Override
             public void run() {
                 synchronized (sequenceValidator) {
-                    if (isRecovering == null)
+                    if (isRecovering == null) {
                         isRecovering = new AtomicBoolean(sequenceValidator.isRecovering());
+                        if (!isRecovering.get())
+                            stopSnapshot(sequenceValidator.getType());
+                    }
 
                     if (sequenceValidator.isRecovering()) {
                         if (!isRecovering.getAndSet(true))
