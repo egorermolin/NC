@@ -148,7 +148,9 @@ public class MessageReader implements IMulticastEventListener {
         Thread.currentThread().setName(connectionId.toString());
 
         if (running.getAndSet(true)) {
-            logger.warn("Already started..");
+            if (logger.isDebugEnabled())
+                logger.debug("Already STARTED");
+
             return;
         }
 
@@ -164,7 +166,9 @@ public class MessageReader implements IMulticastEventListener {
 
     public void stop() {
         if (!running.getAndSet(false)) {
-            logger.warn("Already stopped..");
+            if (logger.isDebugEnabled())
+                logger.debug("Already STOPPED");
+
             return;
         }
 
@@ -174,6 +178,9 @@ public class MessageReader implements IMulticastEventListener {
         } catch (IOException e) {
             Utils.printStackTrace(e, logger, "IOException occurred while starting..");
         }
+
+        if (logger.isDebugEnabled())
+            logger.debug("STOPPED");
     }
 
 
@@ -351,7 +358,8 @@ public class MessageReader implements IMulticastEventListener {
     }
 
     private void run() throws IOException {
-        logger.debug("STARTED");
+        if (logger.isDebugEnabled())
+            logger.debug("STARTED");
 
         if (!multicastInputStream.isRunning())
             multicastInputStream.start();
