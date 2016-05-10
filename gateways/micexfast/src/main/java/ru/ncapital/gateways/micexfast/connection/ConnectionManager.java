@@ -149,7 +149,7 @@ public class ConnectionManager {
                         break;
                     case PUBLIC_TRADES:
                         if (logger.isDebugEnabled())
-                            logger.error("NO SNAPSHOT CHANNEL FOR PUBLIC TRADES");
+                            logger.debug("NO SNAPSHOT CHANNEL FOR PUBLIC TRADES");
 
                         break;
                 }
