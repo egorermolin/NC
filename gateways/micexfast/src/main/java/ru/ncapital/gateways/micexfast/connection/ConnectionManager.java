@@ -137,6 +137,7 @@ public class ConnectionManager {
 
                         break;
                 }
+                break;
             case FOND:
                 switch (type) {
                     case ORDER_LIST:
