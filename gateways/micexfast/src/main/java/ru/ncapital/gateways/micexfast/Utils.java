@@ -98,8 +98,11 @@ public class Utils {
         return entryTimeInMicros;
     }
 
-    public static long getEntryTimeInToday(GroupValue groupValue) {
-        return convertTicksToToday(getEntryTimeInTicks(groupValue));
+    public static long getEntryTimeInTodayMicros(GroupValue mdEntry) {
+        long entryTimeToday = mdEntry.getValue("MDEntryTime") != null ? mdEntry.getInt("MDEntryTime") * 1000 : 0;
+        long entryTimeMicros = mdEntry.getValue("OrigTime") != null ? mdEntry.getInt("OrigTime") : 0;
+
+        return entryTimeToday + entryTimeMicros;
     }
 
     public static void printStackTrace(Exception e, Logger logger, String message) {

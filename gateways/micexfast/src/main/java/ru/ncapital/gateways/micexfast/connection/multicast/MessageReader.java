@@ -64,7 +64,7 @@ public class MessageReader implements IMulticastEventListener {
         }
 
         synchronized String dumpSendingToReceived() {
-            return dump("ENTR -> RECV", latenciesSendingToReceived);
+            return dump("SEND -> RECV", latenciesSendingToReceived);
         }
 
         private String dump(String prefix, List<Double> latencies) {
@@ -242,10 +242,10 @@ public class MessageReader implements IMulticastEventListener {
                     if (readMessage.getString("MsgType").equals("X")) {
                         SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
                         for (int i = 0; i < mdEntries.getLength(); ++i) {
-                            long entryTimeInToday = Utils.getEntryTimeInToday(mdEntries.get(i));
+                            long entryTimeInTodayMicros = Utils.getEntryTimeInTodayMicros(mdEntries.get(i));
 
-                            stats.addValueEntryToSending(entryTimeInToday - sendingTimeInToday);
-                            stats.addValueEntryToReceived(entryTimeInToday - currentTimeInToday);
+                            stats.addValueEntryToSending(sendingTimeInToday * 1000 - entryTimeInTodayMicros);
+                            stats.addValueEntryToReceived(currentTimeInToday * 1000 - entryTimeInTodayMicros);
                         }
                     }
                 }

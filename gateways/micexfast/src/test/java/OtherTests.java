@@ -80,4 +80,9 @@ public class OtherTests {
         assert MessageHandlerType.STATISTICS.equals("Statistics");
         assert MessageHandlerType.PUBLIC_TRADES.equals("PublicTrades");
     }
+
+    @Test
+    public void testConversion() {
+
+    }
 }
