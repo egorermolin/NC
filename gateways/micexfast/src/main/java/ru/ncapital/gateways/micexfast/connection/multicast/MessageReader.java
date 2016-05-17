@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Created by egore on 12/8/15.
  */
 public class MessageReader implements IMulticastEventListener {
+
     private class Statistics {
         private int totalNumberOfMessages = 0;
 
@@ -209,9 +210,6 @@ public class MessageReader implements IMulticastEventListener {
 
     public boolean isRunning() {
         return running.get();
-    }
-
-    public void dumpStatistics() {
     }
 
     private void connect() throws IOException {
