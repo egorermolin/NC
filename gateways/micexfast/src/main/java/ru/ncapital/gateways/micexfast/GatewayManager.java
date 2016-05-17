@@ -5,14 +5,10 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.apache.log4j.*;
-import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.micexfast.connection.ConnectionManager;
-import ru.ncapital.gateways.micexfast.domain.Instrument;
 import ru.ncapital.gateways.micexfast.domain.Subscription;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
-import ru.ncapital.gateways.micexfast.performance.IGatewayPerformanceLogger;
 
-import java.net.NetworkInterface;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -30,15 +26,12 @@ public class GatewayManager implements IGatewayManager {
     @Inject
     private MarketDataManager marketDataManager;
 
-    private boolean withStatistics = true;
-
-    private boolean withPublicTrade = true;
+    private boolean isListenSnapshotChannelOnlyIfNeeded;
 
     private AtomicBoolean started = new AtomicBoolean(false);
 
-    public GatewayManager configure(boolean withPublicTrade, boolean withStatistics) {
-        this.withPublicTrade = withPublicTrade;
-        this.withStatistics = withStatistics;
+    public GatewayManager configure(IGatewayConfiguration configuration) {
+        isListenSnapshotChannelOnlyIfNeeded = configuration.isListenSnapshotChannelOnlyIfNeeded();
 
         // hack to avoid circular injection
         marketDataManager.setInstrumentManager(instrumentManager);
@@ -112,14 +105,16 @@ public class GatewayManager implements IGatewayManager {
         injector.getInstance(MarketDataManager.class).configure(configuration);
         injector.getInstance(ConnectionManager.class).configure(configuration);
 
-        return injector.getInstance(GatewayManager.class).configure(true, true);
+        return injector.getInstance(GatewayManager.class).configure(configuration);
     }
 
     @Override
     public void start() {
         if (!started.getAndSet(true)) {
-            connectionManager.scheduleSnapshotWatcher(marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST).getSequenceValidator());
-            connectionManager.scheduleSnapshotWatcher(marketDataManager.getIncrementalProcessor(MessageHandlerType.STATISTICS).getSequenceValidator());
+            if (isListenSnapshotChannelOnlyIfNeeded) {
+                connectionManager.scheduleSnapshotWatcher(marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST).getSequenceValidator());
+                connectionManager.scheduleSnapshotWatcher(marketDataManager.getIncrementalProcessor(MessageHandlerType.STATISTICS).getSequenceValidator());
+            }
             connectionManager.startInstrument();
             connectionManager.startInstrumentStatus();
             for (MessageHandlerType type : MessageHandlerType.values()) {
@@ -138,7 +133,9 @@ public class GatewayManager implements IGatewayManager {
             }
             connectionManager.stopInstrument();
             connectionManager.stopInstrumentStatus();
-            connectionManager.stopSnapshotWatchers();
+            if (isListenSnapshotChannelOnlyIfNeeded) {
+                connectionManager.stopSnapshotWatchers();
+            }
             connectionManager.shutdown();
         }
     }

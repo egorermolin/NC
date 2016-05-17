@@ -28,4 +28,6 @@ public interface IGatewayConfiguration {
     IGatewayPerformanceLogger getPerformanceLogger();
 
     boolean isAsynchChannelReader();
+
+    boolean isListenSnapshotChannelOnlyIfNeeded();
 }
