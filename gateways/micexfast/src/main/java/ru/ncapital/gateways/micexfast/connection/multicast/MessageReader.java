@@ -239,7 +239,7 @@ public class MessageReader implements IMulticastEventListener {
                     long currentTimeInToday = Utils.currentTimeInToday();
                     stats.addValueSendingToReceived(currentTimeInToday - sendingTimeInToday);
 
-                    if (readMessage.getString("MsgType").equals("X")) {
+                    if (readMessage.getString("MessageType").equals("X")) {
                         SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
                         for (int i = 0; i < mdEntries.getLength(); ++i) {
                             long entryTimeInToday = Utils.getEntryTimeInToday(mdEntries.get(i));

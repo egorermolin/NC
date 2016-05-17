@@ -56,7 +56,7 @@ public class NullGatewayConfiguration implements IGatewayConfiguration {
 
     @Override
     public boolean isAsynchChannelReader() {
-        return false;
+        return true;
     }
 
     @Override

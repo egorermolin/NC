@@ -86,7 +86,7 @@ public class MainClass {
             }
 
             @Override
-            public MarketType getMarketType() { return MarketType.FOND; }
+            public MarketType getMarketType() { return MarketType.CURR; }
 
             @Override
             public TradingSessionId[] getAllowedTradingSessionIds() {
@@ -116,8 +116,8 @@ public class MainClass {
         logger.info("TOTAL " + instruments.length + " INSTRUMENTS");
 
         for (Instrument instrument : instruments) {
-            logger.info("Instrument " + instrument.toString());
-            gwManager.subscribeForMarketData(instrument.getSecurityId());
+            //logger.info("Instrument " + instrument.toString());
+            //gwManager.subscribeForMarketData(instrument.getSecurityId());
         }
 
         try {
