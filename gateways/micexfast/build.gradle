@@ -58,7 +58,7 @@ task genMulticastReceiver(dependsOn: copyLibs, type: Exec) {
     def myArgs = []
     myArgs.add '-target:exe'
     myArgs.add '-version:' + version - '-SNAPSHOT' + '.0.0'
-    myArgs.add '-out:' + exeTargetDir + '\\multicast_receiver.exe'
+    myArgs.add '-out:' + exeTargetDir + '\\messagereader.exe'
     myArgs.add '-main:ru.ncapital.gateways.micexfast.connection.multicast.MessageReader'
     myArgs.add '-sharedclassloader'
     myArgs.add dllSourceDir + '\\micexfast-' + version + '.jar'
