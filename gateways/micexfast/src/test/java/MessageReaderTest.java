@@ -2,7 +2,6 @@
 // Reproduction in whole or in part in any form or medium without express
 // written permission of Orc Software AB is strictly prohibited.
 
-import org.codehaus.groovy.control.messages.Message;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,18 +11,19 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.openfast.Context;
-import org.openfast.MessageHandler;
+import org.openfast.*;
 import org.openfast.codec.Coder;
 import ru.ncapital.gateways.micexfast.ConfigurationManager;
 import ru.ncapital.gateways.micexfast.InstrumentManager;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
+import ru.ncapital.gateways.micexfast.Utils;
 import ru.ncapital.gateways.micexfast.connection.Connection;
 import ru.ncapital.gateways.micexfast.connection.ConnectionId;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IProcessor;
 import ru.ncapital.gateways.micexfast.connection.multicast.MessageReader;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -37,7 +37,6 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.internal.verification.VerificationModeFactory.atLeast;
 
 /**
  * Created by egore on 5/4/16.
@@ -252,5 +251,34 @@ public class MessageReaderTest {
         verify(processor, atLeastOnce()).handleMessage(messageCaptor.capture(), any(Context.class), any(Coder.class));
 
         assertEquals(20151211075748086L, messageCaptor.getValue().getLong("SendingTime"));
+    }
+
+    @Test
+    public void testDefaultMessageHandler() {
+        MessageReader messageReader =  new MessageReader(ConnectionId.CURR_ORDER_LIST_INCR_A, configurationManager, marketDataManager, instrumentManager) {
+            @Override
+            public long currentTimeInToday() {
+                return 81132051L;
+            }
+        };
+        MessageHandler messageHandler = messageReader.createDefaultMessageHandler();
+
+        Message message = mock(Message.class);
+        SequenceValue mdEntries = mock(SequenceValue.class);
+        GroupValue mdEntry = mock(GroupValue.class);
+
+        when(message.getLong("SendingTime")).thenReturn(20160517081132211L);
+        when(message.getString("MessageType")).thenReturn("X");
+        when(message.getSequence("GroupMDEntries")).thenReturn(mdEntries);
+        when(mdEntries.getLength()).thenReturn(1);
+        when(mdEntries.get(0)).thenReturn(mdEntry);
+        when(mdEntry.getValue("MDEntryTime")).thenReturn(mock(FieldValue.class));
+        when(mdEntry.getInt("MDEntryTime")).thenReturn(81132000);
+        when(mdEntry.getValue("OrigTime")).thenReturn(mock(FieldValue.class));
+        when(mdEntry.getInt("OrigTime")).thenReturn(206913);
+
+        messageHandler.handleMessage(message, mock(Context.class), mock(Coder.class));
+
+        messageReader.dumpStatistics();
     }
 }

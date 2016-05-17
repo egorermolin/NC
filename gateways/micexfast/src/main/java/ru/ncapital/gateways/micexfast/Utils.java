@@ -99,7 +99,7 @@ public class Utils {
     }
 
     public static long getEntryTimeInTodayMicros(GroupValue mdEntry) {
-        long entryTimeToday = mdEntry.getValue("MDEntryTime") != null ? mdEntry.getInt("MDEntryTime") * 1000 : 0;
+        long entryTimeToday = mdEntry.getValue("MDEntryTime") != null ? mdEntry.getInt("MDEntryTime") * 1000L : 0;
         long entryTimeMicros = mdEntry.getValue("OrigTime") != null ? mdEntry.getInt("OrigTime") : 0;
 
         return entryTimeToday + entryTimeMicros;

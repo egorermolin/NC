@@ -30,6 +30,25 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class MessageReader implements IMulticastEventListener {
 
+    private class DefaultMessageHandler implements MessageHandler {
+        @Override
+        public void handleMessage(Message readMessage, Context context, Coder coder) {
+            long sendingTimeInToday = readMessage.getLong("SendingTime") % (1000L * 100L * 100L * 100L);
+            long currentTimeInToday = currentTimeInToday();
+            stats.addValueSendingToReceived(currentTimeInToday - sendingTimeInToday);
+
+            if (readMessage.getString("MessageType").equals("X")) {
+                SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
+                for (int i = 0; i < mdEntries.getLength(); ++i) {
+                    long entryTimeInTodayMicros = Utils.getEntryTimeInTodayMicros(mdEntries.get(i));
+
+                    stats.addValueEntryToSending(sendingTimeInToday - entryTimeInTodayMicros / 1000.0);
+                    stats.addValueEntryToReceived(currentTimeInToday - entryTimeInTodayMicros/ 1000.0);
+                }
+            }
+        }
+    }
+
     private class Statistics {
         private int totalNumberOfMessages = 0;
 
@@ -79,9 +98,9 @@ public class MessageReader implements IMulticastEventListener {
             sb.append(prefix + "[Total: ").append(totalNumberOfMessages).append("]");
             if (latencies.size() > 0) {
                 sb.append("[Last: ").append(latencies.size()).append("]");
-                sb.append("[MinL: ").append(latencies.get(0)).append("]");
-                sb.append("[MedL: ").append(latencies.get(latencies.size() / 2)).append("]");
-                sb.append("[MaxL: ").append(latencies.get(latencies.size() - 1)).append("]");
+                sb.append("[MinL: ").append(String.format("%.2f", latencies.get(0))).append("]");
+                sb.append("[MedL: ").append(String.format("%.2f", latencies.get(latencies.size() / 2))).append("]");
+                sb.append("[MaxL: ").append(String.format("%.2f", latencies.get(latencies.size() - 1))).append("]");
                 sb.append("[AvgL: ").append(String.format("%.2f", totalLatency / latencies.size())).append("]");
             }
             latencies.clear();
@@ -208,9 +227,22 @@ public class MessageReader implements IMulticastEventListener {
             logger.debug("STOPPED");
     }
 
-
     public boolean isRunning() {
         return running.get();
+    }
+
+    public MessageHandler createDefaultMessageHandler() {
+        return new DefaultMessageHandler();
+    }
+
+    public long currentTimeInToday() {
+        return Utils.currentTimeInToday();
+    }
+
+    public void dumpStatistics() {
+        logger.info(stats.dumpEntryToSending());
+        logger.info(stats.dumpEntryToReceived());
+        logger.info(stats.dumpSendingToReceived());
     }
 
     private void connect() throws IOException {
@@ -232,24 +264,7 @@ public class MessageReader implements IMulticastEventListener {
             messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
 
         if (instrumentManager == null && marketDataManager == null) {
-            registerMessageHandler(new MessageHandler() {
-                @Override
-                public void handleMessage(Message readMessage, Context context, Coder coder) {
-                    long sendingTimeInToday = readMessage.getLong("SendingTime") % (1000L * 100L * 100L * 100L);
-                    long currentTimeInToday = Utils.currentTimeInToday();
-                    stats.addValueSendingToReceived(currentTimeInToday - sendingTimeInToday);
-
-                    if (readMessage.getString("MsgType").equals("X")) {
-                        SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
-                        for (int i = 0; i < mdEntries.getLength(); ++i) {
-                            long entryTimeInTodayMicros = Utils.getEntryTimeInTodayMicros(mdEntries.get(i));
-
-                            stats.addValueEntryToSending(sendingTimeInToday * 1000 - entryTimeInTodayMicros);
-                            stats.addValueEntryToReceived(currentTimeInToday * 1000 - entryTimeInTodayMicros);
-                        }
-                    }
-                }
-            });
+            registerMessageHandler(createDefaultMessageHandler());
             multicastInputStream.setInTimestamp(inTimestamp = new ThreadLocal<Long>() {
                 @Override
                 public Long initialValue() {
@@ -490,9 +505,7 @@ public class MessageReader implements IMulticastEventListener {
 
                     dumpStatistics++;
                     if (dumpStatistics == 1) {
-                        mr.logger.info(mr.stats.dumpEntryToSending());
-                        mr.logger.info(mr.stats.dumpEntryToReceived());
-                        mr.logger.info(mr.stats.dumpSendingToReceived());
+                        mr.dumpStatistics();
                         dumpStatistics = 0;
                     }
                 }
