@@ -58,4 +58,9 @@ public class NullGatewayConfiguration implements IGatewayConfiguration {
     public boolean isAsynchChannelReader() {
         return false;
     }
+
+    @Override
+    public boolean isListenSnapshotChannelOnlyIfNeeded() {
+        return false;
+    }
 }

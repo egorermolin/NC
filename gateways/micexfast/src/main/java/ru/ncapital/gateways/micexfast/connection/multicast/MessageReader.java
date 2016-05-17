@@ -1,10 +1,7 @@
 package ru.ncapital.gateways.micexfast.connection.multicast;
 
 import org.apache.log4j.Level;
-import org.openfast.Context;
-import org.openfast.Message;
-import org.openfast.MessageHandler;
-import org.openfast.MessageInputStream;
+import org.openfast.*;
 import org.openfast.codec.Coder;
 import org.openfast.logging.FastMessageLogger;
 import org.openfast.template.MessageTemplate;
@@ -36,13 +33,41 @@ public class MessageReader implements IMulticastEventListener {
     private class Statistics {
         private int totalNumberOfMessages = 0;
 
-        private List<Double> latencies = new ArrayList<Double>();
+        private List<Double> latenciesEntryToSending = new ArrayList<Double>();
 
-        synchronized void addValue(double latency) {
+        private List<Double> latenciesEntryToReceived = new ArrayList<Double>();
+
+        private List<Double> latenciesSendingToReceived = new ArrayList<Double>();
+
+        synchronized void addValueEntryToSending(double latency) {
+            addValue(latency, latenciesEntryToSending);
+        }
+
+        synchronized void addValueEntryToReceived(double latency) {
+            addValue(latency, latenciesEntryToReceived);
+        }
+
+        synchronized void addValueSendingToReceived(double latency) {
+            addValue(latency, latenciesSendingToReceived);
+        }
+
+        private void addValue(double latency, List<Double> latencies) {
             latencies.add(latency);
         }
 
-        synchronized String dump() {
+        synchronized String dumpEntryToSending() {
+            return dump("ENTR -> SEND", latenciesEntryToSending);
+        }
+
+        synchronized String dumpEntryToReceived() {
+            return dump("ENTR -> RECV",latenciesEntryToReceived);
+        }
+
+        synchronized String dumpSendingToReceived() {
+            return dump("ENTR -> RECV", latenciesSendingToReceived);
+        }
+
+        private String dump(String prefix, List<Double> latencies) {
             totalNumberOfMessages += latencies.size();
             Collections.sort(latencies);
             double totalLatency = 0.0;
@@ -51,7 +76,7 @@ public class MessageReader implements IMulticastEventListener {
 
             StringBuilder sb = new StringBuilder();
 
-            sb.append("[Total: ").append(totalNumberOfMessages).append("]");
+            sb.append(prefix + "[Total: ").append(totalNumberOfMessages).append("]");
             if (latencies.size() > 0) {
                 sb.append("[Last: ").append(latencies.size()).append("]");
                 sb.append("[MinL: ").append(latencies.get(0)).append("]");
@@ -210,10 +235,19 @@ public class MessageReader implements IMulticastEventListener {
             registerMessageHandler(new MessageHandler() {
                 @Override
                 public void handleMessage(Message readMessage, Context context, Coder coder) {
-                    long sendingTime = readMessage.getLong("SendingTime");
-                    long currentTime = Utils.currentTimeInToday();
+                    long sendingTimeInToday = readMessage.getLong("SendingTime") % (1000L * 100L * 100L * 100L);
+                    long currentTimeInToday = Utils.currentTimeInToday();
+                    stats.addValueSendingToReceived(currentTimeInToday - sendingTimeInToday);
 
-                    stats.addValue(currentTime - sendingTime % (1000L * 100L * 100L * 100L));
+                    if (readMessage.getString("MsgType").equals("X")) {
+                        SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
+                        for (int i = 0; i < mdEntries.getLength(); ++i) {
+                            long entryTimeInToday = Utils.getEntryTimeInToday(mdEntries.get(i));
+
+                            stats.addValueEntryToSending(entryTimeInToday - sendingTimeInToday);
+                            stats.addValueEntryToReceived(entryTimeInToday - currentTimeInToday);
+                        }
+                    }
                 }
             });
             multicastInputStream.setInTimestamp(inTimestamp = new ThreadLocal<Long>() {
@@ -400,7 +434,7 @@ public class MessageReader implements IMulticastEventListener {
         GatewayManager.addConsoleAppender("%d{HH:mm:ss} %m%n", Level.TRACE);
         GatewayManager.addFileAppender("log/log.mr.out", "%d{HH:mm:ss} %m%n", Level.TRACE);
         if (args.length < 4) {
-            System.err.println("Usage MulticastReader <connectionId> <fast_templates> <interfaces> <connections_file> [debug,trace]");
+            System.err.println("Usage MulticastReader <connectionId> <fast_templates> <interface[s]> <connections_file> [debug, trace]");
             return;
         }
 
@@ -456,7 +490,9 @@ public class MessageReader implements IMulticastEventListener {
 
                     dumpStatistics++;
                     if (dumpStatistics == 1) {
-                        mr.logger.info(mr.stats.dump());
+                        mr.logger.info(mr.stats.dumpEntryToSending());
+                        mr.logger.info(mr.stats.dumpEntryToReceived());
+                        mr.logger.info(mr.stats.dumpSendingToReceived());
                         dumpStatistics = 0;
                     }
                 }

@@ -98,6 +98,10 @@ public class Utils {
         return entryTimeInMicros;
     }
 
+    public static long getEntryTimeInToday(GroupValue groupValue) {
+        return convertTicksToToday(getEntryTimeInTicks(groupValue));
+    }
+
     public static void printStackTrace(Exception e, Logger logger, String message) {
         if (message != null)
             logger.error(message);
@@ -106,4 +110,5 @@ public class Utils {
         for (StackTraceElement trace : e.getStackTrace())
            logger.error("--> " + trace.toString());
     }
+
 }
