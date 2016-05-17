@@ -252,33 +252,4 @@ public class MessageReaderTest {
 
         assertEquals(20151211075748086L, messageCaptor.getValue().getLong("SendingTime"));
     }
-
-    @Test
-    public void testDefaultMessageHandler() {
-        MessageReader messageReader =  new MessageReader(ConnectionId.CURR_ORDER_LIST_INCR_A, configurationManager, marketDataManager, instrumentManager) {
-            @Override
-            public long currentTimeInToday() {
-                return 81132051L;
-            }
-        };
-        MessageHandler messageHandler = messageReader.createDefaultMessageHandler();
-
-        Message message = mock(Message.class);
-        SequenceValue mdEntries = mock(SequenceValue.class);
-        GroupValue mdEntry = mock(GroupValue.class);
-
-        when(message.getLong("SendingTime")).thenReturn(20160517081132211L);
-        when(message.getString("MessageType")).thenReturn("X");
-        when(message.getSequence("GroupMDEntries")).thenReturn(mdEntries);
-        when(mdEntries.getLength()).thenReturn(1);
-        when(mdEntries.get(0)).thenReturn(mdEntry);
-        when(mdEntry.getValue("MDEntryTime")).thenReturn(mock(FieldValue.class));
-        when(mdEntry.getInt("MDEntryTime")).thenReturn(81132000);
-        when(mdEntry.getValue("OrigTime")).thenReturn(mock(FieldValue.class));
-        when(mdEntry.getInt("OrigTime")).thenReturn(206913);
-
-        messageHandler.handleMessage(message, mock(Context.class), mock(Coder.class));
-
-        messageReader.dumpStatistics();
-    }
 }

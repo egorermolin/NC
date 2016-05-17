@@ -30,23 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class MessageReader implements IMulticastEventListener {
 
-    private class DefaultMessageHandler implements MessageHandler {
-        @Override
-        public void handleMessage(Message readMessage, Context context, Coder coder) {
-            long sendingTimeInToday = readMessage.getLong("SendingTime") % (1000L * 100L * 100L * 100L);
-            long currentTimeInToday = currentTimeInToday();
-            stats.addValueSendingToReceived(currentTimeInToday - sendingTimeInToday);
-
-            if (readMessage.getString("MessageType").equals("X")) {
-                SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
-                for (int i = 0; i < mdEntries.getLength(); ++i) {
-                    long entryTimeInTodayMicros = Utils.getEntryTimeInTodayMicros(mdEntries.get(i));
-
-                    stats.addValueEntryToSending(sendingTimeInToday - entryTimeInTodayMicros / 1000.0);
-                    stats.addValueEntryToReceived(currentTimeInToday - entryTimeInTodayMicros/ 1000.0);
-                }
-            }
-        }
+    private class DefaultMessageHandler implements
     }
 
     private class Statistics {
@@ -264,7 +248,24 @@ public class MessageReader implements IMulticastEventListener {
             messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
 
         if (instrumentManager == null && marketDataManager == null) {
-            registerMessageHandler(createDefaultMessageHandler());
+            registerMessageHandler(new MessageHandler() {
+                @Override
+                public void handleMessage(Message readMessage, Context context, Coder coder) {
+                    long sendingTimeInToday = readMessage.getLong("SendingTime") % (1000L * 100L * 100L * 100L);
+                    long currentTimeInToday = currentTimeInToday();
+                    stats.addValueSendingToReceived(currentTimeInToday - sendingTimeInToday);
+
+                    if (readMessage.getString("MessageType").equals("X")) {
+                        SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
+                        for (int i = 0; i < mdEntries.getLength(); ++i) {
+                            long entryTimeInTodayMicros = Utils.getEntryTimeInTodayMicros(mdEntries.get(i));
+
+                            stats.addValueEntryToSending(sendingTimeInToday - entryTimeInTodayMicros / 1000.0);
+                            stats.addValueEntryToReceived(currentTimeInToday - entryTimeInTodayMicros / 1000.0);
+                        }
+                    }
+                }
+            });
             multicastInputStream.setInTimestamp(inTimestamp = new ThreadLocal<Long>() {
                 @Override
                 public Long initialValue() {
