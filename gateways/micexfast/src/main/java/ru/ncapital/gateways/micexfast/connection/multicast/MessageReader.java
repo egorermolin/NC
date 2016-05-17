@@ -79,9 +79,9 @@ public class MessageReader implements IMulticastEventListener {
             sb.append(prefix + "[Total: ").append(totalNumberOfMessages).append("]");
             if (latencies.size() > 0) {
                 sb.append("[Last: ").append(latencies.size()).append("]");
-                sb.append("[MinL: ").append(latencies.get(0)).append("]");
-                sb.append("[MedL: ").append(latencies.get(latencies.size() / 2)).append("]");
-                sb.append("[MaxL: ").append(latencies.get(latencies.size() - 1)).append("]");
+                sb.append("[MinL: ").append(String.format("%.2f", latencies.get(0))).append("]");
+                sb.append("[MedL: ").append(String.format("%.2f", latencies.get(latencies.size() / 2))).append("]");
+                sb.append("[MaxL: ").append(String.format("%.2f", latencies.get(latencies.size() - 1))).append("]");
                 sb.append("[AvgL: ").append(String.format("%.2f", totalLatency / latencies.size())).append("]");
             }
             latencies.clear();
@@ -208,7 +208,6 @@ public class MessageReader implements IMulticastEventListener {
             logger.debug("STOPPED");
     }
 
-
     public boolean isRunning() {
         return running.get();
     }
@@ -244,8 +243,8 @@ public class MessageReader implements IMulticastEventListener {
                         for (int i = 0; i < mdEntries.getLength(); ++i) {
                             long entryTimeInTodayMicros = Utils.getEntryTimeInTodayMicros(mdEntries.get(i));
 
-                            stats.addValueEntryToSending(sendingTimeInToday * 1000 - entryTimeInTodayMicros);
-                            stats.addValueEntryToReceived(currentTimeInToday * 1000 - entryTimeInTodayMicros);
+                            stats.addValueEntryToSending(sendingTimeInToday - entryTimeInTodayMicros / 1000.0);
+                            stats.addValueEntryToReceived(currentTimeInToday - entryTimeInTodayMicros / 1000.0);
                         }
                     }
                 }

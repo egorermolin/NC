@@ -2,7 +2,6 @@
 // Reproduction in whole or in part in any form or medium without express
 // written permission of Orc Software AB is strictly prohibited.
 
-import org.codehaus.groovy.control.messages.Message;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,18 +11,19 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.openfast.Context;
-import org.openfast.MessageHandler;
+import org.openfast.*;
 import org.openfast.codec.Coder;
 import ru.ncapital.gateways.micexfast.ConfigurationManager;
 import ru.ncapital.gateways.micexfast.InstrumentManager;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
+import ru.ncapital.gateways.micexfast.Utils;
 import ru.ncapital.gateways.micexfast.connection.Connection;
 import ru.ncapital.gateways.micexfast.connection.ConnectionId;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IProcessor;
 import ru.ncapital.gateways.micexfast.connection.multicast.MessageReader;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -37,7 +37,6 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.internal.verification.VerificationModeFactory.atLeast;
 
 /**
  * Created by egore on 5/4/16.
