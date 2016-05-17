@@ -29,10 +29,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Created by egore on 12/8/15.
  */
 public class MessageReader implements IMulticastEventListener {
-
-    private class DefaultMessageHandler implements
-    }
-
     private class Statistics {
         private int totalNumberOfMessages = 0;
 
@@ -215,18 +211,7 @@ public class MessageReader implements IMulticastEventListener {
         return running.get();
     }
 
-    public MessageHandler createDefaultMessageHandler() {
-        return new DefaultMessageHandler();
-    }
-
-    public long currentTimeInToday() {
-        return Utils.currentTimeInToday();
-    }
-
     public void dumpStatistics() {
-        logger.info(stats.dumpEntryToSending());
-        logger.info(stats.dumpEntryToReceived());
-        logger.info(stats.dumpSendingToReceived());
     }
 
     private void connect() throws IOException {
@@ -252,7 +237,7 @@ public class MessageReader implements IMulticastEventListener {
                 @Override
                 public void handleMessage(Message readMessage, Context context, Coder coder) {
                     long sendingTimeInToday = readMessage.getLong("SendingTime") % (1000L * 100L * 100L * 100L);
-                    long currentTimeInToday = currentTimeInToday();
+                    long currentTimeInToday = Utils.currentTimeInToday();
                     stats.addValueSendingToReceived(currentTimeInToday - sendingTimeInToday);
 
                     if (readMessage.getString("MessageType").equals("X")) {
@@ -506,7 +491,9 @@ public class MessageReader implements IMulticastEventListener {
 
                     dumpStatistics++;
                     if (dumpStatistics == 1) {
-                        mr.dumpStatistics();
+                        mr.logger.info(mr.stats.dumpEntryToSending());
+                        mr.logger.info(mr.stats.dumpEntryToReceived());
+                        mr.logger.info(mr.stats.dumpSendingToReceived());
                         dumpStatistics = 0;
                     }
                 }
