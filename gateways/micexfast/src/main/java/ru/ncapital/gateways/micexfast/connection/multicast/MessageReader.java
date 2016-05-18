@@ -235,7 +235,7 @@ public class MessageReader implements IMulticastEventListener {
                 @Override
                 public void handleMessage(Message readMessage, Context context, Coder coder) {
                     long sendingTimeInToday = readMessage.getLong("SendingTime") % (1000L * 100L * 100L * 100L);
-                    long currentTimeInToday = Utils.currentTimeInToday();
+                    long currentTimeInToday = Utils.convertTicksToToday(inTimestamp.get()); // Utils.currentTimeInToday();
                     stats.addValueSendingToReceived(currentTimeInToday - sendingTimeInToday);
 
                     if (readMessage.getString("MessageType").equals("X")) {
@@ -489,9 +489,12 @@ public class MessageReader implements IMulticastEventListener {
 
                     dumpStatistics++;
                     if (dumpStatistics == 1) {
-                        mr.logger.info(mr.stats.dumpEntryToSending());
-                        mr.logger.info(mr.stats.dumpEntryToReceived());
-                        mr.logger.info(mr.stats.dumpSendingToReceived());
+                        synchronized (mr.stats) {
+                            mr.logger.info("" + Utils.currentTimeInToday());
+                            mr.logger.info(mr.stats.dumpEntryToSending());
+                            mr.logger.info(mr.stats.dumpEntryToReceived());
+                            mr.logger.info(mr.stats.dumpSendingToReceived());
+                        }
                         dumpStatistics = 0;
                     }
                 }
