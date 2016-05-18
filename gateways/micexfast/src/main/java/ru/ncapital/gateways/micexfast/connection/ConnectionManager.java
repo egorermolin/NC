@@ -8,7 +8,6 @@ import ru.ncapital.gateways.micexfast.*;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.micexfast.connection.multicast.MessageReader;
 import ru.ncapital.gateways.micexfast.connection.multicast.MessageReaderStarter;
-import ru.ncapital.gateways.micexfast.connection.multicast.MessageReaderStopper;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
 import java.io.IOException;
@@ -30,7 +29,7 @@ public class ConnectionManager {
 
     private final ScheduledExecutorService snapshotWatcherStarter = Executors.newScheduledThreadPool(1);
 
-    private Map<ConnectionId, MessageReader> multicastReceivers = new HashMap<ConnectionId, MessageReader>();
+    private Map<ConnectionId, MessageReader> messageReaders = new HashMap<ConnectionId, MessageReader>();
 
     private Logger logger = LoggerFactory.getLogger("ConnectionManager");
 
@@ -42,7 +41,7 @@ public class ConnectionManager {
             MessageReader mcr = new MessageReader(connectionId, configurationManager, marketDataManager, instrumentManager);
             try {
                 mcr.init("info");
-                multicastReceivers.put(connectionId, mcr);
+                messageReaders.put(connectionId, mcr);
             } catch (IOException e) {
                 Utils.printStackTrace(e, logger, "IOException occurred while opening channel..");
             }
@@ -57,12 +56,12 @@ public class ConnectionManager {
     public void startInstrument() {
         switch (marketType) {
             case CURR:
-                starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.CURR_INSTRUMENT_SNAP_A)));
-                starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.CURR_INSTRUMENT_SNAP_B)));
+                starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_INSTRUMENT_SNAP_A)));
+                starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_INSTRUMENT_SNAP_B)));
                 break;
             case FOND:
-                starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.FOND_INSTRUMENT_SNAP_A)));
-                starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.FOND_INSTRUMENT_SNAP_B)));
+                starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_INSTRUMENT_SNAP_A)));
+                starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_INSTRUMENT_SNAP_B)));
                 break;
         }
     }
@@ -70,12 +69,12 @@ public class ConnectionManager {
     public void stopInstrument() {
         switch (marketType) {
             case CURR:
-                starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.CURR_INSTRUMENT_SNAP_A)));
-                starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.CURR_INSTRUMENT_SNAP_B)));
+                messageReaders.get(ConnectionId.CURR_INSTRUMENT_SNAP_A).stop();
+                messageReaders.get(ConnectionId.CURR_INSTRUMENT_SNAP_B).stop();
                 break;
             case FOND:
-                starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.FOND_INSTRUMENT_SNAP_A)));
-                starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.FOND_INSTRUMENT_SNAP_B)));
+                messageReaders.get(ConnectionId.FOND_INSTRUMENT_SNAP_A).stop();
+                messageReaders.get(ConnectionId.FOND_INSTRUMENT_SNAP_B).stop();
                 break;
         }
     }
@@ -85,12 +84,12 @@ public class ConnectionManager {
             case CURR:
                 switch (type) {
                     case ORDER_LIST:
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.CURR_ORDER_LIST_SNAP_A)));
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.CURR_ORDER_LIST_SNAP_B)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_ORDER_LIST_SNAP_A)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_ORDER_LIST_SNAP_B)));
                         break;
                     case STATISTICS:
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.CURR_STATISTICS_SNAP_A)));
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.CURR_STATISTICS_SNAP_B)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_STATISTICS_SNAP_A)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_STATISTICS_SNAP_B)));
                         break;
                     case PUBLIC_TRADES:
                         if (logger.isDebugEnabled())
@@ -102,12 +101,12 @@ public class ConnectionManager {
             case FOND:
                 switch (type) {
                     case ORDER_LIST:
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.FOND_ORDER_LIST_SNAP_A)));
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.FOND_ORDER_LIST_SNAP_B)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_ORDER_LIST_SNAP_A)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_ORDER_LIST_SNAP_B)));
                         break;
                     case STATISTICS:
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.FOND_STATISTICS_SNAP_A)));
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.FOND_STATISTICS_SNAP_B)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_STATISTICS_SNAP_A)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_STATISTICS_SNAP_B)));
                         break;
                     case PUBLIC_TRADES:
                         if (logger.isDebugEnabled())
@@ -124,12 +123,12 @@ public class ConnectionManager {
             case CURR:
                 switch (type) {
                     case ORDER_LIST:
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.CURR_ORDER_LIST_SNAP_A)));
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.CURR_ORDER_LIST_SNAP_B)));
+                        messageReaders.get(ConnectionId.CURR_ORDER_LIST_SNAP_A).stop();
+                        messageReaders.get(ConnectionId.CURR_ORDER_LIST_SNAP_B).stop();
                         break;
                     case STATISTICS:
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.CURR_STATISTICS_SNAP_A)));
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.CURR_STATISTICS_SNAP_B)));
+                        messageReaders.get(ConnectionId.CURR_STATISTICS_SNAP_A).stop();
+                        messageReaders.get(ConnectionId.CURR_STATISTICS_SNAP_B).stop();
                         break;
                     case PUBLIC_TRADES:
                         if (logger.isDebugEnabled())
@@ -141,12 +140,12 @@ public class ConnectionManager {
             case FOND:
                 switch (type) {
                     case ORDER_LIST:
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.FOND_ORDER_LIST_SNAP_A)));
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.FOND_ORDER_LIST_SNAP_B)));
+                        messageReaders.get(ConnectionId.FOND_ORDER_LIST_SNAP_A).stop();
+                        messageReaders.get(ConnectionId.FOND_ORDER_LIST_SNAP_B).stop();
                         break;
                     case STATISTICS:
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.FOND_STATISTICS_SNAP_A)));
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.FOND_STATISTICS_SNAP_B)));
+                        messageReaders.get(ConnectionId.FOND_STATISTICS_SNAP_A).stop();
+                        messageReaders.get(ConnectionId.FOND_STATISTICS_SNAP_B).stop();
                         break;
                     case PUBLIC_TRADES:
                         if (logger.isDebugEnabled())
@@ -163,32 +162,32 @@ public class ConnectionManager {
             case CURR:
                 switch (type) {
                     case ORDER_LIST:
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.CURR_ORDER_LIST_INCR_A)));
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.CURR_ORDER_LIST_INCR_B)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_ORDER_LIST_INCR_A)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_ORDER_LIST_INCR_B)));
                         break;
                     case STATISTICS:
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.CURR_STATISTICS_INCR_A)));
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.CURR_STATISTICS_INCR_B)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_STATISTICS_INCR_A)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_STATISTICS_INCR_B)));
                         break;
                     case PUBLIC_TRADES:
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.CURR_PUB_TRADES_INCR_A)));
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.CURR_PUB_TRADES_INCR_B)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_A)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_B)));
                         break;
                 }
                 break;
             case FOND:
                 switch (type) {
                     case ORDER_LIST:
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.FOND_ORDER_LIST_INCR_A)));
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.FOND_ORDER_LIST_INCR_B)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_ORDER_LIST_INCR_A)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_ORDER_LIST_INCR_B)));
                         break;
                     case STATISTICS:
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.FOND_STATISTICS_INCR_A)));
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.FOND_STATISTICS_INCR_B)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_STATISTICS_INCR_A)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_STATISTICS_INCR_B)));
                         break;
                     case PUBLIC_TRADES:
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.FOND_PUB_TRADES_INCR_A)));
-                        starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.FOND_PUB_TRADES_INCR_B)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_A)));
+                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_B)));
                         break;
                 }
                 break;
@@ -200,32 +199,32 @@ public class ConnectionManager {
             case CURR:
                 switch (type) {
                     case ORDER_LIST:
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.CURR_ORDER_LIST_INCR_A)));
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.CURR_ORDER_LIST_INCR_B)));
+                        messageReaders.get(ConnectionId.CURR_ORDER_LIST_INCR_A).stop();
+                        messageReaders.get(ConnectionId.CURR_ORDER_LIST_INCR_B).stop();
                         break;
                     case STATISTICS:
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.CURR_STATISTICS_INCR_A)));
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.CURR_STATISTICS_INCR_B)));
+                        messageReaders.get(ConnectionId.CURR_STATISTICS_INCR_A).stop();
+                        messageReaders.get(ConnectionId.CURR_STATISTICS_INCR_B).stop();
                         break;
                     case PUBLIC_TRADES:
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.CURR_PUB_TRADES_INCR_A)));
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.CURR_PUB_TRADES_INCR_B)));
+                        messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_A).stop();
+                        messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_B).stop();
                         break;
                 }
                 break;
             case FOND:
                 switch (type) {
                     case ORDER_LIST:
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.FOND_ORDER_LIST_INCR_A)));
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.FOND_ORDER_LIST_INCR_B)));
+                        messageReaders.get(ConnectionId.FOND_ORDER_LIST_INCR_A).stop();
+                        messageReaders.get(ConnectionId.FOND_ORDER_LIST_INCR_B).stop();
                         break;
                     case STATISTICS:
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.FOND_STATISTICS_INCR_A)));
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.FOND_STATISTICS_INCR_B)));
+                        messageReaders.get(ConnectionId.FOND_STATISTICS_INCR_A).stop();
+                        messageReaders.get(ConnectionId.FOND_STATISTICS_INCR_B).stop();
                         break;
                     case PUBLIC_TRADES:
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.FOND_PUB_TRADES_INCR_A)));
-                        starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.FOND_PUB_TRADES_INCR_B)));
+                        messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_A).stop();
+                        messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_B).stop();
                         break;
                 }
                 break;
@@ -235,12 +234,12 @@ public class ConnectionManager {
     public void startInstrumentStatus() {
         switch(marketType) {
             case CURR:
-                starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.CURR_INSTRUMENT_INCR_A)));
-                starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.CURR_INSTRUMENT_INCR_B)));
+                starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_INSTRUMENT_INCR_A)));
+                starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_INSTRUMENT_INCR_B)));
                 break;
             case FOND:
-                starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.FOND_INSTRUMENT_INCR_A)));
-                starter.execute(new MessageReaderStarter(logger, multicastReceivers.get(ConnectionId.FOND_INSTRUMENT_INCR_B)));
+                starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_INSTRUMENT_INCR_A)));
+                starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_INSTRUMENT_INCR_B)));
                 break;
         }
     }
@@ -248,12 +247,12 @@ public class ConnectionManager {
     public void stopInstrumentStatus() {
         switch(marketType) {
             case CURR:
-                starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.CURR_INSTRUMENT_INCR_A)));
-                starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.CURR_INSTRUMENT_INCR_B)));
+                messageReaders.get(ConnectionId.CURR_INSTRUMENT_INCR_A).stop();
+                messageReaders.get(ConnectionId.CURR_INSTRUMENT_INCR_B).stop();
                 break;
             case FOND:
-                starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.FOND_INSTRUMENT_INCR_A)));
-                starter.execute(new MessageReaderStopper(logger, multicastReceivers.get(ConnectionId.FOND_INSTRUMENT_INCR_B)));
+                messageReaders.get(ConnectionId.FOND_INSTRUMENT_INCR_A).stop();
+                messageReaders.get(ConnectionId.FOND_INSTRUMENT_INCR_B).stop();
                 break;
         }
     }
@@ -293,7 +292,7 @@ public class ConnectionManager {
                     }
                 }
             }
-        }, 600, 1, TimeUnit.SECONDS);
+        }, 60, 1, TimeUnit.SECONDS);
     }
 
     public void stopSnapshotWatchers() {

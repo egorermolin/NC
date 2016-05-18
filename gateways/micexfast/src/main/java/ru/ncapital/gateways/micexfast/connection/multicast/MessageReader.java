@@ -22,7 +22,9 @@ import java.nio.channels.MembershipKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -124,6 +126,8 @@ public class MessageReader implements IMulticastEventListener {
 
     private long received;
 
+    private AtomicBoolean isStopping = new AtomicBoolean(false);
+
     public MessageReader(ConnectionId connectionId, ConfigurationManager configurationManager, MarketDataManager marketDataManager, InstrumentManager instumentManager) {
         this.connectionId = connectionId;
         this.asynch = configurationManager.isAsynchChannelReader();
@@ -170,7 +174,7 @@ public class MessageReader implements IMulticastEventListener {
     }
 
     public void start() {
-        Thread.currentThread().setName(connectionId.toString());
+        logger.info("START " + toString());
 
         if (running.getAndSet(true)) {
             if (logger.isDebugEnabled())
@@ -190,6 +194,8 @@ public class MessageReader implements IMulticastEventListener {
     }
 
     public void stop() {
+        logger.info("STOP " + toString());
+
         if (!running.getAndSet(false)) {
             if (logger.isDebugEnabled())
                 logger.debug("Already STOPPED");
@@ -235,7 +241,7 @@ public class MessageReader implements IMulticastEventListener {
                 @Override
                 public void handleMessage(Message readMessage, Context context, Coder coder) {
                     long sendingTimeInToday = readMessage.getLong("SendingTime") % (1000L * 100L * 100L * 100L);
-                    long currentTimeInToday = Utils.currentTimeInToday();
+                    long currentTimeInToday = Utils.convertTicksToToday(inTimestamp.get()); // Utils.currentTimeInToday();
                     stats.addValueSendingToReceived(currentTimeInToday - sendingTimeInToday);
 
                     if (readMessage.getString("MessageType").equals("X")) {
@@ -391,6 +397,8 @@ public class MessageReader implements IMulticastEventListener {
     }
 
     private void run() throws IOException {
+        Thread.currentThread().setName(connectionId.toString());
+
         if (logger.isDebugEnabled())
             logger.debug("STARTED");
 
@@ -489,9 +497,12 @@ public class MessageReader implements IMulticastEventListener {
 
                     dumpStatistics++;
                     if (dumpStatistics == 1) {
-                        mr.logger.info(mr.stats.dumpEntryToSending());
-                        mr.logger.info(mr.stats.dumpEntryToReceived());
-                        mr.logger.info(mr.stats.dumpSendingToReceived());
+                        synchronized (mr.stats) {
+                            mr.logger.info("" + Utils.currentTimeInToday());
+                            mr.logger.info(mr.stats.dumpEntryToSending());
+                            mr.logger.info(mr.stats.dumpEntryToReceived());
+                            mr.logger.info(mr.stats.dumpSendingToReceived());
+                        }
                         dumpStatistics = 0;
                     }
                 }
