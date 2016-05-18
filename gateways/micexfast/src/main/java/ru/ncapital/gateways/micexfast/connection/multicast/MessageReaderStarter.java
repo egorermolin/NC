@@ -8,10 +8,8 @@ import org.slf4j.Logger;
 public class MessageReaderStarter implements Runnable {
     private MessageReader mcr;
 
-    public MessageReaderStarter(Logger logger, MessageReader mcr) {
+    public MessageReaderStarter(MessageReader mcr) {
         this.mcr = mcr;
-
-        logger.info("START " + mcr);
     }
 
     @Override
