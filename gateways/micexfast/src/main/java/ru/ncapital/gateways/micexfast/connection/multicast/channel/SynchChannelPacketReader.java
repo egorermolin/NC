@@ -28,7 +28,8 @@ public class SynchChannelPacketReader extends AChannelPacketReader {
     @Override
     public void stop() {
         running = false;
-        readingThread.interrupt();
+        if (readingThread != null)
+            readingThread.interrupt();
     }
 
     @Override
