@@ -5,6 +5,7 @@ package ru.ncapital.gateways.micexfast.connection.multicast.channel;
 
 import ru.ncapital.gateways.micexfast.connection.multicast.IMulticastEventListener;
 
+import java.io.IOException;
 import java.nio.channels.DatagramChannel;
 
 /**
@@ -31,7 +32,7 @@ public class SynchChannelPacketReader extends AChannelPacketReader {
         if (running) {
             try {
                 return receivePacketFromChannel();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 eventReceiver.onException(e);
             }
         }

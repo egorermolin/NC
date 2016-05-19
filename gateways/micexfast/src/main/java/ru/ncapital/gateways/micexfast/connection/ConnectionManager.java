@@ -258,10 +258,19 @@ public class ConnectionManager {
     }
 
     public void shutdown() {
+        int count = 5;
         starter.shutdown();
         try {
-            while (!starter.isTerminated()) {
+            while (!starter.isTerminated() && --count >= 0) {
                 Thread.sleep(1000);
+            }
+
+            if (!starter.isTerminated()) {
+                starter.shutdownNow();
+
+                while (!starter.isTerminated()) {
+                    Thread.sleep(1000);
+                }
             }
         } catch (InterruptedException e) {
             Utils.printStackTrace(e, logger, "InterruptedException occurred..");

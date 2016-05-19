@@ -2,8 +2,10 @@ package ru.ncapital.gateways.micexfast.connection.multicast.channel;
 
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.micexfast.Utils;
+import ru.ncapital.gateways.micexfast.connection.ConnectionId;
 import ru.ncapital.gateways.micexfast.connection.multicast.IMulticastEventListener;
 
+import java.io.IOException;
 import java.nio.channels.DatagramChannel;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -18,10 +20,13 @@ public class AsynchChannelPacketReader extends AChannelPacketReader {
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    public AsynchChannelPacketReader(IMulticastEventListener eventListener, DatagramChannel channel, BlockingQueue queue) {
+    private ConnectionId connectionId;
+
+    public AsynchChannelPacketReader(IMulticastEventListener eventListener, DatagramChannel channel, BlockingQueue queue, ConnectionId connectionId) {
         super(eventListener, channel);
 
         this.packetQueue = queue;
+        this.connectionId = connectionId;
         this.executor = Executors.newSingleThreadExecutor();
     }
 
@@ -31,6 +36,7 @@ public class AsynchChannelPacketReader extends AChannelPacketReader {
         executor.execute(new Runnable() {
             @Override
             public void run() {
+                Thread.currentThread().setName(connectionId.toString() + "-asynch-reader");
                 while (running) {
                     try {
                         ChannelPacket channelPacket = receivePacketFromChannel();
@@ -39,6 +45,7 @@ public class AsynchChannelPacketReader extends AChannelPacketReader {
 
                     } catch (Exception e) {
                         eventReceiver.onException(e);
+                        running = false;
                     }
                 }
             }
@@ -47,13 +54,22 @@ public class AsynchChannelPacketReader extends AChannelPacketReader {
 
     @Override
     public void stop() {
+        int count = 5;
         running = false;
         executor.shutdown();
         try {
-            while (!executor.isTerminated()) {
+            while (!executor.isTerminated() && --count >= 0) {
                 Thread.sleep(1000);
             }
-        } catch (Exception e) {
+
+            if (!executor.isTerminated()) {
+                executor.shutdownNow();
+
+                while (!executor.isTerminated()) {
+                    Thread.sleep(100);
+                }
+            }
+        } catch (InterruptedException e) {
             eventReceiver.onException(e);
         }
     }
@@ -63,7 +79,7 @@ public class AsynchChannelPacketReader extends AChannelPacketReader {
         if (running) {
             try {
                 return packetQueue.take();
-            } catch (Exception e) {
+            } catch (InterruptedException e) {
                 eventReceiver.onException(e);
             }
         }

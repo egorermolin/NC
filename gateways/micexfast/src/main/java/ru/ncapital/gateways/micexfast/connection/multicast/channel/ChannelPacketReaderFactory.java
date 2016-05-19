@@ -3,6 +3,7 @@
 // written permission of Orc Software AB is strictly prohibited.
 package ru.ncapital.gateways.micexfast.connection.multicast.channel;
 
+import ru.ncapital.gateways.micexfast.connection.ConnectionId;
 import ru.ncapital.gateways.micexfast.connection.multicast.IMulticastEventListener;
 
 import java.nio.channels.DatagramChannel;
@@ -14,9 +15,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class ChannelPacketReaderFactory {
     public static int ASYNCH_QUEUE_CAPACITY = 10000;
 
-    public IChannelPacketReader create(IMulticastEventListener eventReceiver, DatagramChannel channel, boolean asynch) {
+    public IChannelPacketReader create(IMulticastEventListener eventReceiver, DatagramChannel channel, boolean asynch, ConnectionId connectionId) {
         if (asynch)
-            return new AsynchChannelPacketReader(eventReceiver, channel, new ArrayBlockingQueue(ASYNCH_QUEUE_CAPACITY));
+            return new AsynchChannelPacketReader(eventReceiver, channel, new ArrayBlockingQueue(ASYNCH_QUEUE_CAPACITY), connectionId);
         else
             return new SynchChannelPacketReader(eventReceiver, channel);
     }

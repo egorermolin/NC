@@ -3,6 +3,7 @@ package ru.ncapital.gateways.micexfast.connection.multicast;
 import org.apache.log4j.Level;
 import org.openfast.*;
 import org.openfast.codec.Coder;
+import org.openfast.error.FastException;
 import org.openfast.logging.FastMessageLogger;
 import org.openfast.template.MessageTemplate;
 import org.openfast.template.loader.XMLMessageTemplateLoader;
@@ -17,6 +18,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.*;
 import java.nio.channels.AsynchronousCloseException;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.MembershipKey;
 import java.util.ArrayList;
@@ -229,7 +231,7 @@ public class MessageReader implements IMulticastEventListener {
                                 "[Source: " + connection.getSource() + "(" + InetAddress.getByName(connection.getSource()) + ")]" +
                                 "[Key: " + membership.toString() + "]");
 
-        multicastInputStream = new MicexFastMulticastInputStream(this, channel, logger, asynch);
+        multicastInputStream = new MicexFastMulticastInputStream(this, channel, logger, asynch, connectionId);
         messageReader = new MessageInputStream(multicastInputStream);
 
         for (MessageTemplate template : new XMLMessageTemplateLoader()
@@ -387,9 +389,17 @@ public class MessageReader implements IMulticastEventListener {
 
     @Override
     public void onException(Exception e) {
-        if (e instanceof AsynchronousCloseException) {
+        if (e instanceof AsynchronousCloseException ||
+                e instanceof ClosedByInterruptException ||
+                e instanceof InterruptedException) {
 
-        } if (e instanceof IOException) {
+        } else if (e instanceof FastException) {
+            if (e.getMessage().contains("The end of the input stream has been reached.")) {
+                logger.info(e.toString());
+            } else {
+                Utils.printStackTrace(e, logger, "FastException occurred..");
+            }
+        } else if (e instanceof IOException) {
             Utils.printStackTrace(e, logger, "IOException occurred..");
         } else {
             Utils.printStackTrace(e, logger, "Exception occurred..");
@@ -410,7 +420,7 @@ public class MessageReader implements IMulticastEventListener {
                 messageReader.readMessage();
                 received = inTimestamp.get();
             } catch (Exception e) {
-                Utils.printStackTrace(e, logger, "Exception occurred while reading message..");
+                onException(e);
             }
         }
     }
@@ -470,11 +480,6 @@ public class MessageReader implements IMulticastEventListener {
                             @Override
                             public String getConnectionsFile() {
                                 return args[3];
-                            }
-
-                            @Override
-                            public boolean isAsynchChannelReader() {
-                                return true;
                             }
                         }),
                 null, null);

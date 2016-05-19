@@ -32,14 +32,17 @@ public class MainClass {
     public void run(final String[] args) throws InterruptedException {
         GatewayManager.addConsoleAppender("%d{HH:mm:ss.SSS} %c{1} - %m%n", Level.INFO);
         GatewayManager.addFileAppender("log/log.out", "%d{HH:mm:ss.SSS} %c{1} - %m%n", Level.DEBUG);
+        Logger logger = LoggerFactory.getLogger("MainClass");
+        if (args.length < 3) {
+            System.err.println("Usage MainClass <fast_templates> <interface[s]> <connections_file>");
+            return;
+        }
 
         final IGatewayManager gwManager = GatewayManager.create(new NullGatewayConfiguration() {
             @Override
             public IMarketDataHandler getMarketDataHandler() {
                 return new IMarketDataHandler() {
                     private Logger logger = LoggerFactory.getLogger("MarketDataHandler");
-
-                    private long lastExchangeTime = 0;
 
                     @Override
                     public void onBBO(BBO bbo, long inTime) {
@@ -109,16 +112,16 @@ public class MainClass {
                   return new ProductType[] {ProductType.CURRENCY};
             }
         });
+
         gwManager.start();
 
-        waiter.await();
-        Logger logger = LoggerFactory.getLogger("MainClass");
-        logger.info("TOTAL " + instruments.length + " INSTRUMENTS");
+        //waiter.await();
+        //logger.info("TOTAL " + instruments.length + " INSTRUMENTS");
 
-        for (Instrument instrument : instruments) {
+        //for (Instrument instrument : instruments) {
             //logger.info("Instrument " + instrument.toString());
             //gwManager.subscribeForMarketData(instrument.getSecurityId());
-        }
+        //}
 
         try {
             Thread.sleep(10000);

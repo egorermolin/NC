@@ -1,15 +1,15 @@
 package ru.ncapital.gateways.micexfast.connection.multicast;
 
-import com.google.inject.Inject;
 import org.slf4j.Logger;
-import ru.ncapital.gateways.micexfast.connection.multicast.channel.*;
+import ru.ncapital.gateways.micexfast.connection.ConnectionId;
+import ru.ncapital.gateways.micexfast.connection.multicast.channel.ChannelPacket;
+import ru.ncapital.gateways.micexfast.connection.multicast.channel.ChannelPacketReaderFactory;
+import ru.ncapital.gateways.micexfast.connection.multicast.channel.IChannelPacketReader;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by egore on 12/10/15.
@@ -39,12 +39,12 @@ public class MicexFastMulticastInputStream extends InputStream {
         return hex;
     }
 
-    public MicexFastMulticastInputStream(IMulticastEventListener eventListener, DatagramChannel channel, Logger logger, boolean asynch) {
+    public MicexFastMulticastInputStream(IMulticastEventListener eventListener, DatagramChannel channel, Logger logger, boolean asynch, ConnectionId connectionId) {
         this.logger = logger;
         this.bytebuffer = ByteBuffer.allocate(BUFFER_LENGTH);
         this.bytebuffer.clear();
         this.bytebuffer.flip();
-        packetReader = channelPacketReaderFactory.create(eventListener, channel, asynch);
+        packetReader = channelPacketReaderFactory.create(eventListener, channel, asynch, connectionId);
     }
 
     public void setInTimestamp(ThreadLocal<Long> inTimestamp) {
@@ -83,7 +83,7 @@ public class MicexFastMulticastInputStream extends InputStream {
             bytebuffer.clear();
             ChannelPacket packet = packetReader.nextPacket();
             if (packet == null)
-                throw new IOException("Cannot read next packet from channel");
+                return -1;
 
             bytebuffer.put(packet.getByteBuffer());
             inTimestamp.set(packet.getInTimestamp());
