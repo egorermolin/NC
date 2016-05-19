@@ -292,7 +292,7 @@ public class ConnectionManager {
                     }
                 }
             }
-        }, 60, 1, TimeUnit.SECONDS);
+        }, 1200, 1, TimeUnit.SECONDS);
     }
 
     public void stopSnapshotWatchers() {
