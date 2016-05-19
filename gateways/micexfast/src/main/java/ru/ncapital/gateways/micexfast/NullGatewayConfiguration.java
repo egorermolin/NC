@@ -61,6 +61,6 @@ public class NullGatewayConfiguration implements IGatewayConfiguration {
 
     @Override
     public boolean isListenSnapshotChannelOnlyIfNeeded() {
-        return false;
+        return true;
     }
 }

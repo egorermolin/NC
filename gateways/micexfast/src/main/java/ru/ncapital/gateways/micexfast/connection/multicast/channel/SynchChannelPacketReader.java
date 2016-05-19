@@ -13,6 +13,8 @@ import java.nio.channels.DatagramChannel;
  */
 public class SynchChannelPacketReader extends AChannelPacketReader {
 
+    private Thread readingThread = null;
+
     public SynchChannelPacketReader(IMulticastEventListener eventReceiver, DatagramChannel channel) {
         super(eventReceiver, channel);
     }
@@ -20,11 +22,13 @@ public class SynchChannelPacketReader extends AChannelPacketReader {
     @Override
     public void start() {
         running = true;
+        readingThread = Thread.currentThread();
     }
 
     @Override
     public void stop() {
         running = false;
+        readingThread.interrupt();
     }
 
     @Override
