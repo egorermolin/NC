@@ -29,7 +29,7 @@ public class ConnectionManager {
 
     private final ScheduledExecutorService snapshotWatcherStarter = Executors.newScheduledThreadPool(1);
 
-    private Map<ConnectionId, MessageReader> messageReaders = new HashMap<ConnectionId, MessageReader>();
+    private Map<ConnectionId, MessageReader> messageReaders = new HashMap<>();
 
     private Logger logger = LoggerFactory.getLogger("ConnectionManager");
 

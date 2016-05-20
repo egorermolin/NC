@@ -128,8 +128,6 @@ public class MessageReader implements IMulticastEventListener {
 
     private long received;
 
-    private AtomicBoolean isStopping = new AtomicBoolean(false);
-
     public MessageReader(ConnectionId connectionId, ConfigurationManager configurationManager, MarketDataManager marketDataManager, InstrumentManager instumentManager) {
         this.connectionId = connectionId;
         this.asynch = configurationManager.isAsynchChannelReader();
