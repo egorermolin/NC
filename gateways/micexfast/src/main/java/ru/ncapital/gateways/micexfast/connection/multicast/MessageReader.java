@@ -126,8 +126,6 @@ public class MessageReader implements IMulticastEventListener {
 
     private ThreadLocal<Long> inTimestamp;
 
-    private long received;
-
     public MessageReader(ConnectionId connectionId, ConfigurationManager configurationManager, MarketDataManager marketDataManager, InstrumentManager instumentManager) {
         this.connectionId = connectionId;
         this.asynch = configurationManager.isAsynchChannelReader();
@@ -416,7 +414,6 @@ public class MessageReader implements IMulticastEventListener {
         while (running.get()) {
             try {
                 messageReader.readMessage();
-                received = inTimestamp.get();
             } catch (Exception e) {
                 onException(e);
             }
@@ -434,7 +431,7 @@ public class MessageReader implements IMulticastEventListener {
             @Override
             public void log(Message message, byte[] bytes, Direction direction) {
                 if (logger.isTraceEnabled())
-                    logger.trace("(IN) " + Utils.convertTicksToToday(received) + " " + message.toString());
+                    logger.trace("(IN) " + Utils.convertTicksToToday(inTimestamp.get()) + " " + message.toString());
             }
         });
     }
@@ -479,6 +476,9 @@ public class MessageReader implements IMulticastEventListener {
                             public String getConnectionsFile() {
                                 return args[3];
                             }
+
+                            @Override
+                            public boolean isAsynchChannelReader() { return false; }
                         }),
                 null, null);
 
@@ -494,9 +494,6 @@ public class MessageReader implements IMulticastEventListener {
                     } catch (InterruptedException e) {
                         break;
                     }
-
-                    if (Utils.currentTimeInTicks() - mr.received > 10 * 1000 * 1000 * 10)
-                       mr.logger.warn("No messages received last 10 seconds ...");
 
                     dumpStatistics++;
                     if (dumpStatistics == 1) {
