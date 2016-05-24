@@ -5,14 +5,16 @@ import org.openfast.Message;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.micexfast.domain.Instrument;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
-import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Created by egore on 1/11/16.
  */
-public class SnapshotProcessor extends Processor {
+public class SnapshotProcessor extends Processor implements ISnapshotProcessor {
 
     private Map<String, Map<Integer, Message>> fragmentedSnapshots = new HashMap<String, Map<Integer, Message>>();
 
@@ -44,12 +46,15 @@ public class SnapshotProcessor extends Processor {
         }
     }
 
-    private boolean checkSeqNums(Iterable<Integer> seqNums) {
+    private boolean checkMessages(Map<Integer, Message> messages) {
         // check seqNum integrity
         int lastSeqNum = 0;
-        for (int seqNum : seqNums) {
+        for (int seqNum : messages.keySet()) {
             if (lastSeqNum == 0) {
                 lastSeqNum = seqNum;
+                if (messages.get(seqNum).getInt("RouteFirst") != 1)
+                    // missing first fragment
+                    return false;
             } else if (lastSeqNum + 1 < seqNum) {
                 // missing message, giving up
                 return false;
@@ -57,6 +62,10 @@ public class SnapshotProcessor extends Processor {
                 lastSeqNum = seqNum;
             }
         }
+        if (messages.get(lastSeqNum).getInt("LastFragment") != 1)
+            // missing last fragment
+            return false;
+
         return true;
     }
 
@@ -79,8 +88,13 @@ public class SnapshotProcessor extends Processor {
 
         messages.put(seqNum, readMessage);
 
-        if (lastFragment && checkSeqNums(messages.keySet()))
-            processSnapshotsAndIncrementals(messages.values(), securityId, rptSeqNum);
+        if (lastFragment) {
+            if (checkMessages(messages)) {
+                processSnapshotsAndIncrementals(messages.values(), securityId, rptSeqNum);
+            } else {
+                fragmentedSnapshots.remove(securityId);
+            }
+        }
     }
 
     @Override
@@ -137,7 +151,8 @@ public class SnapshotProcessor extends Processor {
         }
     }
 
-    private void reset() {
+    @Override
+    public void reset() {
         sequenceArray.clear();
         fragmentedSnapshots.clear();
         if (sequenceValidator.isRecovering())

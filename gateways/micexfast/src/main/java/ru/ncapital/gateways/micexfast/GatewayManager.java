@@ -34,7 +34,10 @@ public class GatewayManager implements IGatewayManager {
         isListenSnapshotChannelOnlyIfNeeded = configuration.isListenSnapshotChannelOnlyIfNeeded();
 
         // hack to avoid circular injection
+        instrumentManager.setMarketDataManager(marketDataManager);
         marketDataManager.setInstrumentManager(instrumentManager);
+
+        instrumentManager.setGatewayManager(this);
 
         return this;
     }
@@ -111,10 +114,6 @@ public class GatewayManager implements IGatewayManager {
     @Override
     public void start() {
         if (!started.getAndSet(true)) {
-            if (isListenSnapshotChannelOnlyIfNeeded) {
-                connectionManager.scheduleSnapshotWatcher(marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST).getSequenceValidator());
-                connectionManager.scheduleSnapshotWatcher(marketDataManager.getIncrementalProcessor(MessageHandlerType.STATISTICS).getSequenceValidator());
-            }
             connectionManager.startInstrument();
             connectionManager.startInstrumentStatus();
             for (MessageHandlerType type : MessageHandlerType.values()) {
@@ -137,6 +136,14 @@ public class GatewayManager implements IGatewayManager {
                 connectionManager.stopSnapshotWatchers();
             }
             connectionManager.shutdown();
+        }
+    }
+
+    public void onInstrumentDownloadFinished() {
+        connectionManager.stopInstrument();
+        if (isListenSnapshotChannelOnlyIfNeeded) {
+            connectionManager.scheduleSnapshotWatcher(marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_LIST));
+            connectionManager.scheduleSnapshotWatcher(marketDataManager.getSnapshotProcessor(MessageHandlerType.STATISTICS));
         }
     }
 

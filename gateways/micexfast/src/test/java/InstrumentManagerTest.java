@@ -18,9 +18,7 @@ import ru.ncapital.gateways.micexfast.domain.Instrument;
 import ru.ncapital.gateways.micexfast.domain.ProductType;
 import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.*;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -49,6 +47,9 @@ public class InstrumentManagerTest {
     @Mock
     private IMarketDataHandler marketDataHandler;
 
+    @Mock
+    private GatewayManager gatewayManager;
+
     @Before
     public void setup() {
         when(configuration.getAllowedProductTypes()).thenReturn(new ProductType[] {ProductType.EQUITY});
@@ -58,7 +59,7 @@ public class InstrumentManagerTest {
 
         instrumentManager = new InstrumentManager();
         instrumentManager.setMarketDataManager(marketDataManager);
-        instrumentManager.setConnectionManager(connectionManager);
+        instrumentManager.setGatewayManager(gatewayManager);
 
         instrumentManager.configure(configuration);
     }
@@ -241,7 +242,7 @@ public class InstrumentManagerTest {
         assertEquals("ROSN;TQBR", bboCapture.getAllValues().get(1).getSecurityId());
         assertEquals("N-17", bboCapture.getAllValues().get(1).getTradingStatus());
 
-        verify(connectionManager, times(1)).stopInstrument();
+        verify(gatewayManager, times(1)).onInstrumentDownloadFinished();
 
         ArgumentCaptor<Instrument[]> instrumentCapture = ArgumentCaptor.forClass(Instrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
@@ -261,7 +262,7 @@ public class InstrumentManagerTest {
             instrumentManager.handleMessage(getInstrumentMessageMock(i), context, coder);
 
         verify(marketDataManager, times(2)).onBBO(any(BBO.class), anyLong());
-        verify(connectionManager, times(1)).stopInstrument();
+        verify(gatewayManager, times(1)).onInstrumentDownloadFinished();
         ArgumentCaptor<Instrument[]> instrumentCapture = ArgumentCaptor.forClass(Instrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
         assertEquals(2, instrumentCapture.getValue().length);
@@ -272,13 +273,13 @@ public class InstrumentManagerTest {
         for (int i : new int [] {1, 1, 3, 3, 4, 4, 5, 5})
             instrumentManager.handleMessage(getInstrumentMessageMock(i), context, coder);
 
-        verify(connectionManager, times(0)).stopInstrument();
+        verify(gatewayManager, times(0)).onInstrumentDownloadFinished();
 
         for (int i : new int [] {1, 1, 2, 2, 3, 3, 4, 4, 5, 5})
             instrumentManager.handleMessage(getInstrumentMessageMock(i), context, coder);
 
         verify(marketDataManager, times(2)).onBBO(any(BBO.class), anyLong());
-        verify(connectionManager, times(1)).stopInstrument();
+        verify(gatewayManager, times(1)).onInstrumentDownloadFinished();
         ArgumentCaptor<Instrument[]> instrumentCapture = ArgumentCaptor.forClass(Instrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
         assertEquals(2, instrumentCapture.getValue().length);
@@ -289,13 +290,13 @@ public class InstrumentManagerTest {
         for (int i : new int [] {1, 1, 3, 3, 4, 4, 5, 5})
             instrumentManager.handleMessage(getInstrumentMessageMock(i), context, coder);
 
-        verify(connectionManager, times(0)).stopInstrument();
+        verify(gatewayManager, times(0)).onInstrumentDownloadFinished();
 
         for (int i : new int [] {1, 1, 2, 2, 4, 4, 5, 5})
             instrumentManager.handleMessage(getInstrumentMessageMock(i), context, coder);
 
         verify(marketDataManager, times(2)).onBBO(any(BBO.class), anyLong());
-        verify(connectionManager, times(1)).stopInstrument();
+        verify(gatewayManager, times(1)).onInstrumentDownloadFinished();
         ArgumentCaptor<Instrument[]> instrumentCapture = ArgumentCaptor.forClass(Instrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
         assertEquals(2, instrumentCapture.getValue().length);

@@ -1,15 +1,8 @@
 package ru.ncapital.gateways.micexfast;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.openfast.Context;
 import org.openfast.GroupValue;
 import org.openfast.Message;
-import org.openfast.MessageHandler;
-import org.openfast.codec.Coder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.micexfast.connection.ConnectionManager;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.Processor;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.SequenceArray;
 import ru.ncapital.gateways.micexfast.domain.BBO;
@@ -17,7 +10,9 @@ import ru.ncapital.gateways.micexfast.domain.Instrument;
 import ru.ncapital.gateways.micexfast.domain.ProductType;
 import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -43,11 +38,9 @@ public class InstrumentManager extends Processor {
 
     private Set<String> allowedSecurityIds = new HashSet<String>();
 
-    @Inject
-    private ConnectionManager connectionManager;
-
-    @Inject
     private MarketDataManager marketDataManager;
+
+    private GatewayManager gatewayManager;
 
     private IMarketDataHandler marketDataHandler;
 
@@ -309,7 +302,7 @@ public class InstrumentManager extends Processor {
         if (instruments.size() + ignoredInstruments.size() == numberOfInstruments) {
             if (!instrumentsDownloaded.getAndSet(true)) {
                 getLogger().info("FINISHED INSTRUMENTS " + instruments.size());
-                connectionManager.stopInstrument();
+                gatewayManager.onInstrumentDownloadFinished();
                 marketDataHandler.onInstruments(instruments.values().toArray(new Instrument[instruments.size()]));
             }
         } else {
@@ -326,12 +319,11 @@ public class InstrumentManager extends Processor {
         }
     }
 
-
     public void setMarketDataManager(MarketDataManager marketDataManager) {
         this.marketDataManager = marketDataManager;
     }
 
-    public void setConnectionManager(ConnectionManager connectionManager) {
-        this.connectionManager = connectionManager;
+    public void setGatewayManager(GatewayManager gatewayManager) {
+        this.gatewayManager = gatewayManager;
     }
 }

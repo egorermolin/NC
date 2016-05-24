@@ -1,18 +1,10 @@
 package ru.ncapital.gateways.micexfast.connection.messageprocessors;
 
-import com.google.inject.Inject;
 import org.openfast.Context;
 import org.openfast.Message;
-import org.openfast.MessageHandler;
 import org.openfast.codec.Coder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.micexfast.connection.ConnectionManager;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IProcessor;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
-
-import java.util.*;
 
 /**
  * Created by egore on 24.02.2016.

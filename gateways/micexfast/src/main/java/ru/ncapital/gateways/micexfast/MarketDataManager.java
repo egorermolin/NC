@@ -2,15 +2,10 @@ package ru.ncapital.gateways.micexfast;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.openfast.MessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.micexfast.connection.ConnectionManager;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.HeartbeatProcessor;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.IncrementalProcessor;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.SnapshotProcessor;
+import ru.ncapital.gateways.micexfast.connection.messageprocessors.*;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IProcessor;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
 import ru.ncapital.gateways.micexfast.domain.*;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
@@ -20,7 +15,6 @@ import ru.ncapital.gateways.micexfast.performance.IGatewayPerformanceLogger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -39,15 +33,15 @@ public class MarketDataManager {
 
     private IMarketDataHandler marketDataHandler;
 
-    private IProcessor snapshotProcessorForOrderList;
+    private ISnapshotProcessor snapshotProcessorForOrderList;
 
-    private IProcessor snapshotProcessorForStatistics;
+    private ISnapshotProcessor snapshotProcessorForStatistics;
 
-    private IProcessor incrementalProcessorForOrderList;
+    private IIncrementalProcessor incrementalProcessorForOrderList;
 
-    private IProcessor incrementalProcessorForStatistics;
+    private IIncrementalProcessor incrementalProcessorForStatistics;
 
-    private IProcessor incrementalProcessorForPublicTrades;
+    private IIncrementalProcessor incrementalProcessorForPublicTrades;
 
     @Inject
     private MessageSequenceValidatorFactory messageSequenceValidatorFactory;
@@ -185,7 +179,7 @@ public class MarketDataManager {
         return heartbeatProcessor;
     }
 
-    public IProcessor getSnapshotProcessor(MessageHandlerType type) {
+    public ISnapshotProcessor getSnapshotProcessor(MessageHandlerType type) {
         switch (type) {
             case ORDER_LIST:
                 return snapshotProcessorForOrderList;
@@ -196,7 +190,7 @@ public class MarketDataManager {
         throw new RuntimeException("Unknown Snapshot Processor " + type);
     }
 
-    public IProcessor getIncrementalProcessor(MessageHandlerType type) {
+    public IIncrementalProcessor getIncrementalProcessor(MessageHandlerType type) {
         switch (type) {
             case ORDER_LIST:
                 return incrementalProcessorForOrderList;

@@ -16,14 +16,13 @@ import org.openfast.codec.Coder;
 import ru.ncapital.gateways.micexfast.ConfigurationManager;
 import ru.ncapital.gateways.micexfast.InstrumentManager;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
-import ru.ncapital.gateways.micexfast.Utils;
 import ru.ncapital.gateways.micexfast.connection.Connection;
 import ru.ncapital.gateways.micexfast.connection.ConnectionId;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IProcessor;
+import ru.ncapital.gateways.micexfast.connection.messageprocessors.IIncrementalProcessor;
+import ru.ncapital.gateways.micexfast.connection.messageprocessors.IProcessor;
 import ru.ncapital.gateways.micexfast.connection.multicast.MessageReader;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -66,7 +65,7 @@ public class MessageReaderTest {
     private MembershipKey membershipKey;
 
     @Mock
-    private IProcessor processor;
+    private IIncrementalProcessor processor;
 
     private MessageReader testableReader;
 

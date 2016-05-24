@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.micexfast.*;
+import ru.ncapital.gateways.micexfast.connection.messageprocessors.ISnapshotProcessor;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.micexfast.connection.multicast.MessageReader;
 import ru.ncapital.gateways.micexfast.connection.multicast.MessageReaderStarter;
@@ -277,9 +278,11 @@ public class ConnectionManager {
         }
     }
 
-    public void scheduleSnapshotWatcher(final IMessageSequenceValidator sequenceValidatorToWatch) {
+    public void scheduleSnapshotWatcher(final ISnapshotProcessor snapshotProcessorToWatch) {
         snapshotWatcherStarter.scheduleAtFixedRate(new Runnable() {
-            private IMessageSequenceValidator sequenceValidator = sequenceValidatorToWatch;
+            private ISnapshotProcessor snapshotProcessor = snapshotProcessorToWatch;
+
+            private IMessageSequenceValidator sequenceValidator = snapshotProcessor.getSequenceValidator();
 
             private AtomicBoolean isRecovering;
 
@@ -288,16 +291,20 @@ public class ConnectionManager {
                 synchronized (sequenceValidator) {
                     if (isRecovering == null) {
                         isRecovering = new AtomicBoolean(sequenceValidator.isRecovering());
-                        if (!isRecovering.get())
+                        if (!isRecovering.get()) {
                             stopSnapshot(sequenceValidator.getType());
+                            snapshotProcessor.reset();
+                        }
                     }
 
                     if (sequenceValidator.isRecovering()) {
                         if (!isRecovering.getAndSet(true))
                             startSnapshot(sequenceValidator.getType());
                     } else {
-                        if (isRecovering.getAndSet(false))
+                        if (isRecovering.getAndSet(false)) {
                             stopSnapshot(sequenceValidator.getType());
+                            snapshotProcessor.reset();
+                        }
                     }
                 }
             }

@@ -1,6 +1,8 @@
 package ru.ncapital.gateways.micexfast.connection.messageprocessors;
 
-import org.openfast.*;
+import org.openfast.GroupValue;
+import org.openfast.Message;
+import org.openfast.SequenceValue;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.micexfast.domain.Instrument;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
@@ -8,7 +10,7 @@ import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
 /**
  * Created by egore on 1/11/16.
  */
-public class IncrementalProcessor extends Processor {
+public class IncrementalProcessor extends Processor implements IIncrementalProcessor {
 
     public IncrementalProcessor(IMessageHandler messageHandler, IMessageSequenceValidator sequenceValidator) {
         super(messageHandler, sequenceValidator);
