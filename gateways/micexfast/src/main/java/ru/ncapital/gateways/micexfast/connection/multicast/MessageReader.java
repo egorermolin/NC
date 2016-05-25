@@ -113,20 +113,18 @@ public class MessageReader implements IMulticastEventListener {
                 sb.append("[MaxL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() - 1)))
                         .append("|").append(String.format("%d", latenciesRecvToDecd.get(latenciesRecvToDecd.size() - 1))).append("]");
 
-                if (writer != null)
-                    dumpToFile();
-
+                dumpToFile(sb.toString());
             }
             items.clear();
             return sb.toString();
         }
 
-        synchronized protected void dumpToFile() {
+        synchronized protected void dumpToFile(String header) {
             if (writer == null)
                 return;
 
             try {
-                writer.write(items.size());
+                writer.write(header);
                 writer.newLine();
 
                 for (FineStatisticsItem item : items) {
