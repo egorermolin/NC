@@ -55,14 +55,14 @@ public class Utils {
          CURRENT TODAY_MILLIS (millis since midnight)
     */
     public static long currentTimeInTodayMillis() {
-        return Calendar.getInstance().getTimeInMillis() - TODAY_IN_MILLIS_SINCE_JANUARY_1ST_1970;
+        return convertTicksToTodayMillis(currentTimeInTicks());
     }
 
     /*
          CURRENT TODAY_MICROS (micros since midnight)
     */
     public static long currentTimeInTodayMicros() {
-        return currentTimeInTodayMillis() * 1000L;
+        return convertTicksToTodayMicros(currentTimeInTicks());
     }
 
     /*
