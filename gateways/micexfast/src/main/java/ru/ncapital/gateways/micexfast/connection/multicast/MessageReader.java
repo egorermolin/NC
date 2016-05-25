@@ -91,34 +91,33 @@ public class MessageReader implements IMulticastEventListener {
                 return null;
 
             total += items.size();
-
-            List<Long> latenciesEntrToRecv = new ArrayList<>();
-            List<Long> latenciesRecvToDecd = new ArrayList<>();
-
-            for (FineStatisticsItem item : items) {
-                latenciesEntrToRecv.add(item.recvTime - item.entrTime);
-                latenciesRecvToDecd.add(item.decdTime - item.recvTime);
-            }
-
-            Collections.sort(latenciesEntrToRecv);
-            Collections.sort(latenciesRecvToDecd);
-
             StringBuilder sb = new StringBuilder();
             sb.append("[Total: ").append(total).append("]");
+            if (!items.isEmpty()) {
+                List<Long> latenciesEntrToRecv = new ArrayList<>();
+                List<Long> latenciesRecvToDecd = new ArrayList<>();
 
-            sb.append("[Last: ").append(items.size()).append("]");
-            sb.append("[MinL: ").append(String.format("%d", latenciesEntrToRecv.get(0)))
-                    .append("|").append(String.format("%d", latenciesRecvToDecd.get(0))).append("]");
-            sb.append("[MedL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() / 2)))
-                    .append("|").append(String.format("%d", latenciesRecvToDecd.get(latenciesRecvToDecd.size() / 2))).append("]");
-            sb.append("[MaxL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() - 1)))
-                    .append("|").append(String.format("%d", latenciesRecvToDecd.get(latenciesRecvToDecd.size() - 1))).append("]");
+                for (FineStatisticsItem item : items) {
+                    latenciesEntrToRecv.add(item.recvTime - item.entrTime);
+                    latenciesRecvToDecd.add(item.decdTime - item.recvTime);
+                }
 
-            if (writer != null)
-                dumpToFile();
+                Collections.sort(latenciesEntrToRecv);
+                Collections.sort(latenciesRecvToDecd);
 
+                sb.append("[Last: ").append(items.size()).append("]");
+                sb.append("[MinL: ").append(String.format("%d", latenciesEntrToRecv.get(0)))
+                        .append("|").append(String.format("%d", latenciesRecvToDecd.get(0))).append("]");
+                sb.append("[MedL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() / 2)))
+                        .append("|").append(String.format("%d", latenciesRecvToDecd.get(latenciesRecvToDecd.size() / 2))).append("]");
+                sb.append("[MaxL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() - 1)))
+                        .append("|").append(String.format("%d", latenciesRecvToDecd.get(latenciesRecvToDecd.size() - 1))).append("]");
+
+                if (writer != null)
+                    dumpToFile();
+
+            }
             items.clear();
-
             return sb.toString();
         }
 
