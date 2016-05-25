@@ -111,7 +111,7 @@ public class MessageReader implements IMulticastEventListener {
         private synchronized List<StatisticsItem> initNextAvaiableItems() {
             List<StatisticsItem> itemsToDump = currentItems;
 
-            if (currentItemsPos >= NUMBER_OF_LISTS)
+            if (currentItemsPos + 1 == NUMBER_OF_LISTS)
                 currentItemsPos = 0;
 
             currentItems = allItems.get(++currentItemsPos);
