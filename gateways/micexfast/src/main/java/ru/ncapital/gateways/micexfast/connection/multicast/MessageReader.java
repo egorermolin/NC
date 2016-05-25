@@ -35,13 +35,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MessageReader implements IMulticastEventListener {
 
     private class Statistics {
-        private int totalNumberOfMessages[] = new int[] {0, 0, 0};
+        private int totalNumberOfMessages[] = new int[] {0, 0, 0, 0};
 
         private List<Double> latenciesEntryToSending = new ArrayList<Double>();
 
         private List<Double> latenciesEntryToReceived = new ArrayList<Double>();
 
         private List<Double> latenciesSendingToReceived = new ArrayList<Double>();
+
+        private List<Double> latenciesReceivedToDecoded = new ArrayList<Double>();
 
         synchronized void addValueEntryToSending(double latency) {
             addValue(latency, latenciesEntryToSending);
@@ -55,6 +57,10 @@ public class MessageReader implements IMulticastEventListener {
             addValue(latency, latenciesSendingToReceived);
         }
 
+        synchronized void addValueReceivedToDecoded(double latency) {
+            addValue(latency, latenciesReceivedToDecoded);
+        }
+
         private void addValue(double latency, List<Double> latencies) {
             latencies.add(latency);
         }
@@ -63,12 +69,16 @@ public class MessageReader implements IMulticastEventListener {
             return dump("ENTR -> SEND", latenciesEntryToSending, 0);
         }
 
+        synchronized String dumpEntryToReceived() {
+            return dump("ENTR -> RECV", latenciesEntryToReceived, 2);
+        }
+
         synchronized String dumpSendingToReceived() {
             return dump("SEND -> RECV", latenciesSendingToReceived, 1);
         }
 
-        synchronized String dumpEntryToReceived() {
-            return dump("ENTR -> RECV",latenciesEntryToReceived, 2);
+        synchronized String dumpReceivedToDecoded() {
+            return dump("RECV -> DECD", latenciesReceivedToDecoded, 3);
         }
 
         private String dump(String prefix, List<Double> latencies, int idx) {
@@ -238,17 +248,19 @@ public class MessageReader implements IMulticastEventListener {
             registerMessageHandler(new MessageHandler() {
                 @Override
                 public void handleMessage(Message readMessage, Context context, Coder coder) {
-                    long sendingTimeInToday = readMessage.getLong("SendingTime") % (1000L * 100L * 100L * 100L);
-                    long currentTimeInToday = Utils.currentTimeInToday(); //Utils.convertTicksToToday(inTimestamp.get()); //
-                    stats.addValueSendingToReceived(currentTimeInToday - sendingTimeInToday);
+                    long decodedTimeInTodayMicros = Utils.currentTimeInTodayMicros();
+                    long sendingTimeInTodayMicros = Utils.convertTodayToTodayMicros(readMessage.getLong("SendingTime") % (1000L * 100L * 100L * 100L));
+                    long receivedTimeInTodayMicros = Utils.convertTicksToTodayMicros(inTimestamp.get());
+
+                    stats.addValueReceivedToDecoded(receivedTimeInTodayMicros - decodedTimeInTodayMicros);
 
                     if (readMessage.getString("MessageType").equals("X")) {
                         SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
                         for (int i = 0; i < mdEntries.getLength(); ++i) {
                             long entryTimeInTodayMicros = Utils.getEntryTimeInTodayMicros(mdEntries.get(i));
 
-                            stats.addValueEntryToSending(sendingTimeInToday - entryTimeInTodayMicros / 1000.0);
-                            stats.addValueEntryToReceived(currentTimeInToday - entryTimeInTodayMicros / 1000.0);
+                            stats.addValueEntryToSending(sendingTimeInTodayMicros - entryTimeInTodayMicros);
+                            stats.addValueEntryToReceived(receivedTimeInTodayMicros - entryTimeInTodayMicros);
                         }
                     }
                 }
@@ -431,7 +443,7 @@ public class MessageReader implements IMulticastEventListener {
             @Override
             public void log(Message message, byte[] bytes, Direction direction) {
                 if (logger.isTraceEnabled())
-                    logger.trace("(IN) " + Utils.convertTicksToToday(inTimestamp.get()) + " " + message.toString());
+                    logger.trace("(IN) " + Utils.convertTicksToTodayMicros(inTimestamp.get()) + " " + message.toString());
             }
         });
     }
@@ -494,10 +506,10 @@ public class MessageReader implements IMulticastEventListener {
                 }
                 while (mr.running.get()) {
                     synchronized (mr.stats) {
-                        mr.logger.info("" + Utils.currentTimeInToday());
+                        mr.logger.info("" + Utils.currentTimeInTodayMicros());
                         mr.logger.info(mr.stats.dumpEntryToSending());
                         mr.logger.info(mr.stats.dumpEntryToReceived());
-                        mr.logger.info(mr.stats.dumpSendingToReceived());
+                        mr.logger.info(mr.stats.dumpReceivedToDecoded());
                     }
                     try {
                         Thread.sleep(1000);

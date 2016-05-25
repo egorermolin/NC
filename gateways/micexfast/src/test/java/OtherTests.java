@@ -23,12 +23,21 @@ public class OtherTests {
         Mockito.when(mdEntry.getInt("MDEntryTime")).thenReturn(110908000);
         Mockito.when(mdEntry.getInt("OrigTime")).thenReturn(555444);
 
-        Assert.assertEquals(40148555444L, Utils.getEntryTimeInMicros(mdEntry));
+        Assert.assertEquals(40148555444L, Utils.getEntryTimeInTodayMicros(mdEntry));
+    }
+
+    @Test
+    public void testConvertToday() {
+        long sendingTime = 91756343231L;
+
+        System.out.println(Utils.convertTodayToTodayMicros(sendingTime));
+        System.out.println(Utils.convertTodayToTodayMillis(sendingTime));
+        System.out.println(Utils.convertTodayToTicks(sendingTime));
     }
 
     @Test
     public void testCurrentTimeInMillis() {
-        System.out.println(Utils.currentTimeInTodayMillis());
+        System.out.println(Utils.currentTimeInTodayMicros());
     }
 
     @Test
@@ -41,11 +50,11 @@ public class OtherTests {
     public void testConvertTodayToTicksAndBack() {
         long millis = Utils.currentTimeInTodayMillis();
         long micros = 667L;
-        long ticks = Utils.convertTodayMicrosToTicks(millis, micros);
+        long ticks = Utils.convertTodayMicrosToTicks(millis * 1000L + micros);
 
         System.out.println(millis * 1000L + micros);
         System.out.println(ticks);
-        System.out.println(Utils.convertTicksToToday(ticks));
+        System.out.println(Utils.convertTicksToTodayMillis(ticks));
         System.out.println(Utils.convertTicksToTodayMicros(ticks));
         assert Utils.convertTicksToTodayMicros(ticks) == (millis * 1000L + micros);
     }
