@@ -74,6 +74,7 @@ public class MessageReader implements IMulticastEventListener {
             active = true;
             for (int i = 0; i < NUMBER_OF_LISTS; ++i)
                 allItems.add(new ArrayList<StatisticsItem>());
+            currentItems = allItems.get(0);
         }
 
         protected void initStatisticsWritingToFile(String filename) {
@@ -113,7 +114,7 @@ public class MessageReader implements IMulticastEventListener {
             if (currentItemsPos >= NUMBER_OF_LISTS)
                 currentItemsPos = 0;
 
-            currentItems = allItems.get(currentItemsPos++);
+            currentItems = allItems.get(++currentItemsPos);
             currentItems.clear();
 
             return itemsToDump;
