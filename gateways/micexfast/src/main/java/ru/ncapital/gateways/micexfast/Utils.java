@@ -64,7 +64,6 @@ public class Utils {
     public static long currentTimeInTodayMicros() {
         return convertTicksToTodayMicros(currentTimeInTicks());
     }
-
     /*
         CONVERT TODAY_MICROS (micros since midnight) to TICKS (ticks since 1 JAN 0001)
     */
@@ -153,32 +152,4 @@ public class Utils {
         for (StackTraceElement trace : e.getStackTrace())
            logger.error("--> " + trace.toString());
     }
-
-//    public static long convertTicksToToday(long ticks) {
-//        long micros = convertTicksToTodayMicros(ticks);
-//        long secondsTotal = micros / 1000L / 1000L;
-//        long seconds = secondsTotal % (60L * 60L) % 60L;
-//        long minutes = (secondsTotal / 60L) % 60L;
-//        long hours = (secondsTotal / 60L / 60L);
-//
-//        return hours * 100L * 100L * 1000L * 1000L + minutes * 100L * 1000L * 1000L + seconds * 1000L * 1000L + micros % (1000L * 1000L);
-//    }
-
-//    public static long currentTimeInToday() {
-//        long millis = currentTimeInTodayMillis();
-//        long secondsTotal = millis / 1000L;
-//        long seconds = secondsTotal % (60L * 60L) % 60L;
-//        long minutes = (secondsTotal / 60L) % 60L;
-//        long hours = (secondsTotal / 60L / 60L);
-//
-//        return hours * 100L * 100L * 1000L + minutes * 100L * 1000L + seconds * 1000L + millis % (1000L);
-//    }
-
-
-//    public static long getEntryTimeInToday(GroupValue mdEntry) {
-//        long entryTimeToday = mdEntry.getValue("MDEntryTime") != null ? mdEntry.getInt("MDEntryTime") * 1000L : 0;
-//        long entryTimeMicros = mdEntry.getValue("OrigTime") != null ? mdEntry.getInt("OrigTime") : 0;
-//
-//        return entryTimeToday + entryTimeMicros;
-//    }
 }

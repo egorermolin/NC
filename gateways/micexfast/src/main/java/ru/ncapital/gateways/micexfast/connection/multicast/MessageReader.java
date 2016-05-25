@@ -1,6 +1,7 @@
 package ru.ncapital.gateways.micexfast.connection.multicast;
 
 import org.apache.log4j.Level;
+import org.codehaus.groovy.tools.shell.IO;
 import org.openfast.*;
 import org.openfast.codec.Coder;
 import org.openfast.error.FastException;
@@ -14,7 +15,9 @@ import ru.ncapital.gateways.micexfast.connection.Connection;
 import ru.ncapital.gateways.micexfast.connection.ConnectionId;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.*;
 import java.nio.channels.AsynchronousCloseException;
@@ -27,6 +30,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -34,77 +38,116 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class MessageReader implements IMulticastEventListener {
 
-    private class Statistics {
-        private int totalNumberOfMessages[] = new int[] {0, 0, 0, 0};
+    private class FineStatistics {
+        private class FineStatisticsItem {
+            // ALL TIMES IN TODAY MICROS (micros since midnight)
 
-        private List<Double> latenciesEntryToSending = new ArrayList<Double>();
+            private long entrTime;
 
-        private List<Double> latenciesEntryToReceived = new ArrayList<Double>();
+            private long recvTime;
 
-        private List<Double> latenciesSendingToReceived = new ArrayList<Double>();
+            private long decdTime;
 
-        private List<Double> latenciesReceivedToDecoded = new ArrayList<Double>();
-
-        synchronized void addValueEntryToSending(double latency) {
-            addValue(latency, latenciesEntryToSending);
+            private FineStatisticsItem(long entrTime, long recvTime, long decdTime) {
+                this.entrTime = entrTime;
+                this.recvTime = recvTime;
+                this.decdTime = decdTime;
+            }
         }
 
-        synchronized void addValueEntryToReceived(double latency) {
-            addValue(latency, latenciesEntryToReceived);
+        private List<FineStatisticsItem> items = new ArrayList<>();
+
+        private long total = 0;
+
+        private BufferedWriter writer;
+
+        private boolean active = false;
+
+        protected void initStatistics() {
+            active = true;
         }
 
-        synchronized void addValueSendingToReceived(double latency) {
-            addValue(latency, latenciesSendingToReceived);
+        protected void initStatisticsWritingToFile(String filename) {
+            if (!active)
+                return;
+
+            try {
+                writer = new BufferedWriter(new FileWriter(filename, false));
+            } catch (IOException e) {
+                System.err.println("FAILED TO OPEN FILE " + e.toString());
+                writer = null;
+            }
         }
 
-        synchronized void addValueReceivedToDecoded(double latency) {
-            addValue(latency, latenciesReceivedToDecoded);
+        synchronized protected void addItem(long entrTime, long recvTime, long decdTime) {
+            if (!active)
+                return;
+
+            items.add(new FineStatisticsItem(entrTime, recvTime, decdTime));
         }
 
-        private void addValue(double latency, List<Double> latencies) {
-            latencies.add(latency);
-        }
+        synchronized protected String dump() {
+            if (!active)
+                return null;
 
-        synchronized String dumpEntryToSending() {
-            return dump("ENTR -> SEND", latenciesEntryToSending, 0);
-        }
+            total += items.size();
 
-        synchronized String dumpEntryToReceived() {
-            return dump("ENTR -> RECV", latenciesEntryToReceived, 2);
-        }
+            List<Long> latenciesEntrToRecv = new ArrayList<>();
+            List<Long> latenciesRecvToDecd = new ArrayList<>();
 
-        synchronized String dumpSendingToReceived() {
-            return dump("SEND -> RECV", latenciesSendingToReceived, 1);
-        }
+            for (FineStatisticsItem item : items) {
+                latenciesEntrToRecv.add(item.recvTime - item.entrTime);
+                latenciesRecvToDecd.add(item.decdTime - item.recvTime);
+            }
 
-        synchronized String dumpReceivedToDecoded() {
-            return dump("RECV -> DECD", latenciesReceivedToDecoded, 3);
-        }
-
-        private String dump(String prefix, List<Double> latencies, int idx) {
-            totalNumberOfMessages[idx] += latencies.size();
-            Collections.sort(latencies);
-            double totalLatency = 0.0;
-            for (Double latency : latencies)
-                totalLatency += latency;
+            Collections.sort(latenciesEntrToRecv);
+            Collections.sort(latenciesRecvToDecd);
 
             StringBuilder sb = new StringBuilder();
+            sb.append("[Total: ").append(total).append("]");
 
-            sb.append(prefix + "[Total: ").append(totalNumberOfMessages[idx]).append("]");
-            if (latencies.size() > 0) {
-                sb.append("[Last: ").append(latencies.size()).append("]");
-                sb.append("[MinL: ").append(String.format("%.2f", latencies.get(0))).append("]");
-                sb.append("[MedL: ").append(String.format("%.2f", latencies.get(latencies.size() / 2))).append("]");
-                sb.append("[MaxL: ").append(String.format("%.2f", latencies.get(latencies.size() - 1))).append("]");
-                sb.append("[AvgL: ").append(String.format("%.2f", totalLatency / latencies.size())).append("]");
-            }
-            latencies.clear();
+            sb.append("[Last: ").append(items.size()).append("]");
+            sb.append("[MinL: ").append(String.format("%d", latenciesEntrToRecv.get(0)))
+                    .append("|").append(String.format("%d", latenciesRecvToDecd.get(0))).append("]");
+            sb.append("[MedL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() / 2)))
+                    .append("|").append(String.format("%d", latenciesRecvToDecd.get(latenciesRecvToDecd.size() / 2))).append("]");
+            sb.append("[MaxL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() - 1)))
+                    .append("|").append(String.format("%d", latenciesRecvToDecd.get(latenciesRecvToDecd.size() - 1))).append("]");
+
+            if (writer != null)
+                dumpToFile();
+
+            items.clear();
 
             return sb.toString();
         }
+
+        synchronized protected void dumpToFile() {
+            if (writer == null)
+                return;
+
+            try {
+                writer.write(items.size());
+                writer.newLine();
+
+                for (FineStatisticsItem item : items) {
+                    writer.write(new StringBuilder()
+                            .append(item.entrTime).append(";")
+                            .append(item.recvTime).append(";")
+                            .append(item.decdTime).append(";")
+                            .append(item.recvTime - item.entrTime).append(";")
+                            .append(item.decdTime - item.recvTime).toString());
+
+                    writer.newLine();
+                }
+                writer.flush();
+            } catch (IOException e) {
+                System.err.println("FAILED TO WRITE TO FILE " + e.toString());
+            }
+        }
     }
 
-    private Statistics stats = new Statistics();
+    private FineStatistics stats = new FineStatistics();
 
     private Connection connection;
 
@@ -249,18 +292,19 @@ public class MessageReader implements IMulticastEventListener {
                 @Override
                 public void handleMessage(Message readMessage, Context context, Coder coder) {
                     long decodedTimeInTodayMicros = Utils.currentTimeInTodayMicros();
-                    long sendingTimeInTodayMicros = Utils.convertTodayToTodayMicros(readMessage.getLong("SendingTime") % (1000L * 100L * 100L * 100L));
+                    // long sendingTimeInTodayMicros = Utils.convertTodayToTodayMicros(readMessage.getLong("SendingTime") % (1000L * 100L * 100L * 100L));
                     long receivedTimeInTodayMicros = Utils.convertTicksToTodayMicros(inTimestamp.get());
 
-                    stats.addValueReceivedToDecoded(receivedTimeInTodayMicros - decodedTimeInTodayMicros);
+                    //stats.addValueReceivedToDecoded(receivedTimeInTodayMicros - decodedTimeInTodayMicros);
 
                     if (readMessage.getString("MessageType").equals("X")) {
                         SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
                         for (int i = 0; i < mdEntries.getLength(); ++i) {
                             long entryTimeInTodayMicros = Utils.getEntryTimeInTodayMicros(mdEntries.get(i));
 
-                            stats.addValueEntryToSending(sendingTimeInTodayMicros - entryTimeInTodayMicros);
-                            stats.addValueEntryToReceived(receivedTimeInTodayMicros - entryTimeInTodayMicros);
+                            stats.addItem(entryTimeInTodayMicros, receivedTimeInTodayMicros, decodedTimeInTodayMicros);
+//                            stats.addValueEntryToSending(sendingTimeInTodayMicros - entryTimeInTodayMicros);
+//                            stats.addValueEntryToReceived(receivedTimeInTodayMicros - entryTimeInTodayMicros);
                         }
                     }
                 }
@@ -458,7 +502,7 @@ public class MessageReader implements IMulticastEventListener {
         GatewayManager.addConsoleAppender("%d{HH:mm:ss} %m%n", Level.TRACE);
         GatewayManager.addFileAppender("log/log.mr.out", "%d{HH:mm:ss} %m%n", Level.TRACE);
         if (args.length < 4) {
-            System.err.println("Usage MulticastReader <connectionId> <fast_templates> <interface[s]> <connections_file> [debug, trace]");
+            System.err.println("Usage MulticastReader <connectionId> <fast_templates> <interface[s]> <connections_file> [debug, trace, stats] [stats_filename]");
             return;
         }
 
@@ -490,35 +534,46 @@ public class MessageReader implements IMulticastEventListener {
                             }
 
                             @Override
-                            public boolean isAsynchChannelReader() { return false; }
+                            public boolean isAsynchChannelReader() {
+                                return false;
+                            }
                         }),
                 null, null);
 
-        mr.init(args.length > 4 ? args[4] : "info");
+        boolean statistics = false;
+        if (args.length > 4) {
+            switch (args[4]) {
+                case "trace":
+                case "debug":
+                    mr.init(args[4]);
+                    break;
+                case "stats":
+                    statistics = true;
+                    mr.init("info");
+                    mr.stats.initStatistics();
+                    if (args.length > 5) {
+                        mr.stats.initStatisticsWritingToFile(args[5]);
+                    }
+                    break;
+            }
+        } else {
+            mr.init("info");
+        }
 
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    //
-                }
-                while (mr.running.get()) {
+        if (statistics) {
+            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new Runnable() {
+                @Override
+                public void run() {
+                    if (!mr.running.get())
+                        return;
+
                     synchronized (mr.stats) {
                         mr.logger.info("" + Utils.currentTimeInTodayMicros());
-                        mr.logger.info(mr.stats.dumpEntryToSending());
-                        mr.logger.info(mr.stats.dumpEntryToReceived());
-                        mr.logger.info(mr.stats.dumpReceivedToDecoded());
-                    }
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        break;
+                        mr.logger.info(mr.stats.dump());
                     }
                 }
-            }
-        });
+            }, 1, 1, TimeUnit.SECONDS);
+        }
 
         mr.start();
     }
