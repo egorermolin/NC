@@ -501,8 +501,8 @@ public class MessageReader implements IMulticastEventListener {
         // org.apache.log4j.Logger.getLogger("MessageReader").setLevel(Level.INFO);
         GatewayManager.addConsoleAppender("%d{HH:mm:ss} %m%n", Level.TRACE);
         GatewayManager.addFileAppender("log/log.mr.out", "%d{HH:mm:ss} %m%n", Level.TRACE);
-        if (args.length < 4) {
-            System.err.println("Usage MulticastReader <connectionId> <fast_templates> <interface[s]> <connections_file> [debug, trace, stats] [stats_filename]");
+        if (args.length < 5) {
+            System.err.println("Usage MulticastReader <connectionId> <fast_templates> <interface[s]> <connections_file> <debug, trace, stats> [stats_filename]");
             return;
         }
 
@@ -541,33 +541,26 @@ public class MessageReader implements IMulticastEventListener {
                 null, null);
 
         boolean statistics = false;
-        if (args.length > 4) {
-            switch (args[4]) {
-                case "trace":
-                case "debug":
-                    mr.init(args[4]);
-                    break;
-                case "stats":
-                    statistics = true;
-                    mr.init("info");
-                    mr.stats.initStatistics();
-                    if (args.length > 5) {
-                        mr.stats.initStatisticsWritingToFile(args[5]);
-                    }
-                    break;
-            }
-        } else {
-            mr.init("info");
+        switch (args[4]) {
+            case "trace":
+            case "debug":
+                mr.init(args[4]);
+                break;
+            case "stats":
+                mr.init("info");
+                mr.stats.initStatistics();
+                if (args.length > 5) {
+                    mr.stats.initStatisticsWritingToFile(args[5]);
+                }
+                statistics = true;
+                break;
         }
 
         if (statistics) {
             Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
-                    if (!mr.running.get())
-                        return;
-
-                    synchronized (mr.stats) {
+                   synchronized (mr.stats) {
                         mr.logger.info("" + Utils.currentTimeInTodayMicros());
                         mr.logger.info(mr.stats.dump());
                     }
