@@ -239,7 +239,7 @@ public class MessageReader implements IMulticastEventListener {
                 @Override
                 public void handleMessage(Message readMessage, Context context, Coder coder) {
                     long sendingTimeInToday = readMessage.getLong("SendingTime") % (1000L * 100L * 100L * 100L);
-                    long currentTimeInToday = Utils.convertTicksToToday(inTimestamp.get()); // Utils.currentTimeInToday();
+                    long currentTimeInToday = Utils.currentTimeInToday(); //Utils.convertTicksToToday(inTimestamp.get()); //
                     stats.addValueSendingToReceived(currentTimeInToday - sendingTimeInToday);
 
                     if (readMessage.getString("MessageType").equals("X")) {
@@ -487,23 +487,22 @@ public class MessageReader implements IMulticastEventListener {
         Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                int dumpStatistics = 0;
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    //
+                }
                 while (mr.running.get()) {
+                    synchronized (mr.stats) {
+                        mr.logger.info("" + Utils.currentTimeInToday());
+                        mr.logger.info(mr.stats.dumpEntryToSending());
+                        mr.logger.info(mr.stats.dumpEntryToReceived());
+                        mr.logger.info(mr.stats.dumpSendingToReceived());
+                    }
                     try {
-                        Thread.sleep(10000);
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         break;
-                    }
-
-                    dumpStatistics++;
-                    if (dumpStatistics == 1) {
-                        synchronized (mr.stats) {
-                            mr.logger.info("" + Utils.currentTimeInToday());
-                            mr.logger.info(mr.stats.dumpEntryToSending());
-                            mr.logger.info(mr.stats.dumpEntryToReceived());
-                            mr.logger.info(mr.stats.dumpSendingToReceived());
-                        }
-                        dumpStatistics = 0;
                     }
                 }
             }
