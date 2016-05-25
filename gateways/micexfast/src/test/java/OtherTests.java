@@ -9,6 +9,10 @@ import ru.ncapital.gateways.micexfast.Utils;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.SequenceArray;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * Created by egore on 27.01.2016.
  */
@@ -93,5 +97,35 @@ public class OtherTests {
     @Test
     public void testConversion() {
 
+    }
+
+    public static void main(String[] args) {
+        ExecutorService executor = Executors.newCachedThreadPool();
+
+        class Task implements Runnable {
+
+            private String id;
+
+            private Task(String id) {
+                this.id = id;
+            }
+
+            @Override
+            public void run() {
+                System.out.println("STARTED " + id);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("FINISHED " + id);
+            }
+        }
+
+        for (int i = 0; i < 10; ++i) {
+            executor.execute(new Task(String.valueOf(i + 1)));
+        }
+
+        executor.shutdown();
     }
 }

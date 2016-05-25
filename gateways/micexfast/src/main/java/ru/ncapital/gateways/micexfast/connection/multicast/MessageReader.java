@@ -1,7 +1,6 @@
 package ru.ncapital.gateways.micexfast.connection.multicast;
 
 import org.apache.log4j.Level;
-import org.codehaus.groovy.tools.shell.IO;
 import org.openfast.*;
 import org.openfast.codec.Coder;
 import org.openfast.error.FastException;
@@ -27,9 +26,8 @@ import java.nio.channels.MembershipKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -38,8 +36,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class MessageReader implements IMulticastEventListener {
 
-    private class FineStatistics {
-        private class FineStatisticsItem {
+    private class Statistics {
+
+        private static final int NUMBER_OF_LISTS = 100;
+
+        private class StatisticsItem {
             // ALL TIMES IN TODAY MICROS (micros since midnight)
 
             private long entrTime;
@@ -48,14 +49,18 @@ public class MessageReader implements IMulticastEventListener {
 
             private long decdTime;
 
-            private FineStatisticsItem(long entrTime, long recvTime, long decdTime) {
+            private StatisticsItem(long entrTime, long recvTime, long decdTime) {
                 this.entrTime = entrTime;
                 this.recvTime = recvTime;
                 this.decdTime = decdTime;
             }
         }
 
-        private List<FineStatisticsItem> items = new ArrayList<>();
+        private List<List<StatisticsItem>> allItems = new ArrayList<>();
+
+        private List<StatisticsItem> currentItems;
+
+        private int currentItemsPos = 0;
 
         private long total = 0;
 
@@ -63,8 +68,12 @@ public class MessageReader implements IMulticastEventListener {
 
         private boolean active = false;
 
+        private Executor executor = Executors.newSingleThreadExecutor();
+
         protected void initStatistics() {
             active = true;
+            for (int i = 0; i < NUMBER_OF_LISTS; ++i)
+                allItems.add(new ArrayList<StatisticsItem>());
         }
 
         protected void initStatisticsWritingToFile(String filename) {
@@ -79,72 +88,106 @@ public class MessageReader implements IMulticastEventListener {
             }
         }
 
-        synchronized protected void addItem(long entrTime, long recvTime, long decdTime) {
+        protected synchronized void addItem(long entrTime, long recvTime, long decdTime) {
             if (!active)
                 return;
 
-            items.add(new FineStatisticsItem(entrTime, recvTime, decdTime));
+            currentItems.add(new StatisticsItem(entrTime, recvTime, decdTime));
         }
 
-        synchronized protected String dump() {
-            if (!active)
-                return null;
+        protected void dump() {
+            if (active) {
+                int pos = currentItemsPos;
 
-            total += items.size();
-            StringBuilder sb = new StringBuilder();
-            sb.append("[Total: ").append(total).append("]");
-            if (!items.isEmpty()) {
-                List<Long> latenciesEntrToRecv = new ArrayList<>();
-                List<Long> latenciesRecvToDecd = new ArrayList<>();
+                logger.info(pos + " " + Utils.currentTimeInTodayMicros());
 
-                for (FineStatisticsItem item : items) {
-                    latenciesEntrToRecv.add(item.recvTime - item.entrTime);
-                    latenciesRecvToDecd.add(item.decdTime - item.recvTime);
-                }
+                List<StatisticsItem> lastItems = initNextAvaiableItems();
 
-                Collections.sort(latenciesEntrToRecv);
-                Collections.sort(latenciesRecvToDecd);
-
-                sb.append("[Last: ").append(items.size()).append("]");
-                sb.append("[MinL: ").append(String.format("%d", latenciesEntrToRecv.get(0)))
-                        .append("|").append(String.format("%d", latenciesRecvToDecd.get(0))).append("]");
-                sb.append("[MedL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() / 2)))
-                        .append("|").append(String.format("%d", latenciesRecvToDecd.get(latenciesRecvToDecd.size() / 2))).append("]");
-                sb.append("[MaxL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() - 1)))
-                        .append("|").append(String.format("%d", latenciesRecvToDecd.get(latenciesRecvToDecd.size() - 1))).append("]");
-
-                dumpToFile(sb.toString());
+                calculateAndWriteToFile(pos, lastItems);
             }
-            items.clear();
-            return sb.toString();
         }
 
-        synchronized protected void dumpToFile(String header) {
-            if (writer == null)
+        private synchronized List<StatisticsItem> initNextAvaiableItems() {
+            List<StatisticsItem> itemsToDump = currentItems;
+
+            if (currentItemsPos >= NUMBER_OF_LISTS)
+                currentItemsPos = 0;
+
+            currentItems = allItems.get(currentItemsPos++);
+            currentItems.clear();
+
+            return itemsToDump;
+        }
+
+        private void calculateAndWriteToFile(int pos, List<StatisticsItem> items) {
+            if (items.isEmpty())
                 return;
 
-            try {
-                writer.write(header);
-                writer.newLine();
+            class CalculateAndWriteTask implements Runnable {
+                private int pos;
 
-                for (FineStatisticsItem item : items) {
-                    writer.write(new StringBuilder()
-                            .append(item.entrTime).append(";")
-                            .append(item.recvTime).append(";")
-                            .append(item.decdTime).append(";")
-                            .append(item.recvTime - item.entrTime).append(";")
-                            .append(item.decdTime - item.recvTime).toString());
+                private List<StatisticsItem> items;
 
-                    writer.newLine();
+                private CalculateAndWriteTask(int pos, List<StatisticsItem> items) {
+                    this.pos = pos;
+                    this.items = items;
                 }
-                writer.flush();
-            } catch (IOException e) {
-                System.err.println("FAILED TO WRITE TO FILE " + e.toString());
+
+                @Override
+                public void run() {
+                    StringBuilder sb = new StringBuilder();
+                    List<Long> latenciesEntrToRecv = new ArrayList<>();
+                    List<Long> latenciesRecvToDecd = new ArrayList<>();
+
+                    for (StatisticsItem item : items) {
+                        latenciesEntrToRecv.add(item.recvTime - item.entrTime);
+                        latenciesRecvToDecd.add(item.decdTime - item.recvTime);
+                    }
+
+                    Collections.sort(latenciesEntrToRecv);
+                    Collections.sort(latenciesRecvToDecd);
+
+                    total += items.size();
+                    sb.append("[Total: ").append(total).append("]");
+                    sb.append("[Last: ").append(items.size()).append("]");
+                    sb.append("[MinL: ").append(String.format("%d", latenciesEntrToRecv.get(0)))
+                            .append("|").append(String.format("%d", latenciesRecvToDecd.get(0))).append("]");
+                    sb.append("[MedL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() / 2)))
+                            .append("|").append(String.format("%d", latenciesRecvToDecd.get(latenciesRecvToDecd.size() / 2))).append("]");
+                    sb.append("[MaxL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() - 1)))
+                            .append("|").append(String.format("%d", latenciesRecvToDecd.get(latenciesRecvToDecd.size() - 1))).append("]");
+
+                    logger.info(pos + "" + Utils.currentTimeInTodayMicros() + " " + sb.toString());
+
+                    if (writer == null)
+                        return;
+
+                    try {
+                        writer.write(sb.toString());
+                        writer.newLine();
+
+                        for (StatisticsItem item : items) {
+                            writer.write(new StringBuilder()
+                                    .append(item.entrTime).append(";")
+                                    .append(item.recvTime).append(";")
+                                    .append(item.decdTime).append(";")
+                                    .append(item.recvTime - item.entrTime).append(";")
+                                    .append(item.decdTime - item.recvTime).toString());
+
+                            writer.newLine();
+                        }
+                        writer.flush();
+                    } catch (IOException e) {
+                        System.err.println("FAILED TO WRITE TO FILE " + e.toString());
+                    }
+                }
             }
+
+            executor.execute(new CalculateAndWriteTask(pos, items));
         }
     }
 
-    private FineStatistics stats = new FineStatistics();
+    private Statistics stats = new Statistics();
 
     private Connection connection;
 
@@ -557,10 +600,7 @@ public class MessageReader implements IMulticastEventListener {
             Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
-                   synchronized (mr.stats) {
-                        mr.logger.info("" + Utils.currentTimeInTodayMicros());
-                        mr.logger.info(mr.stats.dump());
-                    }
+                    mr.stats.dump();
                 }
             }, 1, 1, TimeUnit.SECONDS);
         }
