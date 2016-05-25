@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MessageReader implements IMulticastEventListener {
 
     private class Statistics {
-        private int totalNumberOfMessages = 0;
+        private int totalNumberOfMessages[] = new int[] {0, 0, 0};
 
         private List<Double> latenciesEntryToSending = new ArrayList<Double>();
 
@@ -60,19 +60,19 @@ public class MessageReader implements IMulticastEventListener {
         }
 
         synchronized String dumpEntryToSending() {
-            return dump("ENTR -> SEND", latenciesEntryToSending);
-        }
-
-        synchronized String dumpEntryToReceived() {
-            return dump("ENTR -> RECV",latenciesEntryToReceived);
+            return dump("ENTR -> SEND", latenciesEntryToSending, 0);
         }
 
         synchronized String dumpSendingToReceived() {
-            return dump("SEND -> RECV", latenciesSendingToReceived);
+            return dump("SEND -> RECV", latenciesSendingToReceived, 1);
         }
 
-        private String dump(String prefix, List<Double> latencies) {
-            totalNumberOfMessages += latencies.size();
+        synchronized String dumpEntryToReceived() {
+            return dump("ENTR -> RECV",latenciesEntryToReceived, 2);
+        }
+
+        private String dump(String prefix, List<Double> latencies, int idx) {
+            totalNumberOfMessages[idx] += latencies.size();
             Collections.sort(latencies);
             double totalLatency = 0.0;
             for (Double latency : latencies)
@@ -80,7 +80,7 @@ public class MessageReader implements IMulticastEventListener {
 
             StringBuilder sb = new StringBuilder();
 
-            sb.append(prefix + "[Total: ").append(totalNumberOfMessages).append("]");
+            sb.append(prefix + "[Total: ").append(totalNumberOfMessages[idx]).append("]");
             if (latencies.size() > 0) {
                 sb.append("[Last: ").append(latencies.size()).append("]");
                 sb.append("[MinL: ").append(String.format("%.2f", latencies.get(0))).append("]");
