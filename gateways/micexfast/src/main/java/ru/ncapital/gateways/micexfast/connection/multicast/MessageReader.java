@@ -335,7 +335,7 @@ public class MessageReader implements IMulticastEventListener {
                 public void handleMessage(Message readMessage, Context context, Coder coder) {
                     long decodedTimeInTodayMicros = Utils.currentTimeInTodayMicros();
                     long receivedTimeInTodayMicros = Utils.convertTicksToTodayMicros(inTimestamp.get());
-                    long sendingTimeInTodayMicros = Utils.convertTodayToTodayMicros(readMessage.getLong("SendingTime"));
+                    long sendingTimeInTodayMicros = Utils.convertTodayToTodayMicros((readMessage.getLong("SendingTime") * 1_000L) % 1_00_00_00_000_000L);
 
                     if (readMessage.getString("MessageType").equals("X")) {
                         SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
