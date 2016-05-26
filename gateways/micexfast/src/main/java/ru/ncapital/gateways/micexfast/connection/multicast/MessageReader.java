@@ -144,19 +144,25 @@ public class MessageReader implements IMulticastEventListener {
                 public void run() {
                     StringBuilder sb = new StringBuilder();
                     List<Long> latenciesEntrToRecv = new ArrayList<>();
+                    List<Long> latenciesEntrToSend = new ArrayList<>();
 
                     for (StatisticsItem item : items) {
                         latenciesEntrToRecv.add(item.recvTime - item.entrTime);
+                        latenciesEntrToSend.add(item.sendTime - item.entrTime);
                     }
 
                     Collections.sort(latenciesEntrToRecv);
+                    Collections.sort(latenciesEntrToSend);
 
                     total += items.size();
                     sb.append("[Total: ").append(total).append("]");
                     sb.append("[Last: ").append(items.size()).append("]");
-                    sb.append("[MinL: ").append(String.format("%d", latenciesEntrToRecv.get(0))).append("]");
-                    sb.append("[MedL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() / 2))).append("]");
-                    sb.append("[MaxL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() - 1))).append("]");
+                    sb.append("[MinL: ").append(String.format("%d", latenciesEntrToRecv.get(0))).append("");
+                    sb.append("|").append(String.format("%d", latenciesEntrToSend.get(0))).append("]");
+                    sb.append("[MedL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() / 2))).append("");
+                    sb.append("|").append(String.format("%d", latenciesEntrToSend.get(0))).append("]");
+                    sb.append("[MaxL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() - 1))).append("");
+                    sb.append("|").append(String.format("%d", latenciesEntrToSend.get(0))).append("]");
 
                     logger.info(pos + "" + Utils.currentTimeInTodayMicros() + " " + sb.toString());
 
@@ -174,7 +180,8 @@ public class MessageReader implements IMulticastEventListener {
                                     .append(item.sendTime).append(";")
                                     .append(item.recvTime).append(";")
                                     .append(item.decdTime).append(";")
-                                    .append(item.recvTime - item.entrTime).append(";").toString());
+                                    .append(item.recvTime - item.entrTime).append(";")
+                                    .append(item.sendTime - item.entrTime).append(";").toString());
 
                             writer.newLine();
                         }
