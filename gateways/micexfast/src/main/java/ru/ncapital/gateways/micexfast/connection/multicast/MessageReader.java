@@ -43,13 +43,16 @@ public class MessageReader implements IMulticastEventListener {
         private class StatisticsItem {
             // ALL TIMES IN TODAY MICROS (micros since midnight)
 
+            private int seqNum;
+
             private long entrTime;
 
             private long recvTime;
 
             private long decdTime;
 
-            private StatisticsItem(long entrTime, long recvTime, long decdTime) {
+            private StatisticsItem(int seqNum, long entrTime, long recvTime, long decdTime) {
+                this.seqNum = seqNum;
                 this.entrTime = entrTime;
                 this.recvTime = recvTime;
                 this.decdTime = decdTime;
@@ -89,11 +92,11 @@ public class MessageReader implements IMulticastEventListener {
             }
         }
 
-        protected synchronized void addItem(long entrTime, long recvTime, long decdTime) {
+        protected synchronized void addItem(int seqNum, long entrTime, long recvTime, long decdTime) {
             if (!active)
                 return;
 
-            currentItems.add(new StatisticsItem(entrTime, recvTime, decdTime));
+            currentItems.add(new StatisticsItem(seqNum, entrTime, recvTime, decdTime));
         }
 
         protected void dump() {
@@ -169,6 +172,7 @@ public class MessageReader implements IMulticastEventListener {
 
                         for (StatisticsItem item : items) {
                             writer.write(new StringBuilder()
+                                    .append(item.seqNum).append(";")
                                     .append(item.entrTime).append(";")
                                     .append(item.recvTime).append(";")
                                     .append(item.decdTime).append(";")
@@ -343,7 +347,7 @@ public class MessageReader implements IMulticastEventListener {
                         for (int i = 0; i < mdEntries.getLength(); ++i) {
                             long entryTimeInTodayMicros = Utils.getEntryTimeInTodayMicros(mdEntries.get(i));
 
-                            stats.addItem(entryTimeInTodayMicros, receivedTimeInTodayMicros, decodedTimeInTodayMicros);
+                            stats.addItem(readMessage.getInt("MsgSeqNum"), entryTimeInTodayMicros, receivedTimeInTodayMicros, decodedTimeInTodayMicros);
 //                            stats.addValueEntryToSending(sendingTimeInTodayMicros - entryTimeInTodayMicros);
 //                            stats.addValueEntryToReceived(receivedTimeInTodayMicros - entryTimeInTodayMicros);
                         }
