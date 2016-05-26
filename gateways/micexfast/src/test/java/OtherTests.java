@@ -13,6 +13,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static junit.framework.TestCase.assertEquals;
+
 /**
  * Created by egore on 27.01.2016.
  */
@@ -32,13 +34,18 @@ public class OtherTests {
 
     @Test
     public void testConvertToday() {
-        long sendingTime = 91756343231L;
-        System.out.println(Utils.convertTodayToTodayMicros(sendingTime));
-        System.out.println(Utils.convertTodayToTicks(sendingTime));
+        long sendingTime = 20160526064844726L;
+        long todayMicros = Utils.convertTodayToTodayMicros((sendingTime % 1_00_00_00_000L) * 1_000L);
+        long ticks = Utils.convertTodayMicrosToTicks(todayMicros);
+        long todayMicros2 = Utils.convertTicksToTodayMicros(ticks);
+        long ticks2 = Utils.convertTodayToTicks((sendingTime % 1_00_00_00_000L) * 1_000L);
+        System.out.println(todayMicros);
+        System.out.println(ticks);
+        System.out.println(todayMicros2);
+        System.out.println(ticks2);
 
-        long ticks = 635997568558836194L;
-        System.out.println(Utils.convertTicksToTodayMicros(ticks));
-        System.out.println(Utils.convertTodayMicrosToTicks(Utils.convertTicksToTodayMicros(ticks)));
+        assertEquals(ticks, ticks2);
+        assertEquals(todayMicros, todayMicros2);
     }
 
     @Test
