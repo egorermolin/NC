@@ -47,13 +47,16 @@ public class MessageReader implements IMulticastEventListener {
 
             private long entrTime;
 
+            private long sendTime;
+
             private long recvTime;
 
             private long decdTime;
 
-            private StatisticsItem(int seqNum, long entrTime, long recvTime, long decdTime) {
+            private StatisticsItem(int seqNum, long entrTime, long sendTime, long recvTime, long decdTime) {
                 this.seqNum = seqNum;
                 this.entrTime = entrTime;
+                this.sendTime = sendTime;
                 this.recvTime = recvTime;
                 this.decdTime = decdTime;
             }
@@ -92,11 +95,11 @@ public class MessageReader implements IMulticastEventListener {
             }
         }
 
-        protected synchronized void addItem(int seqNum, long entrTime, long recvTime, long decdTime) {
+        protected synchronized void addItem(int seqNum, long entrTime, long sendTime, long recvTime, long decdTime) {
             if (!active)
                 return;
 
-            currentItems.add(new StatisticsItem(seqNum, entrTime, recvTime, decdTime));
+            currentItems.add(new StatisticsItem(seqNum, entrTime, sendTime, recvTime, decdTime));
         }
 
         protected void dump() {
@@ -141,25 +144,19 @@ public class MessageReader implements IMulticastEventListener {
                 public void run() {
                     StringBuilder sb = new StringBuilder();
                     List<Long> latenciesEntrToRecv = new ArrayList<>();
-                    List<Long> latenciesRecvToDecd = new ArrayList<>();
 
                     for (StatisticsItem item : items) {
                         latenciesEntrToRecv.add(item.recvTime - item.entrTime);
-                        latenciesRecvToDecd.add(item.decdTime - item.recvTime);
                     }
 
                     Collections.sort(latenciesEntrToRecv);
-                    Collections.sort(latenciesRecvToDecd);
 
                     total += items.size();
                     sb.append("[Total: ").append(total).append("]");
                     sb.append("[Last: ").append(items.size()).append("]");
-                    sb.append("[MinL: ").append(String.format("%d", latenciesEntrToRecv.get(0)))
-                            .append("|").append(String.format("%d", latenciesRecvToDecd.get(0))).append("]");
-                    sb.append("[MedL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() / 2)))
-                            .append("|").append(String.format("%d", latenciesRecvToDecd.get(latenciesRecvToDecd.size() / 2))).append("]");
-                    sb.append("[MaxL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() - 1)))
-                            .append("|").append(String.format("%d", latenciesRecvToDecd.get(latenciesRecvToDecd.size() - 1))).append("]");
+                    sb.append("[MinL: ").append(String.format("%d", latenciesEntrToRecv.get(0))).append("]");
+                    sb.append("[MedL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() / 2))).append("]");
+                    sb.append("[MaxL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() - 1))).append("]");
 
                     logger.info(pos + "" + Utils.currentTimeInTodayMicros() + " " + sb.toString());
 
@@ -174,10 +171,10 @@ public class MessageReader implements IMulticastEventListener {
                             writer.write(new StringBuilder()
                                     .append(item.seqNum).append(";")
                                     .append(item.entrTime).append(";")
+                                    .append(item.sendTime).append(";")
                                     .append(item.recvTime).append(";")
                                     .append(item.decdTime).append(";")
-                                    .append(item.recvTime - item.entrTime).append(";")
-                                    .append(item.decdTime - item.recvTime).toString());
+                                    .append(item.recvTime - item.entrTime).append(";").toString());
 
                             writer.newLine();
                         }
@@ -337,19 +334,18 @@ public class MessageReader implements IMulticastEventListener {
                 @Override
                 public void handleMessage(Message readMessage, Context context, Coder coder) {
                     long decodedTimeInTodayMicros = Utils.currentTimeInTodayMicros();
-                    // long sendingTimeInTodayMicros = Utils.convertTodayToTodayMicros(readMessage.getLong("SendingTime") % (1000L * 100L * 100L * 100L));
                     long receivedTimeInTodayMicros = Utils.convertTicksToTodayMicros(inTimestamp.get());
-
-                    //stats.addValueReceivedToDecoded(receivedTimeInTodayMicros - decodedTimeInTodayMicros);
+                    long sendingTimeInTodayMicros = Utils.convertTodayToTodayMicros(readMessage.getLong("SendingTime"));
 
                     if (readMessage.getString("MessageType").equals("X")) {
                         SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
                         for (int i = 0; i < mdEntries.getLength(); ++i) {
                             long entryTimeInTodayMicros = Utils.getEntryTimeInTodayMicros(mdEntries.get(i));
 
-                            stats.addItem(readMessage.getInt("MsgSeqNum"), entryTimeInTodayMicros, receivedTimeInTodayMicros, decodedTimeInTodayMicros);
-//                            stats.addValueEntryToSending(sendingTimeInTodayMicros - entryTimeInTodayMicros);
-//                            stats.addValueEntryToReceived(receivedTimeInTodayMicros - entryTimeInTodayMicros);
+                            stats.addItem(readMessage.getInt("MsgSeqNum"),
+                                    entryTimeInTodayMicros, sendingTimeInTodayMicros,
+                                    receivedTimeInTodayMicros, decodedTimeInTodayMicros
+                            );
                         }
                     }
                 }

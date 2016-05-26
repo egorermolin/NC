@@ -33,10 +33,12 @@ public class OtherTests {
     @Test
     public void testConvertToday() {
         long sendingTime = 91756343231L;
-
         System.out.println(Utils.convertTodayToTodayMicros(sendingTime));
-        System.out.println(Utils.convertTodayToTodayMillis(sendingTime));
         System.out.println(Utils.convertTodayToTicks(sendingTime));
+
+        long ticks = 635997568558836194L;
+        System.out.println(Utils.convertTicksToTodayMicros(ticks));
+        System.out.println(Utils.convertTodayMicrosToTicks(Utils.convertTicksToTodayMicros(ticks)));
     }
 
     @Test
@@ -52,13 +54,12 @@ public class OtherTests {
 
     @Test
     public void testConvertTodayToTicksAndBack() {
-        long millis = Utils.currentTimeInTodayMillis();
+        long millis = Utils.currentTimeInTodayMicros() / 1000L;
         long micros = 667L;
         long ticks = Utils.convertTodayMicrosToTicks(millis * 1000L + micros);
 
         System.out.println(millis * 1000L + micros);
         System.out.println(ticks);
-        System.out.println(Utils.convertTicksToTodayMillis(ticks));
         System.out.println(Utils.convertTicksToTodayMicros(ticks));
         assert Utils.convertTicksToTodayMicros(ticks) == (millis * 1000L + micros);
     }

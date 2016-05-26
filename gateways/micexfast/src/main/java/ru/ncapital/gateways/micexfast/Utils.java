@@ -20,9 +20,7 @@ public class Utils {
     static {
         try {
             new cli.System.DateTime();
-        } catch (UnsatisfiedLinkError e) {
-            USING_DOT_NET = false;
-        } catch (NoClassDefFoundError e1) {
+        } catch (UnsatisfiedLinkError | NoClassDefFoundError e) {
             USING_DOT_NET = false;
         }
 
@@ -50,14 +48,6 @@ public class Utils {
         else
             return (System.currentTimeMillis() + JANUARY_1ST_1970_IN_MICROS) * 10000L;
     }
-
-    /*
-         CURRENT TODAY_MILLIS (millis since midnight)
-    */
-    public static long currentTimeInTodayMillis() {
-        return convertTicksToTodayMillis(currentTimeInTicks());
-    }
-
     /*
          CURRENT TODAY_MICROS (micros since midnight)
     */
@@ -70,14 +60,6 @@ public class Utils {
     public static long convertTodayMicrosToTicks(long micros) {
         return (JANUARY_1ST_1970_IN_MICROS + TODAY_IN_MILLIS_SINCE_JANUARY_1ST_1970 + micros / 1000L) * 10000L + (micros % 1000L) * 10L;
     }
-
-    /*
-        CONVERT TODAY_MILLIS (millis since midnight) to TICKS (ticks since 1 JAN 0001)
-    */
-    public static long convertTodayMillisToTicks(long millis) {
-        return convertTodayMicrosToTicks(millis * 1000L);
-    }
-
     /*
         CONVERT TICKS (ticks since 1 JAN 0001) to TODAY_MICROS (micros since midnight)
     */
@@ -88,15 +70,8 @@ public class Utils {
     }
 
     /*
-         CONVERT TICKS (ticks since 1 JAN 0001) to TODAY_MILLIS (millis since midnight)
+         CONVERT TODAY (HHMMSSsssmmm) to TODAY_MICROS (micros since midnight)
     */
-    public static long convertTicksToTodayMillis(long ticks) {
-        return convertTicksToTodayMicros(ticks) / 1000L;
-    }
-
-    /*
-     CONVERT TODAY (HHMMSSsssmmm) to TODAY_MICROS (micros since midnight)
-*/
     public static long convertTodayToTicks(long today) {
         return convertTodayMicrosToTicks(convertTodayToTodayMicros(today));
     }
@@ -109,13 +84,6 @@ public class Utils {
         long underSeconds = today % 1_000_000L;
 
         return 1_000_000L * (aboveSeconds / 10_000 * 3600 + ((aboveSeconds / 100) % 100) * 60 + (aboveSeconds % 100)) + underSeconds;
-    }
-
-    /*
-     CONVERT TODAY (HHMMSSsssmmm) to TODAY_MILLIS (micros since midnight)
-*/
-    public static long convertTodayToTodayMillis(long today) {
-        return convertTodayToTodayMicros(today) / 1_000L;
     }
 
     /*
@@ -135,13 +103,6 @@ public class Utils {
         long entryTimeMicros = mdEntry.getValue("OrigTime") != null ? mdEntry.getInt("OrigTime") : 0;
 
         return convertTodayToTodayMicros(entryTimeToday + entryTimeMicros);
-    }
-
-    /*
-         GET ENTRY (HHMMSSsssmmm) in TODAY_MILLIS (millis since midnight)
-    */
-    public static long getEntryTimeInTodayMillis(GroupValue mdEntry) {
-        return getEntryTimeInTodayMicros(mdEntry) / 1_000L;
     }
 
     public static void printStackTrace(Exception e, Logger logger, String message) {
