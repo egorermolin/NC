@@ -9,13 +9,11 @@ import ru.ncapital.gateways.micexfast.connection.messageprocessors.ISnapshotProc
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.micexfast.connection.multicast.MessageReader;
 import ru.ncapital.gateways.micexfast.connection.multicast.MessageReaderStarter;
+import ru.ncapital.gateways.micexfast.domain.Instrument;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -283,10 +281,10 @@ public class ConnectionManager {
         }
     }
 
-    public void onInstrumentDownloadFinished() {
+    public void onInstrumentDownloadFinished(Collection<Instrument> instruments) {
         stopInstrument();
 
-        startSnapshotWatchers();
+        startSnapshotWatchers(instruments);
     }
 
     private void restart() {
@@ -322,9 +320,15 @@ public class ConnectionManager {
         shutdownStarterService();
     }
 
-    private void startSnapshotWatchers() {
+    private void startSnapshotWatchers(Collection<Instrument> instruments) {
         if (snapshotProcessorsToWatch.isEmpty())
             return;
+
+        for (Instrument instrument : instruments) {
+            for (ISnapshotProcessor snapshotProcessor : snapshotProcessorsToWatch) {
+                snapshotProcessor.getSequenceValidator().startRecovering(instrument.getSecurityId());
+            }
+        }
 
         class SnapshotProcessorWatchTask implements Runnable {
             private ISnapshotProcessor snapshotProcessorToWatch;

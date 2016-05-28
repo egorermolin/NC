@@ -6,12 +6,10 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.apache.log4j.*;
 import ru.ncapital.gateways.micexfast.connection.ConnectionManager;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.ISnapshotProcessor;
+import ru.ncapital.gateways.micexfast.domain.Instrument;
 import ru.ncapital.gateways.micexfast.domain.Subscription;
-import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -126,8 +124,8 @@ public class GatewayManager implements IGatewayManager {
             connectionManager.shutdown();
     }
 
-    public void onInstrumentDownloadFinished() {
-        connectionManager.onInstrumentDownloadFinished();
+    public void onInstrumentDownloadFinished(Collection<Instrument> instruments) {
+        connectionManager.onInstrumentDownloadFinished(instruments);
     }
 
     @Override

@@ -302,7 +302,7 @@ public class InstrumentManager extends Processor {
         if (instruments.size() + ignoredInstruments.size() == numberOfInstruments) {
             if (!instrumentsDownloaded.getAndSet(true)) {
                 getLogger().info("FINISHED INSTRUMENTS " + instruments.size());
-                gatewayManager.onInstrumentDownloadFinished();
+                gatewayManager.onInstrumentDownloadFinished(instruments.values());
                 marketDataHandler.onInstruments(instruments.values().toArray(new Instrument[instruments.size()]));
             }
         } else {
