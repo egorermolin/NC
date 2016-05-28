@@ -20,4 +20,6 @@ public interface IMarketDataHandler {
     void onTradingStatus(BBO bbo, long inTimeInTicks);
 
     void onInstruments(Instrument[] instruments);
+
+    void onFeedStatus(boolean up, boolean all);
 }

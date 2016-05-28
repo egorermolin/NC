@@ -114,6 +114,7 @@ public class GatewayManager implements IGatewayManager {
     @Override
     public void start() {
         if (!started.getAndSet(true)) {
+            connectionManager.start();
             connectionManager.startInstrument();
             connectionManager.startInstrumentStatus();
             for (MessageHandlerType type : MessageHandlerType.values()) {

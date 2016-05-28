@@ -228,4 +228,8 @@ public class MarketDataManager {
     public void setInstrumentManager(InstrumentManager instrumentManager) {
         this.instrumentManager = instrumentManager;
     }
+
+    public void onFeedStatus(boolean up, boolean all) {
+        marketDataHandler.onFeedStatus(up, all);
+    }
 }

@@ -70,6 +70,11 @@ public class MainClass {
                         instruments = _instruments;
                         waiter.countDown();
                     }
+
+                    @Override
+                    public void onFeedStatus(boolean up, boolean all) {
+                        logger.info("FeedStatus [" + (up ? "UP" : "DOWN") + "][" + (all ? "ALL" : "SOME") + "]");
+                    }
                 };
             }
 
@@ -111,6 +116,16 @@ public class MainClass {
                 else
                   return new ProductType[] {ProductType.CURRENCY};
             }
+
+            @Override
+            public boolean isAsynchChannelReader() {
+                return true;
+            }
+
+            @Override
+            public boolean isListenSnapshotChannelOnlyIfNeeded() {
+                return true;
+            }
         });
 
         gwManager.start();
@@ -124,7 +139,7 @@ public class MainClass {
         //}
 
         try {
-            Thread.sleep(1000);
+            Thread.sleep(10000);
         } catch (InterruptedException e) {
             Utils.printStackTrace(e, logger, "InterruptedException occurred..");
         }

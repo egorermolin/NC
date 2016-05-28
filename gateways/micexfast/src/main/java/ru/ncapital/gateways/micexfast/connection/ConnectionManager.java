@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ConnectionManager {
     private final ExecutorService starter = Executors.newCachedThreadPool();
 
-    private final ScheduledExecutorService snapshotWatcherStarter = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
 
     private Map<ConnectionId, MessageReader> messageReaders = new HashMap<>();
 
@@ -36,8 +36,11 @@ public class ConnectionManager {
 
     private MarketType marketType = MarketType.CURR;
 
+    private MarketDataManager marketDataManager;
+
     @Inject
     public ConnectionManager(ConfigurationManager configurationManager, MarketDataManager marketDataManager, InstrumentManager instrumentManager) {
+        this.marketDataManager = marketDataManager;
         for (ConnectionId connectionId : ConnectionId.values()) {
             MessageReader mcr = new MessageReader(connectionId, configurationManager, marketDataManager, instrumentManager);
             try {
@@ -49,9 +52,45 @@ public class ConnectionManager {
         }
     }
 
+    private int checkMessageReaders() {
+        final long threshold = 60L * 1000L * 1000L * 10L;
+        int running = 0;
+        int up = 0;
+        long currentTime = Utils.currentTimeInTicks();
+        for (MessageReader mr : messageReaders.values()) {
+            if (mr.isRunning()) {
+                running++;
+                if (currentTime - mr.getLastInTimestamp() < threshold)
+                    up++;
+            }
+        }
+
+        if (up == 0)
+            return -1;
+
+        return running - up;
+    }
+
     public ConnectionManager configure(IGatewayConfiguration configuration) {
         this.marketType = configuration.getMarketType();
         return this;
+    }
+
+    public void start() {
+        scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                int result = checkMessageReaders();
+                if (result != 0) {
+                    if (result < 0)
+                        marketDataManager.onFeedStatus(false, true);
+                    else
+                        marketDataManager.onFeedStatus(false, false);
+                } else {
+                    marketDataManager.onFeedStatus(true, true);
+                }
+            }
+        }, 5, 1, TimeUnit.SECONDS);
     }
 
     public void startInstrument() {
@@ -279,7 +318,7 @@ public class ConnectionManager {
     }
 
     public void scheduleSnapshotWatcher(final ISnapshotProcessor snapshotProcessorToWatch) {
-        snapshotWatcherStarter.scheduleAtFixedRate(new Runnable() {
+        scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
             private ISnapshotProcessor snapshotProcessor = snapshotProcessorToWatch;
 
             private IMessageSequenceValidator sequenceValidator = snapshotProcessor.getSequenceValidator();
@@ -312,9 +351,9 @@ public class ConnectionManager {
     }
 
     public void stopSnapshotWatchers() {
-        snapshotWatcherStarter.shutdown();
+        scheduledExecutorService.shutdown();
         try {
-            while (!snapshotWatcherStarter.isTerminated()) {
+            while (!scheduledExecutorService.isTerminated()) {
                 Thread.sleep(1000);
             }
         } catch (InterruptedException e) {

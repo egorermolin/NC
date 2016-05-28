@@ -36,11 +36,6 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
     }
 
     @Override
-    public void onInstruments(Instrument[] instruments) {
-
-    }
-
-    @Override
     public void onStatistics(BBO bbo, long inTime) {
         StringBuilder sb = new StringBuilder();
         sb.append("onStatistics: ");
@@ -88,5 +83,15 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
         sb.append(publicTrade.getSecurityId()).append(" ");
         sb.append(publicTrade.isBid() ? "B" : "S");
         sb.append(publicTrade.getLastSize()).append("@").append(publicTrade.getLastPx());
+    }
+
+    @Override
+    public void onInstruments(Instrument[] instruments) {
+
+    }
+
+    @Override
+    public void onFeedStatus(boolean up, boolean all) {
+
     }
 }

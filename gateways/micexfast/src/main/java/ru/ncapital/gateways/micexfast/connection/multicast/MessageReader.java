@@ -318,6 +318,13 @@ public class MessageReader implements IMulticastEventListener {
         return running.get();
     }
 
+    public long getLastInTimestamp() {
+        if (inTimestamp != null)
+            return inTimestamp.get();
+
+        return 0;
+    }
+
     private void connect() throws IOException {
         membership = channel.join(InetAddress.getByName(connection.getIp()),
                 NetworkInterface.getByName(intf),
