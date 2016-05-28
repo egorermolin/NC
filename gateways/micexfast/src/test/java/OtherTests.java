@@ -67,55 +67,6 @@ public class OtherTests {
     }
 
     @Test
-    public void testScheduleStart() {
-        AtomicBoolean running = new AtomicBoolean(true);
-        final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-        final ExecutorService service2 = Executors.newSingleThreadExecutor();
-        class Task implements Runnable {
-            AtomicBoolean running;
-
-            int count = 0;
-            int count2 = 0;
-
-            Task(AtomicBoolean running) {
-                this.running = running;
-            }
-
-            @Override
-            public void run() {
-                if (++count == 5) {
-//                    Executors.newSingleThreadExecutor().execute(new Runnable() {
-//                        @Override
-//                        public void run() {
-                            futureTask.cancel(false);
-
-                            if (++count2 == 5)
-                                running.set(false);
-                            else {
-                                System.out.println("++" + count2);
-                                futureTask = service.scheduleAtFixedRate(new Task(running), 1, 1, TimeUnit.SECONDS);
-                            }
-//                        }
-//                    });
-                } else {
-                    System.out.println("+" + count);
-                }
-            }
-        }
-        futureTask = service.scheduleAtFixedRate(new Task(running), 1, 1, TimeUnit.SECONDS);
-
-        int count3 = 0;
-        while (running.get()) {
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            System.out.println("+++" + ++count3);
-        }
-    }
-
-    @Test
     public void testConvertTodayToTicksAndBack() {
         long millis = Utils.currentTimeInTodayMicros() / 1000L;
         long micros = 667L;
