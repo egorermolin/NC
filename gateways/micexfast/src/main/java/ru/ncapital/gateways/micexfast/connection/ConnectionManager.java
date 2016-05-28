@@ -58,10 +58,12 @@ public class ConnectionManager {
         int up = 0;
         long currentTime = Utils.currentTimeInTicks();
         for (MessageReader mr : messageReaders.values()) {
-            if (mr.isRunning() || mr.isIncremental()) {
+            if (mr.isRunning()) {
                 running++;
                 if (currentTime - mr.getLastReceivedTimestamp() < threshold)
                     up++;
+                else
+                    logger.warn("Message reader [" + mr.getConnectionId()+ "] is down since [" + Utils.convertTicksToTodayMicros(mr.getLastReceivedTimestamp()) + "]");
             }
         }
 

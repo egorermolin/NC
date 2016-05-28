@@ -324,8 +324,8 @@ public class MessageReader implements IMulticastEventListener {
         return receivedTimestamp;
     }
 
-    public boolean isIncremental() {
-        return connectionId.isIncremental();
+    public ConnectionId getConnectionId() {
+        return connectionId;
     }
 
     private void connect() throws IOException {
