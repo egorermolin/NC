@@ -56,6 +56,10 @@ public class MarketDataManager {
 
     private IGatewayPerformanceLogger performanceLogger;
 
+    private boolean feedStatusUP = false;
+
+    private boolean feedStatusALL = true;
+
     public MarketDataManager configure(IGatewayConfiguration configuration) {
         marketDataHandler = configuration.getMarketDataHandler();
         performanceLogger = configuration.getPerformanceLogger();
@@ -230,6 +234,16 @@ public class MarketDataManager {
     }
 
     public void onFeedStatus(boolean up, boolean all) {
-        marketDataHandler.onFeedStatus(up, all);
+        boolean changed = false;
+        if (feedStatusUP != up) {
+            feedStatusUP = up;
+            changed = true;
+        }
+        if (feedStatusALL != all) {
+            feedStatusALL = all;
+            changed = true;
+        }
+        if (changed)
+            marketDataHandler.onFeedStatus(up, all);
     }
 }
