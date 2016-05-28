@@ -118,6 +118,12 @@ public class MainClass {
             }
 
             @Override
+            public String[] getAllowedSecurityIds() {
+                // return new String[] {"*"};
+                return new String[] {"EUR000TODTOM;CETS"};
+            }
+
+            @Override
             public boolean isAsynchChannelReader() {
                 return true;
             }
@@ -139,7 +145,7 @@ public class MainClass {
         //}
 
         try {
-            Thread.sleep(10000);
+            Thread.sleep(1200000);
         } catch (InterruptedException e) {
             Utils.printStackTrace(e, logger, "InterruptedException occurred..");
         }

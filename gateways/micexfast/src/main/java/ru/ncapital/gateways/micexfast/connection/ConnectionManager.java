@@ -41,7 +41,7 @@ public class ConnectionManager {
 
     private MarketDataManager marketDataManager;
 
-    private List<ISnapshotProcessor> snapshotProcessorsToWatch;
+    private List<ISnapshotProcessor> snapshotProcessorsToWatch = new ArrayList<>();
 
     @Inject
     public ConnectionManager(ConfigurationManager configurationManager, MarketDataManager marketDataManager, InstrumentManager instrumentManager) {
@@ -290,6 +290,8 @@ public class ConnectionManager {
     }
 
     private void restart() {
+        stopMessageReaderWatcher();
+
         List<MessageReader> stoppedMessageReaders = new ArrayList<>();
         for (MessageReader messageReader : messageReaders.values()) {
             if (messageReader.isRunning()) {
@@ -298,12 +300,11 @@ public class ConnectionManager {
             }
         }
 
-        stopMessageReaderWatcher();
-        startMessageReadersWatcher();
-
         for (MessageReader messageReader : stoppedMessageReaders) {
             starterService.execute(new MessageReaderStarter(messageReader));
         }
+
+        startMessageReadersWatcher();
     }
 
     public void shutdown() {
@@ -364,7 +365,7 @@ public class ConnectionManager {
         for (final ISnapshotProcessor snapshotProcessorToWatch : snapshotProcessorsToWatch) {
             snapshotWatcherFutures.add(
                     scheduledService.scheduleAtFixedRate(
-                            new SnapshotProcessorWatchTask(snapshotProcessorToWatch), 1200, 1, TimeUnit.SECONDS
+                            new SnapshotProcessorWatchTask(snapshotProcessorToWatch), 600, 1, TimeUnit.SECONDS
                     )
             );
         }
@@ -391,8 +392,8 @@ public class ConnectionManager {
                 if (currentTime - messageReader.getLastReceivedTimestamp() < threshold)
                     up++;
                 else
-                    //if (logger.isDebugEnabled())
-                        logger.warn("Message reader [" + messageReader.getConnectionId() + "] is down since [" + Utils.convertTicksToTodayString(messageReader.getLastReceivedTimestamp()) + "]");
+                    if (logger.isDebugEnabled())
+                        logger.debug("Message Reader [" + messageReader.getConnectionId() + "] is down since [" + Utils.convertTicksToTodayString(messageReader.getLastReceivedTimestamp()) + "]");
             }
         }
 
