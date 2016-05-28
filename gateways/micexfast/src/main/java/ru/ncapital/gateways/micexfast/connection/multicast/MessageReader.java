@@ -228,6 +228,8 @@ public class MessageReader implements IMulticastEventListener {
 
     private ThreadLocal<Long> inTimestamp;
 
+    private volatile long receivedTimestamp;
+
     public MessageReader(ConnectionId connectionId, ConfigurationManager configurationManager, MarketDataManager marketDataManager, InstrumentManager instumentManager) {
         this.connectionId = connectionId;
         this.asynch = configurationManager.isAsynchChannelReader();
@@ -318,11 +320,8 @@ public class MessageReader implements IMulticastEventListener {
         return running.get();
     }
 
-    public long getLastInTimestamp() {
-        if (inTimestamp != null)
-            return inTimestamp.get();
-
-        return 0;
+    public long getLastReceivedTimestamp() {
+        return receivedTimestamp;
     }
 
     private void connect() throws IOException {
@@ -525,6 +524,7 @@ public class MessageReader implements IMulticastEventListener {
         while (running.get()) {
             try {
                 messageReader.readMessage();
+                receivedTimestamp = inTimestamp.get();
             } catch (Exception e) {
                 onException(e);
             }

@@ -60,7 +60,7 @@ public class ConnectionManager {
         for (MessageReader mr : messageReaders.values()) {
             if (mr.isRunning()) {
                 running++;
-                if (currentTime - mr.getLastInTimestamp() < threshold)
+                if (currentTime - mr.getLastReceivedTimestamp() < threshold)
                     up++;
             }
         }
