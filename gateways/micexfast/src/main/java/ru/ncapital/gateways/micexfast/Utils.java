@@ -39,6 +39,23 @@ public class Utils {
         TODAY_IN_MILLIS_SINCE_JANUARY_1ST_1970 = cal.getTimeInMillis();
     }
 
+    public static String convertTicksToTodayString(long ticks) {
+        return convertTodayMicrosToTodayString(convertTicksToTodayMicros(ticks));
+    }
+
+    public static String convertTodayMicrosToTodayString(long todayMicros) {
+        int todaySeconds = (int) (todayMicros / 1_000_000L);
+        int seconds = todaySeconds % 60;
+        int todayMinutes = (todaySeconds - seconds) / 60;
+        int minutes = todayMinutes % 60;
+        int hours = (todayMinutes - minutes) / 60;
+
+        return new StringBuilder()
+                .append(hours < 10 ? "0" : "").append(hours).append(":")
+                .append(minutes < 10 ? "0" : "").append(minutes).append(":")
+                .append(seconds < 10 ? "0" : "").append(seconds).append(" UTC").toString();
+    }
+
     /*
          CURRENT TICKS (ticks since 1 JAN 0001)
     */

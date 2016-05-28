@@ -53,7 +53,7 @@ public class ConnectionManager {
     }
 
     private int checkMessageReaders() {
-        final long threshold = 60L * 1000L * 1000L * 10L;
+        final long threshold = 10L * 1000L * 1000L * 10L;
         int running = 0;
         int up = 0;
         long currentTime = Utils.currentTimeInTicks();
@@ -63,7 +63,7 @@ public class ConnectionManager {
                 if (currentTime - mr.getLastReceivedTimestamp() < threshold)
                     up++;
                 else
-                    logger.warn("Message reader [" + mr.getConnectionId()+ "] is down since [" + Utils.convertTicksToTodayMicros(mr.getLastReceivedTimestamp()) + "]");
+                    logger.warn("Message reader [" + mr.getConnectionId() + "] is down since [" + Utils.convertTicksToTodayString(mr.getLastReceivedTimestamp()) + "]");
             }
         }
 

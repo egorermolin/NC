@@ -49,6 +49,12 @@ public class OtherTests {
     }
 
     @Test
+    public void testConvertTicks() {
+        long ticks = 7805452000L;
+        System.out.println(Utils.convertTodayMicrosToTodayString(ticks));
+    }
+
+    @Test
     public void testCurrentTimeInMillis() {
         System.out.println(Utils.currentTimeInTodayMicros());
     }
