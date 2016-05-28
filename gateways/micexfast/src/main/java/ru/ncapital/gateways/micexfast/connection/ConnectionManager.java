@@ -58,7 +58,7 @@ public class ConnectionManager {
         int up = 0;
         long currentTime = Utils.currentTimeInTicks();
         for (MessageReader mr : messageReaders.values()) {
-            if (mr.isRunning()) {
+            if (mr.isRunning() || mr.isIncremental()) {
                 running++;
                 if (currentTime - mr.getLastReceivedTimestamp() < threshold)
                     up++;

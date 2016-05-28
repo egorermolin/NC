@@ -324,6 +324,10 @@ public class MessageReader implements IMulticastEventListener {
         return receivedTimestamp;
     }
 
+    public boolean isIncremental() {
+        return connectionId.isIncremental();
+    }
+
     private void connect() throws IOException {
         membership = channel.join(InetAddress.getByName(connection.getIp()),
                 NetworkInterface.getByName(intf),
