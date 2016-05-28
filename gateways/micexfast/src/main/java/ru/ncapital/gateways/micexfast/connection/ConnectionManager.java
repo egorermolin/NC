@@ -365,7 +365,7 @@ public class ConnectionManager {
         for (final ISnapshotProcessor snapshotProcessorToWatch : snapshotProcessorsToWatch) {
             snapshotWatcherFutures.add(
                     scheduledService.scheduleAtFixedRate(
-                            new SnapshotProcessorWatchTask(snapshotProcessorToWatch), 600, 1, TimeUnit.SECONDS
+                            new SnapshotProcessorWatchTask(snapshotProcessorToWatch), 60, 1, TimeUnit.SECONDS
                     )
             );
         }
