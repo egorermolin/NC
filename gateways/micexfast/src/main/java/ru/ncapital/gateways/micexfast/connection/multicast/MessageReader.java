@@ -160,11 +160,11 @@ public class MessageReader implements IMulticastEventListener {
                     sb.append("[MinL: ").append(String.format("%d", latenciesEntrToRecv.get(0))).append("");
                     sb.append("|").append(String.format("%d", latenciesEntrToSend.get(0))).append("]");
                     sb.append("[MedL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() / 2))).append("");
-                    sb.append("|").append(String.format("%d", latenciesEntrToSend.get(0))).append("]");
+                    sb.append("|").append(String.format("%d", latenciesEntrToSend.get(latenciesEntrToSend.size() / 2))).append("]");
                     sb.append("[MaxL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() - 1))).append("");
-                    sb.append("|").append(String.format("%d", latenciesEntrToSend.get(0))).append("]");
+                    sb.append("|").append(String.format("%d", latenciesEntrToSend.get(latenciesEntrToSend.size() - 1))).append("]");
 
-                    logger.info(pos + "" + Utils.currentTimeInTodayMicros() + " " + sb.toString());
+                    logger.info(pos + " " + Utils.currentTimeInTodayMicros() + " " + sb.toString());
 
                     if (writer == null)
                         return;
@@ -342,7 +342,7 @@ public class MessageReader implements IMulticastEventListener {
                 public void handleMessage(Message readMessage, Context context, Coder coder) {
                     long decodedTimeInTodayMicros = Utils.currentTimeInTodayMicros();
                     long receivedTimeInTodayMicros = Utils.convertTicksToTodayMicros(inTimestamp.get());
-                    long sendingTimeInTodayMicros = Utils.convertTodayToTodayMicros((readMessage.getLong("SendingTime") * 1_000L) % 1_00_00_00_000_000L);
+                    long sendingTimeInTodayMicros = Utils.convertTodayToTodayMicros((readMessage.getLong("SendingTime") % 1_00_00_00_000L) * 1_000L);
 
                     if (readMessage.getString("MessageType").equals("X")) {
                         SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
