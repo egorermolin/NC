@@ -242,7 +242,7 @@ public class InstrumentManagerTest {
         assertEquals("ROSN;TQBR", bboCapture.getAllValues().get(1).getSecurityId());
         assertEquals("N-17", bboCapture.getAllValues().get(1).getTradingStatus());
 
-        verify(gatewayManager, times(1)).onInstrumentDownloadFinished();
+        verify(gatewayManager, times(1)).onInstrumentDownloadFinished(anyCollectionOf(Instrument.class));
 
         ArgumentCaptor<Instrument[]> instrumentCapture = ArgumentCaptor.forClass(Instrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
@@ -262,7 +262,7 @@ public class InstrumentManagerTest {
             instrumentManager.handleMessage(getInstrumentMessageMock(i), context, coder);
 
         verify(marketDataManager, times(2)).onBBO(any(BBO.class), anyLong());
-        verify(gatewayManager, times(1)).onInstrumentDownloadFinished();
+        verify(gatewayManager, times(1)).onInstrumentDownloadFinished(anyCollectionOf(Instrument.class));
         ArgumentCaptor<Instrument[]> instrumentCapture = ArgumentCaptor.forClass(Instrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
         assertEquals(2, instrumentCapture.getValue().length);
@@ -273,13 +273,13 @@ public class InstrumentManagerTest {
         for (int i : new int [] {1, 1, 3, 3, 4, 4, 5, 5})
             instrumentManager.handleMessage(getInstrumentMessageMock(i), context, coder);
 
-        verify(gatewayManager, times(0)).onInstrumentDownloadFinished();
+        verify(gatewayManager, times(0)).onInstrumentDownloadFinished(anyCollectionOf(Instrument.class));
 
         for (int i : new int [] {1, 1, 2, 2, 3, 3, 4, 4, 5, 5})
             instrumentManager.handleMessage(getInstrumentMessageMock(i), context, coder);
 
         verify(marketDataManager, times(2)).onBBO(any(BBO.class), anyLong());
-        verify(gatewayManager, times(1)).onInstrumentDownloadFinished();
+        verify(gatewayManager, times(1)).onInstrumentDownloadFinished(anyCollectionOf(Instrument.class));
         ArgumentCaptor<Instrument[]> instrumentCapture = ArgumentCaptor.forClass(Instrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
         assertEquals(2, instrumentCapture.getValue().length);
@@ -290,13 +290,13 @@ public class InstrumentManagerTest {
         for (int i : new int [] {1, 1, 3, 3, 4, 4, 5, 5})
             instrumentManager.handleMessage(getInstrumentMessageMock(i), context, coder);
 
-        verify(gatewayManager, times(0)).onInstrumentDownloadFinished();
+        verify(gatewayManager, times(0)).onInstrumentDownloadFinished(anyCollectionOf(Instrument.class));
 
         for (int i : new int [] {1, 1, 2, 2, 4, 4, 5, 5})
             instrumentManager.handleMessage(getInstrumentMessageMock(i), context, coder);
 
         verify(marketDataManager, times(2)).onBBO(any(BBO.class), anyLong());
-        verify(gatewayManager, times(1)).onInstrumentDownloadFinished();
+        verify(gatewayManager, times(1)).onInstrumentDownloadFinished(anyCollectionOf(Instrument.class));
         ArgumentCaptor<Instrument[]> instrumentCapture = ArgumentCaptor.forClass(Instrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
         assertEquals(2, instrumentCapture.getValue().length);
