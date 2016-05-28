@@ -9,9 +9,8 @@ import ru.ncapital.gateways.micexfast.Utils;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.SequenceArray;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static junit.framework.TestCase.assertEquals;
 
@@ -20,6 +19,8 @@ import static junit.framework.TestCase.assertEquals;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class OtherTests {
+    ScheduledFuture<?> futureTask ;
+
     @Test
     public void testGetMdEntryTimeInUsec() {
         GroupValue mdEntry = Mockito.mock(GroupValue.class);
@@ -63,6 +64,55 @@ public class OtherTests {
     public void testSubstring() {
         String str = "AAA:AAA";
         assert str.substring(0, str.indexOf(':')).equals("AAA");
+    }
+
+    @Test
+    public void testScheduleStart() {
+        AtomicBoolean running = new AtomicBoolean(true);
+        final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+        final ExecutorService service2 = Executors.newSingleThreadExecutor();
+        class Task implements Runnable {
+            AtomicBoolean running;
+
+            int count = 0;
+            int count2 = 0;
+
+            Task(AtomicBoolean running) {
+                this.running = running;
+            }
+
+            @Override
+            public void run() {
+                if (++count == 5) {
+//                    Executors.newSingleThreadExecutor().execute(new Runnable() {
+//                        @Override
+//                        public void run() {
+                            futureTask.cancel(false);
+
+                            if (++count2 == 5)
+                                running.set(false);
+                            else {
+                                System.out.println("++" + count2);
+                                futureTask = service.scheduleAtFixedRate(new Task(running), 1, 1, TimeUnit.SECONDS);
+                            }
+//                        }
+//                    });
+                } else {
+                    System.out.println("+" + count);
+                }
+            }
+        }
+        futureTask = service.scheduleAtFixedRate(new Task(running), 1, 1, TimeUnit.SECONDS);
+
+        int count3 = 0;
+        while (running.get()) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("+++" + ++count3);
+        }
     }
 
     @Test

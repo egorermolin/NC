@@ -12,12 +12,11 @@ import ru.ncapital.gateways.micexfast.connection.multicast.MessageReaderStarter;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -26,9 +25,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Singleton
 public class ConnectionManager {
-    private final ExecutorService starter = Executors.newCachedThreadPool();
+    private final ExecutorService starterService = Executors.newCachedThreadPool();
 
-    private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
+    private final ScheduledExecutorService scheduledService = Executors.newScheduledThreadPool(2);
+
+    private ScheduledFuture<?> messageReadersWatcherFuture;
+
+    private List<ScheduledFuture<?>> snapshotWatcherFutures = new ArrayList<>();
 
     private Map<ConnectionId, MessageReader> messageReaders = new HashMap<>();
 
@@ -38,72 +41,37 @@ public class ConnectionManager {
 
     private MarketDataManager marketDataManager;
 
+    private List<ISnapshotProcessor> snapshotProcessorsToWatch;
+
     @Inject
     public ConnectionManager(ConfigurationManager configurationManager, MarketDataManager marketDataManager, InstrumentManager instrumentManager) {
         this.marketDataManager = marketDataManager;
         for (ConnectionId connectionId : ConnectionId.values()) {
-            MessageReader mcr = new MessageReader(connectionId, configurationManager, marketDataManager, instrumentManager);
+            MessageReader messageReader = new MessageReader(connectionId, configurationManager, marketDataManager, instrumentManager);
             try {
-                mcr.init("info");
-                messageReaders.put(connectionId, mcr);
+                messageReader.init("info");
+                messageReaders.put(connectionId, messageReader);
             } catch (IOException e) {
                 Utils.printStackTrace(e, logger, "IOException occurred while opening channel..");
             }
         }
     }
 
-    private int checkMessageReaders() {
-        final long threshold = 10L * 1000L * 1000L * 10L;
-        int running = 0;
-        int up = 0;
-        long currentTime = Utils.currentTimeInTicks();
-        for (MessageReader mr : messageReaders.values()) {
-            if (mr.isRunning()) {
-                running++;
-                if (currentTime - mr.getLastReceivedTimestamp() < threshold)
-                    up++;
-                else
-                    logger.warn("Message reader [" + mr.getConnectionId() + "] is down since [" + Utils.convertTicksToTodayString(mr.getLastReceivedTimestamp()) + "]");
-            }
-        }
-
-        if (up == 0)
-            return -1;
-
-        return running - up;
-    }
 
     public ConnectionManager configure(IGatewayConfiguration configuration) {
         this.marketType = configuration.getMarketType();
         return this;
     }
 
-    public void start() {
-        scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                int result = checkMessageReaders();
-                if (result != 0) {
-                    if (result < 0)
-                        marketDataManager.onFeedStatus(false, true);
-                    else
-                        marketDataManager.onFeedStatus(false, false);
-                } else {
-                    marketDataManager.onFeedStatus(true, true);
-                }
-            }
-        }, 5, 1, TimeUnit.SECONDS);
-    }
-
     public void startInstrument() {
         switch (marketType) {
             case CURR:
-                starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_INSTRUMENT_SNAP_A)));
-                starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_INSTRUMENT_SNAP_B)));
+                starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_INSTRUMENT_SNAP_A)));
+                starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_INSTRUMENT_SNAP_B)));
                 break;
             case FOND:
-                starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_INSTRUMENT_SNAP_A)));
-                starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_INSTRUMENT_SNAP_B)));
+                starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_INSTRUMENT_SNAP_A)));
+                starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_INSTRUMENT_SNAP_B)));
                 break;
         }
     }
@@ -126,12 +94,12 @@ public class ConnectionManager {
             case CURR:
                 switch (type) {
                     case ORDER_LIST:
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_ORDER_LIST_SNAP_A)));
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_ORDER_LIST_SNAP_B)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_ORDER_LIST_SNAP_A)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_ORDER_LIST_SNAP_B)));
                         break;
                     case STATISTICS:
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_STATISTICS_SNAP_A)));
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_STATISTICS_SNAP_B)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_STATISTICS_SNAP_A)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_STATISTICS_SNAP_B)));
                         break;
                     case PUBLIC_TRADES:
                         if (logger.isDebugEnabled())
@@ -143,12 +111,12 @@ public class ConnectionManager {
             case FOND:
                 switch (type) {
                     case ORDER_LIST:
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_ORDER_LIST_SNAP_A)));
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_ORDER_LIST_SNAP_B)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_ORDER_LIST_SNAP_A)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_ORDER_LIST_SNAP_B)));
                         break;
                     case STATISTICS:
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_STATISTICS_SNAP_A)));
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_STATISTICS_SNAP_B)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_STATISTICS_SNAP_A)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_STATISTICS_SNAP_B)));
                         break;
                     case PUBLIC_TRADES:
                         if (logger.isDebugEnabled())
@@ -204,32 +172,32 @@ public class ConnectionManager {
             case CURR:
                 switch (type) {
                     case ORDER_LIST:
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_ORDER_LIST_INCR_A)));
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_ORDER_LIST_INCR_B)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_ORDER_LIST_INCR_A)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_ORDER_LIST_INCR_B)));
                         break;
                     case STATISTICS:
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_STATISTICS_INCR_A)));
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_STATISTICS_INCR_B)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_STATISTICS_INCR_A)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_STATISTICS_INCR_B)));
                         break;
                     case PUBLIC_TRADES:
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_A)));
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_B)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_A)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_B)));
                         break;
                 }
                 break;
             case FOND:
                 switch (type) {
                     case ORDER_LIST:
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_ORDER_LIST_INCR_A)));
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_ORDER_LIST_INCR_B)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_ORDER_LIST_INCR_A)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_ORDER_LIST_INCR_B)));
                         break;
                     case STATISTICS:
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_STATISTICS_INCR_A)));
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_STATISTICS_INCR_B)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_STATISTICS_INCR_A)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_STATISTICS_INCR_B)));
                         break;
                     case PUBLIC_TRADES:
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_A)));
-                        starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_B)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_A)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_B)));
                         break;
                 }
                 break;
@@ -276,12 +244,12 @@ public class ConnectionManager {
     public void startInstrumentStatus() {
         switch(marketType) {
             case CURR:
-                starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_INSTRUMENT_INCR_A)));
-                starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_INSTRUMENT_INCR_B)));
+                starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_INSTRUMENT_INCR_A)));
+                starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_INSTRUMENT_INCR_B)));
                 break;
             case FOND:
-                starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_INSTRUMENT_INCR_A)));
-                starter.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_INSTRUMENT_INCR_B)));
+                starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_INSTRUMENT_INCR_A)));
+                starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_INSTRUMENT_INCR_B)));
                 break;
         }
     }
@@ -299,33 +267,75 @@ public class ConnectionManager {
         }
     }
 
-    public void shutdown() {
-        int count = 5;
-        starter.shutdown();
-        try {
-            while (!starter.isTerminated() && --count >= 0) {
-                Thread.sleep(1000);
-            }
+    public void start(boolean isListenSnapshotChannelOnlyIfNeeded) {
+        startMessageReadersWatcher();
 
-            if (!starter.isTerminated()) {
-                starter.shutdownNow();
+        startInstrument();
+        startInstrumentStatus();
+        for (MessageHandlerType type : MessageHandlerType.values()) {
+            startIncremental(type);
+            startSnapshot(type);
+        }
 
-                while (!starter.isTerminated()) {
-                    Thread.sleep(1000);
-                }
-            }
-        } catch (InterruptedException e) {
-            Utils.printStackTrace(e, logger, "InterruptedException occurred..");
+        if (isListenSnapshotChannelOnlyIfNeeded) {
+            snapshotProcessorsToWatch.add(marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_LIST));
+            snapshotProcessorsToWatch.add(marketDataManager.getSnapshotProcessor(MessageHandlerType.STATISTICS));
         }
     }
 
-    public void scheduleSnapshotWatcher(final ISnapshotProcessor snapshotProcessorToWatch) {
-        scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-            private ISnapshotProcessor snapshotProcessor = snapshotProcessorToWatch;
+    public void onInstrumentDownloadFinished() {
+        stopInstrument();
 
-            private IMessageSequenceValidator sequenceValidator = snapshotProcessor.getSequenceValidator();
+        startSnapshotWatchers();
+    }
+
+    private void restart() {
+        List<MessageReader> stoppedMessageReaders = new ArrayList<>();
+        for (MessageReader messageReader : messageReaders.values()) {
+            if (messageReader.isRunning()) {
+                stoppedMessageReaders.add(messageReader);
+                messageReader.stop();
+            }
+        }
+
+        stopMessageReaderWatcher();
+        startMessageReadersWatcher();
+
+        for (MessageReader messageReader : stoppedMessageReaders) {
+            starterService.execute(new MessageReaderStarter(messageReader));
+        }
+    }
+
+    public void shutdown() {
+        for (MessageHandlerType type : MessageHandlerType.values()) {
+            stopIncremental(type);
+            stopSnapshot(type);
+        }
+        stopInstrumentStatus();
+        stopInstrument();
+        stopSnapshotWatchers();
+
+        stopMessageReaderWatcher();
+
+        shutdownScheduledService();
+        shutdownStarterService();
+    }
+
+    private void startSnapshotWatchers() {
+        if (snapshotProcessorsToWatch.isEmpty())
+            return;
+
+        class SnapshotProcessorWatchTask implements Runnable {
+            private ISnapshotProcessor snapshotProcessorToWatch;
+
+            private IMessageSequenceValidator sequenceValidator;
 
             private AtomicBoolean isRecovering;
+
+            private SnapshotProcessorWatchTask(ISnapshotProcessor snapshotProcessorToWatch) {
+                this.snapshotProcessorToWatch = snapshotProcessorToWatch;
+                this.sequenceValidator = snapshotProcessorToWatch.getSequenceValidator();
+            }
 
             @Override
             public void run() {
@@ -334,7 +344,7 @@ public class ConnectionManager {
                         isRecovering = new AtomicBoolean(sequenceValidator.isRecovering());
                         if (!isRecovering.get()) {
                             stopSnapshot(sequenceValidator.getType());
-                            snapshotProcessor.reset();
+                            snapshotProcessorToWatch.reset();
                         }
                     }
 
@@ -344,19 +354,113 @@ public class ConnectionManager {
                     } else {
                         if (isRecovering.getAndSet(false)) {
                             stopSnapshot(sequenceValidator.getType());
-                            snapshotProcessor.reset();
+                            snapshotProcessorToWatch.reset();
                         }
                     }
                 }
             }
-        }, 1200, 1, TimeUnit.SECONDS);
+        }
+
+        for (final ISnapshotProcessor snapshotProcessorToWatch : snapshotProcessorsToWatch) {
+            snapshotWatcherFutures.add(
+                    scheduledService.scheduleAtFixedRate(
+                            new SnapshotProcessorWatchTask(snapshotProcessorToWatch), 1200, 1, TimeUnit.SECONDS
+                    )
+            );
+        }
     }
 
-    public void stopSnapshotWatchers() {
-        scheduledExecutorService.shutdown();
+    private void stopSnapshotWatchers() {
+        if (snapshotProcessorsToWatch.isEmpty())
+            return;
+
+        for (ScheduledFuture<?> snapshotWatcherFuture : snapshotWatcherFutures) {
+            snapshotWatcherFuture.cancel(false);
+        }
+        snapshotWatcherFutures.clear();
+    }
+
+    private int checkMessageReaders() {
+        final long threshold = 10L * 1000L * 1000L * 10L;
+        int running = 0;
+        int up = 0;
+        long currentTime = Utils.currentTimeInTicks();
+        for (MessageReader messageReader : messageReaders.values()) {
+            if (messageReader.isRunning()) {
+                running++;
+                if (currentTime - messageReader.getLastReceivedTimestamp() < threshold)
+                    up++;
+                else
+                    //if (logger.isDebugEnabled())
+                        logger.warn("Message reader [" + messageReader.getConnectionId() + "] is down since [" + Utils.convertTicksToTodayString(messageReader.getLastReceivedTimestamp()) + "]");
+            }
+        }
+
+        if (up == 0)
+            return -1;
+
+        return running - up;
+    }
+
+    private void startMessageReadersWatcher() {
+        messageReadersWatcherFuture = scheduledService.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                int result = checkMessageReaders();
+                if (result != 0) {
+                    if (result < 0) {
+                        marketDataManager.onFeedStatus(false, true);
+                        restart();
+                    } else {
+                        marketDataManager.onFeedStatus(false, false);
+                    }
+                } else {
+                    marketDataManager.onFeedStatus(true, true);
+                }
+            }
+        }, 30, 1, TimeUnit.SECONDS);
+    }
+
+    private void stopMessageReaderWatcher() {
+        if (messageReadersWatcherFuture != null) {
+            messageReadersWatcherFuture.cancel(false);
+        }
+        messageReadersWatcherFuture = null;
+    }
+
+    private void shutdownStarterService() {
+        int count = 50;
+        starterService.shutdown();
         try {
-            while (!scheduledExecutorService.isTerminated()) {
-                Thread.sleep(1000);
+            while (!starterService.isTerminated() && --count >= 0) {
+                Thread.sleep(100);
+            }
+
+            if (!starterService.isTerminated()) {
+                starterService.shutdownNow();
+
+                while (!starterService.isTerminated()) {
+                    Thread.sleep(100);
+                }
+            }
+        } catch (InterruptedException e) {
+            Utils.printStackTrace(e, logger, "InterruptedException occurred..");
+        }
+    }
+
+    private void shutdownScheduledService() {
+        int count = 50;
+        scheduledService.shutdown();
+        try {
+            while (!scheduledService.isTerminated() && --count >= 0) {
+                Thread.sleep(100);
+            }
+            if (!scheduledService.isTerminated()) {
+                scheduledService.shutdownNow();
+
+                while (!scheduledService.isTerminated()) {
+                    Thread.sleep(100);
+                }
             }
         } catch (InterruptedException e) {
             Utils.printStackTrace(e, logger, "InterruptedException occurred..");

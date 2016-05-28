@@ -6,9 +6,12 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.apache.log4j.*;
 import ru.ncapital.gateways.micexfast.connection.ConnectionManager;
+import ru.ncapital.gateways.micexfast.connection.messageprocessors.ISnapshotProcessor;
 import ru.ncapital.gateways.micexfast.domain.Subscription;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -113,39 +116,18 @@ public class GatewayManager implements IGatewayManager {
 
     @Override
     public void start() {
-        if (!started.getAndSet(true)) {
-            connectionManager.start();
-            connectionManager.startInstrument();
-            connectionManager.startInstrumentStatus();
-            for (MessageHandlerType type : MessageHandlerType.values()) {
-                connectionManager.startIncremental(type);
-                connectionManager.startSnapshot(type);
-            }
-        }
+        if (!started.getAndSet(true))
+            connectionManager.start(isListenSnapshotChannelOnlyIfNeeded);
     }
 
     @Override
     public void stop() {
-        if (started.getAndSet(false)) {
-            for (MessageHandlerType type : MessageHandlerType.values()) {
-                connectionManager.stopIncremental(type);
-                connectionManager.stopSnapshot(type);
-            }
-            connectionManager.stopInstrument();
-            connectionManager.stopInstrumentStatus();
-            if (isListenSnapshotChannelOnlyIfNeeded) {
-                connectionManager.stopSnapshotWatchers();
-            }
+        if (started.getAndSet(false))
             connectionManager.shutdown();
-        }
     }
 
     public void onInstrumentDownloadFinished() {
-        connectionManager.stopInstrument();
-        if (isListenSnapshotChannelOnlyIfNeeded) {
-            connectionManager.scheduleSnapshotWatcher(marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_LIST));
-            connectionManager.scheduleSnapshotWatcher(marketDataManager.getSnapshotProcessor(MessageHandlerType.STATISTICS));
-        }
+        connectionManager.onInstrumentDownloadFinished();
     }
 
     @Override
