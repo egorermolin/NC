@@ -8,10 +8,8 @@ import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.micexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
 import ru.ncapital.gateways.micexfast.Utils;
-import ru.ncapital.gateways.micexfast.domain.DepthLevel;
-import ru.ncapital.gateways.micexfast.domain.MdEntryType;
-import ru.ncapital.gateways.micexfast.domain.MdUpdateAction;
-import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
+import ru.ncapital.gateways.micexfast.domain.*;
+import sun.misc.Perf;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +38,7 @@ public class OrderListMessageHandler extends AMessageHandler {
     }
 
     @Override
-    protected void onSnapshotMdEntry(String securityId, GroupValue mdEntry, long inTime) {
+    protected void onSnapshotMdEntry(String securityId, GroupValue mdEntry, PerformanceData perfData) {
         MdEntryType mdEntryType = MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
 
         if (mdEntryType == null)
@@ -58,7 +56,7 @@ public class OrderListMessageHandler extends AMessageHandler {
                                 null,
                                 true);
 
-                depthLevel.setMdEntryTime(Utils.getEntryTimeInTicks(mdEntry));
+                depthLevel.setPerformanceData(perfData.setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry)));
                 break;
             case OFFER:
                 depthLevel =
@@ -70,7 +68,7 @@ public class OrderListMessageHandler extends AMessageHandler {
                                 null,
                                 false);
 
-                depthLevel.setMdEntryTime(Utils.getEntryTimeInTicks(mdEntry));
+                depthLevel.setPerformanceData(perfData.setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry)));
                 break;
             case EMPTY:
                 break;
@@ -90,7 +88,7 @@ public class OrderListMessageHandler extends AMessageHandler {
     }
 
     @Override
-    public void onIncrementalMdEntry(String securityId, GroupValue mdEntry, long inTime, long sendingTime) {
+    public void onIncrementalMdEntry(String securityId, GroupValue mdEntry, PerformanceData perfData) {
         MdEntryType mdEntryType = MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
         MdUpdateAction mdUpdateAction = MdUpdateAction.convert(mdEntry.getString("MDUpdateAction").charAt(0));
 
@@ -109,8 +107,7 @@ public class OrderListMessageHandler extends AMessageHandler {
                                 mdEntry.getString("DealNumber"),
                                 true);
 
-                depthLevel.setMdEntryTime(Utils.getEntryTimeInTicks(mdEntry));
-                depthLevel.setSendingTime(sendingTime);
+                depthLevel.setPerformanceData(perfData.setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry)));
                 break;
             case OFFER:
                 depthLevel =
@@ -122,8 +119,7 @@ public class OrderListMessageHandler extends AMessageHandler {
                                 mdEntry.getString("DealNumber"),
                                 false);
 
-                depthLevel.setMdEntryTime(Utils.getEntryTimeInTicks(mdEntry));
-                depthLevel.setSendingTime(sendingTime);
+                depthLevel.setPerformanceData(perfData.setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry)));
                 break;
             case EMPTY:
                 depthLevel = new DepthLevel(securityId, MdUpdateAction.SNAPSHOT);
@@ -144,14 +140,14 @@ public class OrderListMessageHandler extends AMessageHandler {
     }
 
     @Override
-    protected void onBeforeSnapshot(String securityId, long inTime) {
+    protected void onBeforeSnapshot(String securityId, PerformanceData perfData) {
         List<DepthLevel> depthLevelList = new ArrayList<>();
         depthLevelMap.put(securityId, depthLevelList);
         depthLevelList.add(new DepthLevel(securityId, MdUpdateAction.SNAPSHOT));
     }
 
     @Override
-    protected void onAfterSnapshot(String securityId, long inTime) {
+    protected void onAfterSnapshot(String securityId, PerformanceData perfData) {
         for (List<DepthLevel> depthLevelList : depthLevelMap.values()) {
             marketDataManager.onDepthLevels(depthLevelList.toArray(new DepthLevel[0]), 0);
         }
@@ -159,7 +155,7 @@ public class OrderListMessageHandler extends AMessageHandler {
     }
 
     @Override
-    public void beforeIncremental(GroupValue mdEntry, long inTime) {
+    public void beforeIncremental(GroupValue mdEntry, PerformanceData perfData) {
         String dealNumber = mdEntry.getString("DealNumber");
         if (dealNumber != null && !dealNumber.equals(lastDealNumber)) {
             lastDealNumber = dealNumber;
@@ -169,9 +165,9 @@ public class OrderListMessageHandler extends AMessageHandler {
     }
 
     @Override
-    public void flushIncrementals(long inTime) {
+    public void flushIncrementals(PerformanceData perfData) {
         for (List<DepthLevel> depthLevelList : depthLevelMap.values()) {
-            marketDataManager.onDepthLevels(depthLevelList.toArray(new DepthLevel[0]), inTime);
+            marketDataManager.onDepthLevels(depthLevelList.toArray(new DepthLevel[0]), perfData);
         }
         depthLevelMap.clear();
     }

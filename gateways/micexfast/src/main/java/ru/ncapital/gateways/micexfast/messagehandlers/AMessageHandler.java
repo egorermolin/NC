@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import ru.ncapital.gateways.micexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
 import ru.ncapital.gateways.micexfast.domain.Instrument;
+import ru.ncapital.gateways.micexfast.domain.PerformanceData;
 import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
 
 import java.util.Arrays;
@@ -32,7 +33,7 @@ public abstract class AMessageHandler implements IMessageHandler {
     }
 
     @Override
-    public void onSnapshot(Message readMessage, long inTime) {
+    public void onSnapshot(Message readMessage, PerformanceData perfData) {
         String symbol = readMessage.getString("Symbol");
         String tradingSessionId = readMessage.getString("TradingSessionID");
         String securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
@@ -40,35 +41,35 @@ public abstract class AMessageHandler implements IMessageHandler {
         boolean lastFragment = readMessage.getInt("LastFragment") == 1;
 
         if (firstFragment)
-            onBeforeSnapshot(securityId, inTime);
+            onBeforeSnapshot(securityId, perfData);
 
         SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
         for (int i = 0; i < mdEntries.getLength(); ++i) {
-            onSnapshotMdEntry(securityId, mdEntries.get(i), inTime);
+            onSnapshotMdEntry(securityId, mdEntries.get(i), perfData);
         }
 
         if (lastFragment)
-            onAfterSnapshot(securityId, inTime);
+            onAfterSnapshot(securityId, perfData);
     }
 
     @Override
-    public void onIncremental(GroupValue mdEntry, long inTime, long sendingTime) {
+    public void onIncremental(GroupValue mdEntry, PerformanceData perfData) {
         String symbol = mdEntry.getString("Symbol");
         String tradingSessionId = mdEntry.getString("TradingSessionID");
         String securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
 
-        beforeIncremental(mdEntry, inTime);
+        beforeIncremental(mdEntry, perfData);
 
-        onIncrementalMdEntry(securityId, mdEntry, inTime, sendingTime);
+        onIncrementalMdEntry(securityId, mdEntry, perfData);
     }
 
     protected abstract Logger getLogger();
 
-    protected abstract void onBeforeSnapshot(String securityId, long inTime);
+    protected abstract void onBeforeSnapshot(String securityId, PerformanceData perfData);
 
-    protected abstract void onAfterSnapshot(String securityId, long inTime);
+    protected abstract void onAfterSnapshot(String securityId, PerformanceData perfData);
 
-    protected abstract void onSnapshotMdEntry(String securityId, GroupValue mdEntry, long inTime);
+    protected abstract void onSnapshotMdEntry(String securityId, GroupValue mdEntry, PerformanceData perfData);
 
-    protected abstract void onIncrementalMdEntry(String securityId, GroupValue mdEntry, long inTime, long sendingTime);
+    protected abstract void onIncrementalMdEntry(String securityId, GroupValue mdEntry, PerformanceData perfData);
 }

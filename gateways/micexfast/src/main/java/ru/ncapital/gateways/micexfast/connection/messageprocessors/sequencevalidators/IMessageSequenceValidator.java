@@ -2,6 +2,7 @@ package ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevali
 
 import org.openfast.GroupValue;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.StoredMdEntry;
+import ru.ncapital.gateways.micexfast.domain.PerformanceData;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
 /**
@@ -12,7 +13,7 @@ public interface IMessageSequenceValidator {
 
     boolean onIncrementalSeq(String securityId, int seqNum);
 
-    void storeIncremental(GroupValue mdEntry, String securityId, int seqNum, long sendingTime);
+    void storeIncremental(GroupValue mdEntry, String securityId, int seqNum, PerformanceData perfData);
 
     void startRecovering(String securityId);
 

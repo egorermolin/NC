@@ -1,5 +1,7 @@
 package ru.ncapital.gateways.micexfast.domain;
 
+import sun.misc.Perf;
+
 /**
  * Created by egore on 12/14/15.
  */
@@ -14,9 +16,7 @@ public class DepthLevel implements Comparable<DepthLevel> {
 
     public double mdEntrySize;
 
-    public long mdEntryTime;
-
-    public long sendingTime;
+    public PerformanceData perfData;
 
     public boolean isBid;
 
@@ -73,20 +73,12 @@ public class DepthLevel implements Comparable<DepthLevel> {
         return isBid;
     }
 
-    public long getMdEntryTime() {
-        return mdEntryTime;
+    public PerformanceData getPerfomanceData() {
+        return perfData;
     }
 
-    public void setMdEntryTime(long mdEntryTime) {
-        this.mdEntryTime = mdEntryTime;
-    }
-
-    public long getSendingTime() {
-        return sendingTime;
-    }
-
-    public void setSendingTime(long sendingTime) {
-        this.sendingTime = sendingTime;
+    public void setPerformanceData(PerformanceData perfData) {
+        this.perfData = perfData;
     }
 
     @Override
@@ -107,7 +99,7 @@ public class DepthLevel implements Comparable<DepthLevel> {
                 ", mdUpdateAction=" + mdUpdateAction +
                 ", mdEntryPx=" + mdEntryPx +
                 ", mdEntrySize=" + mdEntrySize +
-                ", mdEntryTime=" + mdEntryTime +
+                ", perfData=" + perfData +
                 ", isBid=" + isBid +
                 '}';
     }
