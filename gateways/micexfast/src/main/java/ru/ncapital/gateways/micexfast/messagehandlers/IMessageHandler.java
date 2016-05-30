@@ -11,7 +11,7 @@ public interface IMessageHandler {
 
     void onSnapshot(Message readMessage, long inTime);
 
-    void onIncremental(GroupValue mdEntry, long inTime);
+    void onIncremental(GroupValue mdEntry, long inTime, long sendingTime);
 
     void beforeIncremental(GroupValue mdEntry, long inTime);
 

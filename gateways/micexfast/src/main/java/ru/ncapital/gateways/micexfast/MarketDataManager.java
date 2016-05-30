@@ -60,6 +60,8 @@ public class MarketDataManager {
 
     private boolean feedStatusALL = true;
 
+    private long debugWarningSilentPeriod = 0;
+
     public MarketDataManager configure(IGatewayConfiguration configuration) {
         marketDataHandler = configuration.getMarketDataHandler();
         performanceLogger = configuration.getPerformanceLogger();
@@ -159,10 +161,19 @@ public class MarketDataManager {
             return;
 
         for (DepthLevel depthLevel : depthLevels) {
-            if (depthLevel.getMdEntryTime() == 0)
+            if (depthLevel.getMdEntryTime() == 0 || depthLevel.getSendingTime() == 0)
                 continue;
 
-            performanceLogger.notify(depthLevel.getMdEntryTime(), inTimeInTicks, "external");
+            if (logger.isDebugEnabled()) {
+                if (depthLevel.getSendingTime() - depthLevel.getMdEntryTime() > 10_000_0L) { // 10ms in ticks
+                    if (debugWarningSilentPeriod == 0 || depthLevel.getSendingTime() > debugWarningSilentPeriod) {
+                        logger.debug("MDEntryTime is more than 10ms lower than SendingTime [" + (depthLevel.getSendingTime() - depthLevel.getMdEntryTime()) + "]");
+                        debugWarningSilentPeriod = depthLevel.getSendingTime() + 60_000_000_0L; // 60s in ticks
+                    }
+                }
+            }
+
+            performanceLogger.notify(depthLevel.getSendingTime(), inTimeInTicks, "external");
         }
     }
 

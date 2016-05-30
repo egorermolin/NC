@@ -3,6 +3,7 @@ package ru.ncapital.gateways.micexfast.connection.messageprocessors;
 import org.openfast.GroupValue;
 import org.openfast.Message;
 import org.openfast.SequenceValue;
+import ru.ncapital.gateways.micexfast.Utils;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.micexfast.domain.Instrument;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
@@ -19,6 +20,7 @@ public class IncrementalProcessor extends Processor implements IIncrementalProce
     @Override
     protected void processMessage(Message readMessage) {
         long inTime = getInTimestamp();
+        long sendingTime = Utils.convertTodayToTicks((readMessage.getLong("SendingTime") % 1_00_00_00_000L) * 1_000L);
         synchronized (sequenceValidator) {
             SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
             for (int i = 0; i < mdEntries.getLength(); ++i) {
@@ -38,26 +40,26 @@ public class IncrementalProcessor extends Processor implements IIncrementalProce
 
                 if (sequenceValidator.isRecovering(securityId, false)) {
                     if (sequenceValidator.onIncrementalSeq(securityId, rptSeqNum)) {
-                        messageHandler.onIncremental(mdEntry, inTime);
+                        messageHandler.onIncremental(mdEntry, inTime, sendingTime);
 
                         // finished recovering
-                        GroupValue[] mdEntriesToProcess = sequenceValidator.stopRecovering(securityId);
-                        if (mdEntriesToProcess != null)
-                            for (GroupValue mdEntryToProcess : mdEntriesToProcess) {
-                                sequenceValidator.onIncrementalSeq(securityId, mdEntryToProcess.getInt("RptSeq"));
+                        StoredMdEntry[] storedMdEntriesToProcess = sequenceValidator.stopRecovering(securityId);
+                        if (storedMdEntriesToProcess != null)
+                            for (StoredMdEntry storedMdEntryToProcess : storedMdEntriesToProcess) {
+                                sequenceValidator.onIncrementalSeq(securityId, storedMdEntryToProcess.getMdEntry().getInt("RptSeq"));
 
-                                messageHandler.onIncremental(mdEntryToProcess, inTime);
+                                messageHandler.onIncremental(storedMdEntryToProcess.getMdEntry(), inTime, storedMdEntryToProcess.getSendingTime());
                             }
                     } else {
-                        sequenceValidator.storeIncremental(mdEntry, securityId, rptSeqNum);
+                        sequenceValidator.storeIncremental(mdEntry, securityId, rptSeqNum, sendingTime);
                     }
                     continue;
                 }
 
                 if (sequenceValidator.onIncrementalSeq(securityId, rptSeqNum)) {
-                    messageHandler.onIncremental(mdEntry, inTime);
+                    messageHandler.onIncremental(mdEntry, inTime, sendingTime);
                 } else {
-                    sequenceValidator.storeIncremental(mdEntry, securityId, rptSeqNum);
+                    sequenceValidator.storeIncremental(mdEntry, securityId, rptSeqNum, sendingTime);
                     sequenceValidator.startRecovering(securityId);
                 }
             }

@@ -52,14 +52,14 @@ public abstract class AMessageHandler implements IMessageHandler {
     }
 
     @Override
-    public void onIncremental(GroupValue mdEntry, long inTime) {
+    public void onIncremental(GroupValue mdEntry, long inTime, long sendingTime) {
         String symbol = mdEntry.getString("Symbol");
         String tradingSessionId = mdEntry.getString("TradingSessionID");
         String securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
 
         beforeIncremental(mdEntry, inTime);
 
-        onIncrementalMdEntry(securityId, mdEntry, inTime);
+        onIncrementalMdEntry(securityId, mdEntry, inTime, sendingTime);
     }
 
     protected abstract Logger getLogger();
@@ -70,5 +70,5 @@ public abstract class AMessageHandler implements IMessageHandler {
 
     protected abstract void onSnapshotMdEntry(String securityId, GroupValue mdEntry, long inTime);
 
-    protected abstract void onIncrementalMdEntry(String securityId, GroupValue mdEntry, long inTime);
+    protected abstract void onIncrementalMdEntry(String securityId, GroupValue mdEntry, long inTime, long sendingTime);
 }

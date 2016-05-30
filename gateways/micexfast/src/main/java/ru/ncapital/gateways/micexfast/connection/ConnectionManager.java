@@ -284,7 +284,7 @@ public class ConnectionManager {
     public void onInstrumentDownloadFinished(Collection<Instrument> instruments) {
         stopInstrument();
 
-        startSnapshotWatchers(instruments);
+        startSnapshotWatchers();
     }
 
     private void restart() {
@@ -320,7 +320,7 @@ public class ConnectionManager {
         shutdownStarterService();
     }
 
-    private void startSnapshotWatchers(Collection<Instrument> instruments) {
+    private void startSnapshotWatchers() {
         if (snapshotProcessorsToWatch.isEmpty())
             return;
 
@@ -380,7 +380,7 @@ public class ConnectionManager {
     }
 
     private int checkMessageReaders() {
-        final long threshold = 60L * 1000L * 1000L * 10L;
+        final long threshold = 60_000_000_0L; // 60s in ticks
         int running = 0;
         int up = 0;
         long currentTime = Utils.currentTimeInTicks();
@@ -402,7 +402,7 @@ public class ConnectionManager {
     }
 
     private void startMessageReadersWatcher() {
-        messageReadersWatcherFuture = scheduledService.scheduleAtFixedRate(new Runnable() {
+        class MessageReadersWatchTask implements Runnable {
             @Override
             public void run() {
                 int result = checkMessageReaders();
@@ -417,7 +417,11 @@ public class ConnectionManager {
                     marketDataManager.onFeedStatus(true, true);
                 }
             }
-        }, 30, 1, TimeUnit.SECONDS);
+        }
+
+        messageReadersWatcherFuture = scheduledService.scheduleAtFixedRate(
+                new MessageReadersWatchTask(), 30, 1, TimeUnit.SECONDS
+        );
     }
 
     private void stopMessageReaderWatcher() {

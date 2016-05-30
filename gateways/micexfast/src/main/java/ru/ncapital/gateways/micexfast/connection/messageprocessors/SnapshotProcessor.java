@@ -33,12 +33,12 @@ public class SnapshotProcessor extends Processor implements ISnapshotProcessor {
                     messageHandler.onSnapshot(message, getInTimestamp());
 
                 // finished recovering
-                GroupValue[] mdEntriesToProcess = sequenceValidator.stopRecovering(securityId);
-                if (mdEntriesToProcess != null) {
-                    for (GroupValue mdEntry : mdEntriesToProcess) {
-                        sequenceValidator.onIncrementalSeq(securityId, mdEntry.getInt("RptSeq"));
+                StoredMdEntry[] storedMdEntriesToProcess = sequenceValidator.stopRecovering(securityId);
+                if (storedMdEntriesToProcess != null) {
+                    for (StoredMdEntry storedMdEntry : storedMdEntriesToProcess) {
+                        sequenceValidator.onIncrementalSeq(securityId, storedMdEntry.getMdEntry().getInt("RptSeq"));
 
-                        messageHandler.onIncremental(mdEntry, getInTimestamp());
+                        messageHandler.onIncremental(storedMdEntry.getMdEntry(), getInTimestamp(), 0);
                     }
                     messageHandler.flushIncrementals(0);
                 }

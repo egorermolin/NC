@@ -45,7 +45,7 @@ public class PublicTradesMessageHandler extends AMessageHandler {
     }
 
     @Override
-    protected void onIncrementalMdEntry(String securityId, GroupValue mdEntry, long inTime) {
+    protected void onIncrementalMdEntry(String securityId, GroupValue mdEntry, long inTime, long sendingTime) {
         MdEntryType mdEntryType = MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
 
         if (mdEntryType == null)

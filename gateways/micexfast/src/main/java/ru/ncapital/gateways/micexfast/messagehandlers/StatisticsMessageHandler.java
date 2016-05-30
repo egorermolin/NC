@@ -74,7 +74,7 @@ public class StatisticsMessageHandler extends AMessageHandler {
     }
 
     @Override
-    protected void onIncrementalMdEntry(String securityId, GroupValue mdEntry, long inTime) {
+    protected void onIncrementalMdEntry(String securityId, GroupValue mdEntry, long inTime, long sendingTime) {
         onBeforeSnapshot(securityId, inTime);
         onSnapshotMdEntry(securityId, mdEntry, inTime);
         onAfterSnapshot(securityId, inTime);

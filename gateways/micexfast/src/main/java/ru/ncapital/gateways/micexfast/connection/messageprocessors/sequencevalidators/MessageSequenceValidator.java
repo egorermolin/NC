@@ -5,11 +5,14 @@ import org.openfast.GroupValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
+import ru.ncapital.gateways.micexfast.connection.messageprocessors.StoredMdEntry;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
 import java.util.*;
 
 public class MessageSequenceValidator implements IMessageSequenceValidator {
+
+
     private MessageHandlerType type;
 
     protected ThreadLocal<Logger> logger = new ThreadLocal<Logger>() {
@@ -19,13 +22,13 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
         }
     };
 
-    private Map<String, Map<Integer, GroupValue>> storedMdEntriesBySecurityId = new HashMap<String, Map<Integer, GroupValue>>();
+    private Map<String, Map<Integer, StoredMdEntry>> storedMdEntriesBySecurityId = new HashMap<>();
 
-    private Map<String, GroupValue[]> storedMdEntriesToProcess = new HashMap<String, GroupValue[]>();
+    private Map<String, StoredMdEntry[]> storedMdEntriesToProcess = new HashMap<>();
 
-    private Set<String> securityIdsToRecover = new HashSet<String>();
+    private Set<String> securityIdsToRecover = new HashSet<>();
 
-    protected Map<String, SequenceNumber> sequenceNumbers = new HashMap<String, SequenceNumber>();
+    protected Map<String, SequenceNumber> sequenceNumbers = new HashMap<>();
 
     @Inject
     private MarketDataManager marketDataManager;
@@ -97,7 +100,7 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
     }
 
     @Override
-    public void storeIncremental(GroupValue mdEntry, String securityId, int seqNum) {
+    public void storeIncremental(GroupValue mdEntry, String securityId, int seqNum, long sendingTime) {
         if (logger.get().isTraceEnabled())
             logger.get().trace("STORE -> " + securityId + " " + seqNum);
 
@@ -105,12 +108,12 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
 
         synchronized (sequenceNumber) {
             if (!storedMdEntriesBySecurityId.containsKey(securityId)) {
-                storedMdEntriesBySecurityId.put(securityId, new TreeMap<Integer, GroupValue>());
+                storedMdEntriesBySecurityId.put(securityId, new TreeMap<Integer, StoredMdEntry>());
             }
 
-            Map<Integer, GroupValue> storedMdEntries = storedMdEntriesBySecurityId.get(securityId);
+            Map<Integer, StoredMdEntry> storedMdEntries = storedMdEntriesBySecurityId.get(securityId);
 
-            storedMdEntries.put(seqNum, mdEntry);
+            storedMdEntries.put(seqNum, new StoredMdEntry(mdEntry, sendingTime));
         }
     }
 
@@ -127,11 +130,11 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
     }
 
     @Override
-    public GroupValue[] stopRecovering(String securityId) {
+    public StoredMdEntry[] stopRecovering(String securityId) {
         SequenceNumber sequenceNumber = getSequenceNumber(securityId);
         synchronized (sequenceNumber) {
             //check incrementals are in sequence
-            Map<Integer, GroupValue> storedMdEntries = storedMdEntriesBySecurityId.get(securityId);
+            Map<Integer, StoredMdEntry> storedMdEntries = storedMdEntriesBySecurityId.get(securityId);
             if (storedMdEntries == null || storedMdEntries.size() == 0) {
                 sequenceNumber.numberOfMissingSequences = 0;
 
@@ -143,12 +146,12 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
                 return null;
             }
 
-            List<GroupValue> mdEntriesToProcess = new ArrayList<GroupValue>();
+            List<StoredMdEntry> mdEntriesToProcess = new ArrayList<>();
             int currentSeqNum = sequenceNumber.lastSeqNum;
 
             {
                 for (int mdEntrySeqNum : storedMdEntries.keySet()) {
-                    GroupValue mdEntry = storedMdEntries.get(mdEntrySeqNum);
+                    StoredMdEntry mdEntry = storedMdEntries.get(mdEntrySeqNum);
                     if (mdEntrySeqNum <= currentSeqNum)
                         continue;
                     else {
@@ -162,7 +165,7 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
                     }
                 }
 
-                storedMdEntriesToProcess.put(securityId, mdEntriesToProcess.toArray(new GroupValue[mdEntriesToProcess.size()]));
+                storedMdEntriesToProcess.put(securityId, mdEntriesToProcess.toArray(new StoredMdEntry[mdEntriesToProcess.size()]));
                 storedMdEntries.clear();
                 mdEntriesToProcess.clear();
             }
@@ -173,7 +176,7 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
         securityIdsToRecover.remove(securityId);
         marketDataManager.setRecovery(securityId, false, type.equals("OrderList"));
 
-        GroupValue[] mdEntriesToProcess = storedMdEntriesToProcess.remove(securityId);
+        StoredMdEntry[] mdEntriesToProcess = storedMdEntriesToProcess.remove(securityId);
 
         logger.get().info("Stop Recovering "
                 + securityId + ((mdEntriesToProcess.length > 0) ? (" " + mdEntriesToProcess.length) : ""));

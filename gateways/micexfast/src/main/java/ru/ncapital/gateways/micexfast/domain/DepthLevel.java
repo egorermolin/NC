@@ -16,6 +16,8 @@ public class DepthLevel implements Comparable<DepthLevel> {
 
     public long mdEntryTime;
 
+    public long sendingTime;
+
     public boolean isBid;
 
     public String dealNumber;
@@ -77,6 +79,14 @@ public class DepthLevel implements Comparable<DepthLevel> {
 
     public void setMdEntryTime(long mdEntryTime) {
         this.mdEntryTime = mdEntryTime;
+    }
+
+    public long getSendingTime() {
+        return sendingTime;
+    }
+
+    public void setSendingTime(long sendingTime) {
+        this.sendingTime = sendingTime;
     }
 
     @Override
