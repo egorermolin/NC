@@ -324,12 +324,6 @@ public class ConnectionManager {
         if (snapshotProcessorsToWatch.isEmpty())
             return;
 
-        for (Instrument instrument : instruments) {
-            for (ISnapshotProcessor snapshotProcessor : snapshotProcessorsToWatch) {
-                snapshotProcessor.getSequenceValidator().startRecovering(instrument.getSecurityId());
-            }
-        }
-
         class SnapshotProcessorWatchTask implements Runnable {
             private ISnapshotProcessor snapshotProcessorToWatch;
 
@@ -386,7 +380,7 @@ public class ConnectionManager {
     }
 
     private int checkMessageReaders() {
-        final long threshold = 10L * 1000L * 1000L * 10L;
+        final long threshold = 60L * 1000L * 1000L * 10L;
         int running = 0;
         int up = 0;
         long currentTime = Utils.currentTimeInTicks();
