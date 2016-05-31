@@ -25,9 +25,9 @@ public class OrderDepthEngine {
     private Map<String, PublicTrade> publicTrades;
 
     public OrderDepthEngine() {
-        this.bids = new HashMap<String, OrderDepth>();
-        this.offers = new HashMap<String, OrderDepth>();
-        this.publicTrades = new HashMap<String, PublicTrade>();
+        this.bids = new HashMap<>();
+        this.offers = new HashMap<>();
+        this.publicTrades = new HashMap<>();
     }
 
     private OrderDepth getOrderDepth(String securityId, boolean isBid) {

@@ -73,7 +73,6 @@ public class MainClass {
 
                     @Override
                     public void onFeedStatus(boolean up, boolean all) {
-                        logger.info("FeedStatus [" + (up ? "UP" : "DOWN") + "][" + (all ? "ALL" : "SOME") + "]");
                     }
                 };
             }

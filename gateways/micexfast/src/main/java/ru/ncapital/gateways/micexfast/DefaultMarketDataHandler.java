@@ -21,6 +21,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
         sb.append(bbo.getSecurityId()).append(" ");
         sb.append(bbo.getBidSize()).append("@").append(bbo.getBidPx()).append(" - ");
         sb.append(bbo.getOfferSize()).append("@").append(bbo.getOfferPx());
+        sb.append(bbo.getPerformanceData().toString());
 
         logger.info(sb.toString());
     }
@@ -31,6 +32,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
         sb.append("onTradingStatus: ");
         sb.append(bbo.getSecurityId()).append(" ");
         sb.append(bbo.getTradingStatus()).append(" ");
+        sb.append(bbo.getPerformanceData().toString());
 
         logger.info(sb.toString());
     }
@@ -45,6 +47,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
         sb.append(" L:").append(bbo.getLowPx());
         sb.append(" O:").append(bbo.getOpenPx());
         sb.append(" C:").append(bbo.getClosePx());
+        sb.append(bbo.getPerformanceData().toString());
 
         logger.info(sb.toString());
     }
@@ -71,6 +74,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
             sb.append(depthLevel.getSecurityId()).append(" ");
             sb.append(depthLevel.isBid() ? "B" : "S").append(depthLevel.getMdEntryId()).append(" ");
             sb.append(depthLevel.getMdEntrySize()).append("@").append(depthLevel.getMdEntryPx());
+            sb.append(depthLevel.getPerformanceData().toString());
 
             logger.info(sb.toString());
         }
@@ -83,6 +87,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
         sb.append(publicTrade.getSecurityId()).append(" ");
         sb.append(publicTrade.isBid() ? "B" : "S");
         sb.append(publicTrade.getLastSize()).append("@").append(publicTrade.getLastPx());
+        sb.append(publicTrade.getPerformanceData().toString());
     }
 
     @Override
@@ -92,6 +97,6 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
 
     @Override
     public void onFeedStatus(boolean up, boolean all) {
-
+        logger.info("onFeedStatus [" + (up ? "UP" : "DOWN") + "][" + (all ? "ALL" : "SOME") + "]");
     }
 }
