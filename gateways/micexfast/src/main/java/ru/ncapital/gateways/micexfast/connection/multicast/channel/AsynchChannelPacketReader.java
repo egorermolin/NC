@@ -1,11 +1,8 @@
 package ru.ncapital.gateways.micexfast.connection.multicast.channel;
 
-import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.micexfast.Utils;
 import ru.ncapital.gateways.micexfast.connection.ConnectionId;
 import ru.ncapital.gateways.micexfast.connection.multicast.IMulticastEventListener;
 
-import java.io.IOException;
 import java.nio.channels.DatagramChannel;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;

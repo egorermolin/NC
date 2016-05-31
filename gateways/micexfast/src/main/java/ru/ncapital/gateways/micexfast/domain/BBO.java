@@ -1,7 +1,5 @@
 package ru.ncapital.gateways.micexfast.domain;
 
-import sun.misc.Perf;
-
 /**
  * Created by egore on 12/7/15.
  */
