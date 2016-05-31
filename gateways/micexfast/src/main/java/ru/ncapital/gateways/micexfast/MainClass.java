@@ -44,6 +44,11 @@ public class MainClass {
                 return new DefaultMarketDataHandler() {
 
                     @Override
+                    public void onBBO(BBO bbo) {
+
+                    }
+
+                    @Override
                     public void onDepthLevels(DepthLevel[] depthLevels) {
 
                     }
