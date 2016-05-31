@@ -41,38 +41,12 @@ public class MainClass {
         final IGatewayManager gwManager = GatewayManager.create(new NullGatewayConfiguration() {
             @Override
             public IMarketDataHandler getMarketDataHandler() {
-                return new IMarketDataHandler() {
-                    private Logger logger = LoggerFactory.getLogger("MarketDataHandler");
-
-                    @Override
-                    public void onBBO(BBO bbo) {
-                        logger.info("BBO " + bbo.getSecurityId());
-                    }
-
-                    @Override
-                    public void onDepthLevels(DepthLevel[] depthLevels) {
-                    }
-
-                    @Override
-                    public void onPublicTrade(PublicTrade publicTrade) {
-                    }
-
-                    @Override
-                    public void onStatistics(BBO bbo) {
-                    }
-
-                    @Override
-                    public void onTradingStatus(BBO bbo) {
-                    }
+                return new DefaultMarketDataHandler() {
 
                     @Override
                     public void onInstruments(Instrument[] _instruments) {
                         instruments = _instruments;
                         waiter.countDown();
-                    }
-
-                    @Override
-                    public void onFeedStatus(boolean up, boolean all) {
                     }
                 };
             }
@@ -119,7 +93,7 @@ public class MainClass {
             @Override
             public String[] getAllowedSecurityIds() {
                 // return new String[] {"*"};
-                return new String[] {"EUR000TODTOM;CETS"};
+                return new String[] {"USD000UTSTOM;CETS"};
             }
 
             @Override
@@ -135,13 +109,13 @@ public class MainClass {
 
         gwManager.start();
 
-        //waiter.await();
-        //logger.info("TOTAL " + instruments.length + " INSTRUMENTS");
+        waiter.await();
+        logger.info("TOTAL " + instruments.length + " INSTRUMENTS");
 
-        //for (Instrument instrument : instruments) {
-            //logger.info("Instrument " + instrument.toString());
-            //gwManager.subscribeForMarketData(instrument.getSecurityId());
-        //}
+        for (Instrument instrument : instruments) {
+            logger.info("Instrument " + instrument.toString());
+            gwManager.subscribeForMarketData(instrument.getSecurityId());
+        }
 
         try {
             Thread.sleep(1200000);
