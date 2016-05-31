@@ -20,7 +20,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
         sb.append("onBBO: ");
         sb.append(bbo.getSecurityId()).append(" ");
         sb.append(bbo.getBidSize()).append("@").append(bbo.getBidPx()).append(" - ");
-        sb.append(bbo.getOfferSize()).append("@").append(bbo.getOfferPx());
+        sb.append(bbo.getOfferSize()).append("@").append(bbo.getOfferPx()).append(" ");
         sb.append(bbo.getPerformanceData().toString());
 
         logger.info(sb.toString());
@@ -46,7 +46,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
         sb.append(" H:").append(bbo.getHighPx());
         sb.append(" L:").append(bbo.getLowPx());
         sb.append(" O:").append(bbo.getOpenPx());
-        sb.append(" C:").append(bbo.getClosePx());
+        sb.append(" C:").append(bbo.getClosePx()).append(" ");
         sb.append(bbo.getPerformanceData().toString());
 
         logger.info(sb.toString());
@@ -73,7 +73,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
             }
             sb.append(depthLevel.getSecurityId()).append(" ");
             sb.append(depthLevel.isBid() ? "B" : "S").append(depthLevel.getMdEntryId()).append(" ");
-            sb.append(depthLevel.getMdEntrySize()).append("@").append(depthLevel.getMdEntryPx());
+            sb.append(depthLevel.getMdEntrySize()).append("@").append(depthLevel.getMdEntryPx()).append(" ");
             sb.append(depthLevel.getPerformanceData().toString());
 
             logger.info(sb.toString());
@@ -86,7 +86,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
         sb.append("onPublicTrade: ");
         sb.append(publicTrade.getSecurityId()).append(" ");
         sb.append(publicTrade.isBid() ? "B" : "S");
-        sb.append(publicTrade.getLastSize()).append("@").append(publicTrade.getLastPx());
+        sb.append(publicTrade.getLastSize()).append("@").append(publicTrade.getLastPx()).append(" ");
         sb.append(publicTrade.getPerformanceData().toString());
     }
 

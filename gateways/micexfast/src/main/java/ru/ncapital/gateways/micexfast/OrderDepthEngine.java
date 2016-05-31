@@ -105,10 +105,6 @@ public class OrderDepthEngine {
             changed[1] = true;
             previousBBO.setLastPx(newBBO.getLastPx());
         }
-        if (newBBO.getPerformanceData() != null && !newBBO.getPerformanceData().equals(previousBBO.getPerformanceData())) {
-            changed[1] = true;
-            previousBBO.getPerformanceData().updateFrom(newBBO.getPerformanceData());
-        }
         if (Double.compare(newBBO.getHighPx(), 0.0) != 0 && Double.compare(newBBO.getHighPx(), previousBBO.getHighPx()) != 0) {
             changed[1] = true;
             previousBBO.setHighPx(newBBO.getHighPx());
@@ -139,6 +135,9 @@ public class OrderDepthEngine {
                 changed[2] = true;
                 previousBBO.setInRecovery(newBBO.isInRecovery(i), i);
             }
+        }
+        if (newBBO.getPerformanceData() != null && !newBBO.getPerformanceData().equals(previousBBO.getPerformanceData())) {
+            previousBBO.getPerformanceData().updateFrom(newBBO.getPerformanceData());
         }
         if (logger.isTraceEnabled())
             logger.trace("Updated BBO: " + previousBBO);
