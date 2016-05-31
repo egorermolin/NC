@@ -217,6 +217,7 @@ public class MarketDataManager {
 //                    }
 //                }
 //            }
+
             if (depthLevel.getPerformanceData() == null)
                 continue;
 

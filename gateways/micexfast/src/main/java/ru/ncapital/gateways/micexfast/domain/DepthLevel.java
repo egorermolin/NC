@@ -36,6 +36,7 @@ public class DepthLevel implements Comparable<DepthLevel> {
     public DepthLevel(String securityId, MdUpdateAction mdUpdateAction) {
         this.securityId = securityId;
         this.mdUpdateAction = mdUpdateAction;
+        this.performanceData = new PerformanceData();
     }
 
     public void setMdUpdateAction(MdUpdateAction mdUpdateAction) {
