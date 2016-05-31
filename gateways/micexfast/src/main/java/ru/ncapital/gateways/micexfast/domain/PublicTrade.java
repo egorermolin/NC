@@ -1,5 +1,7 @@
 package ru.ncapital.gateways.micexfast.domain;
 
+import ru.ncapital.gateways.micexfast.performance.PerformanceData;
+
 /**
  * Created by egore on 1/28/16.
  */
@@ -22,6 +24,7 @@ public class PublicTrade {
         this.lastPx = lastPx;
         this.lastSize = lastSize;
         this.isBid = isBid;
+        this.performanceData = new PerformanceData();
     }
 
     public String getSecurityId() {
@@ -48,10 +51,6 @@ public class PublicTrade {
         return performanceData;
     }
 
-    public void setPerformanceData(PerformanceData performanceData) {
-        this.performanceData = performanceData;
-    }
-
     @Override
     public String toString() {
         return "PublicTrade{" +
@@ -60,7 +59,7 @@ public class PublicTrade {
                 ", isBid=" + isBid +
                 ", lastPx=" + lastPx +
                 ", lastSize=" + lastSize +
-                ", perfData=" + performanceData +
+                ", performanceData=" + performanceData +
                 '}';
     }
 }

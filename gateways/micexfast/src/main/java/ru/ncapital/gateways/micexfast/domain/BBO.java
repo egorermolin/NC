@@ -1,5 +1,7 @@
 package ru.ncapital.gateways.micexfast.domain;
 
+import ru.ncapital.gateways.micexfast.performance.PerformanceData;
+
 /**
  * Created by egore on 12/7/15.
  */
@@ -36,6 +38,7 @@ public class BBO {
 
     public BBO(String securityId) {
         this.securityId = securityId;
+        this.performanceData = new PerformanceData();
     }
 
     public String getSecurityId() {
@@ -134,10 +137,6 @@ public class BBO {
         return performanceData;
     }
 
-    public void setPerformanceData(PerformanceData performanceData) {
-        this.performanceData = performanceData;
-    }
-
     public boolean isInRecovery(int i) {
         return inRecovery[i];
     }
@@ -161,12 +160,12 @@ public class BBO {
                 ", offerSize=" + offerSize +
                 ", lastPx=" + lastPx +
                 ", lastSize=" + lastSize +
-                ", perfData=" + performanceData +
+                ", performanceData=" + performanceData +
                 ", lowPx=" + lowPx +
                 ", highPx=" + highPx +
                 ", openPx=" + openPx +
                 ", closePx=" + closePx +
-                ", inRecovery=" + inRecovery +
+                ", inRecovery=" + inRecovery[0] + inRecovery[1] +
                 ", tradingStatus='" + tradingStatus + '\'' +
                 '}';
     }

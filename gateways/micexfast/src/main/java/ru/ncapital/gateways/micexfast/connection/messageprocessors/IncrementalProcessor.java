@@ -6,7 +6,7 @@ import org.openfast.SequenceValue;
 import ru.ncapital.gateways.micexfast.Utils;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.micexfast.domain.Instrument;
-import ru.ncapital.gateways.micexfast.domain.PerformanceData;
+import ru.ncapital.gateways.micexfast.performance.PerformanceData;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
 
 /**
@@ -21,6 +21,7 @@ public class IncrementalProcessor extends Processor implements IIncrementalProce
     @Override
     protected void processMessage(Message readMessage) {
         long inTimestamp = getInTimestamp();
+        long dequeTimestamp = Utils.currentTimeInTicks();
         long sendingTime = Utils.convertTodayToTicks((readMessage.getLong("SendingTime") % 1_00_00_00_000L) * 1_000L);
 
         synchronized (sequenceValidator) {
@@ -35,7 +36,11 @@ public class IncrementalProcessor extends Processor implements IIncrementalProce
                 String symbol = mdEntry.getString("Symbol");
                 String tradingSessionId = mdEntry.getString("TradingSessionID");
                 String securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
-                PerformanceData performanceData = new PerformanceData(inTimestamp).setExchangeSendingTime(sendingTime);
+                PerformanceData performanceData = new PerformanceData()
+                        .setExchangeSendingTime(sendingTime)
+                        .setGatewayDequeTime(dequeTimestamp)
+                        .setGatewayInTime(inTimestamp);
+
                 int rptSeqNum = mdEntry.getInt("RptSeq");
 
                 if (!messageHandler.isAllowedUpdate(symbol, tradingSessionId))

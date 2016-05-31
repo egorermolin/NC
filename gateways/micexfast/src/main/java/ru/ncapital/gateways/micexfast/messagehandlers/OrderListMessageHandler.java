@@ -9,6 +9,7 @@ import ru.ncapital.gateways.micexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
 import ru.ncapital.gateways.micexfast.Utils;
 import ru.ncapital.gateways.micexfast.domain.*;
+import ru.ncapital.gateways.micexfast.performance.PerformanceData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,7 +56,7 @@ public class OrderListMessageHandler extends AMessageHandler {
                                 null,
                                 true);
 
-                depthLevel.setPerformanceData(new PerformanceData(0).setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry)));
+                depthLevel.getPerformanceData().setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
             case OFFER:
                 depthLevel =
@@ -67,7 +68,7 @@ public class OrderListMessageHandler extends AMessageHandler {
                                 null,
                                 false);
 
-                depthLevel.setPerformanceData(new PerformanceData(0).setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry)));
+                depthLevel.getPerformanceData().setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
             case EMPTY:
                 break;
@@ -106,7 +107,7 @@ public class OrderListMessageHandler extends AMessageHandler {
                                 mdEntry.getString("DealNumber"),
                                 true);
 
-                depthLevel.setPerformanceData(perfData.setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry)));
+                depthLevel.getPerformanceData().updateFrom(perfData).setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
             case OFFER:
                 depthLevel =
@@ -118,7 +119,7 @@ public class OrderListMessageHandler extends AMessageHandler {
                                 mdEntry.getString("DealNumber"),
                                 false);
 
-                depthLevel.setPerformanceData(perfData.setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry)));
+                depthLevel.getPerformanceData().updateFrom(perfData).setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
             case EMPTY:
                 depthLevel = new DepthLevel(securityId, MdUpdateAction.SNAPSHOT);

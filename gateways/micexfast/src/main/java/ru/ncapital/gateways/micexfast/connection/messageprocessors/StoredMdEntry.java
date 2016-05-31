@@ -4,7 +4,7 @@
 package ru.ncapital.gateways.micexfast.connection.messageprocessors;
 
 import org.openfast.GroupValue;
-import ru.ncapital.gateways.micexfast.domain.PerformanceData;
+import ru.ncapital.gateways.micexfast.performance.PerformanceData;
 
 /**
  * Created by egore on 5/30/16.

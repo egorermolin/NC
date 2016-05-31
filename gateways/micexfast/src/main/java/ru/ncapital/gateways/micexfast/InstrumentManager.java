@@ -6,6 +6,7 @@ import org.openfast.Message;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.Processor;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.SequenceArray;
 import ru.ncapital.gateways.micexfast.domain.*;
+import ru.ncapital.gateways.micexfast.performance.PerformanceData;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -253,7 +254,6 @@ public class InstrumentManager extends Processor {
 
     private void sendToClient(String securityId, String tradingStatus) {
         BBO tradingStatusUpdate = new BBO(securityId);
-        tradingStatusUpdate.setPerformanceData(new PerformanceData(0));
         tradingStatusUpdate.setTradingStatus(tradingStatus);
         marketDataManager.onBBO(tradingStatusUpdate);
     }

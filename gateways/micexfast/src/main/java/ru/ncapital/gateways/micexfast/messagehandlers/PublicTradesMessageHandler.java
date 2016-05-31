@@ -9,9 +9,8 @@ import ru.ncapital.gateways.micexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
 import ru.ncapital.gateways.micexfast.Utils;
 import ru.ncapital.gateways.micexfast.domain.MdEntryType;
-import ru.ncapital.gateways.micexfast.domain.PerformanceData;
+import ru.ncapital.gateways.micexfast.performance.PerformanceData;
 import ru.ncapital.gateways.micexfast.domain.PublicTrade;
-import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
 
 /**
  * Created by egore on 1/28/16.
@@ -61,7 +60,7 @@ public class PublicTradesMessageHandler extends AMessageHandler {
                         mdEntry.getDouble("MDEntrySize"),
                         mdEntry.getString("OrderSide").charAt(0) == 'B');
 
-                publicTrade.setPerformanceData(perfData.setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry)));
+                publicTrade.getPerformanceData().updateFrom(perfData).setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
             case EMPTY:
                 break;

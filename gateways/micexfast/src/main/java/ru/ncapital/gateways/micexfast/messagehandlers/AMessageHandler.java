@@ -7,12 +7,7 @@ import org.slf4j.Logger;
 import ru.ncapital.gateways.micexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
 import ru.ncapital.gateways.micexfast.domain.Instrument;
-import ru.ncapital.gateways.micexfast.domain.PerformanceData;
-import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import ru.ncapital.gateways.micexfast.performance.PerformanceData;
 
 /**
  * Created by egore on 1/21/16.

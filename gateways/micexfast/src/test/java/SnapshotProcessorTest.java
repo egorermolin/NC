@@ -8,7 +8,7 @@ import org.openfast.GroupValue;
 import org.openfast.Message;
 import org.openfast.codec.Coder;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.StoredMdEntry;
-import ru.ncapital.gateways.micexfast.domain.PerformanceData;
+import ru.ncapital.gateways.micexfast.performance.PerformanceData;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidator;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.SnapshotProcessor;

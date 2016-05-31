@@ -2,7 +2,7 @@ package ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevali
 
 import org.openfast.GroupValue;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.StoredMdEntry;
-import ru.ncapital.gateways.micexfast.domain.PerformanceData;
+import ru.ncapital.gateways.micexfast.performance.PerformanceData;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
 /**

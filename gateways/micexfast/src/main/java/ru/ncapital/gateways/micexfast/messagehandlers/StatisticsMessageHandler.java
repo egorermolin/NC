@@ -10,7 +10,7 @@ import ru.ncapital.gateways.micexfast.MarketDataManager;
 import ru.ncapital.gateways.micexfast.Utils;
 import ru.ncapital.gateways.micexfast.domain.BBO;
 import ru.ncapital.gateways.micexfast.domain.MdEntryType;
-import ru.ncapital.gateways.micexfast.domain.PerformanceData;
+import ru.ncapital.gateways.micexfast.performance.PerformanceData;
 
 /**
  * Created by egore on 1/21/16.
@@ -75,7 +75,6 @@ public class StatisticsMessageHandler extends AMessageHandler {
     @Override
     protected void onBeforeSnapshot(String securityId) {
         bbo = new BBO(securityId);
-        bbo.setPerformanceData(new PerformanceData(0));
     }
 
     @Override
@@ -91,7 +90,7 @@ public class StatisticsMessageHandler extends AMessageHandler {
     @Override
     protected void onIncrementalMdEntry(String securityId, GroupValue mdEntry, PerformanceData perfData) {
         bbo = new BBO(securityId);
-        bbo.setPerformanceData(perfData);
+        bbo.getPerformanceData().updateFrom(perfData);
         onMdEntry(mdEntry);
         marketDataManager.onBBO(bbo);
     }

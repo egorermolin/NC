@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.Util;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.*;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
@@ -124,6 +125,7 @@ public class MarketDataManager {
     }
 
     public void onBBO(BBO newBBO) {
+        long gatewayOutTime = 0;
         if (logger.isTraceEnabled())
             logger.trace("onBBO " + newBBO.getSecurityId());
 
@@ -131,7 +133,9 @@ public class MarketDataManager {
         synchronized (currentBBO) {
             boolean[] changed = orderDepthEngine.updateBBO(currentBBO, newBBO);
 
-            if (subscriptions.containsKey(newBBO.getSecurityId())) {
+            if (subscriptions.containsKey(currentBBO.getSecurityId())) {
+                gatewayOutTime = Utils.currentTimeInTicks();
+
                 if (changed[0])
                     marketDataHandler.onBBO(currentBBO);
                 if (changed[1])
@@ -141,10 +145,11 @@ public class MarketDataManager {
             }
         }
 
-        logPerformance(newBBO);
+        logPerformance(currentBBO, gatewayOutTime);
     }
 
     public void onDepthLevels(DepthLevel[] depthLevels) {
+        long gatewayOutTime = 0;
         if (logger.isTraceEnabled())
             logger.trace("onDepthLevel " + depthLevels[0].getSecurityId());
 
@@ -153,15 +158,18 @@ public class MarketDataManager {
             List<DepthLevel> depthLevelsToSend = new ArrayList<>();
             orderDepthEngine.onDepthLevels(depthLevels, depthLevelsToSend);
 
-            if (subscriptions.containsKey(depthLevels[0].getSecurityId()))
+            if (subscriptions.containsKey(depthLevels[0].getSecurityId())) {
+                gatewayOutTime = Utils.currentTimeInTicks();
                 marketDataHandler.onDepthLevels(depthLevelsToSend.toArray(new DepthLevel[0]));
+            }
         }
 
-        logPerformance(depthLevels);
+        logPerformance(depthLevels, gatewayOutTime);
     }
 
 
     public void onPublicTrade(PublicTrade publicTrade) {
+        long gatewayOutTime = 0;
         if (logger.isTraceEnabled())
             logger.trace("onPublicTrade " + publicTrade.getSecurityId());
 
@@ -169,24 +177,27 @@ public class MarketDataManager {
         synchronized (currentBBO) {
             orderDepthEngine.onPublicTrade(publicTrade);
 
-            if (subscriptions.containsKey(publicTrade.getSecurityId()))
+            if (subscriptions.containsKey(publicTrade.getSecurityId())) {
+                gatewayOutTime = Utils.currentTimeInTicks();
                 marketDataHandler.onPublicTrade(publicTrade);
+            }
         }
 
-        logPerformance(publicTrade);
+        logPerformance(publicTrade, gatewayOutTime);
     }
 
-    private void logPerformance(BBO bbo) {
+    private void logPerformance(BBO bbo, long gatewayOutTime) {
         if (performanceLogger == null)
             return;
 
         if (bbo.getPerformanceData() == null)
             return;
 
+        bbo.getPerformanceData().setGatewayOutTime(gatewayOutTime);
         performanceLogger.notifyBBOPerformance(bbo.getPerformanceData());
     }
 
-    private void logPerformance(DepthLevel[] depthLevels) {
+    private void logPerformance(DepthLevel[] depthLevels, long gatewayOutTime) {
          if (performanceLogger == null)
             return;
 
@@ -209,14 +220,19 @@ public class MarketDataManager {
             if (depthLevel.getPerformanceData() == null)
                 continue;
 
+            depthLevel.getPerformanceData().setGatewayOutTime(gatewayOutTime);
             performanceLogger.notifyOrderListPerformance(depthLevel.getPerformanceData());
         }
     }
 
-    private void logPerformance(PublicTrade publicTrade) {
+    private void logPerformance(PublicTrade publicTrade, long gatewayOutTime) {
         if (performanceLogger == null)
             return;
 
+        if (publicTrade.getPerformanceData() == null)
+            return;
+
+        publicTrade.getPerformanceData().setGatewayOutTime(gatewayOutTime);
         performanceLogger.notifyPublicTradePerformance(publicTrade.getPerformanceData());
     }
 

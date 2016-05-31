@@ -5,6 +5,7 @@ import org.openfast.Message;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.micexfast.domain.Instrument;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
+import ru.ncapital.gateways.micexfast.performance.PerformanceData;
 
 import java.util.*;
 
@@ -35,7 +36,7 @@ public class SnapshotProcessor extends Processor implements ISnapshotProcessor {
                     for (StoredMdEntry storedMdEntry : storedMdEntriesToProcess) {
                         sequenceValidator.onIncrementalSeq(securityId, storedMdEntry.getSequenceNumber());
 
-                        messageHandler.onIncremental(storedMdEntry.getMdEntry(), null);
+                        messageHandler.onIncremental(storedMdEntry.getMdEntry(), new PerformanceData());
                     }
                     messageHandler.flushIncrementals();
                 }

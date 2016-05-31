@@ -2,7 +2,7 @@ package ru.ncapital.gateways.micexfast.messagehandlers;
 
 import org.openfast.GroupValue;
 import org.openfast.Message;
-import ru.ncapital.gateways.micexfast.domain.PerformanceData;
+import ru.ncapital.gateways.micexfast.performance.PerformanceData;
 
 /**
  * Created by egore on 1/21/16.

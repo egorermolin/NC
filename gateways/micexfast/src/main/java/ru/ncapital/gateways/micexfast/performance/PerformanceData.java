@@ -1,4 +1,4 @@
-package ru.ncapital.gateways.micexfast.domain;
+package ru.ncapital.gateways.micexfast.performance;
 
 /**
  * Created by egore on 5/30/16.
@@ -9,18 +9,22 @@ public class PerformanceData {
 
     private long exchangeSendingTime;
 
-    private long gatewayReceiveTime;
+    private long gatewayInTime;
 
     private long gatewayDequeTime;
 
     private long gatewayOutTime;
 
-    public PerformanceData(long gatewayReceiveTime) {
-        this.gatewayReceiveTime = gatewayReceiveTime;
+    public PerformanceData() {
     }
 
-    public long getGatewayReceiveTime() {
-        return gatewayReceiveTime;
+    public long getGatewayInTime() {
+        return gatewayInTime;
+    }
+
+    public PerformanceData setGatewayInTime(long gatewayInTime) {
+        this.gatewayInTime = gatewayInTime;
+        return this;
     }
 
     public long getExchangeEntryTime() {
@@ -59,6 +63,23 @@ public class PerformanceData {
         return this;
     }
 
+    public PerformanceData updateFrom(PerformanceData perfData) {
+        if (perfData == null) {
+            setExchangeEntryTime(0);
+            setExchangeSendingTime(0);
+            setGatewayInTime(0);
+            setGatewayDequeTime(0);
+            setGatewayOutTime(0);
+        } else {
+            setExchangeEntryTime(perfData.getExchangeEntryTime());
+            setExchangeSendingTime(perfData.getExchangeSendingTime());
+            setGatewayInTime(perfData.getGatewayInTime());
+            setGatewayDequeTime(perfData.getGatewayDequeTime());
+            setGatewayOutTime(perfData.getGatewayOutTime());
+        }
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -68,7 +89,7 @@ public class PerformanceData {
 
         if (exchangeEntryTime != that.exchangeEntryTime) return false;
         if (exchangeSendingTime != that.exchangeSendingTime) return false;
-        if (gatewayReceiveTime != that.gatewayReceiveTime) return false;
+        if (gatewayInTime != that.gatewayInTime) return false;
         if (gatewayDequeTime != that.gatewayDequeTime) return false;
         return gatewayOutTime == that.gatewayOutTime;
 
@@ -78,9 +99,21 @@ public class PerformanceData {
     public int hashCode() {
         int result = (int) (exchangeEntryTime ^ (exchangeEntryTime >>> 32));
         result = 31 * result + (int) (exchangeSendingTime ^ (exchangeSendingTime >>> 32));
-        result = 31 * result + (int) (gatewayReceiveTime ^ (gatewayReceiveTime >>> 32));
+        result = 31 * result + (int) (gatewayInTime ^ (gatewayInTime >>> 32));
         result = 31 * result + (int) (gatewayDequeTime ^ (gatewayDequeTime >>> 32));
         result = 31 * result + (int) (gatewayOutTime ^ (gatewayOutTime >>> 32));
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "PerformanceData{" +
+                "exchangeEntryTime=" + exchangeEntryTime +
+                ", exchangeSendingTime=" + exchangeSendingTime +
+                ", gatewayInTime=" + gatewayInTime +
+                ", gatewayDequeTime=" + gatewayDequeTime +
+                ", gatewayOutTime=" + gatewayOutTime +
+                '}';
+    }
+
 }

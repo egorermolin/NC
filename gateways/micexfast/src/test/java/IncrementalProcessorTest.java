@@ -9,13 +9,9 @@ import org.openfast.codec.Coder;
 import ru.ncapital.gateways.micexfast.GatewayModule;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.IncrementalProcessor;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidator;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorForOrderList;
-import ru.ncapital.gateways.micexfast.domain.PerformanceData;
+import ru.ncapital.gateways.micexfast.performance.PerformanceData;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
-
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.mockito.Mockito.mock;
 

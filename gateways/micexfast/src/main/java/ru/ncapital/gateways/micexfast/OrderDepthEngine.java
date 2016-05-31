@@ -107,7 +107,7 @@ public class OrderDepthEngine {
         }
         if (newBBO.getPerformanceData() != null && !newBBO.getPerformanceData().equals(previousBBO.getPerformanceData())) {
             changed[1] = true;
-            previousBBO.setPerformanceData(newBBO.getPerformanceData());
+            previousBBO.getPerformanceData().updateFrom(newBBO.getPerformanceData());
         }
         if (Double.compare(newBBO.getHighPx(), 0.0) != 0 && Double.compare(newBBO.getHighPx(), previousBBO.getHighPx()) != 0) {
             changed[1] = true;

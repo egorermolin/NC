@@ -10,12 +10,8 @@ import org.openfast.SequenceValue;
 import ru.ncapital.gateways.micexfast.GatewayModule;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.StoredMdEntry;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidator;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorForOrderList;
-import ru.ncapital.gateways.micexfast.domain.PerformanceData;
-
-import java.util.Arrays;
+import ru.ncapital.gateways.micexfast.performance.PerformanceData;
 
 /**
  * Created by egore on 1/14/16.
@@ -89,9 +85,9 @@ public class MessageSequenceValidatorTest {
         GroupValue mdEntry3 = Mockito.mock(GroupValue.class);
 
         sequenceValidator.startRecovering("SYMB:CETS");
-        sequenceValidator.storeIncremental("SYMB:CETS", 100, mdEntry1, new PerformanceData(0));
-        sequenceValidator.storeIncremental("SYMB:CETS", 101, mdEntry2, new PerformanceData(0));
-        sequenceValidator.storeIncremental("SYMB:CETS", 102, mdEntry3, new PerformanceData(0));
+        sequenceValidator.storeIncremental("SYMB:CETS", 100, mdEntry1, new PerformanceData());
+        sequenceValidator.storeIncremental("SYMB:CETS", 101, mdEntry2, new PerformanceData());
+        sequenceValidator.storeIncremental("SYMB:CETS", 102, mdEntry3, new PerformanceData());
 
         assert sequenceValidator.onSnapshotSeq("SYMB:CETS", 100);
         StoredMdEntry[] storedMdEntries = sequenceValidator.stopRecovering("SYMB:CETS");
@@ -107,9 +103,9 @@ public class MessageSequenceValidatorTest {
         GroupValue mdEntry3 = Mockito.mock(GroupValue.class);
 
         sequenceValidator.startRecovering("SYMB:CETS");
-        sequenceValidator.storeIncremental("SYMB:CETS", 100, mdEntry1, new PerformanceData(0));
-        sequenceValidator.storeIncremental("SYMB:CETS", 101, mdEntry2, new PerformanceData(0));
-        sequenceValidator.storeIncremental("SYMB:CETS", 104, mdEntry3, new PerformanceData(0));
+        sequenceValidator.storeIncremental("SYMB:CETS", 100, mdEntry1, new PerformanceData());
+        sequenceValidator.storeIncremental("SYMB:CETS", 101, mdEntry2, new PerformanceData());
+        sequenceValidator.storeIncremental("SYMB:CETS", 104, mdEntry3, new PerformanceData());
 
         assert sequenceValidator.onSnapshotSeq("SYMB:CETS", 100);
         assert sequenceValidator.stopRecovering("SYMB:CETS") == null;

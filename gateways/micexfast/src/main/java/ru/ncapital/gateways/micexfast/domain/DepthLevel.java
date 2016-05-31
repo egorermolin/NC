@@ -1,5 +1,7 @@
 package ru.ncapital.gateways.micexfast.domain;
 
+import ru.ncapital.gateways.micexfast.performance.PerformanceData;
+
 /**
  * Created by egore on 12/14/15.
  */
@@ -14,7 +16,7 @@ public class DepthLevel implements Comparable<DepthLevel> {
 
     public double mdEntrySize;
 
-    public PerformanceData perfData;
+    public PerformanceData performanceData;
 
     public boolean isBid;
 
@@ -28,6 +30,7 @@ public class DepthLevel implements Comparable<DepthLevel> {
         this.mdEntrySize = mdEntrySize;
         this.dealNumber = dealNumber;
         this.isBid = isBid;
+        this.performanceData = new PerformanceData();
     }
 
     public DepthLevel(String securityId, MdUpdateAction mdUpdateAction) {
@@ -72,11 +75,7 @@ public class DepthLevel implements Comparable<DepthLevel> {
     }
 
     public PerformanceData getPerformanceData() {
-        return perfData;
-    }
-
-    public void setPerformanceData(PerformanceData perfData) {
-        this.perfData = perfData;
+        return performanceData;
     }
 
     @Override
@@ -97,7 +96,7 @@ public class DepthLevel implements Comparable<DepthLevel> {
                 ", mdUpdateAction=" + mdUpdateAction +
                 ", mdEntryPx=" + mdEntryPx +
                 ", mdEntrySize=" + mdEntrySize +
-                ", perfData=" + perfData +
+                ", performanceData=" + performanceData +
                 ", isBid=" + isBid +
                 '}';
     }
