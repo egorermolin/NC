@@ -20,8 +20,9 @@ public class IncrementalProcessor extends Processor implements IIncrementalProce
 
     @Override
     protected void processMessage(Message readMessage) {
-        long inTime = getInTimestamp();
+        long inTimestamp = getInTimestamp();
         long sendingTime = Utils.convertTodayToTicks((readMessage.getLong("SendingTime") % 1_00_00_00_000L) * 1_000L);
+
         synchronized (sequenceValidator) {
             SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
             for (int i = 0; i < mdEntries.getLength(); ++i) {
@@ -34,6 +35,7 @@ public class IncrementalProcessor extends Processor implements IIncrementalProce
                 String symbol = mdEntry.getString("Symbol");
                 String tradingSessionId = mdEntry.getString("TradingSessionID");
                 String securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
+                PerformanceData performanceData = new PerformanceData(inTimestamp).setExchangeSendingTime(sendingTime);
                 int rptSeqNum = mdEntry.getInt("RptSeq");
 
                 if (!messageHandler.isAllowedUpdate(symbol, tradingSessionId))
@@ -41,32 +43,32 @@ public class IncrementalProcessor extends Processor implements IIncrementalProce
 
                 if (sequenceValidator.isRecovering(securityId, false)) {
                     if (sequenceValidator.onIncrementalSeq(securityId, rptSeqNum)) {
-                        messageHandler.onIncremental(mdEntry, new PerformanceData(inTime).setExchangeSendingTime(sendingTime));
+                        messageHandler.onIncremental(mdEntry, performanceData);
 
                         // finished recovering
                         StoredMdEntry[] storedMdEntriesToProcess = sequenceValidator.stopRecovering(securityId);
                         if (storedMdEntriesToProcess != null)
                             for (StoredMdEntry storedMdEntryToProcess : storedMdEntriesToProcess) {
-                                sequenceValidator.onIncrementalSeq(securityId, storedMdEntryToProcess.getMdEntry().getInt("RptSeq"));
+                                sequenceValidator.onIncrementalSeq(securityId,
+                                        storedMdEntryToProcess.getSequenceNumber());
 
                                 messageHandler.onIncremental(storedMdEntryToProcess.getMdEntry(),
-                                        new PerformanceData(inTime).setExchangeSendingTime(storedMdEntryToProcess.getSendingTime()));
+                                        storedMdEntryToProcess.getPerformanceData());
                             }
                     } else {
-                        sequenceValidator.storeIncremental(mdEntry, securityId, rptSeqNum, sendingTime);
+                        sequenceValidator.storeIncremental(securityId, rptSeqNum, mdEntry, performanceData);
                     }
                     continue;
                 }
 
                 if (sequenceValidator.onIncrementalSeq(securityId, rptSeqNum)) {
-                    messageHandler.onIncremental(mdEntry, new PerformanceData(inTime).setExchangeSendingTime(sendingTime));
+                    messageHandler.onIncremental(mdEntry, performanceData);
                 } else {
-                    sequenceValidator.storeIncremental(mdEntry, securityId, rptSeqNum,
-                            new PerformanceData(inTime).setExchangeSendingTime(sendingTime));
+                    sequenceValidator.storeIncremental(securityId, rptSeqNum, mdEntry, performanceData);
                     sequenceValidator.startRecovering(securityId);
                 }
             }
-            messageHandler.flushIncrementals(new PerformanceData(inTime).setExchangeSendingTime(sendingTime));
+            messageHandler.flushIncrementals();
         }
     }
 }

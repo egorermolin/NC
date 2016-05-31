@@ -45,24 +45,24 @@ public class MainClass {
                     private Logger logger = LoggerFactory.getLogger("MarketDataHandler");
 
                     @Override
-                    public void onBBO(BBO bbo, long inTime) {
+                    public void onBBO(BBO bbo) {
                         logger.info("BBO " + bbo.getSecurityId());
                     }
 
                     @Override
-                    public void onDepthLevels(DepthLevel[] depthLevels, long inTimeInTicks) {
+                    public void onDepthLevels(DepthLevel[] depthLevels) {
                     }
 
                     @Override
-                    public void onPublicTrade(PublicTrade publicTrade, long inTime) {
+                    public void onPublicTrade(PublicTrade publicTrade) {
                     }
 
                     @Override
-                    public void onStatistics(BBO bbo, long inTime) {
+                    public void onStatistics(BBO bbo) {
                     }
 
                     @Override
-                    public void onTradingStatus(BBO bbo, long inTime) {
+                    public void onTradingStatus(BBO bbo) {
                     }
 
                     @Override

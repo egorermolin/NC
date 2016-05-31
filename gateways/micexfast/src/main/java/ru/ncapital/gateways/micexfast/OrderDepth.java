@@ -38,7 +38,7 @@ public class OrderDepth {
                 return depthLevel.compareTo(depthLevel1);
             }
         });
-        this.depthLevels = new HashMap<String, DepthLevel>();
+        this.depthLevels = new HashMap<>();
         this.logger = LoggerFactory.getLogger((isBid ? "Bid" : "Offer") + "OrderDepth");
     }
 

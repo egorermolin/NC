@@ -14,7 +14,7 @@ public class PublicTrade {
 
     private boolean isBid;
 
-    private long lastTime;
+    private PerformanceData performanceData;
 
     public PublicTrade(String securityId, String id, double lastPx, double lastSize, boolean isBid) {
         this.securityId = securityId;
@@ -44,12 +44,12 @@ public class PublicTrade {
         return isBid;
     }
 
-    public long getLastTime() {
-        return lastTime;
+    public PerformanceData getPerformanceData() {
+        return performanceData;
     }
 
-    public void setLastTime(long lastTime) {
-        this.lastTime = lastTime;
+    public void setPerformanceData(PerformanceData performanceData) {
+        this.performanceData = performanceData;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class PublicTrade {
                 ", isBid=" + isBid +
                 ", lastPx=" + lastPx +
                 ", lastSize=" + lastSize +
-                ", lastTime=" + lastTime +
+                ", perfData=" + performanceData +
                 '}';
     }
 }

@@ -15,7 +15,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
     private Logger logger = LoggerFactory.getLogger("DefaultMarketDataHandler");
 
     @Override
-    public void onBBO(BBO bbo, long inTime) {
+    public void onBBO(BBO bbo) {
         StringBuilder sb = new StringBuilder();
         sb.append("onBBO: ");
         sb.append(bbo.getSecurityId()).append(" ");
@@ -26,7 +26,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
     }
 
     @Override
-    public void onTradingStatus(BBO bbo, long inTime) {
+    public void onTradingStatus(BBO bbo) {
         StringBuilder sb = new StringBuilder();
         sb.append("onTradingStatus: ");
         sb.append(bbo.getSecurityId()).append(" ");
@@ -36,7 +36,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
     }
 
     @Override
-    public void onStatistics(BBO bbo, long inTime) {
+    public void onStatistics(BBO bbo) {
         StringBuilder sb = new StringBuilder();
         sb.append("onStatistics: ");
         sb.append(bbo.getSecurityId());
@@ -50,7 +50,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
     }
 
     @Override
-    public void onDepthLevels(DepthLevel[] depthLevels, long inTime) {
+    public void onDepthLevels(DepthLevel[] depthLevels) {
         for (DepthLevel depthLevel : depthLevels) {
             StringBuilder sb = new StringBuilder();
             sb.append("onDepthLevel: ");
@@ -77,7 +77,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
     }
 
     @Override
-    public void onPublicTrade(PublicTrade publicTrade, long inTime) {
+    public void onPublicTrade(PublicTrade publicTrade) {
         StringBuilder sb = new StringBuilder();
         sb.append("onPublicTrade: ");
         sb.append(publicTrade.getSecurityId()).append(" ");

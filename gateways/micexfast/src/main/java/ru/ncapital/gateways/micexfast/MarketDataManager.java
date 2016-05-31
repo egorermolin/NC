@@ -12,7 +12,6 @@ import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerFactory;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 import ru.ncapital.gateways.micexfast.performance.IGatewayPerformanceLogger;
-import sun.misc.Perf;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +60,11 @@ public class MarketDataManager {
 
     private boolean feedStatusALL = true;
 
-    private long debugWarningSilentPeriod = 0;
+//    private long debugWarningSilentPeriod = 0;
+
+    public void setInstrumentManager(InstrumentManager instrumentManager) {
+        this.instrumentManager = instrumentManager;
+    }
 
     public MarketDataManager configure(IGatewayConfiguration configuration) {
         marketDataHandler = configuration.getMarketDataHandler();
@@ -86,7 +89,6 @@ public class MarketDataManager {
     }
 
     public boolean subscribe(Subscription subscription) {
-        PerformanceData perfData = new PerformanceData(Utils.currentTimeInTicks());
         if (logger.isTraceEnabled())
             logger.trace("onSubscribe " + subscription.getSubscriptionKey());
 
@@ -97,14 +99,14 @@ public class MarketDataManager {
 
         BBO currentBBO = getOrCreateBBO(subscription.getSubscriptionKey());
         synchronized (currentBBO) {
-            List<DepthLevel> depthLevelsToSend = new ArrayList<DepthLevel>();
+            List<DepthLevel> depthLevelsToSend = new ArrayList<>();
             depthLevelsToSend.add(new DepthLevel(subscription.getSubscriptionKey(), MdUpdateAction.SNAPSHOT));
             orderDepthEngine.getDepthLevels(subscription.getSubscriptionKey(), depthLevelsToSend);
 
-            marketDataHandler.onBBO(currentBBO, perfData);
-            marketDataHandler.onDepthLevels(depthLevelsToSend.toArray(new DepthLevel[0]), perfData);
-            marketDataHandler.onStatistics(currentBBO, perfData);
-            marketDataHandler.onTradingStatus(currentBBO, perfData);
+            marketDataHandler.onBBO(currentBBO);
+            marketDataHandler.onDepthLevels(depthLevelsToSend.toArray(new DepthLevel[0]));
+            marketDataHandler.onStatistics(currentBBO);
+            marketDataHandler.onTradingStatus(currentBBO);
         }
         return true;
     }
@@ -121,7 +123,7 @@ public class MarketDataManager {
         return bbo;
     }
 
-    public void onBBO(BBO newBBO, PerformanceData perfData) {
+    public void onBBO(BBO newBBO) {
         if (logger.isTraceEnabled())
             logger.trace("onBBO " + newBBO.getSecurityId());
 
@@ -131,66 +133,35 @@ public class MarketDataManager {
 
             if (subscriptions.containsKey(newBBO.getSecurityId())) {
                 if (changed[0])
-                    marketDataHandler.onBBO(currentBBO, perfData);
+                    marketDataHandler.onBBO(currentBBO);
                 if (changed[1])
-                    marketDataHandler.onStatistics(currentBBO, perfData);
+                    marketDataHandler.onStatistics(currentBBO);
                 if (changed[2])
-                    marketDataHandler.onTradingStatus(currentBBO, perfData);
+                    marketDataHandler.onTradingStatus(currentBBO);
             }
         }
 
-        if (performanceLogger != null)
-            performanceLogger.notifyBBOPerformance(perfData);
+        logPerformance(newBBO);
     }
 
-    public void onDepthLevels(DepthLevel[] depthLevels, PerformanceData perfData) {
+    public void onDepthLevels(DepthLevel[] depthLevels) {
         if (logger.isTraceEnabled())
             logger.trace("onDepthLevel " + depthLevels[0].getSecurityId());
 
         BBO currentBBO = getOrCreateBBO(depthLevels[0].getSecurityId());
         synchronized (currentBBO) {
-            List<DepthLevel> depthLevelsToSend = new ArrayList<DepthLevel>();
+            List<DepthLevel> depthLevelsToSend = new ArrayList<>();
             orderDepthEngine.onDepthLevels(depthLevels, depthLevelsToSend);
 
             if (subscriptions.containsKey(depthLevels[0].getSecurityId()))
-                marketDataHandler.onDepthLevels(depthLevelsToSend.toArray(new DepthLevel[0]), perfData);
+                marketDataHandler.onDepthLevels(depthLevelsToSend.toArray(new DepthLevel[0]));
         }
 
-        logPerformance(depthLevels, perfData);
+        logPerformance(depthLevels);
     }
 
-    private void logPerformance(DepthLevel[] depthLevels, PerformanceData perfData) {
-        if (perfData.getGatewayReceiveTime() == 0)
-            return;
 
-        if (performanceLogger == null)
-            return;
-
-        for (DepthLevel depthLevel : depthLevels) {
-            if (depthLevel.getPerfomanceData().getExchangeEntryTime() == 0
-                    || depthLevel.getPerfomanceData().getExchangeSendingTime() == 0)
-                continue;
-
-            if (logger.isDebugEnabled()) {
-                if (depthLevel.getPerfomanceData().getExchangeSendingTime()
-                        - depthLevel.getPerfomanceData().getExchangeEntryTime()
-                        > 10_000_0L) { // 10ms in ticks
-                    if (debugWarningSilentPeriod == 0 || depthLevel.getPerfomanceData().getExchangeSendingTime()
-                            > debugWarningSilentPeriod) {
-                        logger.debug("MDEntryTime is more than 10ms lower than SendingTime ["
-                                + (depthLevel.getPerfomanceData().getExchangeSendingTime()
-                                    - depthLevel.getPerfomanceData().getExchangeEntryTime()) + "]");
-
-                        debugWarningSilentPeriod = depthLevel.getPerfomanceData().getExchangeSendingTime() + 60_000_000_0L; // 60s in ticks
-                    }
-                }
-            }
-
-            performanceLogger.notify(depthLevel.getPerfomanceData(), "external");
-        }
-    }
-
-    public void onPublicTrade(PublicTrade publicTrade, PerformanceData perfData) {
+    public void onPublicTrade(PublicTrade publicTrade) {
         if (logger.isTraceEnabled())
             logger.trace("onPublicTrade " + publicTrade.getSecurityId());
 
@@ -199,8 +170,54 @@ public class MarketDataManager {
             orderDepthEngine.onPublicTrade(publicTrade);
 
             if (subscriptions.containsKey(publicTrade.getSecurityId()))
-                marketDataHandler.onPublicTrade(publicTrade, perfData);
+                marketDataHandler.onPublicTrade(publicTrade);
         }
+
+        logPerformance(publicTrade);
+    }
+
+    private void logPerformance(BBO bbo) {
+        if (performanceLogger == null)
+            return;
+
+        if (bbo.getPerformanceData() == null)
+            return;
+
+        performanceLogger.notifyBBOPerformance(bbo.getPerformanceData());
+    }
+
+    private void logPerformance(DepthLevel[] depthLevels) {
+         if (performanceLogger == null)
+            return;
+
+        for (DepthLevel depthLevel : depthLevels) {
+
+//            if (logger.isDebugEnabled()) {
+//                if (depthLevel.getPerformanceData().getExchangeSendingTime()
+//                        - depthLevel.getPerformanceData().getExchangeEntryTime()
+//                        > 10_000_0L) { // 10ms in ticks
+//                    if (debugWarningSilentPeriod == 0 || depthLevel.getPerformanceData().getExchangeSendingTime()
+//                            > debugWarningSilentPeriod) {
+//                        logger.debug("MDEntryTime is more than 10ms lower than SendingTime ["
+//                                + (depthLevel.getPerformanceData().getExchangeSendingTime()
+//                                    - depthLevel.getPerformanceData().getExchangeEntryTime()) + "]");
+//
+//                        debugWarningSilentPeriod = depthLevel.getPerformanceData().getExchangeSendingTime() + 60_000_000_0L; // 60s in ticks
+//                    }
+//                }
+//            }
+            if (depthLevel.getPerformanceData() == null)
+                continue;
+
+            performanceLogger.notifyOrderListPerformance(depthLevel.getPerformanceData());
+        }
+    }
+
+    private void logPerformance(PublicTrade publicTrade) {
+        if (performanceLogger == null)
+            return;
+
+        performanceLogger.notifyPublicTradePerformance(publicTrade.getPerformanceData());
     }
 
     public IProcessor getHeartbeatProcessor() {
@@ -250,11 +267,7 @@ public class MarketDataManager {
     public void setRecovery(String securityId, boolean isUp, boolean orderList) {
         BBO bbo = new BBO(securityId);
         bbo.setInRecovery(isUp, orderList ? 0 : 1);
-        onBBO(bbo, new PerformanceData(Utils.currentTimeInTicks()));
-    }
-
-    public void setInstrumentManager(InstrumentManager instrumentManager) {
-        this.instrumentManager = instrumentManager;
+        onBBO(bbo);
     }
 
     public void onFeedStatus(boolean up, boolean all) {

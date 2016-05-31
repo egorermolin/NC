@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.StoredMdEntry;
+import ru.ncapital.gateways.micexfast.domain.PerformanceData;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
 import java.util.*;
@@ -100,7 +101,7 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
     }
 
     @Override
-    public void storeIncremental(GroupValue mdEntry, String securityId, int seqNum, long sendingTime) {
+    public void storeIncremental(String securityId, int seqNum, GroupValue mdEntry, PerformanceData perfData) {
         if (logger.get().isTraceEnabled())
             logger.get().trace("STORE -> " + securityId + " " + seqNum);
 
@@ -113,7 +114,7 @@ public class MessageSequenceValidator implements IMessageSequenceValidator {
 
             Map<Integer, StoredMdEntry> storedMdEntries = storedMdEntriesBySecurityId.get(securityId);
 
-            storedMdEntries.put(seqNum, new StoredMdEntry(mdEntry, sendingTime));
+            storedMdEntries.put(seqNum, new StoredMdEntry(securityId, seqNum, mdEntry, perfData));
         }
     }
 

@@ -58,4 +58,29 @@ public class PerformanceData {
         this.gatewayOutTime = gatewayOutTime;
         return this;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PerformanceData that = (PerformanceData) o;
+
+        if (exchangeEntryTime != that.exchangeEntryTime) return false;
+        if (exchangeSendingTime != that.exchangeSendingTime) return false;
+        if (gatewayReceiveTime != that.gatewayReceiveTime) return false;
+        if (gatewayDequeTime != that.gatewayDequeTime) return false;
+        return gatewayOutTime == that.gatewayOutTime;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (exchangeEntryTime ^ (exchangeEntryTime >>> 32));
+        result = 31 * result + (int) (exchangeSendingTime ^ (exchangeSendingTime >>> 32));
+        result = 31 * result + (int) (gatewayReceiveTime ^ (gatewayReceiveTime >>> 32));
+        result = 31 * result + (int) (gatewayDequeTime ^ (gatewayDequeTime >>> 32));
+        result = 31 * result + (int) (gatewayOutTime ^ (gatewayOutTime >>> 32));
+        return result;
+    }
 }

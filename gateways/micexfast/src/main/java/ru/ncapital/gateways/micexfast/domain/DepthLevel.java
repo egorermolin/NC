@@ -73,7 +73,7 @@ public class DepthLevel implements Comparable<DepthLevel> {
         return isBid;
     }
 
-    public PerformanceData getPerfomanceData() {
+    public PerformanceData getPerformanceData() {
         return perfData;
     }
 

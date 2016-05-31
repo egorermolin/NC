@@ -27,6 +27,8 @@ public class MicexFastMulticastInputStream extends InputStream {
 
     private ThreadLocal<Long> inTimestamp;
 
+    private ThreadLocal<Long> dequeuTimestamp;
+
     private ChannelPacketReaderFactory channelPacketReaderFactory = new ChannelPacketReaderFactory();
 
     private volatile boolean running = false;
@@ -50,6 +52,8 @@ public class MicexFastMulticastInputStream extends InputStream {
     public void setInTimestamp(ThreadLocal<Long> inTimestamp) {
         this.inTimestamp = inTimestamp;
     }
+
+    public void setDequeTimestamp(ThreadLocal<Long> dequeuTimestamp) { this.dequeuTimestamp = dequeuTimestamp; }
 
     private static int getSeqNum(ByteBuffer bb) {
         return (int) ((bb.get(0) & 0xFF)

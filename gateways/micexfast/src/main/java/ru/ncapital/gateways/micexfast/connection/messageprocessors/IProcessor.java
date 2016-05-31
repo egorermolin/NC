@@ -10,10 +10,10 @@ import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalid
  * Created by egore on 5/6/16.
  */
 public interface IProcessor extends MessageHandler {
-    
-    ThreadLocal<Long> getInTimestampHolder();
 
     void setIsPrimary(boolean isPrimary);
+
+    ThreadLocal<Long> getInTimestampHolder();
 
     IMessageSequenceValidator getSequenceValidator();
 }

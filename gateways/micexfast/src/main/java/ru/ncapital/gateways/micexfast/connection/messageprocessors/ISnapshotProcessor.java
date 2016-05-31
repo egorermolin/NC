@@ -7,5 +7,6 @@ package ru.ncapital.gateways.micexfast.connection.messageprocessors;
  * Created by egore on 5/24/16.
  */
 public interface ISnapshotProcessor extends IProcessor {
+
     void reset();
 }

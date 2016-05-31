@@ -44,15 +44,9 @@ public enum ConnectionId {
 
     private final boolean primary;
 
-    private final boolean incremental;
-
     ConnectionId(String connectionId) {
         this.connectionId = connectionId;
         this.primary = connectionId.contains("-A");
-        this.incremental = connectionId.contains("ISF") ||
-                connectionId.contains("OLR") ||
-                connectionId.contains("MSR") ||
-                connectionId.contains("TLR");
     }
 
     private static HashMap<String, ConnectionId> actionMap = new HashMap<String, ConnectionId>();
@@ -72,8 +66,6 @@ public enum ConnectionId {
     public boolean isPrimary() {
         return primary;
     }
-
-    public boolean isIncremental() {return incremental; }
 
     public static ConnectionId convert(String connectionId) { return actionMap.get(connectionId); }
 

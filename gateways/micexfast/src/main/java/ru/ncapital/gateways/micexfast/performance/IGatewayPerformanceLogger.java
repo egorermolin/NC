@@ -7,9 +7,9 @@ import ru.ncapital.gateways.micexfast.domain.PerformanceData;
  */
 public interface IGatewayPerformanceLogger {
 
-    void notifyBBOPerformance(PerformanceData perfData, boolean isSnapshot);
+    void notifyBBOPerformance(PerformanceData perfData);
 
-    void notifyStatisticsPerformance(PerformanceData perfData, boolean isSnapshot);
+    void notifyOrderListPerformance(PerformanceData perfData);
 
-    void notifyOrderListPerformance(PerformanceData perfData, boolean isSnapshot);
+    void notifyPublicTradePerformance(PerformanceData perfData);
 }

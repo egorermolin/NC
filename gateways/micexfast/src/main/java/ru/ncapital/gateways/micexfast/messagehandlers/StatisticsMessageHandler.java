@@ -10,7 +10,7 @@ import ru.ncapital.gateways.micexfast.MarketDataManager;
 import ru.ncapital.gateways.micexfast.Utils;
 import ru.ncapital.gateways.micexfast.domain.BBO;
 import ru.ncapital.gateways.micexfast.domain.MdEntryType;
-import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
+import ru.ncapital.gateways.micexfast.domain.PerformanceData;
 
 /**
  * Created by egore on 1/21/16.
@@ -31,8 +31,7 @@ public class StatisticsMessageHandler extends AMessageHandler {
         return LoggerFactory.getLogger("StatisticMessageHandler");
     }
 
-    @Override
-    protected void onSnapshotMdEntry(String securityId, GroupValue mdEntry, long inTime) {
+    private void onMdEntry(GroupValue mdEntry) {
         MdEntryType mdEntryType = MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
 
         if (mdEntryType == null)
@@ -52,7 +51,7 @@ public class StatisticsMessageHandler extends AMessageHandler {
             case LAST:
                 bbo.setLastPx(mdEntry.getDouble("MDEntryPx"));
                 bbo.setLastSize(mdEntry.getDouble("MDEntrySize"));
-                bbo.setLastTime(Utils.getEntryTimeInTicks(mdEntry));
+                bbo.getPerformanceData().setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
 
             case LOW:
@@ -74,28 +73,35 @@ public class StatisticsMessageHandler extends AMessageHandler {
     }
 
     @Override
-    protected void onIncrementalMdEntry(String securityId, GroupValue mdEntry, long inTime, long sendingTime) {
-        onBeforeSnapshot(securityId, inTime);
-        onSnapshotMdEntry(securityId, mdEntry, inTime);
-        onAfterSnapshot(securityId, inTime);
-    }
-
-    @Override
-    protected void onBeforeSnapshot(String securityId, long inTime) {
+    protected void onBeforeSnapshot(String securityId) {
         bbo = new BBO(securityId);
+        bbo.setPerformanceData(new PerformanceData(0));
     }
 
     @Override
-    protected void onAfterSnapshot(String securityId, long inTime) {
-        marketDataManager.onBBO(bbo, inTime);
+    protected void onSnapshotMdEntry(String securityId, GroupValue mdEntry) {
+        onMdEntry(mdEntry);
     }
 
     @Override
-    public void flushIncrementals(long inTime) {
+    protected void onAfterSnapshot(String securityId) {
+        marketDataManager.onBBO(bbo);
     }
 
     @Override
-    public void beforeIncremental(GroupValue mdEntry, long inTime) {
+    protected void onIncrementalMdEntry(String securityId, GroupValue mdEntry, PerformanceData perfData) {
+        bbo = new BBO(securityId);
+        bbo.setPerformanceData(perfData);
+        onMdEntry(mdEntry);
+        marketDataManager.onBBO(bbo);
+    }
+
+    @Override
+    public void flushIncrementals() {
+    }
+
+    @Override
+    public void onBeforeIncremental(GroupValue mdEntry) {
     }
 
     @Override

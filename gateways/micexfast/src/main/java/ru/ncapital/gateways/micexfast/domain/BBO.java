@@ -1,5 +1,7 @@
 package ru.ncapital.gateways.micexfast.domain;
 
+import sun.misc.Perf;
+
 /**
  * Created by egore on 12/7/15.
  */
@@ -26,7 +28,7 @@ public class BBO {
 
     private double closePx;
 
-    private long lastTime;
+    private PerformanceData performanceData;
 
     private String tradingStatus;
 
@@ -130,12 +132,12 @@ public class BBO {
         this.closePx = closePx;
     }
 
-    public long getLastTime() {
-        return lastTime;
+    public PerformanceData getPerformanceData() {
+        return performanceData;
     }
 
-    public void setLastTime(long lastTime) {
-        this.lastTime = lastTime;
+    public void setPerformanceData(PerformanceData performanceData) {
+        this.performanceData = performanceData;
     }
 
     public boolean isInRecovery(int i) {
@@ -161,7 +163,7 @@ public class BBO {
                 ", offerSize=" + offerSize +
                 ", lastPx=" + lastPx +
                 ", lastSize=" + lastSize +
-                ", lastTime=" + lastTime +
+                ", perfData=" + performanceData +
                 ", lowPx=" + lowPx +
                 ", highPx=" + highPx +
                 ", openPx=" + openPx +

@@ -23,8 +23,11 @@ public abstract class AMessageHandler implements IMessageHandler {
 
     protected MarketDataManager marketDataManager;
 
-    protected AMessageHandler(MarketDataManager marketDataManager, IGatewayConfiguration configuration) {
+    protected IGatewayConfiguration gatewayConfiguration;
+
+    protected AMessageHandler(MarketDataManager marketDataManager, IGatewayConfiguration gatewayConfiguration) {
         this.marketDataManager = marketDataManager;
+        this.gatewayConfiguration = gatewayConfiguration;
     }
 
     @Override
@@ -33,7 +36,7 @@ public abstract class AMessageHandler implements IMessageHandler {
     }
 
     @Override
-    public void onSnapshot(Message readMessage, PerformanceData perfData) {
+    public void onSnapshot(Message readMessage) {
         String symbol = readMessage.getString("Symbol");
         String tradingSessionId = readMessage.getString("TradingSessionID");
         String securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
@@ -41,15 +44,15 @@ public abstract class AMessageHandler implements IMessageHandler {
         boolean lastFragment = readMessage.getInt("LastFragment") == 1;
 
         if (firstFragment)
-            onBeforeSnapshot(securityId, perfData);
+            onBeforeSnapshot(securityId);
 
         SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
         for (int i = 0; i < mdEntries.getLength(); ++i) {
-            onSnapshotMdEntry(securityId, mdEntries.get(i), perfData);
+            onSnapshotMdEntry(securityId, mdEntries.get(i));
         }
 
         if (lastFragment)
-            onAfterSnapshot(securityId, perfData);
+            onAfterSnapshot(securityId);
     }
 
     @Override
@@ -58,18 +61,20 @@ public abstract class AMessageHandler implements IMessageHandler {
         String tradingSessionId = mdEntry.getString("TradingSessionID");
         String securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
 
-        beforeIncremental(mdEntry, perfData);
+        onBeforeIncremental(mdEntry);
 
         onIncrementalMdEntry(securityId, mdEntry, perfData);
     }
 
     protected abstract Logger getLogger();
 
-    protected abstract void onBeforeSnapshot(String securityId, PerformanceData perfData);
+    protected abstract void onBeforeSnapshot(String securityId);
 
-    protected abstract void onAfterSnapshot(String securityId, PerformanceData perfData);
+    protected abstract void onAfterSnapshot(String securityId);
 
-    protected abstract void onSnapshotMdEntry(String securityId, GroupValue mdEntry, PerformanceData perfData);
+    protected abstract void onSnapshotMdEntry(String securityId, GroupValue mdEntry);
+
+    protected abstract void onBeforeIncremental(GroupValue mdEntry);
 
     protected abstract void onIncrementalMdEntry(String securityId, GroupValue mdEntry, PerformanceData perfData);
 }

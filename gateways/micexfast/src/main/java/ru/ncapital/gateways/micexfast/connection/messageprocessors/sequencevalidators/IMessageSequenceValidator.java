@@ -13,9 +13,9 @@ public interface IMessageSequenceValidator {
 
     boolean onIncrementalSeq(String securityId, int seqNum);
 
-    void storeIncremental(GroupValue mdEntry, String securityId, int seqNum, PerformanceData perfData);
-
     void startRecovering(String securityId);
+
+    void storeIncremental(String securityId, int seqNum, GroupValue mdEntry, PerformanceData perfData);
 
     StoredMdEntry[] stopRecovering(String securityId);
 

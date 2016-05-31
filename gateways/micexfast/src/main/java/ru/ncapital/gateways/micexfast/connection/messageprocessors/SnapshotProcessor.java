@@ -6,10 +6,7 @@ import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalid
 import ru.ncapital.gateways.micexfast.domain.Instrument;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Created by egore on 1/11/16.
@@ -26,21 +23,21 @@ public class SnapshotProcessor extends Processor implements ISnapshotProcessor {
         super(messageHandler, sequenceValidator);
     }
 
-    private void processSnapshotsAndIncrementals(Iterable<Message> messages, String securityId, int rptSeqNum) {
+    private void processSnapshotsAndIncrementals(String securityId, int rptSeqNum, Collection<Message> messages) {
         synchronized (sequenceValidator) {
             if (sequenceValidator.onSnapshotSeq(securityId, rptSeqNum)) {
                 for (Message message : messages)
-                    messageHandler.onSnapshot(message, getInTimestamp());
+                    messageHandler.onSnapshot(message);
 
                 // finished recovering
                 StoredMdEntry[] storedMdEntriesToProcess = sequenceValidator.stopRecovering(securityId);
                 if (storedMdEntriesToProcess != null) {
                     for (StoredMdEntry storedMdEntry : storedMdEntriesToProcess) {
-                        sequenceValidator.onIncrementalSeq(securityId, storedMdEntry.getMdEntry().getInt("RptSeq"));
+                        sequenceValidator.onIncrementalSeq(securityId, storedMdEntry.getSequenceNumber());
 
-                        messageHandler.onIncremental(storedMdEntry.getMdEntry(), getInTimestamp(), 0);
+                        messageHandler.onIncremental(storedMdEntry.getMdEntry(), null);
                     }
-                    messageHandler.flushIncrementals(0);
+                    messageHandler.flushIncrementals();
                 }
             }
         }
@@ -70,7 +67,7 @@ public class SnapshotProcessor extends Processor implements ISnapshotProcessor {
     }
 
     @Override
-    public void processMessage(final Message readMessage) {
+    public void processMessage(Message readMessage) {
         int seqNum = readMessage.getInt("MsgSeqNum");
         String symbol = readMessage.getString("Symbol");
         String tradingSessionId = readMessage.getString("TradingSessionID");
@@ -90,7 +87,7 @@ public class SnapshotProcessor extends Processor implements ISnapshotProcessor {
 
         if (lastFragment) {
             if (checkMessages(messages)) {
-                processSnapshotsAndIncrementals(messages.values(), securityId, rptSeqNum);
+                processSnapshotsAndIncrementals(securityId, rptSeqNum, messages.values());
             } else {
                 fragmentedSnapshots.remove(securityId);
             }

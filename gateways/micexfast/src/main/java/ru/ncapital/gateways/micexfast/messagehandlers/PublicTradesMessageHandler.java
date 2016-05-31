@@ -9,6 +9,7 @@ import ru.ncapital.gateways.micexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
 import ru.ncapital.gateways.micexfast.Utils;
 import ru.ncapital.gateways.micexfast.domain.MdEntryType;
+import ru.ncapital.gateways.micexfast.domain.PerformanceData;
 import ru.ncapital.gateways.micexfast.domain.PublicTrade;
 import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
 
@@ -30,22 +31,22 @@ public class PublicTradesMessageHandler extends AMessageHandler {
     }
 
     @Override
-    protected void onBeforeSnapshot(String securityId, long inTime) {
+    protected void onBeforeSnapshot(String securityId) {
         throw new RuntimeException("Not implemented");
     }
 
     @Override
-    protected void onAfterSnapshot(String securityId, long inTime) {
+    protected void onAfterSnapshot(String securityId) {
         throw new RuntimeException("Not implemented");
     }
 
     @Override
-    protected void onSnapshotMdEntry(String securityId, GroupValue mdEntry, long inTime) {
+    protected void onSnapshotMdEntry(String securityId, GroupValue mdEntry) {
         throw new RuntimeException("Not implemented");
     }
 
     @Override
-    protected void onIncrementalMdEntry(String securityId, GroupValue mdEntry, long inTime, long sendingTime) {
+    protected void onIncrementalMdEntry(String securityId, GroupValue mdEntry, PerformanceData perfData) {
         MdEntryType mdEntryType = MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
 
         if (mdEntryType == null)
@@ -60,22 +61,22 @@ public class PublicTradesMessageHandler extends AMessageHandler {
                         mdEntry.getDouble("MDEntrySize"),
                         mdEntry.getString("OrderSide").charAt(0) == 'B');
 
-                publicTrade.setLastTime(Utils.getEntryTimeInTicks(mdEntry));
+                publicTrade.setPerformanceData(perfData.setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry)));
                 break;
             case EMPTY:
                 break;
         }
 
         if (publicTrade != null)
-            marketDataManager.onPublicTrade(publicTrade, inTime);
+            marketDataManager.onPublicTrade(publicTrade);
     }
 
     @Override
-    public void flushIncrementals(long inTime) {
+    public void flushIncrementals() {
     }
 
     @Override
-    public void beforeIncremental(GroupValue mdEntry, long inTime) {
+    public void onBeforeIncremental(GroupValue mdEntry) {
     }
 
     @Override

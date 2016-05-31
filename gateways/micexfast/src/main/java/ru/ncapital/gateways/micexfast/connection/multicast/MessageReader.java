@@ -324,6 +324,18 @@ public class MessageReader implements IMulticastEventListener {
         return receivedTimestamp;
     }
 
+    public ThreadLocal<Long> initAndGetInTimestamp(ThreadLocal<Long> inTimestamp) {
+        if (inTimestamp == null)
+            return this.inTimestamp = new ThreadLocal<Long>() {
+                @Override
+                public Long initialValue() {
+                    return new Long(0);
+                }
+            };
+        else
+            return this.inTimestamp = inTimestamp;
+    }
+
     public ConnectionId getConnectionId() {
         return connectionId;
     }
@@ -367,12 +379,7 @@ public class MessageReader implements IMulticastEventListener {
                     }
                 }
             });
-            multicastInputStream.setInTimestamp(inTimestamp = new ThreadLocal<Long>() {
-                @Override
-                public Long initialValue() {
-                    return new Long(0);
-                }
-            });
+            multicastInputStream.setInTimestamp(initAndGetInTimestamp(null));
         } else {
             switch (connectionId) {
                 case CURR_INSTRUMENT_INCR_A:
@@ -381,12 +388,7 @@ public class MessageReader implements IMulticastEventListener {
                 case FOND_INSTRUMENT_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("f"), instrumentManager);
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    multicastInputStream.setInTimestamp(inTimestamp = new ThreadLocal<Long>() {
-                        @Override
-                        public Long initialValue() {
-                            return new Long(0);
-                        }
-                    });
+                    multicastInputStream.setInTimestamp(initAndGetInTimestamp(null));
                     break;
 
                 case FOND_INSTRUMENT_SNAP_A:
@@ -395,12 +397,7 @@ public class MessageReader implements IMulticastEventListener {
                 case CURR_INSTRUMENT_SNAP_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("d"), instrumentManager);
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    multicastInputStream.setInTimestamp(inTimestamp = new ThreadLocal<Long>() {
-                        @Override
-                        public Long initialValue() {
-                            return new Long(0);
-                        }
-                    });
+                    multicastInputStream.setInTimestamp(initAndGetInTimestamp(null));
                     break;
 
                 case CURR_ORDER_LIST_INCR_A:
@@ -408,7 +405,7 @@ public class MessageReader implements IMulticastEventListener {
                 case CURR_ORDER_LIST_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-OLR-CURR"), marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    multicastInputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.ORDER_LIST));
+                    multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.ORDER_LIST)));
                     break;
 
                 case FOND_ORDER_LIST_INCR_A:
@@ -416,21 +413,21 @@ public class MessageReader implements IMulticastEventListener {
                 case FOND_ORDER_LIST_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-OLR-FOND"), marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    multicastInputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.ORDER_LIST));
+                    multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.ORDER_LIST)));
                     break;
 
                 case CURR_ORDER_LIST_SNAP_A:
                 case CURR_ORDER_LIST_SNAP_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("W-OLS-CURR"), marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_LIST));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    multicastInputStream.setInTimestamp(inTimestamp = marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.ORDER_LIST));
+                    multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.ORDER_LIST)));
                     break;
 
                 case FOND_ORDER_LIST_SNAP_A:
                 case FOND_ORDER_LIST_SNAP_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("W-OLS-FOND"), marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_LIST));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    multicastInputStream.setInTimestamp(inTimestamp = marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.ORDER_LIST));
+                    multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.ORDER_LIST)));
                     break;
 
                 case CURR_STATISTICS_INCR_A:
@@ -438,7 +435,7 @@ public class MessageReader implements IMulticastEventListener {
                 case CURR_STATISTICS_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-MSR-CURR"), marketDataManager.getIncrementalProcessor(MessageHandlerType.STATISTICS));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    multicastInputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.STATISTICS));
+                    multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.STATISTICS)));
                     break;
 
                 case FOND_STATISTICS_INCR_A:
@@ -446,7 +443,7 @@ public class MessageReader implements IMulticastEventListener {
                 case FOND_STATISTICS_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-MSR-FOND"), marketDataManager.getIncrementalProcessor(MessageHandlerType.STATISTICS));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    multicastInputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.STATISTICS));
+                    multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.STATISTICS)));
                     break;
 
                 case CURR_STATISTICS_SNAP_A:
@@ -455,7 +452,7 @@ public class MessageReader implements IMulticastEventListener {
                 case FOND_STATISTICS_SNAP_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("W-Generic"), marketDataManager.getSnapshotProcessor(MessageHandlerType.STATISTICS));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    multicastInputStream.setInTimestamp(inTimestamp = marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.STATISTICS));
+                    multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.STATISTICS)));
                     break;
 
                 case CURR_PUB_TRADES_INCR_A:
@@ -463,7 +460,7 @@ public class MessageReader implements IMulticastEventListener {
                 case CURR_PUB_TRADES_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-TLR-CURR"), marketDataManager.getIncrementalProcessor(MessageHandlerType.PUBLIC_TRADES));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    multicastInputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.PUBLIC_TRADES));
+                    multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.PUBLIC_TRADES)));
                     break;
 
                 case FOND_PUB_TRADES_INCR_A:
@@ -471,7 +468,7 @@ public class MessageReader implements IMulticastEventListener {
                 case FOND_PUB_TRADES_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-TLR-FOND"), marketDataManager.getIncrementalProcessor(MessageHandlerType.PUBLIC_TRADES));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
-                    multicastInputStream.setInTimestamp(inTimestamp = marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.PUBLIC_TRADES));
+                    multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.PUBLIC_TRADES)));
                     break;
             }
         }
