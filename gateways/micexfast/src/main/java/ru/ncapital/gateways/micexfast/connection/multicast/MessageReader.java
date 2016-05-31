@@ -277,6 +277,7 @@ public class MessageReader implements IMulticastEventListener {
 
     public void start() {
         logger.info("START " + toString());
+        receivedTimestamp = Utils.currentTimeInTicks();
 
         if (running.getAndSet(true)) {
             if (logger.isDebugEnabled())
