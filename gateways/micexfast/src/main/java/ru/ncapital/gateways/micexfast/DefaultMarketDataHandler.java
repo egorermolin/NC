@@ -88,6 +88,8 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
         sb.append(publicTrade.isBid() ? "B" : "S");
         sb.append(publicTrade.getLastSize()).append("@").append(publicTrade.getLastPx()).append(" ");
         sb.append(publicTrade.getPerformanceData().toString());
+
+        logger.info(sb.toString());
     }
 
     @Override
