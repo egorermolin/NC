@@ -44,6 +44,11 @@ public class MainClass {
                 return new DefaultMarketDataHandler() {
 
                     @Override
+                    public void onDepthLevels(DepthLevel[] depthLevels) {
+
+                    }
+
+                    @Override
                     public void onInstruments(Instrument[] _instruments) {
                         instruments = _instruments;
                         waiter.countDown();
