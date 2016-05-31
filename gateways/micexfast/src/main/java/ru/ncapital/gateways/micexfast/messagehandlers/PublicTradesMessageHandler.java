@@ -60,7 +60,7 @@ public class PublicTradesMessageHandler extends AMessageHandler {
                         mdEntry.getDouble("MDEntrySize"),
                         mdEntry.getString("OrderSide").charAt(0) == 'B');
 
-                publicTrade.getPerformanceData().updateFrom(perfData).setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry));
+                publicTrade.getPerformanceData().updateFrom(perfData).setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
             case EMPTY:
                 break;

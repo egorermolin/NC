@@ -56,7 +56,7 @@ public class OrderListMessageHandler extends AMessageHandler {
                                 null,
                                 true);
 
-                depthLevel.getPerformanceData().setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry));
+                depthLevel.getPerformanceData().setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
             case OFFER:
                 depthLevel =
@@ -68,7 +68,7 @@ public class OrderListMessageHandler extends AMessageHandler {
                                 null,
                                 false);
 
-                depthLevel.getPerformanceData().setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry));
+                depthLevel.getPerformanceData().setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
             case EMPTY:
                 break;
@@ -107,7 +107,7 @@ public class OrderListMessageHandler extends AMessageHandler {
                                 mdEntry.getString("DealNumber"),
                                 true);
 
-                depthLevel.getPerformanceData().updateFrom(perfData).setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry));
+                depthLevel.getPerformanceData().updateFrom(perfData).setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
             case OFFER:
                 depthLevel =
@@ -119,7 +119,7 @@ public class OrderListMessageHandler extends AMessageHandler {
                                 mdEntry.getString("DealNumber"),
                                 false);
 
-                depthLevel.getPerformanceData().updateFrom(perfData).setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry));
+                depthLevel.getPerformanceData().updateFrom(perfData).setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
             case EMPTY:
                 depthLevel = new DepthLevel(securityId, MdUpdateAction.SNAPSHOT);

@@ -5,7 +5,7 @@ package ru.ncapital.gateways.micexfast.performance;
  */
 public class PerformanceData {
 
-    private long exchangeEntryTime;
+    private long exchangeTime; // EntryTime for an order or LastTime for a trade
 
     private long exchangeSendingTime;
 
@@ -27,12 +27,12 @@ public class PerformanceData {
         return this;
     }
 
-    public long getExchangeEntryTime() {
-        return exchangeEntryTime;
+    public long getExchangeTime() {
+        return exchangeTime;
     }
 
-    public PerformanceData setExchangeEntryTime(long exchangeEntryTime) {
-        this.exchangeEntryTime = exchangeEntryTime;
+    public PerformanceData setExchangeTime(long exchangeTime) {
+        this.exchangeTime = exchangeTime;
         return this;
     }
 
@@ -65,17 +65,22 @@ public class PerformanceData {
 
     public PerformanceData updateFrom(PerformanceData perfData) {
         if (perfData == null) {
-            setExchangeEntryTime(0);
+            setExchangeTime(0);
             setExchangeSendingTime(0);
             setGatewayInTime(0);
             setGatewayDequeTime(0);
             setGatewayOutTime(0);
         } else {
-            setExchangeEntryTime(perfData.getExchangeEntryTime());
-            setExchangeSendingTime(perfData.getExchangeSendingTime());
-            setGatewayInTime(perfData.getGatewayInTime());
-            setGatewayDequeTime(perfData.getGatewayDequeTime());
-            setGatewayOutTime(perfData.getGatewayOutTime());
+            if (perfData.getExchangeTime() > 0)
+                setExchangeTime(perfData.getExchangeTime());
+            if (perfData.getExchangeSendingTime() > 0)
+                setExchangeSendingTime(perfData.getExchangeSendingTime());
+            if (perfData.getGatewayInTime() > 0)
+                setGatewayInTime(perfData.getGatewayInTime());
+            if (perfData.getGatewayDequeTime() > 0)
+                setGatewayDequeTime(perfData.getGatewayDequeTime());
+            if (perfData.getGatewayOutTime() > 0)
+                setGatewayOutTime(perfData.getGatewayOutTime());
         }
         return this;
     }
@@ -87,7 +92,7 @@ public class PerformanceData {
 
         PerformanceData that = (PerformanceData) o;
 
-        if (exchangeEntryTime != that.exchangeEntryTime) return false;
+        if (exchangeTime != that.exchangeTime) return false;
         if (exchangeSendingTime != that.exchangeSendingTime) return false;
         if (gatewayInTime != that.gatewayInTime) return false;
         if (gatewayDequeTime != that.gatewayDequeTime) return false;
@@ -97,7 +102,7 @@ public class PerformanceData {
 
     @Override
     public int hashCode() {
-        int result = (int) (exchangeEntryTime ^ (exchangeEntryTime >>> 32));
+        int result = (int) (exchangeTime ^ (exchangeTime >>> 32));
         result = 31 * result + (int) (exchangeSendingTime ^ (exchangeSendingTime >>> 32));
         result = 31 * result + (int) (gatewayInTime ^ (gatewayInTime >>> 32));
         result = 31 * result + (int) (gatewayDequeTime ^ (gatewayDequeTime >>> 32));
@@ -108,7 +113,7 @@ public class PerformanceData {
     @Override
     public String toString() {
         return "PerformanceData{" +
-                "exchangeEntryTime=" + exchangeEntryTime +
+                "exchangeTime=" + exchangeTime +
                 ", exchangeSendingTime=" + exchangeSendingTime +
                 ", gatewayInTime=" + gatewayInTime +
                 ", gatewayDequeTime=" + gatewayDequeTime +

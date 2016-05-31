@@ -205,13 +205,13 @@ public class MarketDataManager {
 
 //            if (logger.isDebugEnabled()) {
 //                if (depthLevel.getPerformanceData().getExchangeSendingTime()
-//                        - depthLevel.getPerformanceData().getExchangeEntryTime()
+//                        - depthLevel.getPerformanceData().getExchangeTime()
 //                        > 10_000_0L) { // 10ms in ticks
 //                    if (debugWarningSilentPeriod == 0 || depthLevel.getPerformanceData().getExchangeSendingTime()
 //                            > debugWarningSilentPeriod) {
 //                        logger.debug("MDEntryTime is more than 10ms lower than SendingTime ["
 //                                + (depthLevel.getPerformanceData().getExchangeSendingTime()
-//                                    - depthLevel.getPerformanceData().getExchangeEntryTime()) + "]");
+//                                    - depthLevel.getPerformanceData().getExchangeTime()) + "]");
 //
 //                        debugWarningSilentPeriod = depthLevel.getPerformanceData().getExchangeSendingTime() + 60_000_000_0L; // 60s in ticks
 //                    }

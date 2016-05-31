@@ -31,11 +31,11 @@ public class StatisticsMessageHandler extends AMessageHandler {
         return LoggerFactory.getLogger("StatisticMessageHandler");
     }
 
-    private void onMdEntry(GroupValue mdEntry) {
+    private boolean onMdEntry(GroupValue mdEntry) {
         MdEntryType mdEntryType = MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
 
         if (mdEntryType == null)
-            return;
+            return false;
 
         switch (mdEntryType) {
             case BID:
@@ -51,7 +51,7 @@ public class StatisticsMessageHandler extends AMessageHandler {
             case LAST:
                 bbo.setLastPx(mdEntry.getDouble("MDEntryPx"));
                 bbo.setLastSize(mdEntry.getDouble("MDEntrySize"));
-                bbo.getPerformanceData().setExchangeEntryTime(Utils.getEntryTimeInTicks(mdEntry));
+                bbo.getPerformanceData().setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
 
             case LOW:
@@ -70,6 +70,8 @@ public class StatisticsMessageHandler extends AMessageHandler {
                 bbo.setClosePx(mdEntry.getDouble("MDEntryPx"));
                 break;
         }
+
+        return true;
     }
 
     @Override
@@ -91,8 +93,9 @@ public class StatisticsMessageHandler extends AMessageHandler {
     protected void onIncrementalMdEntry(String securityId, GroupValue mdEntry, PerformanceData perfData) {
         bbo = new BBO(securityId);
         bbo.getPerformanceData().updateFrom(perfData);
-        onMdEntry(mdEntry);
-        marketDataManager.onBBO(bbo);
+
+        if (onMdEntry(mdEntry))
+            marketDataManager.onBBO(bbo);
     }
 
     @Override

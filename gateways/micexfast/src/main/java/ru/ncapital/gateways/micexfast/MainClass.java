@@ -54,6 +54,16 @@ public class MainClass {
                     }
 
                     @Override
+                    public void onStatistics(BBO bbo) {
+
+                    }
+
+                    @Override
+                    public void onPublicTrade(PublicTrade publicTrade) {
+
+                    }
+
+                    @Override
                     public void onInstruments(Instrument[] _instruments) {
                         instruments = _instruments;
                         waiter.countDown();
