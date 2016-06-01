@@ -386,12 +386,22 @@ public class ConnectionManager {
         long currentTime = Utils.currentTimeInTicks();
         for (MessageReader messageReader : messageReaders.values()) {
             if (messageReader.isRunning()) {
+                long lastReceivedTimestamp = messageReader.getLastReceivedTimestamp();
+                long startTimestamp = messageReader.getStartTimestamp();
+
+                if (startTimestamp == 0) // not started yet
+                    continue;
+
+                if (currentTime - messageReader.getStartTimestamp() < threshold) // not enough time ran
+                    continue;
+
                 running++;
-                if (currentTime - messageReader.getLastReceivedTimestamp() < threshold)
+
+                if (currentTime - lastReceivedTimestamp < threshold)
                     up++;
                 else
                     if (logger.isDebugEnabled())
-                        logger.debug("Message Reader [" + messageReader.getConnectionId() + "] is down since [" + Utils.convertTicksToTodayString(messageReader.getLastReceivedTimestamp()) + "]");
+                        logger.debug("Message Reader [" + messageReader.getConnectionId() + "] is down since [" + Utils.convertTicksToTodayString(lastReceivedTimestamp) + "]");
             }
         }
 

@@ -230,6 +230,8 @@ public class MessageReader implements IMulticastEventListener {
 
     private volatile long receivedTimestamp;
 
+    private volatile long startTimestamp;
+
     public MessageReader(ConnectionId connectionId, ConfigurationManager configurationManager, MarketDataManager marketDataManager, InstrumentManager instumentManager) {
         this.connectionId = connectionId;
         this.asynch = configurationManager.isAsynchChannelReader();
@@ -277,7 +279,7 @@ public class MessageReader implements IMulticastEventListener {
 
     public void start() {
         logger.info("START " + toString());
-        receivedTimestamp = Utils.currentTimeInTicks();
+        startTimestamp = Utils.currentTimeInTicks();
 
         if (running.getAndSet(true)) {
             if (logger.isDebugEnabled())
@@ -298,6 +300,7 @@ public class MessageReader implements IMulticastEventListener {
 
     public void stop() {
         logger.info("STOP " + toString());
+        startTimestamp = 0;
 
         if (!running.getAndSet(false)) {
             if (logger.isDebugEnabled())
@@ -324,6 +327,8 @@ public class MessageReader implements IMulticastEventListener {
     public long getLastReceivedTimestamp() {
         return receivedTimestamp;
     }
+
+    public long getStartTimestamp() { return startTimestamp; }
 
     public ThreadLocal<Long> initAndGetInTimestamp(ThreadLocal<Long> inTimestamp) {
         if (inTimestamp == null)
