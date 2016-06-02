@@ -317,7 +317,7 @@ public class ConnectionManager {
     }
 
     public void shutdown() {
-        if (!shuttingDown.getAndSet(true))
+        if (shuttingDown.getAndSet(true))
             return;
 
         stopMessageReaderWatcher();
@@ -397,22 +397,11 @@ public class ConnectionManager {
     private int checkMessageReaders() {
         int running = 0;
         int up = 0;
-        int starting = 0;
         long currentTime = Utils.currentTimeInTicks();
         for (MessageReader messageReader : messageReaders.values()) {
             if (messageReader.isRunning()) {
                 long lastReceivedTimestamp = messageReader.getLastReceivedTimestamp();
-                long startTimestamp = messageReader.getStartTimestamp();
-                if (startTimestamp > 0 // started
-                    && currentTime - messageReader.getStartTimestamp() > 2 * feedDownTimeout) { // enough time ran
-                    running++;
-                } else {
-                    if (logger.isDebugEnabled())
-                        logger.debug("Message Reader [" + messageReader.getConnectionId() + "] is just started [" + Utils.convertTicksToTodayString(startTimestamp) + "]");
-
-                    starting++;
-                    continue;
-                }
+                running++;
 
                 if (currentTime - lastReceivedTimestamp < feedDownTimeout) {
                     up++;
@@ -422,9 +411,6 @@ public class ConnectionManager {
                 }
             }
         }
-
-        if (starting > 0)
-            return 0;
 
         if (running == 0 || up == 0)
             return -1;
@@ -453,7 +439,7 @@ public class ConnectionManager {
         }
 
         messageReadersWatcherFuture = scheduledService.scheduleAtFixedRate(
-                new MessageReadersWatchTask(), feedDownTimeout / 10L, 1_000_000L, TimeUnit.MICROSECONDS
+                new MessageReadersWatchTask(), 2 * feedDownTimeout / 10L, 1_000_000L, TimeUnit.MICROSECONDS
         );
     }
 
