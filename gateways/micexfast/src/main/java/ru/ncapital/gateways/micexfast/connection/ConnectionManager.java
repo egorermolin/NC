@@ -397,6 +397,7 @@ public class ConnectionManager {
     private int checkMessageReaders() {
         int running = 0;
         int up = 0;
+        int starting = 0;
         long currentTime = Utils.currentTimeInTicks();
         for (MessageReader messageReader : messageReaders.values()) {
             if (messageReader.isRunning()) {
@@ -409,6 +410,7 @@ public class ConnectionManager {
                     if (logger.isDebugEnabled())
                         logger.debug("Message Reader [" + messageReader.getConnectionId() + "] is just started [" + Utils.convertTicksToTodayString(startTimestamp) + "]");
 
+                    starting++;
                     continue;
                 }
 
@@ -420,6 +422,9 @@ public class ConnectionManager {
                 }
             }
         }
+
+        if (starting > 0)
+            return 0;
 
         if (running == 0 || up == 0)
             return -1;
@@ -454,7 +459,7 @@ public class ConnectionManager {
 
     private void stopMessageReaderWatcher() {
         if (messageReadersWatcherFuture != null) {
-            messageReadersWatcherFuture.cancel(false);
+            messageReadersWatcherFuture.cancel(true);
         }
         messageReadersWatcherFuture = null;
     }
