@@ -30,4 +30,8 @@ public interface IGatewayConfiguration {
     boolean isAsynchChannelReader();
 
     boolean isListenSnapshotChannelOnlyIfNeeded();
+
+    long getFeedDownTimeout();
+
+    boolean restartOnAllFeedDown();
 }

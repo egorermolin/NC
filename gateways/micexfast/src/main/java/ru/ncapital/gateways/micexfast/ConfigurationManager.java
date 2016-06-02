@@ -25,11 +25,17 @@ public class ConfigurationManager {
 
     private boolean asynchChannelReader;
 
+    private long feedDownTimeout;
+
+    private boolean restartOnAllFeedDown;
+
     public ConfigurationManager configure(IGatewayConfiguration configuration) {
         this.fastTemplatesFile = configuration.getFastTemplatesFile();
         this.networkInterface = configuration.getNetworkInterface();
         this.connections = new XMLReader().read(configuration.getConnectionsFile());
         this.asynchChannelReader = configuration.isAsynchChannelReader();
+        this.feedDownTimeout = configuration.getFeedDownTimeout();
+        this.restartOnAllFeedDown = configuration.restartOnAllFeedDown();
 
         return this;
     }
@@ -72,5 +78,13 @@ public class ConfigurationManager {
 
     public boolean isAsynchChannelReader() {
         return asynchChannelReader;
+    }
+
+    public long getFeedDownTimeout() {
+        return feedDownTimeout;
+    }
+
+    public boolean restartOnAllFeedDown() {
+        return restartOnAllFeedDown;
     }
 }

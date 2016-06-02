@@ -63,4 +63,14 @@ public class NullGatewayConfiguration implements IGatewayConfiguration {
     public boolean isListenSnapshotChannelOnlyIfNeeded() {
         return true;
     }
+
+    @Override
+    public long getFeedDownTimeout() {
+        return 60_000_000_0L;  // 60s in ticks
+    }
+
+    @Override
+    public boolean restartOnAllFeedDown() {
+        return true;
+    }
 }

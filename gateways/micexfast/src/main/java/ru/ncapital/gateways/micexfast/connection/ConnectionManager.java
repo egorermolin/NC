@@ -41,6 +41,10 @@ public class ConnectionManager {
 
     private List<ISnapshotProcessor> snapshotProcessorsToWatch = new ArrayList<>();
 
+    private long feedDownTimeout;
+
+    private boolean restartOnAllFeedDown;
+
     @Inject
     public ConnectionManager(ConfigurationManager configurationManager, MarketDataManager marketDataManager, InstrumentManager instrumentManager) {
         this.marketDataManager = marketDataManager;
@@ -53,6 +57,8 @@ public class ConnectionManager {
                 Utils.printStackTrace(e, logger, "IOException occurred while opening channel..");
             }
         }
+        this.feedDownTimeout = configurationManager.getFeedDownTimeout();
+        this.restartOnAllFeedDown = configurationManager.restartOnAllFeedDown();
     }
 
 
@@ -380,7 +386,6 @@ public class ConnectionManager {
     }
 
     private int checkMessageReaders() {
-        final long threshold = 60_000_000_0L; // 60s in ticks
         int running = 0;
         int up = 0;
         long currentTime = Utils.currentTimeInTicks();
@@ -388,19 +393,26 @@ public class ConnectionManager {
             if (messageReader.isRunning()) {
                 long lastReceivedTimestamp = messageReader.getLastReceivedTimestamp();
                 long startTimestamp = messageReader.getStartTimestamp();
-                running++;
+                if (startTimestamp > 0 // started
+                    || currentTime - messageReader.getStartTimestamp() > 2 * feedDownTimeout) { // enough time ran
+                    running++;
+                } else {
+                    if (logger.isDebugEnabled())
+                        logger.debug("Message Reader [" + messageReader.getConnectionId() + "] is just started [" + Utils.convertTicksToTodayString(startTimestamp) + "]");
 
-                if (startTimestamp == 0 // not started yet
-                    || currentTime - messageReader.getStartTimestamp() < threshold // not enough time ran
-                    || currentTime - lastReceivedTimestamp < threshold){
-                        up++;
-                } else
+                    continue;
+                }
+
+                if (currentTime - lastReceivedTimestamp < feedDownTimeout) {
+                    up++;
+                } else {
                     if (logger.isDebugEnabled())
                         logger.debug("Message Reader [" + messageReader.getConnectionId() + "] is down since [" + Utils.convertTicksToTodayString(lastReceivedTimestamp) + "]");
+                }
             }
         }
 
-        if (up == 0)
+        if (running == 0 || up == 0)
             return -1;
 
         return running - up;
@@ -411,21 +423,23 @@ public class ConnectionManager {
             @Override
             public void run() {
                 int result = checkMessageReaders();
-                if (result != 0) {
+                if (result == 0) {
+                    marketDataManager.onFeedStatus(true, true);
+                } else {
                     if (result < 0) {
                         marketDataManager.onFeedStatus(false, true);
-                        restart();
+                        if (restartOnAllFeedDown) {
+                            restart();
+                        }
                     } else {
                         marketDataManager.onFeedStatus(false, false);
                     }
-                } else {
-                    marketDataManager.onFeedStatus(true, true);
                 }
             }
         }
 
         messageReadersWatcherFuture = scheduledService.scheduleAtFixedRate(
-                new MessageReadersWatchTask(), 30, 1, TimeUnit.SECONDS
+                new MessageReadersWatchTask(), feedDownTimeout / 10L, 1_000_000L, TimeUnit.MICROSECONDS
         );
     }
 
