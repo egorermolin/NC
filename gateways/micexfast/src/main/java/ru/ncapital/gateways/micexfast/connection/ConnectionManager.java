@@ -45,6 +45,8 @@ public class ConnectionManager {
 
     private boolean restartOnAllFeedDown;
 
+    private AtomicBoolean shuttingDown = new AtomicBoolean(false);
+
     @Inject
     public ConnectionManager(ConfigurationManager configurationManager, MarketDataManager marketDataManager, InstrumentManager instrumentManager) {
         this.marketDataManager = marketDataManager;
@@ -304,6 +306,9 @@ public class ConnectionManager {
             }
         }
 
+        if (shuttingDown.get())
+            return;
+
         for (MessageReader messageReader : stoppedMessageReaders) {
             starterService.execute(new MessageReaderStarter(messageReader));
         }
@@ -312,15 +317,19 @@ public class ConnectionManager {
     }
 
     public void shutdown() {
+        if (!shuttingDown.getAndSet(true))
+            return;
+
+        stopMessageReaderWatcher();
+        stopSnapshotWatchers();
+
         for (MessageHandlerType type : MessageHandlerType.values()) {
             stopIncremental(type);
             stopSnapshot(type);
         }
+
         stopInstrumentStatus();
         stopInstrument();
-        stopSnapshotWatchers();
-
-        stopMessageReaderWatcher();
 
         shutdownScheduledService();
         shutdownStarterService();
@@ -394,7 +403,7 @@ public class ConnectionManager {
                 long lastReceivedTimestamp = messageReader.getLastReceivedTimestamp();
                 long startTimestamp = messageReader.getStartTimestamp();
                 if (startTimestamp > 0 // started
-                    || currentTime - messageReader.getStartTimestamp() > 2 * feedDownTimeout) { // enough time ran
+                    && currentTime - messageReader.getStartTimestamp() > 2 * feedDownTimeout) { // enough time ran
                     running++;
                 } else {
                     if (logger.isDebugEnabled())
