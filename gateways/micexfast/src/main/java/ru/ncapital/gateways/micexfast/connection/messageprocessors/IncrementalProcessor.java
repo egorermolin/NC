@@ -14,6 +14,8 @@ import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
  */
 public class IncrementalProcessor extends Processor implements IIncrementalProcessor {
 
+    protected String lastDealNumber;
+
     public IncrementalProcessor(IMessageHandler messageHandler, IMessageSequenceValidator sequenceValidator) {
         super(messageHandler, sequenceValidator);
     }
@@ -42,6 +44,14 @@ public class IncrementalProcessor extends Processor implements IIncrementalProce
                         .setGatewayInTime(inTimestamp);
 
                 int rptSeqNum = mdEntry.getInt("RptSeq");
+                String dealNumber = mdEntry.getString("DealNumber");
+                if (dealNumber != null) {
+                    if (!dealNumber.equals(lastDealNumber)) {
+                        lastDealNumber = dealNumber;
+                    } else {
+                        mdEntry.setString("DealNumber", null);
+                    }
+                }
 
                 if (!messageHandler.isAllowedUpdate(symbol, tradingSessionId))
                     continue;

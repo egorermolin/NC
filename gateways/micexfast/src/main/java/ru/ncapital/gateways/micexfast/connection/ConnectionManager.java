@@ -445,7 +445,7 @@ public class ConnectionManager {
 
     private void stopMessageReaderWatcher() {
         if (messageReadersWatcherFuture != null) {
-            messageReadersWatcherFuture.cancel(true);
+            messageReadersWatcherFuture.cancel(false);
         }
         messageReadersWatcherFuture = null;
     }

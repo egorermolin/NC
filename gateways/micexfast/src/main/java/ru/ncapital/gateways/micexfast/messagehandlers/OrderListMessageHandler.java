@@ -23,8 +23,6 @@ public class OrderListMessageHandler extends AMessageHandler {
 
     private Map<String, List<DepthLevel>> depthLevelMap = new HashMap<String, List<DepthLevel>>();
 
-    protected String lastDealNumber;
-
     @AssistedInject
     public OrderListMessageHandler(MarketDataManager marketDataManager,
                                    @Assisted IGatewayConfiguration configuration) {
@@ -156,12 +154,7 @@ public class OrderListMessageHandler extends AMessageHandler {
 
     @Override
     public void onBeforeIncremental(GroupValue mdEntry) {
-        String dealNumber = mdEntry.getString("DealNumber");
-        if (dealNumber != null && !dealNumber.equals(lastDealNumber)) {
-            lastDealNumber = dealNumber;
-        } else {
-            mdEntry.setString("DealNumber", null);
-        }
+
     }
 
     @Override
