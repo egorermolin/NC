@@ -51,12 +51,12 @@ public class AsynchChannelPacketReader extends AChannelPacketReader {
 
     @Override
     public void stop() {
-        int count = 5;
+        int count = 50;
         running = false;
         executor.shutdown();
         try {
             while (!executor.isTerminated() && --count >= 0) {
-                Thread.sleep(1000);
+                Thread.sleep(100);
             }
 
             if (!executor.isTerminated()) {

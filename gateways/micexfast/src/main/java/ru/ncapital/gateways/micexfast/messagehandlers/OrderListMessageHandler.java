@@ -153,11 +153,6 @@ public class OrderListMessageHandler extends AMessageHandler {
     }
 
     @Override
-    public void onBeforeIncremental(GroupValue mdEntry) {
-
-    }
-
-    @Override
     public void flushIncrementals() {
         for (List<DepthLevel> depthLevelList : depthLevelMap.values()) {
             marketDataManager.onDepthLevels(depthLevelList.toArray(new DepthLevel[0]));

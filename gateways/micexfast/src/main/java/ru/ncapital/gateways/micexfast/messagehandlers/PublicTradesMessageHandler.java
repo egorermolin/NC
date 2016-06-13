@@ -75,10 +75,6 @@ public class PublicTradesMessageHandler extends AMessageHandler {
     }
 
     @Override
-    public void onBeforeIncremental(GroupValue mdEntry) {
-    }
-
-    @Override
     public MessageHandlerType getType() {
         return MessageHandlerType.PUBLIC_TRADES;
     }

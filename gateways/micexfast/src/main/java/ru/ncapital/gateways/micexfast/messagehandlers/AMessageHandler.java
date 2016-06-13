@@ -56,8 +56,6 @@ public abstract class AMessageHandler implements IMessageHandler {
         String tradingSessionId = mdEntry.getString("TradingSessionID");
         String securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
 
-        onBeforeIncremental(mdEntry);
-
         onIncrementalMdEntry(securityId, mdEntry, perfData);
     }
 
@@ -68,8 +66,6 @@ public abstract class AMessageHandler implements IMessageHandler {
     protected abstract void onAfterSnapshot(String securityId);
 
     protected abstract void onSnapshotMdEntry(String securityId, GroupValue mdEntry);
-
-    protected abstract void onBeforeIncremental(GroupValue mdEntry);
 
     protected abstract void onIncrementalMdEntry(String securityId, GroupValue mdEntry, PerformanceData perfData);
 }
