@@ -12,14 +12,18 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openfast.*;
 import org.openfast.codec.Coder;
 import ru.ncapital.gateways.micexfast.*;
-import ru.ncapital.gateways.micexfast.connection.ConnectionManager;
-import ru.ncapital.gateways.micexfast.domain.BBO;
-import ru.ncapital.gateways.micexfast.domain.Instrument;
+import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
+import ru.ncapital.gateways.moexfast.connection.ConnectionManager;
+import ru.ncapital.gateways.moexfast.domain.BBO;
 import ru.ncapital.gateways.micexfast.domain.ProductType;
 import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
+import ru.ncapital.gateways.moexfast.IMarketDataHandler;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import static junit.framework.TestCase.*;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.*;
 
 /**
@@ -205,11 +209,11 @@ public class InstrumentManagerTest {
     public void isAllowedInstrument() {
         testInstrumentAddAndFinish();
 
-        assertTrue(instrumentManager.isAllowedInstrument(new Instrument("SBER", "TQBR")));
-        assertTrue(instrumentManager.isAllowedInstrument(new Instrument("ROSN", "TQBR")));
-        assertFalse(instrumentManager.isAllowedInstrument(new Instrument("LUKL", "TQBR")));
-        assertFalse(instrumentManager.isAllowedInstrument(new Instrument("LUKL", "TQIF")));
-        assertFalse(instrumentManager.isAllowedInstrument(new Instrument("VTBB", "TQBR")));
+        assertTrue(instrumentManager.isAllowedInstrument(new MicexInstrument("SBER", "TQBR")));
+        assertTrue(instrumentManager.isAllowedInstrument(new MicexInstrument("ROSN", "TQBR")));
+        assertFalse(instrumentManager.isAllowedInstrument(new MicexInstrument("LUKL", "TQBR")));
+        assertFalse(instrumentManager.isAllowedInstrument(new MicexInstrument("LUKL", "TQIF")));
+        assertFalse(instrumentManager.isAllowedInstrument(new MicexInstrument("VTBB", "TQBR")));
     }
 
 
@@ -237,18 +241,25 @@ public class InstrumentManagerTest {
 
         ArgumentCaptor<BBO> bboCapture = ArgumentCaptor.forClass(BBO.class);
         verify(marketDataManager, times(2)).onBBO(bboCapture.capture());
-        assertEquals("SBER;TQBR", bboCapture.getAllValues().get(0).getSecurityId());
-        assertEquals("N-17", bboCapture.getAllValues().get(0).getTradingStatus());
-        assertEquals("ROSN;TQBR", bboCapture.getAllValues().get(1).getSecurityId());
-        assertEquals("N-17", bboCapture.getAllValues().get(1).getTradingStatus());
+        List<BBO> values = bboCapture.getAllValues();
+        Collections.sort(values, new Comparator<BBO>() {
+            @Override
+            public int compare(BBO o1, BBO o2) {
+                return o1.getSecurityId().compareTo(o2.getSecurityId());
+            }
+        });
+        assertEquals("ROSN;TQBR", values.get(0).getSecurityId());
+        assertEquals("SBER;TQBR", values.get(1).getSecurityId());
+        assertEquals("N-17", values.get(0).getTradingStatus());
+        assertEquals("N-17", values.get(1).getTradingStatus());
 
-        verify(gatewayManager, times(1)).onInstrumentDownloadFinished(anyCollectionOf(Instrument.class));
+        verify(gatewayManager, times(1)).onInstrumentDownloadFinished(anyCollectionOf(MicexInstrument.class));
 
-        ArgumentCaptor<Instrument[]> instrumentCapture = ArgumentCaptor.forClass(Instrument[].class);
+        ArgumentCaptor<MicexInstrument[]> instrumentCapture = ArgumentCaptor.forClass(MicexInstrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
         assertEquals(2, instrumentCapture.getValue().length);
-        assertEquals("ROSN;TQBR", instrumentCapture.getValue()[0].getSecurityId());
-        assertEquals("SBER;TQBR", instrumentCapture.getValue()[1].getSecurityId());
+        assertEquals("SBER;TQBR", instrumentCapture.getValue()[0].getSecurityId());
+        assertEquals("ROSN;TQBR", instrumentCapture.getValue()[1].getSecurityId());
     }
 
     @Test
@@ -262,8 +273,8 @@ public class InstrumentManagerTest {
             instrumentManager.handleMessage(getInstrumentMessageMock(i), context, coder);
 
         verify(marketDataManager, times(2)).onBBO(any(BBO.class));
-        verify(gatewayManager, times(1)).onInstrumentDownloadFinished(anyCollectionOf(Instrument.class));
-        ArgumentCaptor<Instrument[]> instrumentCapture = ArgumentCaptor.forClass(Instrument[].class);
+        verify(gatewayManager, times(1)).onInstrumentDownloadFinished(anyCollectionOf(MicexInstrument.class));
+        ArgumentCaptor<MicexInstrument[]> instrumentCapture = ArgumentCaptor.forClass(MicexInstrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
         assertEquals(2, instrumentCapture.getValue().length);
     }
@@ -273,14 +284,14 @@ public class InstrumentManagerTest {
         for (int i : new int [] {1, 1, 3, 3, 4, 4, 5, 5})
             instrumentManager.handleMessage(getInstrumentMessageMock(i), context, coder);
 
-        verify(gatewayManager, times(0)).onInstrumentDownloadFinished(anyCollectionOf(Instrument.class));
+        verify(gatewayManager, times(0)).onInstrumentDownloadFinished(anyCollectionOf(MicexInstrument.class));
 
         for (int i : new int [] {1, 1, 2, 2, 3, 3, 4, 4, 5, 5})
             instrumentManager.handleMessage(getInstrumentMessageMock(i), context, coder);
 
         verify(marketDataManager, times(2)).onBBO(any(BBO.class));
-        verify(gatewayManager, times(1)).onInstrumentDownloadFinished(anyCollectionOf(Instrument.class));
-        ArgumentCaptor<Instrument[]> instrumentCapture = ArgumentCaptor.forClass(Instrument[].class);
+        verify(gatewayManager, times(1)).onInstrumentDownloadFinished(anyCollectionOf(MicexInstrument.class));
+        ArgumentCaptor<MicexInstrument[]> instrumentCapture = ArgumentCaptor.forClass(MicexInstrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
         assertEquals(2, instrumentCapture.getValue().length);
     }
@@ -290,14 +301,14 @@ public class InstrumentManagerTest {
         for (int i : new int [] {1, 1, 3, 3, 4, 4, 5, 5})
             instrumentManager.handleMessage(getInstrumentMessageMock(i), context, coder);
 
-        verify(gatewayManager, times(0)).onInstrumentDownloadFinished(anyCollectionOf(Instrument.class));
+        verify(gatewayManager, times(0)).onInstrumentDownloadFinished(anyCollectionOf(MicexInstrument.class));
 
         for (int i : new int [] {1, 1, 2, 2, 4, 4, 5, 5})
             instrumentManager.handleMessage(getInstrumentMessageMock(i), context, coder);
 
         verify(marketDataManager, times(2)).onBBO(any(BBO.class));
-        verify(gatewayManager, times(1)).onInstrumentDownloadFinished(anyCollectionOf(Instrument.class));
-        ArgumentCaptor<Instrument[]> instrumentCapture = ArgumentCaptor.forClass(Instrument[].class);
+        verify(gatewayManager, times(1)).onInstrumentDownloadFinished(anyCollectionOf(MicexInstrument.class));
+        ArgumentCaptor<MicexInstrument[]> instrumentCapture = ArgumentCaptor.forClass(MicexInstrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
         assertEquals(2, instrumentCapture.getValue().length);
     }

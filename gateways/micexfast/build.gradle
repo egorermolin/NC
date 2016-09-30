@@ -1,4 +1,4 @@
-group 'micexfast'
+group 'moexfast'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'idea'
@@ -7,8 +7,8 @@ apply plugin: 'groovy'
 
 ext {
     dllSourceDir = 'build\\libs'
-    dllTargetDir = '..\\..\\..\\lib\\Micex'
-    exeTargetDir = '..\\..\\..\\lib\\Micex\\utils'
+    dllTargetDir = '..\\..\\..\\lib\\Moex'
+    exeTargetDir = '..\\..\\..\\lib\\Moex\\utils'
     ikvmDir = '..\\..\\..\\lib\\IKVM8.1'
 }
 
@@ -39,9 +39,9 @@ task ikvm(dependsOn: copyLibs, type: Exec) {
     def myArgs = []
     myArgs.add '-target:library'
     myArgs.add '-version:' + version - '-SNAPSHOT' + '.0.0'
-    myArgs.add '-out:' + dllTargetDir + '\\micexfast.dll'
+    myArgs.add '-out:' + dllTargetDir + '\\moexfast.dll'
     myArgs.add '-sharedclassloader'
-    myArgs.add dllSourceDir + '\\micexfast-' + version + '.jar'
+    myArgs.add dllSourceDir + '\\moexfast-' + version + '.jar'
     myArgs.add dllSourceDir + '\\guava* '
     myArgs.add dllSourceDir + '\\guice* '
     myArgs.add dllSourceDir + '\\aopalliance* '
@@ -59,9 +59,9 @@ task genMessageReader(dependsOn: copyLibs, type: Exec) {
     myArgs.add '-target:exe'
     myArgs.add '-version:' + version - '-SNAPSHOT' + '.0.0'
     myArgs.add '-out:' + exeTargetDir + '\\message_reader.exe'
-    myArgs.add '-main:ru.ncapital.gateways.micexfast.connection.multicast.MessageReader'
+    myArgs.add '-main:ru.ncapital.gateways.moexfast.connection.multicast.MessageReader'
     myArgs.add '-sharedclassloader'
-    myArgs.add dllSourceDir + '\\micexfast-' + version + '.jar'
+    myArgs.add dllSourceDir + '\\moexfast-' + version + '.jar'
     myArgs.add dllSourceDir + '\\guava* '
     myArgs.add dllSourceDir + '\\guice* '
     myArgs.add dllSourceDir + '\\aopalliance* '

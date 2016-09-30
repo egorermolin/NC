@@ -3,10 +3,11 @@ package ru.ncapital.gateways.micexfast;
 import com.google.inject.Singleton;
 import org.openfast.GroupValue;
 import org.openfast.Message;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.Processor;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.SequenceArray;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.Processor;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.SequenceArray;
 import ru.ncapital.gateways.micexfast.domain.*;
-import ru.ncapital.gateways.micexfast.performance.PerformanceData;
+import ru.ncapital.gateways.moexfast.IMarketDataHandler;
+import ru.ncapital.gateways.moexfast.domain.BBO;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -20,9 +21,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Singleton
 public class InstrumentManager extends Processor {
-    private ConcurrentHashMap<String, Instrument> instruments = new ConcurrentHashMap<String, Instrument>();
+    private ConcurrentHashMap<String, MicexInstrument> instruments = new ConcurrentHashMap<String, MicexInstrument>();
 
-    private ConcurrentHashMap<String, Instrument> ignoredInstruments = new ConcurrentHashMap<String, Instrument>();
+    private ConcurrentHashMap<String, MicexInstrument> ignoredInstruments = new ConcurrentHashMap<String, MicexInstrument>();
 
     private Set<Integer> addedInstruments = new HashSet<Integer>();
 
@@ -94,7 +95,7 @@ public class InstrumentManager extends Processor {
         sequenceArray.clear();
     }
 
-    private boolean addNewInstrument(Instrument instrument) {
+    private boolean addNewInstrument(MicexInstrument instrument) {
         if (isDuplicateInstrument(instrument))
             return false;
 
@@ -109,17 +110,17 @@ public class InstrumentManager extends Processor {
         return true;
     }
 
-    private boolean isDuplicateInstrument(Instrument instrument) {
+    private boolean isDuplicateInstrument(MicexInstrument instrument) {
         if (instruments.containsKey(instrument.getSecurityId())) {
             if (getLogger().isTraceEnabled())
-                getLogger().trace("Instrument Duplicate [Symbol: " + instrument.getSymbol() + "][TradingSessionId: " + instrument.getTradingSessionId() + "]");
+                getLogger().trace("MicexInstrument Duplicate [Symbol: " + instrument.getSymbol() + "][TradingSessionId: " + instrument.getTradingSessionId() + "]");
 
             return true;
         }
 
         if (ignoredInstruments.containsKey(instrument.getSecurityId())) {
             if (getLogger().isTraceEnabled())
-                getLogger().trace("Instrument Duplicate Ignored [Symbol: " + instrument.getSymbol() + "][TradingSessionId: " + instrument.getTradingSessionId() + "]");
+                getLogger().trace("MicexInstrument Duplicate Ignored [Symbol: " + instrument.getSymbol() + "][TradingSessionId: " + instrument.getTradingSessionId() + "]");
 
             return true;
         }
@@ -127,7 +128,14 @@ public class InstrumentManager extends Processor {
         return false;
     }
 
-    public boolean isAllowedInstrument(Instrument instrument) {
+    public boolean isAllowedInstrument(String symbol, String tradingSessionId) {
+        if (instruments.containsKey(MicexInstrument.getSecurityId(symbol, tradingSessionId)))
+            return true;
+
+        return false;
+    }
+
+    public boolean isAllowedInstrument(MicexInstrument instrument) {
         if (instruments.containsKey(instrument.getSecurityId()))
             return true;
 
@@ -140,7 +148,7 @@ public class InstrumentManager extends Processor {
         if (allowedTradingSessionIds.isEmpty() || allowedTradingSessionIds.contains(TradingSessionId.convert(instrument.getTradingSessionId()))) {
         } else {
             if (getLogger().isTraceEnabled())
-                getLogger().trace("Instrument Ignored by TradingSessionId [Symbol: " + instrument.getSymbol() + "][TradingSessionId: " + instrument.getTradingSessionId() + "]");
+                getLogger().trace("MicexInstrument Ignored by TradingSessionId [Symbol: " + instrument.getSymbol() + "][TradingSessionId: " + instrument.getTradingSessionId() + "]");
 
             ignoredInstruments.put(instrument.getSecurityId(), instrument);
             return false;
@@ -149,7 +157,7 @@ public class InstrumentManager extends Processor {
         if (allowedProductTypes.isEmpty() || allowedProductTypes.contains(instrument.getProductType())) {
         } else {
             if (getLogger().isTraceEnabled())
-                getLogger().trace("Instrument Ignored by ProductType [SecurityId: " + instrument.getSecurityId() + "][Product: " + instrument.getProductType() + "]");
+                getLogger().trace("MicexInstrument Ignored by ProductType [SecurityId: " + instrument.getSecurityId() + "][Product: " + instrument.getProductType() + "]");
 
             ignoredInstruments.put(instrument.getSecurityId(), instrument);
             return false;
@@ -158,7 +166,7 @@ public class InstrumentManager extends Processor {
         if (allowedSecurityIds.isEmpty() || allowedSecurityIds.contains(instrument.getSecurityId())) {
         } else {
             if (getLogger().isTraceEnabled())
-                getLogger().trace("Instrument Ignored by SecurityId [SecurityId: " + instrument.getSecurityId() + "]");
+                getLogger().trace("MicexInstrument Ignored by SecurityId [SecurityId: " + instrument.getSecurityId() + "]");
 
             ignoredInstruments.put(instrument.getSecurityId(), instrument);
             return false;
@@ -206,7 +214,7 @@ public class InstrumentManager extends Processor {
         return tradingStatus.toString();
     }
 
-    private Instrument getInstrument(Message readMessage) {
+    private MicexInstrument getInstrument(Message readMessage) {
         String symbol = readMessage.getString("Symbol");
         String tradingSessionId = "UNKNOWN";
 
@@ -219,7 +227,7 @@ public class InstrumentManager extends Processor {
             }
         }
 
-        Instrument instrument = new Instrument(symbol, tradingSessionId);
+        MicexInstrument instrument = new MicexInstrument(symbol, tradingSessionId);
 
         if (readMessage.getValue("Product") != null)
             instrument.setProductType(readMessage.getInt("Product"));
@@ -262,7 +270,7 @@ public class InstrumentManager extends Processor {
     protected void processMessage(Message readMessage) {
         switch (readMessage.getString("MessageType").charAt(0)) {
             case 'f':
-                Instrument instrument = new Instrument(readMessage.getString("Symbol"), readMessage.getString("TradingSessionID"));
+                MicexInstrument instrument = new MicexInstrument(readMessage.getString("Symbol"), readMessage.getString("TradingSessionID"));
                 String tradingStatus = buildTradingStatusForInstrumentStatusMessage(readMessage);
 
                 if (isAllowedInstrument(instrument))
@@ -282,11 +290,11 @@ public class InstrumentManager extends Processor {
                     break;
 
 
-                Instrument newInstrument = getInstrument(readMessage);
+                MicexInstrument newInstrument = getInstrument(readMessage);
 
                 if (addNewInstrument(newInstrument)) {
                     if (getLogger().isDebugEnabled())
-                        getLogger().debug("Instrument Received " + newInstrument.getSecurityId() + " " + newInstrument.getProductType());
+                        getLogger().debug("MicexInstrument Received " + newInstrument.getSecurityId() + " " + newInstrument.getProductType());
 
                     sendToClient(newInstrument.getSecurityId(), newInstrument.getTradingStatus());
                 }
@@ -301,7 +309,7 @@ public class InstrumentManager extends Processor {
             if (!instrumentsDownloaded.getAndSet(true)) {
                 getLogger().info("FINISHED INSTRUMENTS " + instruments.size());
                 gatewayManager.onInstrumentDownloadFinished(instruments.values());
-                marketDataHandler.onInstruments(instruments.values().toArray(new Instrument[instruments.size()]));
+                marketDataHandler.onInstruments(instruments.values().toArray(new MicexInstrument[instruments.size()]));
             }
         } else {
             if ((instruments.size() + ignoredInstruments.size()) % 1000 == 0) {

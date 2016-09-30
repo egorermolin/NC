@@ -5,9 +5,9 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.apache.log4j.*;
-import ru.ncapital.gateways.micexfast.connection.ConnectionManager;
-import ru.ncapital.gateways.micexfast.domain.Instrument;
-import ru.ncapital.gateways.micexfast.domain.Subscription;
+import ru.ncapital.gateways.moexfast.connection.ConnectionManager;
+import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
+import ru.ncapital.gateways.moexfast.domain.Subscription;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -124,7 +124,7 @@ public class GatewayManager implements IGatewayManager {
             connectionManager.shutdown();
     }
 
-    public void onInstrumentDownloadFinished(Collection<Instrument> instruments) {
+    public void onInstrumentDownloadFinished(Collection<MicexInstrument> instruments) {
         connectionManager.onInstrumentDownloadFinished(instruments);
     }
 

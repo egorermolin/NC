@@ -1,14 +1,13 @@
 import com.google.inject.Guice;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import ru.ncapital.gateways.micexfast.*;
-import ru.ncapital.gateways.micexfast.connection.MarketType;
 import ru.ncapital.gateways.micexfast.domain.ProductType;
 import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
-import ru.ncapital.gateways.micexfast.performance.IGatewayPerformanceLogger;
+import ru.ncapital.gateways.moexfast.DefaultMarketDataHandler;
+import ru.ncapital.gateways.moexfast.IMarketDataHandler;
 
 /**
  * Created by egore on 2/2/16.

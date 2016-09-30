@@ -8,10 +8,10 @@ import org.openfast.GroupValue;
 import org.openfast.Message;
 import org.openfast.SequenceValue;
 import ru.ncapital.gateways.micexfast.GatewayModule;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.StoredMdEntry;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
-import ru.ncapital.gateways.micexfast.performance.PerformanceData;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.StoredMdEntry;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
+import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 /**
  * Created by egore on 1/14/16.

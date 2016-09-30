@@ -3,7 +3,7 @@ package ru.ncapital.gateways.micexfast;
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.*;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.*;
 import ru.ncapital.gateways.micexfast.messagehandlers.*;
 
 /**

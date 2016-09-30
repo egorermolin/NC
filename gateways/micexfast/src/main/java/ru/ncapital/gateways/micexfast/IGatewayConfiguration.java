@@ -1,9 +1,10 @@
 package ru.ncapital.gateways.micexfast;
 
-import ru.ncapital.gateways.micexfast.connection.MarketType;
+import ru.ncapital.gateways.moexfast.connection.MarketType;
 import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
 import ru.ncapital.gateways.micexfast.domain.ProductType;
-import ru.ncapital.gateways.micexfast.performance.IGatewayPerformanceLogger;
+import ru.ncapital.gateways.moexfast.IMarketDataHandler;
+import ru.ncapital.gateways.moexfast.performance.IGatewayPerformanceLogger;
 
 /**
  * Created by egore on 16.02.2016.

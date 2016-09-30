@@ -1,13 +1,8 @@
 import org.junit.Assert;
 import org.junit.Test;
 import ru.ncapital.gateways.micexfast.ConfigurationManager;
-import ru.ncapital.gateways.micexfast.IGatewayConfiguration;
-import ru.ncapital.gateways.micexfast.IMarketDataHandler;
 import ru.ncapital.gateways.micexfast.NullGatewayConfiguration;
-import ru.ncapital.gateways.micexfast.connection.ConnectionId;
-import ru.ncapital.gateways.micexfast.domain.ProductType;
-import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
-import ru.ncapital.gateways.micexfast.performance.IGatewayPerformanceLogger;
+import ru.ncapital.gateways.moexfast.connection.ConnectionId;
 
 /**
  * Created by egore on 10.02.2016.

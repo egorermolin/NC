@@ -1,15 +1,12 @@
 package ru.ncapital.gateways.micexfast;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.assistedinject.Assisted;
 import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.micexfast.connection.Connection;
-import ru.ncapital.gateways.micexfast.connection.ConnectionId;
-import ru.ncapital.gateways.micexfast.xml.XMLReader;
+import ru.ncapital.gateways.moexfast.connection.Connection;
+import ru.ncapital.gateways.moexfast.connection.ConnectionId;
+import ru.ncapital.gateways.moexfast.xml.XMLReader;
 
 import java.net.NetworkInterface;
-import java.util.HashMap;
 import java.util.Map;
 
 /**

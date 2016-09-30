@@ -1,7 +1,6 @@
 package ru.ncapital.gateways.micexfast;
 
 import com.google.inject.ImplementedBy;
-import ru.ncapital.gateways.micexfast.domain.Instrument;
 
 /**
  * Created by egore on 12/28/15.

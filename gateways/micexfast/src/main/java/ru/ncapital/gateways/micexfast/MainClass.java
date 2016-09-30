@@ -3,11 +3,15 @@ package ru.ncapital.gateways.micexfast;
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.micexfast.connection.MarketType;
+import ru.ncapital.gateways.moexfast.connection.MarketType;
 import ru.ncapital.gateways.micexfast.domain.*;
-import ru.ncapital.gateways.micexfast.performance.IGatewayPerformanceLogger;
+import ru.ncapital.gateways.moexfast.DefaultMarketDataHandler;
+import ru.ncapital.gateways.moexfast.IMarketDataHandler;
+import ru.ncapital.gateways.moexfast.Utils;
+import ru.ncapital.gateways.moexfast.domain.BBO;
+import ru.ncapital.gateways.moexfast.domain.DepthLevel;
+import ru.ncapital.gateways.moexfast.domain.PublicTrade;
 
-import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -15,7 +19,7 @@ import java.util.concurrent.CountDownLatch;
  */
 public class MainClass {
 
-    private Instrument[] instruments;
+    private MicexInstrument[] instruments;
 
     private CountDownLatch waiter = new CountDownLatch(1);
 
@@ -26,7 +30,6 @@ public class MainClass {
     }
 
     MainClass() {
-
     }
 
     public void run(final String[] args) throws InterruptedException {
@@ -45,26 +48,22 @@ public class MainClass {
 
                     @Override
                     public void onBBO(BBO bbo) {
-
                     }
 
                     @Override
                     public void onDepthLevels(DepthLevel[] depthLevels) {
-
                     }
 
                     @Override
                     public void onStatistics(BBO bbo) {
-
                     }
 
                     @Override
                     public void onPublicTrade(PublicTrade publicTrade) {
-
                     }
 
                     @Override
-                    public void onInstruments(Instrument[] _instruments) {
+                    public void onInstruments(MicexInstrument[] _instruments) {
                         instruments = _instruments;
                         waiter.countDown();
                     }
@@ -132,8 +131,8 @@ public class MainClass {
         waiter.await();
         logger.info("TOTAL " + instruments.length + " INSTRUMENTS");
 
-        for (Instrument instrument : instruments) {
-            logger.info("Instrument " + instrument.toString());
+        for (MicexInstrument instrument : instruments) {
+            logger.info("MicexInstrument " + instrument.toString());
             gwManager.subscribeForMarketData(instrument.getSecurityId());
         }
 

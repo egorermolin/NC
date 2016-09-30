@@ -151,6 +151,22 @@
             </connection>
         </connections>
     </channel>
+    <channel id="DERV" label="Derivatives Exchange Market">
+        <connection id="FUT-BOOK-1">
+            <type feed-type="Top of book for Futures">I</type>
+            <protocol>UDP/IP</protocol>
+            <feed id="A">
+                <src-ip>10.50.129.200</src-ip>
+                <ip>239.192.113.3</ip>
+                <port>9113</port>
+            </feed>
+            <feed id="B">
+                <src-ip>10.50.129.200</src-ip>
+                <ip>239.192.113.131</ip>
+                <port>9313</port>
+            </feed>
+        </connection>
+    </channel>
     <channel id="FOND" label="Stock Exchange Market">
     <connections>
         <connection id="OBR">

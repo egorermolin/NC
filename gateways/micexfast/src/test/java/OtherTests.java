@@ -5,12 +5,11 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openfast.FieldValue;
 import org.openfast.GroupValue;
-import ru.ncapital.gateways.micexfast.Utils;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.SequenceArray;
+import ru.ncapital.gateways.moexfast.Utils;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.SequenceArray;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static junit.framework.TestCase.assertEquals;
 

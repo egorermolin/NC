@@ -7,9 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.micexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
-import ru.ncapital.gateways.micexfast.Utils;
-import ru.ncapital.gateways.micexfast.domain.*;
-import ru.ncapital.gateways.micexfast.performance.PerformanceData;
+import ru.ncapital.gateways.moexfast.Utils;
+import ru.ncapital.gateways.moexfast.domain.DepthLevel;
+import ru.ncapital.gateways.moexfast.domain.MdEntryType;
+import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
+import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 import java.util.ArrayList;
 import java.util.HashMap;

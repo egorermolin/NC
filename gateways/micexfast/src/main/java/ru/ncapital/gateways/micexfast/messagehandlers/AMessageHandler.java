@@ -6,8 +6,8 @@ import org.openfast.SequenceValue;
 import org.slf4j.Logger;
 import ru.ncapital.gateways.micexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
-import ru.ncapital.gateways.micexfast.domain.Instrument;
-import ru.ncapital.gateways.micexfast.performance.PerformanceData;
+import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
+import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 /**
  * Created by egore on 1/21/16.
@@ -27,14 +27,14 @@ public abstract class AMessageHandler implements IMessageHandler {
 
     @Override
     public boolean isAllowedUpdate(String symbol, String trandingSessionId) {
-        return this.marketDataManager.isAllowedInstrument(symbol, trandingSessionId);
+        return marketDataManager.isAllowedInstrument(symbol, trandingSessionId);
     }
 
     @Override
     public void onSnapshot(Message readMessage) {
         String symbol = readMessage.getString("Symbol");
         String tradingSessionId = readMessage.getString("TradingSessionID");
-        String securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
+        String securityId = symbol + MicexInstrument.BOARD_SEPARATOR + tradingSessionId;
         boolean firstFragment = readMessage.getInt("RouteFirst") == 1;
         boolean lastFragment = readMessage.getInt("LastFragment") == 1;
 
@@ -54,7 +54,7 @@ public abstract class AMessageHandler implements IMessageHandler {
     public void onIncremental(GroupValue mdEntry, PerformanceData perfData) {
         String symbol = mdEntry.getString("Symbol");
         String tradingSessionId = mdEntry.getString("TradingSessionID");
-        String securityId = symbol + Instrument.BOARD_SEPARATOR + tradingSessionId;
+        String securityId = symbol + MicexInstrument.BOARD_SEPARATOR + tradingSessionId;
 
         onIncrementalMdEntry(securityId, mdEntry, perfData);
     }

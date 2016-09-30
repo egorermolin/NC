@@ -7,10 +7,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openfast.*;
 import org.openfast.codec.Coder;
 import ru.ncapital.gateways.micexfast.GatewayModule;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.IncrementalProcessor;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
-import ru.ncapital.gateways.micexfast.performance.PerformanceData;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.IncrementalProcessor;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
+import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
 
 import static org.mockito.Mockito.mock;

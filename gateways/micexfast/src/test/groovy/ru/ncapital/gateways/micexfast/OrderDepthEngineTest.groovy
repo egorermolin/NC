@@ -1,9 +1,9 @@
 package ru.ncapital.gateways.micexfast
 
-import ru.ncapital.gateways.micexfast.domain.BBO
-import ru.ncapital.gateways.micexfast.domain.DepthLevel
-import ru.ncapital.gateways.micexfast.domain.MdUpdateAction
-import ru.ncapital.gateways.micexfast.domain.PublicTrade
+import ru.ncapital.gateways.moexfast.domain.BBO
+import ru.ncapital.gateways.moexfast.domain.DepthLevel
+import ru.ncapital.gateways.moexfast.domain.MdUpdateAction
+import ru.ncapital.gateways.moexfast.domain.PublicTrade
 
 /**
  * Created by egore on 12/19/15.

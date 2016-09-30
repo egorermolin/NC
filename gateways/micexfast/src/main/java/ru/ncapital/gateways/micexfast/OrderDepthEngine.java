@@ -2,10 +2,10 @@ package ru.ncapital.gateways.micexfast;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.micexfast.domain.BBO;
-import ru.ncapital.gateways.micexfast.domain.DepthLevel;
-import ru.ncapital.gateways.micexfast.domain.MdUpdateAction;
-import ru.ncapital.gateways.micexfast.domain.PublicTrade;
+import ru.ncapital.gateways.moexfast.domain.BBO;
+import ru.ncapital.gateways.moexfast.domain.DepthLevel;
+import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
+import ru.ncapital.gateways.moexfast.domain.PublicTrade;
 
 import java.util.HashMap;
 import java.util.List;

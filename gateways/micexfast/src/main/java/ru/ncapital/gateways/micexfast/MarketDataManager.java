@@ -4,15 +4,17 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.helpers.Util;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.*;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.*;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
 import ru.ncapital.gateways.micexfast.domain.*;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerFactory;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
-import ru.ncapital.gateways.micexfast.performance.IGatewayPerformanceLogger;
+import ru.ncapital.gateways.moexfast.IMarketDataHandler;
+import ru.ncapital.gateways.moexfast.Utils;
+import ru.ncapital.gateways.moexfast.domain.*;
+import ru.ncapital.gateways.moexfast.performance.IGatewayPerformanceLogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,8 +62,6 @@ public class MarketDataManager {
     private boolean feedStatusUP = false;
 
     private boolean feedStatusALL = true;
-
-//    private long debugWarningSilentPeriod = 0;
 
     public void setInstrumentManager(InstrumentManager instrumentManager) {
         this.instrumentManager = instrumentManager;
@@ -278,7 +278,7 @@ public class MarketDataManager {
     }
 
     public boolean isAllowedInstrument(String symbol, String tradingSessionId) {
-        return instrumentManager.isAllowedInstrument(new Instrument(symbol, tradingSessionId));
+        return instrumentManager.isAllowedInstrument(symbol, tradingSessionId);
     }
 
     public void setRecovery(String securityId, boolean isUp, boolean orderList) {

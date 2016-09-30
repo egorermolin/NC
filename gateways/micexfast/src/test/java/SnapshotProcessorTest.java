@@ -7,11 +7,11 @@ import org.openfast.Context;
 import org.openfast.GroupValue;
 import org.openfast.Message;
 import org.openfast.codec.Coder;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.StoredMdEntry;
-import ru.ncapital.gateways.micexfast.performance.PerformanceData;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.StoredMdEntry;
+import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidator;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.SnapshotProcessor;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidator;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.SnapshotProcessor;
 import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
 
 /**
