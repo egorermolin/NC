@@ -7,12 +7,13 @@ import org.openfast.Context;
 import org.openfast.GroupValue;
 import org.openfast.Message;
 import org.openfast.codec.Coder;
+import ru.ncapital.gateways.micexfast.connection.messageprocessors.MicexSnapshotProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.StoredMdEntry;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
-import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
+import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.SnapshotProcessor;
-import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
+import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 
 /**
  * Created by egore on 1/11/16.
@@ -41,7 +42,7 @@ public class SnapshotProcessorTest {
     public void setup() {
         Mockito.when(marketDataHandler.getType()).thenReturn(MessageHandlerType.ORDER_LIST);
 
-        snapshotProcessor = new SnapshotProcessor(marketDataHandler, sequenceValidator);
+        snapshotProcessor = new MicexSnapshotProcessor(marketDataHandler, sequenceValidator);
 
         Mockito.when(sequenceValidator.isRecovering("SYMB;CETS", true)).thenReturn(true);
         Mockito.when(sequenceValidator.isRecovering("SYMB2;CETS", true)).thenReturn(true);
@@ -49,8 +50,8 @@ public class SnapshotProcessorTest {
         Mockito.when(sequenceValidator.onSnapshotSeq(Mockito.eq("SYMB2;CETS"), Mockito.anyInt())).thenReturn(true);
         Mockito.when(sequenceValidator.getRecovering()).thenReturn(new String[]{"SYMB;CETS", "SYMB2;CETS"});
 
-        Mockito.when(marketDataHandler.isAllowedUpdate("SYMB", "CETS")).thenReturn(true);
-        Mockito.when(marketDataHandler.isAllowedUpdate("SYMB2", "CETS")).thenReturn(true);
+        Mockito.when(marketDataHandler.isAllowedUpdate("SYMB;CETS")).thenReturn(true);
+        Mockito.when(marketDataHandler.isAllowedUpdate("SYMB2;CETS")).thenReturn(true);
     }
 
     @Test

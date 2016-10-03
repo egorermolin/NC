@@ -1,14 +1,15 @@
-package ru.ncapital.gateways.micexfast.messagehandlers;
+package ru.ncapital.gateways.moexfast.messagehandlers;
 
 import org.openfast.GroupValue;
 import org.openfast.Message;
+import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 /**
  * Created by egore on 1/21/16.
  */
 public interface IMessageHandler {
-    boolean isAllowedUpdate(String symbol, String trandingSessionId);
+    boolean isAllowedUpdate(String securityId);
 
     void onSnapshot(Message readMessage);
 

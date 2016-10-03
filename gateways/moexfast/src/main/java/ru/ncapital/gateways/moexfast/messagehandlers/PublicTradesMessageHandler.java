@@ -1,11 +1,9 @@
-package ru.ncapital.gateways.micexfast.messagehandlers;
+package ru.ncapital.gateways.moexfast.messagehandlers;
 
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
 import org.openfast.GroupValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.micexfast.IGatewayConfiguration;
+import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.domain.MdEntryType;
@@ -15,12 +13,9 @@ import ru.ncapital.gateways.moexfast.domain.PublicTrade;
 /**
  * Created by egore on 1/28/16.
  */
-public class PublicTradesMessageHandler extends AMessageHandler {
+public abstract class PublicTradesMessageHandler extends AMessageHandler {
 
-    @AssistedInject
-    public PublicTradesMessageHandler(MarketDataManager marketDataManager,
-                                      @Assisted IGatewayConfiguration configuration) {
-
+    public PublicTradesMessageHandler(MarketDataManager marketDataManager, IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
     }
 

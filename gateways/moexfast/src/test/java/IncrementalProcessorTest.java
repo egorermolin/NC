@@ -7,11 +7,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openfast.*;
 import org.openfast.codec.Coder;
 import ru.ncapital.gateways.micexfast.GatewayModule;
+import ru.ncapital.gateways.micexfast.connection.messageprocessors.MicexIncrementalProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IncrementalProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
-import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
+import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 
 import static org.mockito.Mockito.mock;
 
@@ -39,10 +40,10 @@ public class IncrementalProcessorTest {
     @Before
     public void setup() {
         sequenceValidator = Guice.createInjector(new GatewayModule()).getInstance(MessageSequenceValidatorFactory.class).createMessageSequenceValidatorForOrderList();
-        incrementalProcessor = new IncrementalProcessor(marketDataHandler, sequenceValidator);
+        incrementalProcessor = new MicexIncrementalProcessor(marketDataHandler, sequenceValidator);
         incrementalProcessor.setIsPrimary(true);
-        Mockito.when(marketDataHandler.isAllowedUpdate("SYMB", "CETS")).thenReturn(true);
-        Mockito.when(marketDataHandler.isAllowedUpdate("SYMB2", "CETS")).thenReturn(true);
+        Mockito.when(marketDataHandler.isAllowedUpdate("SYMB;CETS")).thenReturn(true);
+        Mockito.when(marketDataHandler.isAllowedUpdate("SYMB2;CETS")).thenReturn(true);
     }
 
     private Message getIncermentalMock(int seqNum, int numMdEntries) {

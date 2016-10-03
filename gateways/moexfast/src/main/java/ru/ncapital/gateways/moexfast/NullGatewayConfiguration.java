@@ -1,5 +1,6 @@
-package ru.ncapital.gateways.micexfast;
+package ru.ncapital.gateways.moexfast;
 
+import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.connection.MarketType;
 import ru.ncapital.gateways.micexfast.domain.ProductType;
 import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
@@ -33,16 +34,6 @@ public class NullGatewayConfiguration implements IGatewayConfiguration {
     @Override
     public MarketType getMarketType() {
         return MarketType.CURR;
-    }
-
-    @Override
-    public TradingSessionId[] getAllowedTradingSessionIds() {
-        return new TradingSessionId[0];
-    }
-
-    @Override
-    public ProductType[] getAllowedProductTypes() {
-        return new ProductType[0];
     }
 
     @Override

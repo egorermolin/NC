@@ -4,13 +4,15 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.ncapital.gateways.micexfast.connection.messageprocessors.MicexIncrementalProcessor;
+import ru.ncapital.gateways.micexfast.connection.messageprocessors.MicexSnapshotProcessor;
+import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.*;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
-import ru.ncapital.gateways.micexfast.domain.*;
-import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
-import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerFactory;
-import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
+import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
+import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerFactory;
+import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 import ru.ncapital.gateways.moexfast.IMarketDataHandler;
 import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.domain.*;
@@ -79,12 +81,12 @@ public class MarketDataManager {
         IMessageSequenceValidator sequenceValidatorForStatistics = messageSequenceValidatorFactory.createMessageSequenceValidatorForStatistics();
         IMessageSequenceValidator sequenceValidatorForPublicTrades = messageSequenceValidatorFactory.createMessageSequenceValidatorForPublicTrades();
 
-        snapshotProcessorForOrderList = new SnapshotProcessor(messageHandlerForOrderList, sequenceValidatorForOrderList);
-        snapshotProcessorForStatistics = new SnapshotProcessor(messageHandlerForStatistics, sequenceValidatorForStatistics);
+        snapshotProcessorForOrderList = new MicexSnapshotProcessor(messageHandlerForOrderList, sequenceValidatorForOrderList);
+        snapshotProcessorForStatistics = new MicexSnapshotProcessor(messageHandlerForStatistics, sequenceValidatorForStatistics);
 
-        incrementalProcessorForOrderList = new IncrementalProcessor(messageHandlerForOrderList, sequenceValidatorForOrderList);
-        incrementalProcessorForStatistics = new IncrementalProcessor(messageHandlerForStatistics, sequenceValidatorForStatistics);
-        incrementalProcessorForPublicTrades = new IncrementalProcessor(messageHandlerForPublicTrades, sequenceValidatorForPublicTrades);
+        incrementalProcessorForOrderList = new MicexIncrementalProcessor(messageHandlerForOrderList, sequenceValidatorForOrderList);
+        incrementalProcessorForStatistics = new MicexIncrementalProcessor(messageHandlerForStatistics, sequenceValidatorForStatistics);
+        incrementalProcessorForPublicTrades = new MicexIncrementalProcessor(messageHandlerForPublicTrades, sequenceValidatorForPublicTrades);
 
         return this;
     }
@@ -202,22 +204,6 @@ public class MarketDataManager {
             return;
 
         for (DepthLevel depthLevel : depthLevels) {
-
-//            if (logger.isDebugEnabled()) {
-//                if (depthLevel.getPerformanceData().getExchangeSendingTime()
-//                        - depthLevel.getPerformanceData().getExchangeTime()
-//                        > 10_000_0L) { // 10ms in ticks
-//                    if (debugWarningSilentPeriod == 0 || depthLevel.getPerformanceData().getExchangeSendingTime()
-//                            > debugWarningSilentPeriod) {
-//                        logger.debug("MDEntryTime is more than 10ms lower than SendingTime ["
-//                                + (depthLevel.getPerformanceData().getExchangeSendingTime()
-//                                    - depthLevel.getPerformanceData().getExchangeTime()) + "]");
-//
-//                        debugWarningSilentPeriod = depthLevel.getPerformanceData().getExchangeSendingTime() + 60_000_000_0L; // 60s in ticks
-//                    }
-//                }
-//            }
-
             if (depthLevel.getPerformanceData() == null)
                 continue;
 
@@ -277,8 +263,8 @@ public class MarketDataManager {
         getIncrementalProcessor(type).setIsPrimary(isPrimary);
     }
 
-    public boolean isAllowedInstrument(String symbol, String tradingSessionId) {
-        return instrumentManager.isAllowedInstrument(symbol, tradingSessionId);
+    public boolean isAllowedInstrument(String securityId) {
+        return instrumentManager.isAllowedInstrument(securityId);
     }
 
     public void setRecovery(String securityId, boolean isUp, boolean orderList) {

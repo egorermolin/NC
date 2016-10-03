@@ -3,6 +3,8 @@ package ru.ncapital.gateways.micexfast;
 import com.google.inject.Singleton;
 import org.openfast.GroupValue;
 import org.openfast.Message;
+import ru.ncapital.gateways.moexfast.GatewayManager;
+import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.Processor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.SequenceArray;
 import ru.ncapital.gateways.micexfast.domain.*;
@@ -47,7 +49,7 @@ public class InstrumentManager extends Processor {
 
     protected SequenceArray sequenceArrayForInstrumentStatus = new SequenceArray();
 
-    public InstrumentManager configure(IGatewayConfiguration configuration) {
+    public InstrumentManager configure(IMicexGatewayConfiguration configuration) {
         this.marketDataHandler = configuration.getMarketDataHandler();
         this.allowedTradingSessionIds.addAll(Arrays.asList(configuration.getAllowedTradingSessionIds()));
         this.allowedProductTypes.addAll(Arrays.asList(configuration.getAllowedProductTypes()));
@@ -128,8 +130,8 @@ public class InstrumentManager extends Processor {
         return false;
     }
 
-    public boolean isAllowedInstrument(String symbol, String tradingSessionId) {
-        if (instruments.containsKey(MicexInstrument.getSecurityId(symbol, tradingSessionId)))
+    public boolean isAllowedInstrument(String securityId) {
+        if (instruments.containsKey(securityId))
             return true;
 
         return false;

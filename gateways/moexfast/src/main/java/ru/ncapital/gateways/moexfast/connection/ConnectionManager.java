@@ -6,11 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.micexfast.*;
 import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
+import ru.ncapital.gateways.moexfast.ConfigurationManager;
+import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.ISnapshotProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.connection.multicast.MessageReader;
 import ru.ncapital.gateways.moexfast.connection.multicast.MessageReaderStarter;
-import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
+import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 import ru.ncapital.gateways.moexfast.Utils;
 
 import java.io.IOException;
@@ -51,7 +53,7 @@ public class ConnectionManager {
     @Inject
     public ConnectionManager(ConfigurationManager configurationManager, MarketDataManager marketDataManager, InstrumentManager instrumentManager) {
         this.marketDataManager = marketDataManager;
-        for (ConnectionId connectionId : ConnectionId.values()) {
+        for (ConnectionId connectionId : configurationManager.getAllConnectionIds()) {
             MessageReader messageReader = new MessageReader(connectionId, configurationManager, marketDataManager, instrumentManager);
             try {
                 messageReader.init("info");

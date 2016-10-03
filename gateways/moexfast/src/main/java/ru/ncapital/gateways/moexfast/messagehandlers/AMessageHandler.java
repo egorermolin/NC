@@ -1,12 +1,11 @@
-package ru.ncapital.gateways.micexfast.messagehandlers;
+package ru.ncapital.gateways.moexfast.messagehandlers;
 
 import org.openfast.GroupValue;
 import org.openfast.Message;
 import org.openfast.SequenceValue;
 import org.slf4j.Logger;
-import ru.ncapital.gateways.micexfast.IGatewayConfiguration;
+import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
-import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 /**
@@ -26,15 +25,13 @@ public abstract class AMessageHandler implements IMessageHandler {
     }
 
     @Override
-    public boolean isAllowedUpdate(String symbol, String trandingSessionId) {
-        return marketDataManager.isAllowedInstrument(symbol, trandingSessionId);
+    public boolean isAllowedUpdate(String securityId) {
+        return marketDataManager.isAllowedInstrument(securityId);
     }
 
     @Override
     public void onSnapshot(Message readMessage) {
-        String symbol = readMessage.getString("Symbol");
-        String tradingSessionId = readMessage.getString("TradingSessionID");
-        String securityId = symbol + MicexInstrument.BOARD_SEPARATOR + tradingSessionId;
+        String securityId = getSecurityId(readMessage);
         boolean firstFragment = readMessage.getInt("RouteFirst") == 1;
         boolean lastFragment = readMessage.getInt("LastFragment") == 1;
 
@@ -52,9 +49,7 @@ public abstract class AMessageHandler implements IMessageHandler {
 
     @Override
     public void onIncremental(GroupValue mdEntry, PerformanceData perfData) {
-        String symbol = mdEntry.getString("Symbol");
-        String tradingSessionId = mdEntry.getString("TradingSessionID");
-        String securityId = symbol + MicexInstrument.BOARD_SEPARATOR + tradingSessionId;
+        String securityId = getSecurityId(mdEntry);
 
         onIncrementalMdEntry(securityId, mdEntry, perfData);
     }
@@ -68,4 +63,8 @@ public abstract class AMessageHandler implements IMessageHandler {
     protected abstract void onSnapshotMdEntry(String securityId, GroupValue mdEntry);
 
     protected abstract void onIncrementalMdEntry(String securityId, GroupValue mdEntry, PerformanceData perfData);
+
+    protected abstract String getSecurityId(Message readMessage);
+
+    protected abstract String getSecurityId(GroupValue mdEntry);
 }

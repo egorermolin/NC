@@ -4,7 +4,7 @@ import org.openfast.Context;
 import org.openfast.Message;
 import org.openfast.codec.Coder;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
-import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
+import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 
 /**
  * Created by egore on 24.02.2016.
@@ -23,7 +23,6 @@ public abstract class Processor extends BaseProcessorWithMessageBackup implement
     }
 
     protected Processor() {
-
     }
 
     @Override

@@ -1,11 +1,9 @@
-package ru.ncapital.gateways.micexfast.messagehandlers;
+package ru.ncapital.gateways.moexfast.messagehandlers;
 
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
 import org.openfast.GroupValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.micexfast.IGatewayConfiguration;
+import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.domain.DepthLevel;
@@ -21,14 +19,11 @@ import java.util.Map;
 /**
  * Created by egore on 12/7/15.
  */
-public class OrderListMessageHandler extends AMessageHandler {
+public abstract class OrderListMessageHandler extends AMessageHandler {
 
     private Map<String, List<DepthLevel>> depthLevelMap = new HashMap<String, List<DepthLevel>>();
 
-    @AssistedInject
-    public OrderListMessageHandler(MarketDataManager marketDataManager,
-                                   @Assisted IGatewayConfiguration configuration) {
-
+    public OrderListMessageHandler(MarketDataManager marketDataManager, IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
     }
 

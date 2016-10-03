@@ -5,14 +5,13 @@ import org.openfast.Message;
 import org.openfast.SequenceValue;
 import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
-import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
-import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
+import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 
 /**
  * Created by egore on 1/11/16.
  */
-public class IncrementalProcessor extends Processor implements IIncrementalProcessor {
+public abstract class IncrementalProcessor extends Processor implements IIncrementalProcessor {
 
     protected String lastDealNumber;
 
@@ -35,9 +34,7 @@ public class IncrementalProcessor extends Processor implements IIncrementalProce
                     continue;
                 }
 
-                String symbol = mdEntry.getString("Symbol");
-                String tradingSessionId = mdEntry.getString("TradingSessionID");
-                String securityId = symbol + MicexInstrument.BOARD_SEPARATOR + tradingSessionId;
+                String securityId = getSecurityId(mdEntry);
                 PerformanceData performanceData = new PerformanceData()
                         .setExchangeSendingTime(sendingTime)
                         .setGatewayDequeTime(dequeTimestamp)
@@ -53,7 +50,7 @@ public class IncrementalProcessor extends Processor implements IIncrementalProce
                     }
                 }
 
-                if (!messageHandler.isAllowedUpdate(symbol, tradingSessionId))
+                if (!messageHandler.isAllowedUpdate(securityId))
                     continue;
 
                 if (sequenceValidator.isRecovering(securityId, false)) {
@@ -86,4 +83,6 @@ public class IncrementalProcessor extends Processor implements IIncrementalProce
             messageHandler.flushIncrementals();
         }
     }
+
+    protected abstract String getSecurityId(GroupValue mdEntry);
 }

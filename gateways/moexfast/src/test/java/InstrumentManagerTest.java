@@ -13,6 +13,7 @@ import org.openfast.*;
 import org.openfast.codec.Coder;
 import ru.ncapital.gateways.micexfast.*;
 import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
+import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.connection.ConnectionManager;
 import ru.ncapital.gateways.moexfast.domain.BBO;
 import ru.ncapital.gateways.micexfast.domain.ProductType;
@@ -40,7 +41,7 @@ public class InstrumentManagerTest {
     private InstrumentManager instrumentManager;
 
     @Mock
-    private IGatewayConfiguration configuration;
+    private IMicexGatewayConfiguration configuration;
 
     @Mock
     private MarketDataManager marketDataManager;
@@ -52,7 +53,7 @@ public class InstrumentManagerTest {
     private IMarketDataHandler marketDataHandler;
 
     @Mock
-    private GatewayManager gatewayManager;
+    private MicexGatewayManager gatewayManager;
 
     @Before
     public void setup() {

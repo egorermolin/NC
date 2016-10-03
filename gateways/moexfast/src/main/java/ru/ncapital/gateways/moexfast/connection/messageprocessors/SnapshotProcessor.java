@@ -1,9 +1,8 @@
 package ru.ncapital.gateways.moexfast.connection.messageprocessors;
 
 import org.openfast.Message;
-import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
-import ru.ncapital.gateways.micexfast.messagehandlers.IMessageHandler;
+import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 import java.util.*;
@@ -11,7 +10,7 @@ import java.util.*;
 /**
  * Created by egore on 1/11/16.
  */
-public class SnapshotProcessor extends Processor implements ISnapshotProcessor {
+public abstract class SnapshotProcessor extends Processor implements ISnapshotProcessor {
 
     private Map<String, Map<Integer, Message>> fragmentedSnapshots = new HashMap<String, Map<Integer, Message>>();
 
@@ -69,9 +68,7 @@ public class SnapshotProcessor extends Processor implements ISnapshotProcessor {
     @Override
     public void processMessage(Message readMessage) {
         int seqNum = readMessage.getInt("MsgSeqNum");
-        String symbol = readMessage.getString("Symbol");
-        String tradingSessionId = readMessage.getString("TradingSessionID");
-        String securityId = symbol + MicexInstrument.BOARD_SEPARATOR + tradingSessionId;
+        String securityId = getSecurityId(readMessage);
 
         int rptSeqNum = readMessage.getInt("RptSeq");
         boolean firstFragment = readMessage.getInt("RouteFirst") == 1;
@@ -97,9 +94,7 @@ public class SnapshotProcessor extends Processor implements ISnapshotProcessor {
 
     @Override
     protected boolean checkSequence(Message readMessage) {
-        String symbol = readMessage.getString("Symbol");
-        String tradingSessionId = readMessage.getString("TradingSessionID");
-        String securityId = symbol + MicexInstrument.BOARD_SEPARATOR + tradingSessionId;
+        String securityId = getSecurityId(readMessage);
         int seqNum = readMessage.getInt("MsgSeqNum");
         long sendingTime = readMessage.getLong("SendingTime");
 
@@ -117,7 +112,7 @@ public class SnapshotProcessor extends Processor implements ISnapshotProcessor {
                 return false;
         }
 
-        if (!messageHandler.isAllowedUpdate(symbol, tradingSessionId))
+        if (!messageHandler.isAllowedUpdate(securityId))
             return false;
 
         if (!sequenceValidator.isRecovering(securityId, true))
@@ -156,4 +151,6 @@ public class SnapshotProcessor extends Processor implements ISnapshotProcessor {
         if (sequenceValidator.isRecovering())
             printRecoveringSecurityIds();
     }
+
+    protected abstract String getSecurityId(Message readMessage);
 }

@@ -1,6 +1,5 @@
-package ru.ncapital.gateways.micexfast;
+package ru.ncapital.gateways.moexfast;
 
-import com.google.inject.Singleton;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.connection.Connection;
 import ru.ncapital.gateways.moexfast.connection.ConnectionId;
@@ -12,13 +11,12 @@ import java.util.Map;
 /**
  * Created by egore on 12/14/15.
  */
-@Singleton
-public class ConfigurationManager {
+public abstract class ConfigurationManager {
     private String fastTemplatesFile;
 
     private String networkInterface;
 
-    private Map<ConnectionId, Connection> connections;
+    protected Map<ConnectionId, Connection> connections;
 
     private boolean asynchChannelReader;
 
@@ -33,7 +31,6 @@ public class ConfigurationManager {
         this.asynchChannelReader = configuration.isAsynchChannelReader();
         this.feedDownTimeout = configuration.getFeedDownTimeout();
         this.restartOnAllFeedDown = configuration.restartOnAllFeedDown();
-
         return this;
     }
 
@@ -84,4 +81,6 @@ public class ConfigurationManager {
     public boolean restartOnAllFeedDown() {
         return restartOnAllFeedDown;
     }
+
+    public abstract ConnectionId[] getAllConnectionIds();
 }

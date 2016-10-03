@@ -79,14 +79,25 @@ public class DepthLevel implements Comparable<DepthLevel> {
         return performanceData;
     }
 
-    @Override
-    public int compareTo(DepthLevel depthLevel) {
-        int c = Double.compare(this.mdEntryPx, depthLevel.mdEntryPx);
+    public int bidCompareTo(DepthLevel depthLevel) {
+        int c = Double.compare(depthLevel.mdEntryPx, this.mdEntryPx);
+        if (c == 0)
+            return depthLevel.mdEntryId.compareTo(this.mdEntryId);
+        else
+            return c;
+    }
 
+    public int offerCompareTo(DepthLevel depthLevel) {
+        int c = Double.compare(this.mdEntryPx, depthLevel.mdEntryPx);
         if (c == 0)
             return this.mdEntryId.compareTo(depthLevel.mdEntryId);
         else
             return c;
+    }
+
+    @Override
+    public int compareTo(DepthLevel depthLevel) {
+        return offerCompareTo(depthLevel);
     }
 
     @Override

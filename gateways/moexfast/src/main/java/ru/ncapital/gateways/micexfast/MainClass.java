@@ -3,11 +3,9 @@ package ru.ncapital.gateways.micexfast;
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.ncapital.gateways.moexfast.*;
 import ru.ncapital.gateways.moexfast.connection.MarketType;
 import ru.ncapital.gateways.micexfast.domain.*;
-import ru.ncapital.gateways.moexfast.DefaultMarketDataHandler;
-import ru.ncapital.gateways.moexfast.IMarketDataHandler;
-import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.domain.BBO;
 import ru.ncapital.gateways.moexfast.domain.DepthLevel;
 import ru.ncapital.gateways.moexfast.domain.PublicTrade;
@@ -33,15 +31,15 @@ public class MainClass {
     }
 
     public void run(final String[] args) throws InterruptedException {
-        GatewayManager.addConsoleAppender("%d{HH:mm:ss.SSS} %c{1} - %m%n", Level.INFO);
-        GatewayManager.addFileAppender("log/log.out", "%d{HH:mm:ss.SSS} %c{1} - %m%n", Level.DEBUG);
+        MicexGatewayManager.addConsoleAppender("%d{HH:mm:ss.SSS} %c{1} - %m%n", Level.INFO);
+        MicexGatewayManager.addFileAppender("log/log.out", "%d{HH:mm:ss.SSS} %c{1} - %m%n", Level.DEBUG);
         Logger logger = LoggerFactory.getLogger("MainClass");
         if (args.length < 3) {
             System.err.println("Usage MainClass <fast_templates> <interface[s]> <connections_file>");
             return;
         }
 
-        final IGatewayManager gwManager = GatewayManager.create(new NullGatewayConfiguration() {
+        final IGatewayManager gwManager = MicexGatewayManager.create(new MicexNullGatewayConfiguration() {
             @Override
             public IMarketDataHandler getMarketDataHandler() {
                 return new DefaultMarketDataHandler() {

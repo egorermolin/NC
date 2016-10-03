@@ -2,17 +2,18 @@ package ru.ncapital.gateways.moexfast.connection.multicast;
 
 import org.apache.log4j.Level;
 import org.openfast.*;
-import org.openfast.codec.Coder;
 import org.openfast.error.FastException;
 import org.openfast.logging.FastMessageLogger;
 import org.openfast.template.MessageTemplate;
 import org.openfast.template.loader.XMLMessageTemplateLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.micexfast.*;
+import ru.ncapital.gateways.micexfast.InstrumentManager;
+import ru.ncapital.gateways.micexfast.MarketDataManager;
+import ru.ncapital.gateways.moexfast.ConfigurationManager;
 import ru.ncapital.gateways.moexfast.connection.Connection;
 import ru.ncapital.gateways.moexfast.connection.ConnectionId;
-import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
+import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 import ru.ncapital.gateways.moexfast.Utils;
 
 import java.io.BufferedWriter;
@@ -37,7 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class MessageReader implements IMulticastEventListener {
 
-    private class Statistics {
+    protected class Statistics {
 
         private static final int NUMBER_OF_LISTS = 100;
 
@@ -77,14 +78,14 @@ public class MessageReader implements IMulticastEventListener {
 
         private Executor executor = Executors.newSingleThreadExecutor();
 
-        protected void initStatistics() {
+        public void initStatistics() {
             active = true;
             for (int i = 0; i < NUMBER_OF_LISTS; ++i)
                 allItems.add(new ArrayList<StatisticsItem>());
             currentItems = allItems.get(0);
         }
 
-        protected void initStatisticsWritingToFile(String filename) {
+        public void initStatisticsWritingToFile(String filename) {
             if (!active)
                 return;
 
@@ -96,14 +97,14 @@ public class MessageReader implements IMulticastEventListener {
             }
         }
 
-        protected synchronized void addItem(int seqNum, long entrTime, long sendTime, long recvTime, long decdTime) {
+        public synchronized void addItem(int seqNum, long entrTime, long sendTime, long recvTime, long decdTime) {
             if (!active)
                 return;
 
             currentItems.add(new StatisticsItem(seqNum, entrTime, sendTime, recvTime, decdTime));
         }
 
-        protected void dump() {
+        public void dump() {
             if (active) {
                 int pos = currentItemsPos;
 
@@ -197,7 +198,7 @@ public class MessageReader implements IMulticastEventListener {
         }
     }
 
-    private Statistics stats = new Statistics();
+    protected Statistics stats = new Statistics();
 
     private Connection connection;
 
@@ -361,23 +362,20 @@ public class MessageReader implements IMulticastEventListener {
             messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
 
         if (instrumentManager == null && marketDataManager == null) {
-            registerMessageHandler(new MessageHandler() {
-                @Override
-                public void handleMessage(Message readMessage, Context context, Coder coder) {
-                    long decodedTimeInTodayMicros = Utils.currentTimeInTodayMicros();
-                    long receivedTimeInTodayMicros = Utils.convertTicksToTodayMicros(inTimestamp.get());
-                    long sendingTimeInTodayMicros = Utils.convertTodayToTodayMicros((readMessage.getLong("SendingTime") % 1_00_00_00_000L) * 1_000L);
+            registerMessageHandler((readMessage, context, coder) -> {
+                long decodedTimeInTodayMicros = Utils.currentTimeInTodayMicros();
+                long receivedTimeInTodayMicros = Utils.convertTicksToTodayMicros(inTimestamp.get());
+                long sendingTimeInTodayMicros = Utils.convertTodayToTodayMicros((readMessage.getLong("SendingTime") % 1_00_00_00_000L) * 1_000L);
 
-                    if (readMessage.getString("MessageType").equals("X")) {
-                        SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
-                        for (int i = 0; i < mdEntries.getLength(); ++i) {
-                            long entryTimeInTodayMicros = Utils.getEntryTimeInTodayMicros(mdEntries.get(i));
+                if (readMessage.getString("MessageType").equals("X")) {
+                    SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
+                    for (int i = 0; i < mdEntries.getLength(); ++i) {
+                        long entryTimeInTodayMicros = Utils.getEntryTimeInTodayMicros(mdEntries.get(i));
 
-                            stats.addItem(readMessage.getInt("MsgSeqNum"),
-                                    entryTimeInTodayMicros, sendingTimeInTodayMicros,
-                                    receivedTimeInTodayMicros, decodedTimeInTodayMicros
-                            );
-                        }
+                        stats.addItem(readMessage.getInt("MsgSeqNum"),
+                                entryTimeInTodayMicros, sendingTimeInTodayMicros,
+                                receivedTimeInTodayMicros, decodedTimeInTodayMicros
+                        );
                     }
                 }
             });
@@ -559,74 +557,4 @@ public class MessageReader implements IMulticastEventListener {
         return connectionId.getConnectionId();
     }
 
-    public static void main(final String[] args) throws IOException {
-        // org.apache.log4j.Logger.getLogger("MessageReader").setLevel(Level.INFO);
-        GatewayManager.addConsoleAppender("%d{HH:mm:ss} %m%n", Level.TRACE);
-        GatewayManager.addFileAppender("log/log.mr.out", "%d{HH:mm:ss} %m%n", Level.TRACE);
-        if (args.length < 5) {
-            System.err.println("Usage MulticastReader <connectionId> <fast_templates> <interface[s]> <connections_file> <debug, trace, stats> [stats_filename]");
-            return;
-        }
-
-        if (ConnectionId.convert(args[0]) == null) {
-            StringBuilder sb = new StringBuilder();
-            for (ConnectionId id : ConnectionId.values())
-                sb.append(id.getConnectionId()).append(' ');
-            System.err.println("Valid connectionIds are: " + sb.toString());
-            return;
-        }
-
-        final MessageReader mr = new MessageReader(
-                ConnectionId.convert(args[0]),
-                new ConfigurationManager().configure(
-                        new NullGatewayConfiguration() {
-                            @Override
-                            public String getFastTemplatesFile() {
-                                return args[1];
-                            }
-
-                            @Override
-                            public String getNetworkInterface() {
-                                return args[2];
-                            }
-
-                            @Override
-                            public String getConnectionsFile() {
-                                return args[3];
-                            }
-
-                            @Override
-                            public boolean isAsynchChannelReader() {
-                                return false;
-                            }
-                        }),
-                null, null);
-
-        boolean statistics = false;
-        switch (args[4]) {
-            case "trace":
-            case "debug":
-                mr.init(args[4]);
-                break;
-            case "stats":
-                mr.init("info");
-                mr.stats.initStatistics();
-                if (args.length > 5) {
-                    mr.stats.initStatisticsWritingToFile(args[5]);
-                }
-                statistics = true;
-                break;
-        }
-
-        if (statistics) {
-            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new Runnable() {
-                @Override
-                public void run() {
-                    mr.stats.dump();
-                }
-            }, 1, 1, TimeUnit.SECONDS);
-        }
-
-        mr.start();
-    }
 }

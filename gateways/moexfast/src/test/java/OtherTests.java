@@ -7,7 +7,7 @@ import org.openfast.FieldValue;
 import org.openfast.GroupValue;
 import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.SequenceArray;
-import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
+import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 
 import java.util.concurrent.*;
 

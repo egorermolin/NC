@@ -37,6 +37,7 @@ public class OrderDepth {
                 return depthLevel.compareTo(depthLevel1);
             }
         });
+        // this.depthLevelsSorted = TreeMultiset.create(isBid ? DepthLevel::bidCompareTo : DepthLevel::offerCompareTo);
         this.depthLevels = new HashMap<>();
         this.logger = LoggerFactory.getLogger((isBid ? "Bid" : "Offer") + "OrderDepth");
     }

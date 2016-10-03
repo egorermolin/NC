@@ -13,14 +13,14 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.openfast.*;
 import org.openfast.codec.Coder;
-import ru.ncapital.gateways.micexfast.ConfigurationManager;
+import ru.ncapital.gateways.moexfast.ConfigurationManager;
 import ru.ncapital.gateways.micexfast.InstrumentManager;
 import ru.ncapital.gateways.micexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.connection.Connection;
 import ru.ncapital.gateways.moexfast.connection.ConnectionId;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IIncrementalProcessor;
 import ru.ncapital.gateways.moexfast.connection.multicast.MessageReader;
-import ru.ncapital.gateways.micexfast.messagehandlers.MessageHandlerType;
+import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 
 import java.io.IOException;
 import java.net.InetAddress;

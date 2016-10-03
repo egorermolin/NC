@@ -1,8 +1,7 @@
-package ru.ncapital.gateways.micexfast.messagehandlers;
+package ru.ncapital.gateways.moexfast.messagehandlers;
 
 import com.google.inject.name.Named;
-import ru.ncapital.gateways.micexfast.IGatewayConfiguration;
-import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
+import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 
 /**
  * Created by egore on 2/2/16.
