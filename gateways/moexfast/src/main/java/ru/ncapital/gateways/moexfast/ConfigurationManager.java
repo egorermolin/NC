@@ -3,7 +3,6 @@ package ru.ncapital.gateways.moexfast;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.connection.Connection;
 import ru.ncapital.gateways.moexfast.connection.ConnectionId;
-import ru.ncapital.gateways.moexfast.xml.XMLReader;
 
 import java.net.NetworkInterface;
 import java.util.Map;
@@ -27,7 +26,6 @@ public abstract class ConfigurationManager {
     public ConfigurationManager configure(IGatewayConfiguration configuration) {
         this.fastTemplatesFile = configuration.getFastTemplatesFile();
         this.networkInterface = configuration.getNetworkInterface();
-        this.connections = new XMLReader().read(configuration.getConnectionsFile());
         this.asynchChannelReader = configuration.isAsynchChannelReader();
         this.feedDownTimeout = configuration.getFeedDownTimeout();
         this.restartOnAllFeedDown = configuration.restartOnAllFeedDown();

@@ -1,7 +1,9 @@
 package ru.ncapital.gateways.micexfast;
 
 import com.google.inject.Singleton;
+import ru.ncapital.gateways.micexfast.xml.MicexXMLReader;
 import ru.ncapital.gateways.moexfast.ConfigurationManager;
+import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.connection.ConnectionId;
 
 import java.util.ArrayList;
@@ -13,6 +15,13 @@ import java.util.List;
 @Singleton
 public class MicexConfigurationManager extends ConfigurationManager {
     private ConnectionId[] micexConnectionIds;
+
+    @Override
+    public ConfigurationManager configure(IGatewayConfiguration configuration) {
+        this.connections = new MicexXMLReader().read(configuration.getConnectionsFile());
+
+        return super.configure(configuration);
+    }
 
     @Override
     public ConnectionId[] getAllConnectionIds() {

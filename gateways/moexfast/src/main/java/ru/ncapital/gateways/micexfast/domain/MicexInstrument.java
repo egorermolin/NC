@@ -20,7 +20,7 @@ public class MicexInstrument extends Instrument {
 
     @Override
     public String getFullname() {
-        return "[SecurityId: " + getSecurityId() + "]" + ((getProductType() == null) ? "" : ("[Product: " + getProductType().toString()));
+        return "[SecurityId: " + getSecurityId() + "]" + ((getProductType() == null) ? "" : ("[Product: " + getProductType().toString() + "]"));
     }
 
     @Override

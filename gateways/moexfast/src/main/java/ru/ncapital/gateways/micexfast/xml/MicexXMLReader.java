@@ -1,4 +1,4 @@
-package ru.ncapital.gateways.moexfast.xml;
+package ru.ncapital.gateways.micexfast.xml;
 
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -20,7 +20,7 @@ import java.util.TreeMap;
 /**
  * Created by egore on 12/14/15.
  */
-public class XMLReader {
+public class MicexXMLReader {
 
     public Map<ConnectionId, Connection> read(String filename) {
         TreeMap<ConnectionId, Connection> connectionsMap = new TreeMap<ConnectionId, Connection>();
@@ -79,11 +79,11 @@ public class XMLReader {
             }
 
         } catch (SAXException e) {
-            Utils.printStackTrace(e, LoggerFactory.getLogger("XMLReader"), "Exception occurred while reading XML");
+            Utils.printStackTrace(e, LoggerFactory.getLogger("MicexXMLReader"), "Exception occurred while reading XML");
         } catch (ParserConfigurationException e) {
-            Utils.printStackTrace(e, LoggerFactory.getLogger("XMLReader"), "Exception occurred while reading XML");
+            Utils.printStackTrace(e, LoggerFactory.getLogger("MicexXMLReader"), "Exception occurred while reading XML");
         } catch (IOException e) {
-            Utils.printStackTrace(e, LoggerFactory.getLogger("XMLReader"), "Exception occurred while reading XML");
+            Utils.printStackTrace(e, LoggerFactory.getLogger("MicexXMLReader"), "Exception occurred while reading XML");
         }
 
         return connectionsMap;

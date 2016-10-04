@@ -19,8 +19,8 @@ public class FortsGatewayManager extends GatewayManager {
 
      public static void setLogLevel(Level level) {
         String[] loggers = {"FortsGatewayManager", "HeartbeatProcessor",
-                "FUT-IDF-A-Processor", "FUT-IDF-B-Processor",
-                "FUT-ISF-A-Processor", "FUT-ISF-B-Processor"
+                "FUT-INFO-R-A-Processor", "FUT-INFO-R-B-Processor",
+                "FUT-INFO-I-A-Processor", "FUT-INFO-I-B-Processor"
         };
 
         for (String logger : loggers)
@@ -28,7 +28,7 @@ public class FortsGatewayManager extends GatewayManager {
     }
 
     public static IGatewayManager create(IFortsGatewayConfiguration configuration) {
-        Injector injector = Guice.createInjector(new MicexGatewayModule());
+        Injector injector = Guice.createInjector(new FortsGatewayModule());
 
         if (!injector.getInstance(FortsConfigurationManager.class).configure(configuration).checkInterfaces())
             return null;

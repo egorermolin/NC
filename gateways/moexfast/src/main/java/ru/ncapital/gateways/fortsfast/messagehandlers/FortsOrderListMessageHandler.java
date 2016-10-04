@@ -1,4 +1,4 @@
-package ru.ncapital.gateways.micexfast.messagehandlers;
+package ru.ncapital.gateways.fortsfast.messagehandlers;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -13,25 +13,25 @@ import ru.ncapital.gateways.moexfast.messagehandlers.OrderListMessageHandler;
 /**
  * Created by Egor on 30-Sep-16.
  */
-public class MicexOrderListMessageHandler extends OrderListMessageHandler {
+public class FortsOrderListMessageHandler extends OrderListMessageHandler {
     @AssistedInject
-    public MicexOrderListMessageHandler(MarketDataManager marketDataManager, @Assisted IGatewayConfiguration configuration) {
+    public FortsOrderListMessageHandler(MarketDataManager marketDataManager, @Assisted IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
     }
 
     @Override
     protected String getSecurityId(Message readMessage) {
-        String symbol = readMessage.getString("Symbol");
-        String tradingSessionId = readMessage.getString("TradingSessionID");
+        long securityId = readMessage.getLong("SecurityID");
 
-        return MicexInstrument.getSecurityId(symbol, tradingSessionId);
+        // TODO lookup for instrument symbol
+        return String.valueOf(securityId);
     }
 
     @Override
     protected String getSecurityId(GroupValue mdEntry) {
-        String symbol = mdEntry.getString("Symbol");
-        String tradingSessionId = mdEntry.getString("TradingSessionID");
+        long securityId = mdEntry.getLong("SecurityID");
 
-        return MicexInstrument.getSecurityId(symbol, tradingSessionId);
+        // TODO lookup for instrument symbol
+        return String.valueOf(securityId);
     }
 }

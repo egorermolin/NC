@@ -3,9 +3,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
-import ru.ncapital.gateways.micexfast.*;
-import ru.ncapital.gateways.micexfast.domain.ProductType;
-import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
+import ru.ncapital.gateways.fortsfast.FortsGatewayManager;
+import ru.ncapital.gateways.fortsfast.FortsGatewayModule;
+import ru.ncapital.gateways.fortsfast.FortsMarketDataManager;
+import ru.ncapital.gateways.fortsfast.FortsNullGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.DefaultMarketDataHandler;
 import ru.ncapital.gateways.moexfast.IMarketDataHandler;
 
@@ -13,11 +14,11 @@ import ru.ncapital.gateways.moexfast.IMarketDataHandler;
  * Created by egore on 2/2/16.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class GatewayManagerTest {
+public class FortsGatewayManagerTest {
 
     @Before
     public void setup() {
-        MicexGatewayManager.create(new MicexNullGatewayConfiguration() {
+        FortsGatewayManager.create(new FortsNullGatewayConfiguration() {
             @Override
             public IMarketDataHandler getMarketDataHandler() {
                 return new DefaultMarketDataHandler();
@@ -25,7 +26,7 @@ public class GatewayManagerTest {
 
             @Override
             public String getFastTemplatesFile() {
-                return "src/main/resources/fast_templates.xml";
+                return "src/main/resources/forts/fast_templates.xml";
             }
 
             @Override
@@ -35,24 +36,14 @@ public class GatewayManagerTest {
 
             @Override
             public String getConnectionsFile() {
-                return "src/main/resources/config_test_internet.xml";
-            }
-
-            @Override
-            public TradingSessionId[] getAllowedTradingSessionIds() {
-                return new TradingSessionId[] {TradingSessionId.CETS};
-            }
-
-            @Override
-            public ProductType[] getAllowedProductTypes() {
-                return new ProductType[]{ProductType.CURRENCY};
+                return "src/main/resources/forts/config_test_internet.xml";
             }
         });
     }
 
     @Test
     public void testCreate() {
-        MicexMarketDataManager md = Guice.createInjector(new MicexGatewayModule()).getInstance(MicexMarketDataManager.class);
+        FortsMarketDataManager md = Guice.createInjector(new FortsGatewayModule()).getInstance(FortsMarketDataManager.class);
         assert md.getHeartbeatProcessor() != null;
     }
 }
