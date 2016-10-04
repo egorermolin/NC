@@ -13,7 +13,7 @@
         <uInt32 name="MsgSeqNum" id="34"/>
         <uInt64 name="SendingTime" id="52"/>
         <uInt32 name="LastFragment" id="893" presence="optional"/>
-        <sequence name="MDEntries">
+        <sequence name="GroupMDEntries">
             <length name="NoMDEntries" id="268"/>
             <uInt32 name="MDUpdateAction" id="279"/>
             <string name="MDEntryType" id="269"/>
@@ -65,7 +65,7 @@
         </uInt32>
         <string name="Symbol" id="55" presence="optional"/>
         <string name="SecurityGroup" id="1151" presence="optional"/>
-        <sequence name="MDEntries">
+        <sequence name="GroupMDEntries">
             <length name="NoMDEntries" id="268"/>
             <string name="MDEntryType" id="269"/>
             <uInt32 name="ExchangeTradingSessionID" id="5842" presence="optional"/>
@@ -312,7 +312,7 @@
         <uInt32 name="MsgSeqNum" id="34"/>
         <uInt64 name="SendingTime" id="52"/>
         <uInt32 name="LastFragment" id="893"/>
-        <sequence name="MDEntries">
+        <sequence name="GroupMDEntries">
             <length name="NoMDEntries" id="268"/>
             <uInt32 name="MDUpdateAction" id="279"/>
             <string name="MDEntryType" id="269"/>
@@ -354,7 +354,7 @@
         <uInt32 name="SecurityIDSource" id="22">
             <constant value="8"/>
         </uInt32>
-        <sequence name="MDEntries">
+        <sequence name="GroupMDEntries">
             <length name="NoMDEntries" id="268"/>
             <string name="MDEntryType" id="269"/>
             <int64 name="MDEntryID" id="278" presence="optional"/>

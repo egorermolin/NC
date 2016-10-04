@@ -34,8 +34,7 @@ public abstract class OrderListMessageHandler extends AMessageHandler {
 
     @Override
     protected void onSnapshotMdEntry(String securityId, GroupValue mdEntry) {
-        MdEntryType mdEntryType = MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
-
+        MdEntryType mdEntryType = getMdEntryType(mdEntry);
         if (mdEntryType == null)
             return;
 
@@ -45,9 +44,9 @@ public abstract class OrderListMessageHandler extends AMessageHandler {
                 depthLevel =
                         new DepthLevel(securityId,
                                 MdUpdateAction.INSERT,
-                                mdEntry.getString("MDEntryID"),
-                                mdEntry.getDouble("MDEntryPx"),
-                                mdEntry.getDouble("MDEntrySize"),
+                                getMdEntryId(mdEntry),
+                                getMdEntryPx(mdEntry),
+                                getMdEntrySize(mdEntry),
                                 null,
                                 true);
 
@@ -57,9 +56,9 @@ public abstract class OrderListMessageHandler extends AMessageHandler {
                 depthLevel =
                         new DepthLevel(securityId,
                                 MdUpdateAction.INSERT,
-                                mdEntry.getString("MDEntryID"),
-                                mdEntry.getDouble("MDEntryPx"),
-                                mdEntry.getDouble("MDEntrySize"),
+                                getMdEntryId(mdEntry),
+                                getMdEntryPx(mdEntry),
+                                getMdEntrySize(mdEntry),
                                 null,
                                 false);
 
@@ -84,22 +83,21 @@ public abstract class OrderListMessageHandler extends AMessageHandler {
 
     @Override
     public void onIncrementalMdEntry(String securityId, GroupValue mdEntry, PerformanceData perfData) {
-        MdEntryType mdEntryType = MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
-        MdUpdateAction mdUpdateAction = MdUpdateAction.convert(mdEntry.getString("MDUpdateAction").charAt(0));
-
+        MdEntryType mdEntryType = getMdEntryType(mdEntry);
         if (mdEntryType == null)
             return;
 
+        MdUpdateAction mdUpdateAction = getMdUpdateAction(mdEntry);
         DepthLevel depthLevel = null;
         switch (mdEntryType) {
             case BID:
                 depthLevel =
                         new DepthLevel(securityId,
                                 mdUpdateAction,
-                                mdEntry.getString("MDEntryID"),
-                                mdEntry.getDouble("MDEntryPx"),
-                                mdUpdateAction == MdUpdateAction.DELETE ? 0.0 : mdEntry.getDouble("MDEntrySize"),
-                                mdEntry.getString("DealNumber"),
+                                getMdEntryId(mdEntry),
+                                getMdEntryPx(mdEntry),
+                                mdUpdateAction == MdUpdateAction.DELETE ? 0.0 : getMdEntrySize(mdEntry),
+                                getTradeId(mdEntry),
                                 true);
 
                 depthLevel.getPerformanceData().updateFrom(perfData).setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
@@ -108,10 +106,10 @@ public abstract class OrderListMessageHandler extends AMessageHandler {
                 depthLevel =
                         new DepthLevel(securityId,
                                 mdUpdateAction,
-                                mdEntry.getString("MDEntryID"),
-                                mdEntry.getDouble("MDEntryPx"),
-                                mdUpdateAction == MdUpdateAction.DELETE ? 0.0 : mdEntry.getDouble("MDEntrySize"),
-                                mdEntry.getString("DealNumber"),
+                                getMdEntryId(mdEntry),
+                                getMdEntryPx(mdEntry),
+                                mdUpdateAction == MdUpdateAction.DELETE ? 0.0 : getMdEntrySize(mdEntry),
+                                getTradeId(mdEntry),
                                 false);
 
                 depthLevel.getPerformanceData().updateFrom(perfData).setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));

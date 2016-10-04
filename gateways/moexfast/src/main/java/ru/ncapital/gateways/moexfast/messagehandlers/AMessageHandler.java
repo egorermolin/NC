@@ -6,6 +6,8 @@ import org.openfast.SequenceValue;
 import org.slf4j.Logger;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
+import ru.ncapital.gateways.moexfast.domain.MdEntryType;
+import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 /**
@@ -67,4 +69,16 @@ public abstract class AMessageHandler implements IMessageHandler {
     protected abstract String getSecurityId(Message readMessage);
 
     protected abstract String getSecurityId(GroupValue mdEntry);
+
+    protected abstract String getMdEntryId(GroupValue mdEntry);
+
+    protected abstract double getMdEntryPx(GroupValue mdEntry);
+
+    protected abstract double getMdEntrySize(GroupValue mdEntry);
+
+    protected abstract String getTradeId(GroupValue mdEntry);
+
+    protected abstract MdEntryType getMdEntryType(GroupValue mdEntry);
+
+    protected abstract MdUpdateAction getMdUpdateAction(GroupValue mdEntry);
 }
