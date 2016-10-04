@@ -4,11 +4,11 @@ import org.openfast.GroupValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
-import ru.ncapital.gateways.micexfast.MarketDataManager;
+import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.domain.MdEntryType;
-import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 import ru.ncapital.gateways.moexfast.domain.PublicTrade;
+import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 /**
  * Created by egore on 1/28/16.

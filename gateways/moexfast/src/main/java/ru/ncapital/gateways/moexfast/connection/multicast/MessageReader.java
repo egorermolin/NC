@@ -1,20 +1,23 @@
 package ru.ncapital.gateways.moexfast.connection.multicast;
 
 import org.apache.log4j.Level;
-import org.openfast.*;
+import org.openfast.Message;
+import org.openfast.MessageHandler;
+import org.openfast.MessageInputStream;
+import org.openfast.SequenceValue;
 import org.openfast.error.FastException;
 import org.openfast.logging.FastMessageLogger;
 import org.openfast.template.MessageTemplate;
 import org.openfast.template.loader.XMLMessageTemplateLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.micexfast.InstrumentManager;
-import ru.ncapital.gateways.micexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.ConfigurationManager;
+import ru.ncapital.gateways.moexfast.InstrumentManager;
+import ru.ncapital.gateways.moexfast.MarketDataManager;
+import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.connection.Connection;
 import ru.ncapital.gateways.moexfast.connection.ConnectionId;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
-import ru.ncapital.gateways.moexfast.Utils;
 
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
@@ -30,7 +33,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -212,7 +214,7 @@ public class MessageReader implements IMulticastEventListener {
 
     private MessageInputStream messageReader;
 
-    private MicexFastMulticastInputStream multicastInputStream;
+    private MoexFastMulticastInputStream multicastInputStream;
 
     private String fastTemplatesFile;
 
@@ -354,7 +356,7 @@ public class MessageReader implements IMulticastEventListener {
                                 "[Source: " + connection.getSource() + "(" + InetAddress.getByName(connection.getSource()) + ")]" +
                                 "[Key: " + membership.toString() + "]");
 
-        multicastInputStream = new MicexFastMulticastInputStream(this, channel, logger, asynch, connectionId);
+        multicastInputStream = new MoexFastMulticastInputStream(this, channel, logger, asynch, connectionId);
         messageReader = new MessageInputStream(multicastInputStream);
 
         for (MessageTemplate template : new XMLMessageTemplateLoader()

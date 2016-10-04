@@ -1,10 +1,6 @@
 package ru.ncapital.gateways.moexfast;
 
-import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.connection.MarketType;
-import ru.ncapital.gateways.micexfast.domain.ProductType;
-import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
-import ru.ncapital.gateways.moexfast.IMarketDataHandler;
 import ru.ncapital.gateways.moexfast.performance.IGatewayPerformanceLogger;
 
 /**

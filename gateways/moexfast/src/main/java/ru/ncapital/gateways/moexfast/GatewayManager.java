@@ -2,13 +2,9 @@ package ru.ncapital.gateways.moexfast;
 
 import com.google.inject.Inject;
 import org.apache.log4j.*;
-import ru.ncapital.gateways.micexfast.InstrumentManager;
-import ru.ncapital.gateways.micexfast.MarketDataManager;
-import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
 import ru.ncapital.gateways.moexfast.connection.ConnectionManager;
 import ru.ncapital.gateways.moexfast.domain.Subscription;
 
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -16,7 +12,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 
 public abstract class GatewayManager implements IGatewayManager {
-
     @Inject
     protected ConnectionManager connectionManager;
 
@@ -88,8 +83,8 @@ public abstract class GatewayManager implements IGatewayManager {
             connectionManager.shutdown();
     }
 
-    public void onInstrumentDownloadFinished(Collection<MicexInstrument> instruments) {
-        connectionManager.onInstrumentDownloadFinished(instruments);
+    public void onInstrumentDownloadFinished() {
+        connectionManager.onInstrumentDownloadFinished();
     }
 
     @Override

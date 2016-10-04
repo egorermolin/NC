@@ -11,9 +11,21 @@ public class MicexInstrument extends Instrument {
 
     private String tradingSessionId;
 
+    private ProductType productType;
+
     public MicexInstrument(String symbol, String tradingSessionId) {
         super(symbol, getSecurityId(symbol, tradingSessionId));
         this.tradingSessionId = tradingSessionId;
+    }
+
+    @Override
+    public String getFullname() {
+        return "[SecurityId: " + getSecurityId() + "]" + ((getProductType() == null) ? "" : ("[Product: " + getProductType().toString()));
+    }
+
+    @Override
+    public String getName() {
+        return "MicexInstrument";
     }
 
     public String getTradingSessionId() {
@@ -22,5 +34,13 @@ public class MicexInstrument extends Instrument {
 
     public static String getSecurityId(String symbol, String tradingSessionId) {
         return symbol + MicexInstrument.BOARD_SEPARATOR + tradingSessionId;
+    }
+
+    public ProductType getProductType() {
+        return this.productType;
+    }
+
+    public void setProductType(int productType) {
+        this.productType = ProductType.convert(productType);
     }
 }

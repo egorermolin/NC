@@ -2,7 +2,6 @@ package ru.ncapital.gateways.moexfast.messagehandlers;
 
 import org.openfast.GroupValue;
 import org.openfast.Message;
-import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 /**

@@ -6,7 +6,7 @@ import org.mockito.*;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openfast.*;
 import org.openfast.codec.Coder;
-import ru.ncapital.gateways.micexfast.GatewayModule;
+import ru.ncapital.gateways.micexfast.MicexGatewayModule;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.MicexIncrementalProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IncrementalProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
@@ -39,7 +39,7 @@ public class IncrementalProcessorTest {
 
     @Before
     public void setup() {
-        sequenceValidator = Guice.createInjector(new GatewayModule()).getInstance(MessageSequenceValidatorFactory.class).createMessageSequenceValidatorForOrderList();
+        sequenceValidator = Guice.createInjector(new MicexGatewayModule()).getInstance(MessageSequenceValidatorFactory.class).createMessageSequenceValidatorForOrderList();
         incrementalProcessor = new MicexIncrementalProcessor(marketDataHandler, sequenceValidator);
         incrementalProcessor.setIsPrimary(true);
         Mockito.when(marketDataHandler.isAllowedUpdate("SYMB;CETS")).thenReturn(true);

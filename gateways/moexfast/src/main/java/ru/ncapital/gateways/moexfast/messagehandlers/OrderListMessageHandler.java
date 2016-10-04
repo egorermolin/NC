@@ -4,7 +4,7 @@ import org.openfast.GroupValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
-import ru.ncapital.gateways.micexfast.MarketDataManager;
+import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.domain.DepthLevel;
 import ru.ncapital.gateways.moexfast.domain.MdEntryType;

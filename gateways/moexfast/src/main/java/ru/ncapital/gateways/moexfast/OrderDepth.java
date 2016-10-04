@@ -1,4 +1,4 @@
-package ru.ncapital.gateways.micexfast;
+package ru.ncapital.gateways.moexfast;
 
 import com.google.common.collect.SortedMultiset;
 import com.google.common.collect.TreeMultiset;
@@ -7,7 +7,10 @@ import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.domain.BBO;
 import ru.ncapital.gateways.moexfast.domain.DepthLevel;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by egore on 12/17/15.
@@ -37,7 +40,6 @@ public class OrderDepth {
                 return depthLevel.compareTo(depthLevel1);
             }
         });
-        // this.depthLevelsSorted = TreeMultiset.create(isBid ? DepthLevel::bidCompareTo : DepthLevel::offerCompareTo);
         this.depthLevels = new HashMap<>();
         this.logger = LoggerFactory.getLogger((isBid ? "Bid" : "Offer") + "OrderDepth");
     }

@@ -7,7 +7,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openfast.GroupValue;
 import org.openfast.Message;
 import org.openfast.SequenceValue;
-import ru.ncapital.gateways.micexfast.GatewayModule;
+import ru.ncapital.gateways.micexfast.MicexGatewayModule;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.StoredMdEntry;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
@@ -19,7 +19,7 @@ import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 @RunWith(MockitoJUnitRunner.class)
 public class MessageSequenceValidatorTest {
 
-    IMessageSequenceValidator sequenceValidator = Guice.createInjector(new GatewayModule()).getInstance(MessageSequenceValidatorFactory.class).createMessageSequenceValidatorForOrderList();;
+    IMessageSequenceValidator sequenceValidator = Guice.createInjector(new MicexGatewayModule()).getInstance(MessageSequenceValidatorFactory.class).createMessageSequenceValidatorForOrderList();;
 
     @Before
     public void setup() {

@@ -1,6 +1,3 @@
-// Copyright 2016 Itiviti Group All rights reserved.
-// Reproduction in whole or in part in any form or medium without express
-// written permission of Orc Software AB is strictly prohibited.
 package ru.ncapital.gateways.micexfast;
 
 import com.google.inject.Singleton;
@@ -23,7 +20,7 @@ public class MicexConfigurationManager extends ConfigurationManager {
             List<ConnectionId> micexConnectionIdsList = new ArrayList<>();
             for (ConnectionId connectionId : ConnectionId.values()) {
                 final String connectionIdString = connectionId.toString();
-                if (connectionIdString.contains("CURR") || connectionIdString.contains("FOND"))
+                if (connectionIdString.contains("CURR-") || connectionIdString.contains("FOND-"))
                     micexConnectionIdsList.add(connectionId);
             }
 

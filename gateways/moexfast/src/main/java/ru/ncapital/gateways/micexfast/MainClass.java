@@ -3,11 +3,16 @@ package ru.ncapital.gateways.micexfast;
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.moexfast.*;
+import ru.ncapital.gateways.micexfast.domain.ProductType;
+import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
+import ru.ncapital.gateways.moexfast.DefaultMarketDataHandler;
+import ru.ncapital.gateways.moexfast.IGatewayManager;
+import ru.ncapital.gateways.moexfast.IMarketDataHandler;
+import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.connection.MarketType;
-import ru.ncapital.gateways.micexfast.domain.*;
 import ru.ncapital.gateways.moexfast.domain.BBO;
 import ru.ncapital.gateways.moexfast.domain.DepthLevel;
+import ru.ncapital.gateways.moexfast.domain.Instrument;
 import ru.ncapital.gateways.moexfast.domain.PublicTrade;
 
 import java.util.concurrent.CountDownLatch;
@@ -17,7 +22,7 @@ import java.util.concurrent.CountDownLatch;
  */
 public class MainClass {
 
-    private MicexInstrument[] instruments;
+    private Instrument[] instruments;
 
     private CountDownLatch waiter = new CountDownLatch(1);
 
@@ -61,7 +66,7 @@ public class MainClass {
                     }
 
                     @Override
-                    public void onInstruments(MicexInstrument[] _instruments) {
+                    public void onInstruments(Instrument[] _instruments) {
                         instruments = _instruments;
                         waiter.countDown();
                     }
@@ -129,8 +134,8 @@ public class MainClass {
         waiter.await();
         logger.info("TOTAL " + instruments.length + " INSTRUMENTS");
 
-        for (MicexInstrument instrument : instruments) {
-            logger.info("MicexInstrument " + instrument.toString());
+        for (Instrument instrument : instruments) {
+            logger.info(instrument.getName() + " " + instrument.toString());
             gwManager.subscribeForMarketData(instrument.getSecurityId());
         }
 

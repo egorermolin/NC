@@ -14,7 +14,7 @@ import java.nio.channels.DatagramChannel;
 /**
  * Created by egore on 12/10/15.
  */
-public class MicexFastMulticastInputStream extends InputStream {
+public class MoexFastMulticastInputStream extends InputStream {
     private static final int BUFFER_LENGTH = 1500;
 
     private IChannelPacketReader packetReader;
@@ -27,7 +27,7 @@ public class MicexFastMulticastInputStream extends InputStream {
 
     private ThreadLocal<Long> inTimestamp;
 
-    private ThreadLocal<Long> dequeuTimestamp;
+    private ThreadLocal<Long> dequeTimestamp;
 
     private ChannelPacketReaderFactory channelPacketReaderFactory = new ChannelPacketReaderFactory();
 
@@ -41,7 +41,7 @@ public class MicexFastMulticastInputStream extends InputStream {
         return hex;
     }
 
-    public MicexFastMulticastInputStream(IMulticastEventListener eventListener, DatagramChannel channel, Logger logger, boolean asynch, ConnectionId connectionId) {
+    public MoexFastMulticastInputStream(IMulticastEventListener eventListener, DatagramChannel channel, Logger logger, boolean asynch, ConnectionId connectionId) {
         this.logger = logger;
         this.bytebuffer = ByteBuffer.allocate(BUFFER_LENGTH);
         this.bytebuffer.clear();
@@ -53,7 +53,7 @@ public class MicexFastMulticastInputStream extends InputStream {
         this.inTimestamp = inTimestamp;
     }
 
-    public void setDequeTimestamp(ThreadLocal<Long> dequeuTimestamp) { this.dequeuTimestamp = dequeuTimestamp; }
+    public void setDequeTimestamp(ThreadLocal<Long> dequeTimestamp) { this.dequeTimestamp = dequeTimestamp; }
 
     private static int getSeqNum(ByteBuffer bb) {
         return (int) ((bb.get(0) & 0xFF)

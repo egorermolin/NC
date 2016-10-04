@@ -4,19 +4,18 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.micexfast.*;
-import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
-import ru.ncapital.gateways.moexfast.ConfigurationManager;
-import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
+import ru.ncapital.gateways.moexfast.*;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.ISnapshotProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.connection.multicast.MessageReader;
 import ru.ncapital.gateways.moexfast.connection.multicast.MessageReaderStarter;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
-import ru.ncapital.gateways.moexfast.Utils;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -316,9 +315,8 @@ public class ConnectionManager {
         }
     }
 
-    public void onInstrumentDownloadFinished(Collection<MicexInstrument> instruments) {
+    public void onInstrumentDownloadFinished() {
         stopInstrument();
-
         startSnapshotWatchers();
     }
 

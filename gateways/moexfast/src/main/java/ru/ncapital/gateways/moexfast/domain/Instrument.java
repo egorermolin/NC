@@ -1,14 +1,9 @@
-// Copyright 2016 Itiviti Group All rights reserved.
-// Reproduction in whole or in part in any form or medium without express
-// written permission of Orc Software AB is strictly prohibited.
 package ru.ncapital.gateways.moexfast.domain;
-
-import ru.ncapital.gateways.micexfast.domain.ProductType;
 
 /**
  * Created by Egor on 30-Sep-16.
  */
-public class Instrument {
+public abstract class Instrument {
     private String symbol;
 
     private String securityId;
@@ -26,8 +21,6 @@ public class Instrument {
     private double multiplier;
 
     private String underlying;
-
-    private ProductType productType;
 
     public Instrument(String symbol, String securityId) {
         this.securityId = securityId;
@@ -70,10 +63,6 @@ public class Instrument {
         return underlying;
     }
 
-    public ProductType getProductType() {
-        return this.productType;
-    }
-
     public void setCurrency(String currency) {
         this.currency = currency;
     }
@@ -102,13 +91,9 @@ public class Instrument {
         this.underlying = underlying;
     }
 
-    public void setProductType(int productType) {
-        this.productType = ProductType.convert(productType);
-    }
-
     @Override
     public String toString() {
-        return "MicexInstrument{" +
+        return "Instrument{" +
                 "symbol='" + symbol + '\'' +
                 ", securityId='" + securityId + '\'' +
                 ", currency='" + currency + '\'' +
@@ -118,7 +103,10 @@ public class Instrument {
                 ", tradingStatus='" + tradingStatus + '\'' +
                 ", multiplier=" + multiplier +
                 ", underlying='" + underlying + '\'' +
-                ", productType=" + productType +
                 '}';
     }
+
+    public abstract String getFullname();
+
+    public abstract String getName();
 }

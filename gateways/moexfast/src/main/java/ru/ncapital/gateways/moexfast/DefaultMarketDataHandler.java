@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.domain.BBO;
 import ru.ncapital.gateways.moexfast.domain.DepthLevel;
-import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
+import ru.ncapital.gateways.moexfast.domain.Instrument;
 import ru.ncapital.gateways.moexfast.domain.PublicTrade;
 
 /**
@@ -93,7 +93,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
     }
 
     @Override
-    public void onInstruments(MicexInstrument[] instruments) {
+    public void onInstruments(Instrument[] instruments) {
 
     }
 

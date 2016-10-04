@@ -1,4 +1,4 @@
-package ru.ncapital.gateways.micexfast;
+package ru.ncapital.gateways.moexfast;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

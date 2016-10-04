@@ -3,9 +3,8 @@ package ru.ncapital.gateways.micexfast;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import org.apache.log4j.*;
+import org.apache.log4j.Level;
 import ru.ncapital.gateways.moexfast.GatewayManager;
-import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.IGatewayManager;
 import ru.ncapital.gateways.moexfast.connection.ConnectionManager;
 
@@ -15,10 +14,8 @@ import ru.ncapital.gateways.moexfast.connection.ConnectionManager;
 
 @Singleton
 public class MicexGatewayManager extends GatewayManager {
-
      public static void setLogLevel(Level level) {
-        String[] loggers = {"MicexGatewayManager",
-                "HeartbeatProcessor",
+        String[] loggers = {"MicexGatewayManager", "MicexMarketDataManager", "HeartbeatProcessor",
             "CURR-IDF-A-Processor", "CURR-IDF-B-Processor",
             "CURR-ISF-A-Processor", "CURR-ISF-B-Processor",
             "CURR-OLR-A-Processor", "CURR-OLR-B-Processor",
@@ -39,13 +36,13 @@ public class MicexGatewayManager extends GatewayManager {
     }
 
     public static IGatewayManager create(IMicexGatewayConfiguration configuration) {
-        Injector injector = Guice.createInjector(new GatewayModule());
+        Injector injector = Guice.createInjector(new MicexGatewayModule());
 
         if (!injector.getInstance(MicexConfigurationManager.class).configure(configuration).checkInterfaces())
             return null;
 
-        injector.getInstance(InstrumentManager.class).configure(configuration);
-        injector.getInstance(MarketDataManager.class).configure(configuration);
+        injector.getInstance(MicexInstrumentManager.class).configure(configuration);
+        injector.getInstance(MicexMarketDataManager.class).configure(configuration);
         injector.getInstance(ConnectionManager.class).configure(configuration);
 
         return injector.getInstance(MicexGatewayManager.class).configure(configuration);

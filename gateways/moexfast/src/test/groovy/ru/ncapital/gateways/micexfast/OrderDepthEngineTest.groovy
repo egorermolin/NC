@@ -1,5 +1,6 @@
 package ru.ncapital.gateways.micexfast
 
+import ru.ncapital.gateways.moexfast.OrderDepthEngine
 import ru.ncapital.gateways.moexfast.domain.BBO
 import ru.ncapital.gateways.moexfast.domain.DepthLevel
 import ru.ncapital.gateways.moexfast.domain.MdUpdateAction

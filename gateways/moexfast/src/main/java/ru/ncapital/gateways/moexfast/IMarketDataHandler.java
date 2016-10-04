@@ -1,8 +1,8 @@
 package ru.ncapital.gateways.moexfast;
 
-import ru.ncapital.gateways.micexfast.domain.*;
 import ru.ncapital.gateways.moexfast.domain.BBO;
 import ru.ncapital.gateways.moexfast.domain.DepthLevel;
+import ru.ncapital.gateways.moexfast.domain.Instrument;
 import ru.ncapital.gateways.moexfast.domain.PublicTrade;
 
 /**
@@ -19,7 +19,7 @@ public interface IMarketDataHandler {
 
     void onTradingStatus(BBO bbo);
 
-    void onInstruments(MicexInstrument[] instruments);
+    void onInstruments(Instrument[] instruments);
 
     void onFeedStatus(boolean up, boolean all);
 }

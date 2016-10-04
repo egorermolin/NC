@@ -1,9 +1,12 @@
 package ru.ncapital.gateways.micexfast.connection.multicast;
 
 import org.apache.log4j.Level;
-import ru.ncapital.gateways.micexfast.*;
+import ru.ncapital.gateways.micexfast.MicexConfigurationManager;
+import ru.ncapital.gateways.micexfast.MicexGatewayManager;
+import ru.ncapital.gateways.micexfast.MicexInstrumentManager;
+import ru.ncapital.gateways.micexfast.MicexNullGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.ConfigurationManager;
-import ru.ncapital.gateways.moexfast.NullGatewayConfiguration;
+import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.connection.ConnectionId;
 import ru.ncapital.gateways.moexfast.connection.multicast.MessageReader;
 
@@ -16,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class MicexMessageReader extends MessageReader {
 
-    public MicexMessageReader(ConnectionId connectionId, ConfigurationManager configurationManager, MarketDataManager marketDataManager, InstrumentManager instumentManager) {
+    public MicexMessageReader(ConnectionId connectionId, ConfigurationManager configurationManager, MarketDataManager marketDataManager, MicexInstrumentManager instumentManager) {
         super(connectionId, configurationManager, marketDataManager, instumentManager);
     }
 

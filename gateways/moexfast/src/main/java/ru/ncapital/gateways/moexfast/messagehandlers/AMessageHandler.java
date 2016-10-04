@@ -5,7 +5,7 @@ import org.openfast.Message;
 import org.openfast.SequenceValue;
 import org.slf4j.Logger;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
-import ru.ncapital.gateways.micexfast.MarketDataManager;
+import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 /**

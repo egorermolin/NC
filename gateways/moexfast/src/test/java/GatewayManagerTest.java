@@ -8,7 +8,6 @@ import ru.ncapital.gateways.micexfast.domain.ProductType;
 import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
 import ru.ncapital.gateways.moexfast.DefaultMarketDataHandler;
 import ru.ncapital.gateways.moexfast.IMarketDataHandler;
-import ru.ncapital.gateways.moexfast.NullGatewayConfiguration;
 
 /**
  * Created by egore on 2/2/16.
@@ -53,7 +52,7 @@ public class GatewayManagerTest {
 
     @Test
     public void testCreate() {
-        MarketDataManager md = Guice.createInjector(new GatewayModule()).getInstance(MarketDataManager.class);
+        MicexMarketDataManager md = Guice.createInjector(new MicexGatewayModule()).getInstance(MicexMarketDataManager.class);
         assert md.getHeartbeatProcessor() != null;
     }
 }

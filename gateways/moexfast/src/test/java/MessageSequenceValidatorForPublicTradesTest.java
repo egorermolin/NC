@@ -3,7 +3,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
-import ru.ncapital.gateways.micexfast.GatewayModule;
+import ru.ncapital.gateways.micexfast.MicexGatewayModule;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
 
@@ -12,7 +12,7 @@ import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalida
  */
 @RunWith(MockitoJUnitRunner.class)
 public class MessageSequenceValidatorForPublicTradesTest {
-    IMessageSequenceValidator sequenceValidator = Guice.createInjector(new GatewayModule()).getInstance(MessageSequenceValidatorFactory.class).createMessageSequenceValidatorForPublicTrades();
+    IMessageSequenceValidator sequenceValidator = Guice.createInjector(new MicexGatewayModule()).getInstance(MessageSequenceValidatorFactory.class).createMessageSequenceValidatorForPublicTrades();
 
     @Before
     public void setup() {

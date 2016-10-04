@@ -1,7 +1,3 @@
-// Copyright 2016 Orc Software AB All rights reserved.
-// Reproduction in whole or in part in any form or medium without express
-// written permission of Orc Software AB is strictly prohibited.
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,11 +7,11 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.openfast.*;
+import org.openfast.Context;
 import org.openfast.codec.Coder;
+import ru.ncapital.gateways.micexfast.MicexInstrumentManager;
+import ru.ncapital.gateways.micexfast.MicexMarketDataManager;
 import ru.ncapital.gateways.moexfast.ConfigurationManager;
-import ru.ncapital.gateways.micexfast.InstrumentManager;
-import ru.ncapital.gateways.micexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.connection.Connection;
 import ru.ncapital.gateways.moexfast.connection.ConnectionId;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IIncrementalProcessor;
@@ -49,10 +45,10 @@ public class MessageReaderTest {
     private ConfigurationManager configurationManager;
 
     @Mock
-    private InstrumentManager instrumentManager;
+    private MicexInstrumentManager instrumentManager;
 
     @Mock
-    private MarketDataManager marketDataManager;
+    private MicexMarketDataManager marketDataManager;
 
     @Mock
     private Connection connection;

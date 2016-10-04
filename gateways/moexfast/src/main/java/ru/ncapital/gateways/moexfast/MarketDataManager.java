@@ -1,21 +1,15 @@
-package ru.ncapital.gateways.micexfast;
+package ru.ncapital.gateways.moexfast;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.MicexIncrementalProcessor;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.MicexSnapshotProcessor;
-import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
-import ru.ncapital.gateways.moexfast.connection.messageprocessors.*;
-import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.HeartbeatProcessor;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.IIncrementalProcessor;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.IProcessor;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.ISnapshotProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
-import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
+import ru.ncapital.gateways.moexfast.domain.*;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerFactory;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
-import ru.ncapital.gateways.moexfast.IMarketDataHandler;
-import ru.ncapital.gateways.moexfast.Utils;
-import ru.ncapital.gateways.moexfast.domain.*;
 import ru.ncapital.gateways.moexfast.performance.IGatewayPerformanceLogger;
 
 import java.util.ArrayList;
@@ -26,38 +20,37 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by egore on 12/7/15.
  */
 
-@Singleton
-public class MarketDataManager {
-    private ConcurrentHashMap<String, Subscription> subscriptions = new ConcurrentHashMap<String, Subscription>();
+public abstract class MarketDataManager {
+    private ConcurrentHashMap<String, Subscription> subscriptions = new ConcurrentHashMap<>();
 
-    private ConcurrentHashMap<String, BBO> bbos = new ConcurrentHashMap<String, BBO>();
+    private ConcurrentHashMap<String, BBO> bbos = new ConcurrentHashMap<>();
 
-    private Logger logger = LoggerFactory.getLogger("MarketDataManager");
+    private Logger logger = getLogger();
 
     private OrderDepthEngine orderDepthEngine = new OrderDepthEngine();
 
     private IMarketDataHandler marketDataHandler;
 
-    private ISnapshotProcessor snapshotProcessorForOrderList;
+    protected ISnapshotProcessor snapshotProcessorForOrderList;
 
-    private ISnapshotProcessor snapshotProcessorForStatistics;
+    protected ISnapshotProcessor snapshotProcessorForStatistics;
 
-    private IIncrementalProcessor incrementalProcessorForOrderList;
+    protected IIncrementalProcessor incrementalProcessorForOrderList;
 
-    private IIncrementalProcessor incrementalProcessorForStatistics;
+    protected IIncrementalProcessor incrementalProcessorForStatistics;
 
-    private IIncrementalProcessor incrementalProcessorForPublicTrades;
-
-    @Inject
-    private MessageSequenceValidatorFactory messageSequenceValidatorFactory;
+    protected IIncrementalProcessor incrementalProcessorForPublicTrades;
 
     @Inject
-    private MessageHandlerFactory messageHandlerFactory;
+    protected MessageSequenceValidatorFactory messageSequenceValidatorFactory;
 
     @Inject
-    private HeartbeatProcessor heartbeatProcessor;
+    protected MessageHandlerFactory messageHandlerFactory;
 
-    private InstrumentManager instrumentManager;
+    @Inject
+    protected HeartbeatProcessor heartbeatProcessor;
+
+    protected InstrumentManager instrumentManager;
 
     private IGatewayPerformanceLogger performanceLogger;
 
@@ -72,21 +65,6 @@ public class MarketDataManager {
     public MarketDataManager configure(IGatewayConfiguration configuration) {
         marketDataHandler = configuration.getMarketDataHandler();
         performanceLogger = configuration.getPerformanceLogger();
-
-        IMessageHandler messageHandlerForOrderList = messageHandlerFactory.createOrderListMessageHandler(configuration);
-        IMessageHandler messageHandlerForStatistics = messageHandlerFactory.createStatisticsMessageHandler(configuration);
-        IMessageHandler messageHandlerForPublicTrades = messageHandlerFactory.createPublicTradesMessageHandler(configuration);
-
-        IMessageSequenceValidator sequenceValidatorForOrderList = messageSequenceValidatorFactory.createMessageSequenceValidatorForOrderList();
-        IMessageSequenceValidator sequenceValidatorForStatistics = messageSequenceValidatorFactory.createMessageSequenceValidatorForStatistics();
-        IMessageSequenceValidator sequenceValidatorForPublicTrades = messageSequenceValidatorFactory.createMessageSequenceValidatorForPublicTrades();
-
-        snapshotProcessorForOrderList = new MicexSnapshotProcessor(messageHandlerForOrderList, sequenceValidatorForOrderList);
-        snapshotProcessorForStatistics = new MicexSnapshotProcessor(messageHandlerForStatistics, sequenceValidatorForStatistics);
-
-        incrementalProcessorForOrderList = new MicexIncrementalProcessor(messageHandlerForOrderList, sequenceValidatorForOrderList);
-        incrementalProcessorForStatistics = new MicexIncrementalProcessor(messageHandlerForStatistics, sequenceValidatorForStatistics);
-        incrementalProcessorForPublicTrades = new MicexIncrementalProcessor(messageHandlerForPublicTrades, sequenceValidatorForPublicTrades);
 
         return this;
     }
@@ -286,4 +264,6 @@ public class MarketDataManager {
         if (changed)
             marketDataHandler.onFeedStatus(up, all);
     }
+
+    public abstract Logger getLogger();
 }

@@ -5,8 +5,8 @@ import org.openfast.Message;
 import org.openfast.SequenceValue;
 import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
-import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
+import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 /**
  * Created by egore on 1/11/16.
