@@ -17,6 +17,7 @@ import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.connection.Connection;
 import ru.ncapital.gateways.moexfast.connection.ConnectionId;
+import ru.ncapital.gateways.moexfast.connection.multicast.quickdecoder.QuickDecoderMessageInputStream;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 
 import java.io.BufferedWriter;
@@ -357,7 +358,17 @@ public class MessageReader implements IMulticastEventListener {
                                 "[Key: " + membership.toString() + "]");
 
         multicastInputStream = new MoexFastMulticastInputStream(this, channel, logger, asynch, connectionId);
-        messageReader = new MessageInputStream(multicastInputStream);
+        switch (connectionId) {
+            case CURR_ORDER_LIST_INCR_A:
+            case CURR_ORDER_LIST_INCR_B:
+            case FOND_ORDER_LIST_INCR_A:
+            case FOND_ORDER_LIST_INCR_B:
+                // messageReader = new QuickDecoderMessageInputStream(multicastInputStream);
+                // break;
+            default:
+                messageReader = new MessageInputStream(multicastInputStream);
+                break;
+        }
 
         for (MessageTemplate template : new XMLMessageTemplateLoader()
                 .load(new FileInputStream(fastTemplatesFile)))

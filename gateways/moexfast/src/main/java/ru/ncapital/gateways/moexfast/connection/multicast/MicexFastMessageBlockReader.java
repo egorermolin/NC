@@ -25,8 +25,7 @@ public class MicexFastMessageBlockReader implements MessageBlockReader {
             return false;
         }
         try {
-            in.read(new byte[4]);
-            return true;
+            return in.read(new byte[4]) > 0;
         } catch (IOException e) {
             eventListener.onException(e);
         }
