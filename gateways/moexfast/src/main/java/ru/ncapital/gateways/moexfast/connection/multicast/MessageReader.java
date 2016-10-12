@@ -1,10 +1,8 @@
 package ru.ncapital.gateways.moexfast.connection.multicast;
 
 import org.apache.log4j.Level;
-import org.openfast.Message;
-import org.openfast.MessageHandler;
-import org.openfast.MessageInputStream;
-import org.openfast.SequenceValue;
+import org.openfast.*;
+import org.openfast.codec.Coder;
 import org.openfast.error.FastException;
 import org.openfast.logging.FastMessageLogger;
 import org.openfast.template.MessageTemplate;
@@ -18,6 +16,7 @@ import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.connection.Connection;
 import ru.ncapital.gateways.moexfast.connection.ConnectionId;
 import ru.ncapital.gateways.moexfast.connection.multicast.quickdecoder.QuickDecoderMessageInputStream;
+import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 
 import java.io.BufferedWriter;
@@ -364,20 +363,24 @@ public class MessageReader implements IMulticastEventListener {
             messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
 
         if (instrumentManager == null && marketDataManager == null) {
-            registerMessageHandler((readMessage, context, coder) -> {
-                long decodedTimeInTodayMicros = Utils.currentTimeInTodayMicros();
-                long receivedTimeInTodayMicros = Utils.convertTicksToTodayMicros(inTimestamp.get());
-                long sendingTimeInTodayMicros = Utils.convertTodayToTodayMicros((readMessage.getLong("SendingTime") % 1_00_00_00_000L) * 1_000L);
+            registerMessageHandler(new MessageHandler()
+            {
+                @Override
+                public void handleMessage(Message readMessage, Context context, Coder coder) {
+                    long decodedTimeInTodayMicros = Utils.currentTimeInTodayMicros();
+                    long receivedTimeInTodayMicros = Utils.convertTicksToTodayMicros(inTimestamp.get());
+                    long sendingTimeInTodayMicros = Utils.convertTodayToTodayMicros((readMessage.getLong("SendingTime") % 1_00_00_00_000L) * 1_000L);
 
-                if (readMessage.getString("MessageType").equals("X")) {
-                    SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
-                    for (int i = 0; i < mdEntries.getLength(); ++i) {
-                        long entryTimeInTodayMicros = Utils.getEntryTimeInTodayMicros(mdEntries.get(i));
+                    if (readMessage.getString("MessageType").equals("X")) {
+                        SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
+                        for (int i = 0; i < mdEntries.getLength(); ++i) {
+                            long entryTimeInTodayMicros = Utils.getEntryTimeInTodayMicros(mdEntries.get(i));
 
-                        stats.addItem(readMessage.getInt("MsgSeqNum"),
-                                entryTimeInTodayMicros, sendingTimeInTodayMicros,
-                                receivedTimeInTodayMicros, decodedTimeInTodayMicros
-                        );
+                            stats.addItem(readMessage.getInt("MsgSeqNum"),
+                                    entryTimeInTodayMicros, sendingTimeInTodayMicros,
+                                    receivedTimeInTodayMicros, decodedTimeInTodayMicros
+                            );
+                        }
                     }
                 }
             });
