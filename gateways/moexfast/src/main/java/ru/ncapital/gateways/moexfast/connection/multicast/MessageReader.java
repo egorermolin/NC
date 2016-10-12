@@ -358,20 +358,9 @@ public class MessageReader implements IMulticastEventListener {
                                 "[Key: " + membership.toString() + "]");
 
         multicastInputStream = new MoexFastMulticastInputStream(this, channel, logger, asynch, connectionId);
-        switch (connectionId) {
-            case CURR_ORDER_LIST_INCR_A:
-            case CURR_ORDER_LIST_INCR_B:
-            case FOND_ORDER_LIST_INCR_A:
-            case FOND_ORDER_LIST_INCR_B:
-                // messageReader = new QuickDecoderMessageInputStream(multicastInputStream);
-                // break;
-            default:
-                messageReader = new MessageInputStream(multicastInputStream);
-                break;
-        }
+        messageReader = new MessageInputStream(multicastInputStream);
 
-        for (MessageTemplate template : new XMLMessageTemplateLoader()
-                .load(new FileInputStream(fastTemplatesFile)))
+        for (MessageTemplate template : new XMLMessageTemplateLoader().load(new FileInputStream(fastTemplatesFile)))
             messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
 
         if (instrumentManager == null && marketDataManager == null) {
