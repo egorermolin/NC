@@ -7,7 +7,7 @@ import ru.ncapital.gateways.moexfast.domain.Instrument;
  */
 public class MicexInstrument extends Instrument {
 
-    private static String BOARD_SEPARATOR = ";";
+    public static String BOARD_SEPARATOR = ";";
 
     private String tradingSessionId;
 

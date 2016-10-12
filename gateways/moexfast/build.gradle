@@ -7,8 +7,8 @@ apply plugin: 'groovy'
 
 ext {
     dllSourceDir = 'build\\libs'
-    dllTargetDir = '..\\..\\..\\lib\\Moex'
-    exeTargetDir = '..\\..\\..\\lib\\Moex\\utils'
+    dllTargetDir = '..\\..\\..\\lib\\MOEX'
+    exeTargetDir = '..\\..\\..\\lib\\MOEX\\utils'
     ikvmDir = '..\\..\\..\\lib\\IKVM8.1'
 }
 

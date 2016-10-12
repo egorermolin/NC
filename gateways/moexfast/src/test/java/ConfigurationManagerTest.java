@@ -1,5 +1,7 @@
 import org.junit.Assert;
 import org.junit.Test;
+import ru.ncapital.gateways.fortsfast.FortsConfigurationManager;
+import ru.ncapital.gateways.fortsfast.FortsNullGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.MicexConfigurationManager;
 import ru.ncapital.gateways.micexfast.MicexNullGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.ConfigurationManager;
@@ -15,7 +17,7 @@ public class ConfigurationManagerTest {
         ConfigurationManager cm = new MicexConfigurationManager().configure(new MicexNullGatewayConfiguration() {
             @Override
             public String getFastTemplatesFile() {
-                return "src/main/resources/fast_templates.xml";
+                return "src/main/resources/micex/fast_templates.xml";
             }
 
             @Override
@@ -25,14 +27,14 @@ public class ConfigurationManagerTest {
 
             @Override
             public String getConnectionsFile() {
-                return "src/main/resources/config_test_internet.xml";
+                return "src/main/resources/micex/config_test_internet.xml";
             }
         });
 
         for (ConnectionId id : cm.getAllConnectionIds())
             assert cm.getConnection(id) != null;
 
-        assert cm.getFastTemplatesFile() == "src/main/resources/fast_templates.xml";
+        assert cm.getFastTemplatesFile() == "src/main/resources/micex/fast_templates.xml";
 
         Assert.assertEquals("eth0", cm.getPrimaryNetworkInterface());
         Assert.assertEquals("eth0", cm.getSecondaryNetworkInterface());
@@ -40,10 +42,10 @@ public class ConfigurationManagerTest {
 
     @Test
     public void testFortsConfigurationManager() {
-        ConfigurationManager cm = new MicexConfigurationManager().configure(new MicexNullGatewayConfiguration() {
+        ConfigurationManager cm = new FortsConfigurationManager().configure(new FortsNullGatewayConfiguration() {
             @Override
             public String getFastTemplatesFile() {
-                return "src/main/resources/fast_templates.xml";
+                return "src/main/resources/forts/fast_templates.xml";
             }
 
             @Override
@@ -53,14 +55,14 @@ public class ConfigurationManagerTest {
 
             @Override
             public String getConnectionsFile() {
-                return "src/main/resources/config_test_internet.xml";
+                return "src/main/resources/forts/config_test_internet.xml";
             }
         });
 
         for (ConnectionId id : cm.getAllConnectionIds())
             assert cm.getConnection(id) != null;
 
-        assert cm.getFastTemplatesFile() == "src/main/resources/fast_templates.xml";
+        assert cm.getFastTemplatesFile() == "src/main/resources/forts/fast_templates.xml";
 
         Assert.assertEquals("eth0", cm.getPrimaryNetworkInterface());
         Assert.assertEquals("eth0", cm.getSecondaryNetworkInterface());
@@ -71,7 +73,7 @@ public class ConfigurationManagerTest {
         ConfigurationManager cm = new MicexConfigurationManager().configure(new MicexNullGatewayConfiguration() {
             @Override
             public String getFastTemplatesFile() {
-                return "src/main/resources/fast_templates.xml";
+                return "src/main/resources/micex/fast_templates.xml";
             }
 
             @Override
@@ -81,7 +83,7 @@ public class ConfigurationManagerTest {
 
             @Override
             public String getConnectionsFile() {
-                return "src/main/resources/config_test_internet.xml";
+                return "src/main/resources/micex/config_test_internet.xml";
             }
         });
 

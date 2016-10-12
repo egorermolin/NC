@@ -112,7 +112,7 @@ public class MainClass {
 
         for (Instrument instrument : instruments) {
             logger.info(instrument.getName() + " " + instrument.toString());
-            gwManager.subscribeForMarketData(instrument.getSecurityId());
+            //gwManager.subscribeForMarketData(instrument.getSecurityId());
         }
 
         try {

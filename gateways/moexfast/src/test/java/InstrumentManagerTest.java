@@ -255,8 +255,8 @@ public class InstrumentManagerTest {
         ArgumentCaptor<MicexInstrument[]> instrumentCapture = ArgumentCaptor.forClass(MicexInstrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
         assertEquals(2, instrumentCapture.getValue().length);
-        assertEquals("SBER;TQBR", instrumentCapture.getValue()[0].getSecurityId());
-        assertEquals("ROSN;TQBR", instrumentCapture.getValue()[1].getSecurityId());
+        assertEquals("SBER;TQBR", instrumentCapture.getValue()[1].getSecurityId());
+        assertEquals("ROSN;TQBR", instrumentCapture.getValue()[0].getSecurityId());
     }
 
     @Test
