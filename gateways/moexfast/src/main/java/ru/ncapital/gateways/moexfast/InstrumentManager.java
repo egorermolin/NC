@@ -6,6 +6,7 @@ import ru.ncapital.gateways.moexfast.connection.messageprocessors.SequenceArray;
 import ru.ncapital.gateways.moexfast.domain.BBO;
 import ru.ncapital.gateways.moexfast.domain.Instrument;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,8 +21,6 @@ public abstract class InstrumentManager extends Processor {
     protected ConcurrentHashMap<String, Instrument> instruments = new ConcurrentHashMap<>();
 
     protected ConcurrentHashMap<String, Instrument> ignoredInstruments = new ConcurrentHashMap<>();
-
-    protected Set<String> allowedSecurityIds = new HashSet<>();
 
     private Set<Integer> addedInstruments = new HashSet<>();
 
@@ -122,15 +121,6 @@ public abstract class InstrumentManager extends Processor {
 
         if (ignoredInstruments.containsKey(instrument.getSecurityId()))
             return false;
-
-        if (allowedSecurityIds.isEmpty() || allowedSecurityIds.contains(instrument.getSecurityId())) {
-        } else {
-            if (getLogger().isTraceEnabled())
-                getLogger().trace(instrument.getName() + " Ignored by SecurityId [SecurityId: " + instrument.getSecurityId() + "]");
-
-            ignoredInstruments.put(instrument.getSecurityId(), instrument);
-            return false;
-        }
 
         return true;
     }

@@ -20,9 +20,11 @@ import java.util.Set;
 
 @Singleton
 public class MicexInstrumentManager extends InstrumentManager {
-    private Set<TradingSessionId> allowedTradingSessionIds = new HashSet<TradingSessionId>();
+    private Set<TradingSessionId> allowedTradingSessionIds = new HashSet<>();
 
-    private Set<ProductType> allowedProductTypes = new HashSet<ProductType>();
+    private Set<ProductType> allowedProductTypes = new HashSet<>();
+
+    private Set<String> allowedSecurityIds = new HashSet<>();
 
     @Override
     public InstrumentManager configure(IGatewayConfiguration configuration) {
@@ -30,7 +32,7 @@ public class MicexInstrumentManager extends InstrumentManager {
 
         this.allowedTradingSessionIds.addAll(Arrays.asList(micexConfiguration.getAllowedTradingSessionIds()));
         this.allowedProductTypes.addAll(Arrays.asList(micexConfiguration.getAllowedProductTypes()));
-        this.allowedSecurityIds.addAll(Arrays.asList(micexConfiguration.getAllowedSecurityIds()));
+        this.allowedSecurityIds.addAll(Arrays.asList(configuration.getAllowedSecurityIds()));
         if (allowedSecurityIds.contains("*"))
             allowedSecurityIds.clear();
 
@@ -43,6 +45,15 @@ public class MicexInstrumentManager extends InstrumentManager {
             return false;
 
         MicexInstrument micexInstrument = (MicexInstrument) instrument;
+
+        if (allowedSecurityIds.isEmpty() || allowedSecurityIds.contains(instrument.getSecurityId())) {
+        } else {
+            if (getLogger().isTraceEnabled())
+                getLogger().trace(instrument.getName() + " Ignored by SecurityId [SecurityId: " + instrument.getSecurityId() + "]");
+
+            ignoredInstruments.put(instrument.getSecurityId(), instrument);
+            return false;
+        }
 
         if (allowedTradingSessionIds.isEmpty() || allowedTradingSessionIds.contains(TradingSessionId.convert(micexInstrument.getTradingSessionId()))) {
         } else {
