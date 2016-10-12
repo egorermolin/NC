@@ -657,4 +657,41 @@
 		</connections>
 	</MarketDataGroup>
 
+    <MarketDataGroup feedType="ORDERS-LOG" marketID="D" label="Full orders log">
+        <connections>
+            <connection>
+                <type>Incremental</type>
+                <protocol>UDP/IP</protocol>
+                <src-ip>10.50.129.90</src-ip>
+                <ip>239.192.70.40</ip>
+                <port>40040</port>
+                <feed>A</feed>
+            </connection>
+            <connection>
+                <type>Incremental</type>
+                <protocol>UDP/IP</protocol>
+                <src-ip>10.50.129.90</src-ip>
+                <ip>239.192.175.40</ip>
+                <port>41040</port>
+                <feed>B</feed>
+            </connection>
+            <connection>
+                <type>Snapshot</type>
+                <protocol>UDP/IP</protocol>
+                <src-ip>10.50.129.90</src-ip>
+                <ip>239.192.70.41</ip>
+                <port>40041</port>
+                <feed>A</feed>
+            </connection>
+            <connection>
+                <type>Snapshot</type>
+                <protocol>UDP/IP</protocol>
+                <src-ip>10.50.129.90</src-ip>
+                <ip>239.192.175.41</ip>
+                <port>41041</port>
+                <feed>B</feed>
+            </connection>
+        </connections>
+    </MarketDataGroup>
+
 </configuration>
