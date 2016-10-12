@@ -80,11 +80,11 @@ public class FortsXMLReader {
             }
 
         } catch (SAXException e) {
-            Utils.printStackTrace(e, LoggerFactory.getLogger("MicexXMLReader"), "Exception occurred while reading XML");
+            Utils.printStackTrace(e, LoggerFactory.getLogger("FortsXMLReader"), "Exception occurred while reading XML");
         } catch (ParserConfigurationException e) {
-            Utils.printStackTrace(e, LoggerFactory.getLogger("MicexXMLReader"), "Exception occurred while reading XML");
+            Utils.printStackTrace(e, LoggerFactory.getLogger("FortsXMLReader"), "Exception occurred while reading XML");
         } catch (IOException e) {
-            Utils.printStackTrace(e, LoggerFactory.getLogger("MicexXMLReader"), "Exception occurred while reading XML");
+            Utils.printStackTrace(e, LoggerFactory.getLogger("FortsXMLReader"), "Exception occurred while reading XML");
         }
 
         return connectionsMap;
