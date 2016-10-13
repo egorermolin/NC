@@ -122,7 +122,7 @@ public abstract class SnapshotProcessor extends Processor implements ISnapshotPr
     }
 
     private void printRecoveringSecurityIds() {
-        String [] recoveringSecurityIds = sequenceValidator.getRecovering();
+        String[] recoveringSecurityIds = sequenceValidator.getRecovering();
         StringBuilder sb = new StringBuilder("Recovering ");
         if (recoveringSecurityIds != null && recoveringSecurityIds.length > 0) {
             wasRecovering = true;

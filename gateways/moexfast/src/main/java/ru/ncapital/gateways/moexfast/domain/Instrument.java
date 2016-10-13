@@ -1,12 +1,16 @@
 package ru.ncapital.gateways.moexfast.domain;
 
+import ru.ncapital.gateways.fortsfast.domain.FortsInstrument;
+
 /**
  * Created by Egor on 30-Sep-16.
  */
-public abstract class Instrument {
+public abstract class Instrument<T> implements IInstrument {
     private String symbol;
 
     private String securityId;
+
+    private T exchangeSecurityId;
 
     private String currency;
 
@@ -22,45 +26,62 @@ public abstract class Instrument {
 
     private String underlying;
 
-    public Instrument(String symbol, String securityId) {
-        this.securityId = securityId;
+    public Instrument(String symbol, String securityId, T exchangeSecurityId) {
         this.symbol = symbol;
+        this.securityId = securityId;
+        this.exchangeSecurityId = exchangeSecurityId;
     }
 
     public String getSymbol() {
         return symbol;
     }
 
+    @Override
     public String getSecurityId() {
         return securityId;
     }
 
+    public T getExchangeSecurityId() {
+        return exchangeSecurityId;
+    }
+
+    @Override
     public String getCurrency() {
         return currency;
     }
 
+    @Override
     public String getDescription() {
         return description;
     }
 
+    @Override
     public int getLotSize() {
         return lotSize;
     }
 
+    @Override
     public double getTickSize() {
         return tickSize;
     }
 
+    @Override
     public String getTradingStatus() {
         return tradingStatus;
     }
 
+    @Override
     public double getMultiplier() {
         return multiplier;
     }
 
+    @Override
     public String getUnderlying() {
         return underlying;
+    }
+
+    public String getName() {
+        return getClass().getName();
     }
 
     public void setCurrency(String currency) {
@@ -93,9 +114,10 @@ public abstract class Instrument {
 
     @Override
     public String toString() {
-        return "Instrument{" +
+        return getName() + "{" +
                 "symbol='" + symbol + '\'' +
                 ", securityId='" + securityId + '\'' +
+                ", exchangeSecurityId='" + exchangeSecurityId + '\'' +
                 ", currency='" + currency + '\'' +
                 ", description='" + description + '\'' +
                 ", lotSize=" + lotSize +
@@ -106,7 +128,11 @@ public abstract class Instrument {
                 '}';
     }
 
-    public abstract String getFullname();
-
-    public abstract String getName();
+    public String getId() {
+        return getName() + "{" +
+                "symbol='" + symbol + '\'' +
+                ", securityId='" + securityId + '\'' +
+                ", exchangeSecurityId='" + exchangeSecurityId + '\'' +
+                '}';
+    }
 }

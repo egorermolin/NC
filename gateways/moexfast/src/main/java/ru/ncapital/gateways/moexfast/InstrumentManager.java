@@ -4,6 +4,7 @@ import org.openfast.Message;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.Processor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.SequenceArray;
 import ru.ncapital.gateways.moexfast.domain.BBO;
+import ru.ncapital.gateways.moexfast.domain.IInstrument;
 import ru.ncapital.gateways.moexfast.domain.Instrument;
 
 import java.util.Arrays;
@@ -15,12 +16,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Created by Egor on 03-Oct-16.
  */
-public abstract class InstrumentManager extends Processor {
+public abstract class InstrumentManager<T> extends Processor {
     protected SequenceArray sequenceArrayForInstrumentStatus = new SequenceArray();
 
-    protected ConcurrentHashMap<String, Instrument> instruments = new ConcurrentHashMap<>();
+    protected ConcurrentHashMap<T, Instrument<T>> instruments = new ConcurrentHashMap<>();
 
-    protected ConcurrentHashMap<String, Instrument> ignoredInstruments = new ConcurrentHashMap<>();
+    protected ConcurrentHashMap<T, Instrument<T>> ignoredInstruments = new ConcurrentHashMap<>();
 
     private Set<Integer> addedInstruments = new HashSet<>();
 
@@ -82,17 +83,17 @@ public abstract class InstrumentManager extends Processor {
         return true;
     }
 
-    protected boolean isDuplicateInstrument(Instrument instrument) {
-        if (instruments.containsKey(instrument.getSecurityId())) {
+    protected boolean isDuplicateInstrument(Instrument<T> instrument) {
+        if (instruments.containsKey(instrument.getExchangeSecurityId())) {
             if (getLogger().isTraceEnabled())
-                getLogger().trace(instrument.getName() + " Duplicate " + instrument.getFullname());
+                getLogger().trace(instrument.getName() + " Duplicate " + instrument.getId());
 
             return true;
         }
 
-        if (ignoredInstruments.containsKey(instrument.getSecurityId())) {
+        if (ignoredInstruments.containsKey(instrument.getExchangeSecurityId())) {
             if (getLogger().isTraceEnabled())
-                getLogger().trace(instrument.getName() + " Duplicate Ignored " + instrument.getFullname());
+                getLogger().trace(instrument.getName() + " Duplicate Ignored " + instrument.getId());
 
             return true;
         }
@@ -100,43 +101,43 @@ public abstract class InstrumentManager extends Processor {
         return false;
     }
 
-    protected boolean addNewInstrument(Instrument instrument) {
+    protected boolean addNewInstrument(Instrument<T> instrument) {
         if (isDuplicateInstrument(instrument))
             return false;
 
         if (!isAllowedInstrument(instrument)) {
-            ignoredInstruments.putIfAbsent(instrument.getSecurityId(), instrument);
+            ignoredInstruments.putIfAbsent(instrument.getExchangeSecurityId(), instrument);
             return false;
         }
 
-        if (instruments.putIfAbsent(instrument.getSecurityId(), instrument) != null)
+        if (instruments.putIfAbsent(instrument.getExchangeSecurityId(), instrument) != null)
             return false;
 
         return true;
     }
 
-    public boolean isAllowedInstrument(Instrument instrument) {
-        if (instruments.containsKey(instrument.getSecurityId()))
+    public boolean isAllowedInstrument(T exchangeSecurityId) {
+        return instruments.containsKey(exchangeSecurityId);
+    }
+
+    public boolean isAllowedInstrument(Instrument<T> instrument) {
+        if (instruments.containsKey(instrument.getExchangeSecurityId()))
             return true;
 
-        if (ignoredInstruments.containsKey(instrument.getSecurityId()))
+        if (ignoredInstruments.containsKey(instrument.getExchangeSecurityId()))
             return false;
 
-        return true;
-    }
-
-    public boolean isAllowedInstrument(String securityId) {
-        return instruments.containsKey(securityId);
+        return false;
     }
 
     @Override
     protected void processMessage(Message readMessage) {
         switch (readMessage.getString("MessageType").charAt(0)) {
             case 'f':
-                Instrument instrument = createInstrument(readMessage);
+                Instrument<T> instrument = createInstrument(readMessage);
                 String tradingStatus = createTradingStatusForInstrumentStatus(readMessage);
 
-                if (isAllowedInstrument(instrument.getSecurityId()))
+                if (isAllowedInstrument(instrument.getExchangeSecurityId()))
                     sendToClient(instrument.getSecurityId(), tradingStatus);
 
                 break;
@@ -157,7 +158,7 @@ public abstract class InstrumentManager extends Processor {
 
                 if (addNewInstrument(newInstrument)) {
                     if (getLogger().isDebugEnabled())
-                        getLogger().debug(newInstrument.getName() + " Received " + newInstrument.getFullname());
+                        getLogger().debug(newInstrument.getName() + " Received " + newInstrument.getId());
 
                     sendToClient(newInstrument.getSecurityId(), newInstrument.getTradingStatus());
                 }
@@ -194,11 +195,13 @@ public abstract class InstrumentManager extends Processor {
         marketDataManager.onBBO(tradingStatusUpdate);
     }
 
-    protected abstract Instrument createInstrument(Message readMessage);
+    protected abstract Instrument<T> createInstrument(Message readMessage);
 
-    protected abstract Instrument createFullInstrument(Message readMessage);
+    protected abstract Instrument<T> createFullInstrument(Message readMessage);
 
     protected abstract String createTradingStatusForInstrumentStatus(Message readMessage);
 
-    protected abstract Instrument[] getInstruments();
+    protected IInstrument[] getInstruments() {
+        return instruments.values().toArray(new IInstrument[instruments.size()]);
+    }
 }

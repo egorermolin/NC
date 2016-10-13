@@ -11,4 +11,6 @@ public interface IMicexGatewayConfiguration extends IGatewayConfiguration{
     TradingSessionId[] getAllowedTradingSessionIds();
 
     ProductType[] getAllowedProductTypes();
+
+    String[] getAllowedSecurityIds();
 }

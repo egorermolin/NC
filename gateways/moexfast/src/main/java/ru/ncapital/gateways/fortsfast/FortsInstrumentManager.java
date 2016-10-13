@@ -3,23 +3,76 @@ package ru.ncapital.gateways.fortsfast;
 import com.google.inject.Singleton;
 import org.openfast.Message;
 import ru.ncapital.gateways.fortsfast.domain.FortsInstrument;
+import ru.ncapital.gateways.micexfast.IMicexGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
+import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
+import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.InstrumentManager;
+import ru.ncapital.gateways.moexfast.domain.IInstrument;
 import ru.ncapital.gateways.moexfast.domain.Instrument;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by egore on 24.12.2015.
  */
 
 @Singleton
-public class FortsInstrumentManager extends InstrumentManager {
+public class FortsInstrumentManager extends InstrumentManager<Long> {
+
+    private Set<String> allowedUnderlyings = new HashSet<>();
+
+    private Set<Long> allowedSecurityIds = new HashSet<>();
+
     @Override
-    protected Instrument createInstrument(Message readMessage) {
-        return new MicexInstrument(readMessage.getString("Symbol"), readMessage.getString("SecurityId"));
+    public InstrumentManager configure(IGatewayConfiguration configuration) {
+        IFortsGatewayConfiguration fortsConfiguration = (IFortsGatewayConfiguration) configuration;
+
+        this.allowedUnderlyings.addAll(Arrays.asList(fortsConfiguration.getAllowedUnderlyings()));
+        if (allowedUnderlyings.contains("*"))
+            allowedUnderlyings.clear();
+
+        return super.configure(configuration);
     }
 
     @Override
-    protected Instrument createFullInstrument(Message readMessage) {
+    public boolean isAllowedInstrument(Instrument<Long> instrument) {
+        if (super.isAllowedInstrument(instrument))
+            return true;
+
+        if (allowedUnderlyings.isEmpty() || allowedUnderlyings.contains(instrument.getUnderlying())) {
+        } else {
+            if (getLogger().isTraceEnabled())
+                getLogger().trace(instrument.getName() + " Ignored by Underlying " + instrument.getId());
+
+            ignoredInstruments.put(instrument.getExchangeSecurityId(), instrument);
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    protected String createTradingStatusForInstrumentStatus(Message readMessage) {
+        StringBuilder tradingStatus = new StringBuilder();
+
+        if (readMessage != null && readMessage.getValue("SecurityTradingStatus") != null)
+            tradingStatus.append(readMessage.getInt("SecurityTradingStatus"));
+        else
+            tradingStatus.append("20");
+
+        return tradingStatus.toString();
+    }
+
+    @Override
+    protected Instrument<Long> createInstrument(Message readMessage) {
+        return new FortsInstrument(readMessage.getString("Symbol"), readMessage.getLong("SecurityId"));
+    }
+
+    @Override
+    protected Instrument<Long> createFullInstrument(Message readMessage) {
         String symbol = readMessage.getString("Symbol");
         long securityId = readMessage.getLong("SecurityId");
 
@@ -49,20 +102,5 @@ public class FortsInstrumentManager extends InstrumentManager {
 
         return instrument;
     }
+}
 
-    @Override
-    protected String createTradingStatusForInstrumentStatus(Message readMessage) {
-        StringBuilder tradingStatus = new StringBuilder();
-
-        if (readMessage != null && readMessage.getValue("SecurityTradingStatus") != null)
-            tradingStatus.append(readMessage.getInt("SecurityTradingStatus"));
-        else
-            tradingStatus.append("20");
-
-        return tradingStatus.toString();
-    }
-
-    @Override
-    protected Instrument[] getInstruments() {
-        return instruments.values().toArray(new FortsInstrument[instruments.size()]);
-    }}

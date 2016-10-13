@@ -13,7 +13,7 @@ import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 /**
  * Created by egore on 1/21/16.
  */
-public abstract class AMessageHandler implements IMessageHandler {
+public abstract class AMessageHandler<T> implements IMessageHandler<T> {
 
     protected Logger logger = getLogger();
 
@@ -27,8 +27,13 @@ public abstract class AMessageHandler implements IMessageHandler {
     }
 
     @Override
-    public boolean isAllowedUpdate(String securityId) {
-        return marketDataManager.isAllowedInstrument(securityId);
+    public boolean isAllowedUpdate(T securityId) {
+        if (securityId instanceof String) // MICEX
+            return marketDataManager.isAllowedInstrument((String) securityId);
+        else if (securityId instanceof Long) // FORTS
+            return marketDataManager.isAllowedInstrument((Long) securityId);
+        else
+            throw new RuntimeException("Unknown securityId type");
     }
 
     @Override

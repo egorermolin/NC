@@ -8,22 +8,22 @@ import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 /**
  * Created by egore on 2/3/16.
  */
-public interface IMessageSequenceValidator {
-    boolean onSnapshotSeq(String securityId, int seqNum);
+public interface IMessageSequenceValidator<T> {
+    boolean onSnapshotSeq(T securityId, int seqNum);
 
-    boolean onIncrementalSeq(String securityId, int seqNum);
+    boolean onIncrementalSeq(T securityId, int seqNum);
 
-    void startRecovering(String securityId);
+    void startRecovering(T securityId);
 
-    void storeIncremental(String securityId, int seqNum, GroupValue mdEntry, PerformanceData perfData);
+    void storeIncremental(T securityId, int seqNum, GroupValue mdEntry, PerformanceData perfData);
 
-    StoredMdEntry[] stopRecovering(String securityId);
+    StoredMdEntry[] stopRecovering(T securityId);
 
-    boolean isRecovering(String securityId, boolean isSnapshot);
+    boolean isRecovering(T securityId, boolean isSnapshot);
 
     boolean isRecovering();
 
-    String[] getRecovering();
+    T[] getRecovering();
 
     MessageHandlerType getType();
 }

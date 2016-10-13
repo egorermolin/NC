@@ -7,8 +7,8 @@ import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 /**
  * Created by egore on 1/21/16.
  */
-public interface IMessageHandler {
-    boolean isAllowedUpdate(String securityId);
+public interface IMessageHandler<T> {
+    boolean isAllowedUpdate(T securityId);
 
     void onSnapshot(Message readMessage);
 

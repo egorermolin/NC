@@ -245,6 +245,10 @@ public abstract class MarketDataManager {
         return instrumentManager.isAllowedInstrument(securityId);
     }
 
+    public boolean isAllowedInstrument(Long securityId) {
+        return instrumentManager.isAllowedInstrument(securityId);
+    }
+
     public void setRecovery(String securityId, boolean isUp, boolean orderList) {
         BBO bbo = new BBO(securityId);
         bbo.setInRecovery(isUp, orderList ? 0 : 1);

@@ -8,6 +8,7 @@ import ru.ncapital.gateways.micexfast.domain.ProductType;
 import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.InstrumentManager;
+import ru.ncapital.gateways.moexfast.domain.IInstrument;
 import ru.ncapital.gateways.moexfast.domain.Instrument;
 
 import java.util.Arrays;
@@ -19,7 +20,7 @@ import java.util.Set;
  */
 
 @Singleton
-public class MicexInstrumentManager extends InstrumentManager {
+public class MicexInstrumentManager extends InstrumentManager<String> {
     private Set<TradingSessionId> allowedTradingSessionIds = new HashSet<>();
 
     private Set<ProductType> allowedProductTypes = new HashSet<>();
@@ -32,7 +33,7 @@ public class MicexInstrumentManager extends InstrumentManager {
 
         this.allowedTradingSessionIds.addAll(Arrays.asList(micexConfiguration.getAllowedTradingSessionIds()));
         this.allowedProductTypes.addAll(Arrays.asList(micexConfiguration.getAllowedProductTypes()));
-        this.allowedSecurityIds.addAll(Arrays.asList(configuration.getAllowedSecurityIds()));
+        this.allowedSecurityIds.addAll(Arrays.asList(micexConfiguration.getAllowedSecurityIds()));
         if (allowedSecurityIds.contains("*"))
             allowedSecurityIds.clear();
 
@@ -40,11 +41,9 @@ public class MicexInstrumentManager extends InstrumentManager {
     }
 
     @Override
-    public boolean isAllowedInstrument(Instrument instrument) {
-        if (!super.isAllowedInstrument(instrument))
-            return false;
-
-        MicexInstrument micexInstrument = (MicexInstrument) instrument;
+    public boolean isAllowedInstrument(Instrument<String> instrument) {
+        if (super.isAllowedInstrument(instrument))
+            return true;
 
         if (allowedSecurityIds.isEmpty() || allowedSecurityIds.contains(instrument.getSecurityId())) {
         } else {
@@ -55,10 +54,11 @@ public class MicexInstrumentManager extends InstrumentManager {
             return false;
         }
 
+        MicexInstrument micexInstrument = (MicexInstrument) instrument;
         if (allowedTradingSessionIds.isEmpty() || allowedTradingSessionIds.contains(TradingSessionId.convert(micexInstrument.getTradingSessionId()))) {
         } else {
             if (getLogger().isTraceEnabled())
-                getLogger().trace(instrument.getName() + " Ignored by TradingSessionId " + instrument.getFullname());
+                getLogger().trace(instrument.getName() + " Ignored by TradingSessionId " + instrument.getId());
 
             ignoredInstruments.put(instrument.getSecurityId(), instrument);
             return false;
@@ -70,7 +70,7 @@ public class MicexInstrumentManager extends InstrumentManager {
         if (allowedProductTypes.isEmpty() || allowedProductTypes.contains(micexInstrument.getProductType())) {
         } else {
             if (getLogger().isTraceEnabled())
-                getLogger().trace(instrument.getName() + " Ignored by ProductType " + instrument.getFullname());
+                getLogger().trace(instrument.getName() + " Ignored by ProductType " + instrument.getId());
 
             ignoredInstruments.put(instrument.getSecurityId(), instrument);
             return false;
@@ -96,17 +96,12 @@ public class MicexInstrumentManager extends InstrumentManager {
     }
 
     @Override
-    protected Instrument[] getInstruments() {
-        return instruments.values().toArray(new MicexInstrument[instruments.size()]);
+    protected Instrument<String> createInstrument(Message readMessage) {
+        return new MicexInstrument(readMessage.getString("Symbol"), readMessage.getString("TradingSessionID"), -1);
     }
 
     @Override
-    public Instrument createInstrument(Message readMessage) {
-        return new MicexInstrument(readMessage.getString("Symbol"), readMessage.getString("TradingSessionID"));
-    }
-
-    @Override
-    public Instrument createFullInstrument(Message readMessage) {
+    protected Instrument<String> createFullInstrument(Message readMessage) {
         String symbol = readMessage.getString("Symbol");
         String tradingSessionId = "UNKNOWN";
 
@@ -119,12 +114,11 @@ public class MicexInstrumentManager extends InstrumentManager {
             }
         }
 
-        MicexInstrument instrument = new MicexInstrument(symbol, tradingSessionId);
+        int product = -1;
         if (readMessage.getValue("Product") != null)
-            instrument.setProductType(readMessage.getInt("Product"));
-        else
-            instrument.setProductType(-1);
+            product = readMessage.getInt("Product");
 
+        MicexInstrument instrument = new MicexInstrument(symbol, tradingSessionId, product);
         if (readMessage.getValue("Currency") != null)
             instrument.setCurrency(readMessage.getString("Currency"));
         else

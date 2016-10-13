@@ -11,7 +11,7 @@ import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 /**
  * Created by egore on 1/11/16.
  */
-public abstract class IncrementalProcessor extends Processor implements IIncrementalProcessor {
+public abstract class IncrementalProcessor<T> extends Processor implements IIncrementalProcessor {
 
     protected String lastDealNumber;
 
@@ -34,7 +34,7 @@ public abstract class IncrementalProcessor extends Processor implements IIncreme
                     continue;
                 }
 
-                String securityId = getSecurityId(mdEntry);
+                T securityId = getSecurityId(mdEntry);
                 PerformanceData performanceData = new PerformanceData()
                         .setExchangeSendingTime(sendingTime)
                         .setGatewayDequeTime(dequeTimestamp)
@@ -84,5 +84,5 @@ public abstract class IncrementalProcessor extends Processor implements IIncreme
         }
     }
 
-    protected abstract String getSecurityId(GroupValue mdEntry);
+    protected abstract T getSecurityId(GroupValue mdEntry);
 }

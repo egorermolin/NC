@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * Created by egore on 12/7/15.
  */
-public abstract class OrderListMessageHandler extends AMessageHandler {
+public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
 
     private Map<String, List<DepthLevel>> depthLevelMap = new HashMap<String, List<DepthLevel>>();
 
@@ -33,7 +33,7 @@ public abstract class OrderListMessageHandler extends AMessageHandler {
     }
 
     @Override
-    protected void onSnapshotMdEntry(String securityId, GroupValue mdEntry) {
+    protected void onSnapshotMdEntry(T securityId, GroupValue mdEntry) {
         MdEntryType mdEntryType = getMdEntryType(mdEntry);
         if (mdEntryType == null)
             return;
@@ -82,7 +82,7 @@ public abstract class OrderListMessageHandler extends AMessageHandler {
     }
 
     @Override
-    public void onIncrementalMdEntry(String securityId, GroupValue mdEntry, PerformanceData perfData) {
+    public void onIncrementalMdEntry(T securityId, GroupValue mdEntry, PerformanceData perfData) {
         MdEntryType mdEntryType = getMdEntryType(mdEntry);
         if (mdEntryType == null)
             return;
@@ -133,14 +133,14 @@ public abstract class OrderListMessageHandler extends AMessageHandler {
     }
 
     @Override
-    protected void onBeforeSnapshot(String securityId) {
+    protected void onBeforeSnapshot(T securityId) {
         List<DepthLevel> depthLevelList = new ArrayList<>();
         depthLevelMap.put(securityId, depthLevelList);
         depthLevelList.add(new DepthLevel(securityId, MdUpdateAction.SNAPSHOT));
     }
 
     @Override
-    protected void onAfterSnapshot(String securityId) {
+    protected void onAfterSnapshot(T securityId) {
         for (List<DepthLevel> depthLevelList : depthLevelMap.values()) {
             marketDataManager.onDepthLevels(depthLevelList.toArray(new DepthLevel[0]));
         }

@@ -17,8 +17,6 @@ public interface IGatewayConfiguration {
 
     MarketType getMarketType();
 
-    String[] getAllowedSecurityIds();
-
     IGatewayPerformanceLogger getPerformanceLogger();
 
     boolean isAsynchChannelReader();
