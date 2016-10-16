@@ -5,21 +5,21 @@ import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 /**
  * Created by egore on 1/28/16.
  */
-public class MessageSequenceValidatorForPublicTrades extends MessageSequenceValidator {
+public class MessageSequenceValidatorForPublicTrades<T> extends MessageSequenceValidator<T> {
     public MessageSequenceValidatorForPublicTrades() {
         super(MessageHandlerType.PUBLIC_TRADES);
     }
 
     @Override
-    public boolean onIncrementalSeq(String securityId, int seqNum) {
+    public boolean onIncrementalSeq(T exchangeSecurityId, int seqNum) {
         if (logger.get().isTraceEnabled())
-            logger.get().trace("INC -> " + securityId + "-" + seqNum);
+            logger.get().trace("INC -> " + exchangeSecurityId + "-" + seqNum);
 
         return true;
     }
 
     @Override
-    public boolean isRecovering(String securityId, boolean isSnapshot) {
+    public boolean isRecovering(T exchangeSecurityId, boolean isSnapshot) {
         return false;
     }
 }

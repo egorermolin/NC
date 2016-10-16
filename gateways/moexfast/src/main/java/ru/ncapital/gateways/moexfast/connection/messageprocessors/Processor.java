@@ -9,15 +9,15 @@ import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 /**
  * Created by egore on 24.02.2016.
  */
-public abstract class Processor extends BaseProcessorWithMessageBackup implements IProcessor {
+public abstract class Processor<T> extends BaseProcessorWithMessageBackup implements IProcessor {
 
     protected SequenceArray sequenceArray = new SequenceArray();
 
-    protected IMessageSequenceValidator sequenceValidator;
+    protected IMessageSequenceValidator<T> sequenceValidator;
 
-    protected IMessageHandler messageHandler;
+    protected IMessageHandler<T> messageHandler;
 
-    protected Processor(IMessageHandler messageHandler, IMessageSequenceValidator sequenceValidator) {
+    protected Processor(IMessageHandler<T> messageHandler, IMessageSequenceValidator<T> sequenceValidator) {
         this.messageHandler = messageHandler;
         this.sequenceValidator = sequenceValidator;
     }
@@ -26,7 +26,7 @@ public abstract class Processor extends BaseProcessorWithMessageBackup implement
     }
 
     @Override
-    public IMessageSequenceValidator getSequenceValidator() {
+    public IMessageSequenceValidator<T> getSequenceValidator() {
         return sequenceValidator;
     }
 

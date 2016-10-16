@@ -10,11 +10,11 @@ import org.openfast.codec.Coder;
 import ru.ncapital.gateways.micexfast.*;
 import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
 import ru.ncapital.gateways.moexfast.connection.ConnectionManager;
-import ru.ncapital.gateways.moexfast.domain.BBO;
+import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.micexfast.domain.ProductType;
 import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
 import ru.ncapital.gateways.moexfast.IMarketDataHandler;
-import ru.ncapital.gateways.moexfast.domain.Instrument;
+import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
 
 import java.util.Collections;
 import java.util.Comparator;

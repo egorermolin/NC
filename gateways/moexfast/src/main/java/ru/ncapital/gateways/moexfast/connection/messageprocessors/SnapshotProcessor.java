@@ -10,9 +10,9 @@ import java.util.*;
 /**
  * Created by egore on 1/11/16.
  */
-public abstract class SnapshotProcessor extends Processor implements ISnapshotProcessor {
+public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnapshotProcessor {
 
-    private Map<String, Map<Integer, Message>> fragmentedSnapshots = new HashMap<String, Map<Integer, Message>>();
+    private Map<T, Map<Integer, Message>> fragmentedSnapshots = new HashMap<>();
 
     private long sendingTimeOfSnapshotStart = 0;
 
@@ -22,17 +22,17 @@ public abstract class SnapshotProcessor extends Processor implements ISnapshotPr
         super(messageHandler, sequenceValidator);
     }
 
-    private void processSnapshotsAndIncrementals(String securityId, int rptSeqNum, Collection<Message> messages) {
+    private void processSnapshotsAndIncrementals(T exchangeSecurityId, int rptSeqNum, Collection<Message> messages) {
         synchronized (sequenceValidator) {
-            if (sequenceValidator.onSnapshotSeq(securityId, rptSeqNum)) {
+            if (sequenceValidator.onSnapshotSeq(exchangeSecurityId, rptSeqNum)) {
                 for (Message message : messages)
                     messageHandler.onSnapshot(message);
 
                 // finished recovering
-                StoredMdEntry[] storedMdEntriesToProcess = sequenceValidator.stopRecovering(securityId);
+                StoredMdEntry[] storedMdEntriesToProcess = sequenceValidator.stopRecovering(exchangeSecurityId);
                 if (storedMdEntriesToProcess != null) {
                     for (StoredMdEntry storedMdEntry : storedMdEntriesToProcess) {
-                        sequenceValidator.onIncrementalSeq(securityId, storedMdEntry.getSequenceNumber());
+                        sequenceValidator.onIncrementalSeq(exchangeSecurityId, storedMdEntry.getSequenceNumber());
 
                         messageHandler.onIncremental(storedMdEntry.getMdEntry(), new PerformanceData());
                     }
@@ -68,16 +68,16 @@ public abstract class SnapshotProcessor extends Processor implements ISnapshotPr
     @Override
     public void processMessage(Message readMessage) {
         int seqNum = readMessage.getInt("MsgSeqNum");
-        String securityId = getSecurityId(readMessage);
+        T exchangeSecurityId = getExchangeSecurityId(readMessage);
 
         int rptSeqNum = readMessage.getInt("RptSeq");
         boolean firstFragment = readMessage.getInt("RouteFirst") == 1;
         boolean lastFragment = readMessage.getInt("LastFragment") == 1;
 
         if (firstFragment)
-            fragmentedSnapshots.put(securityId, Collections.synchronizedMap(new TreeMap<Integer, Message>()));
+            fragmentedSnapshots.put(exchangeSecurityId, Collections.synchronizedMap(new TreeMap<Integer, Message>()));
 
-        Map<Integer, Message> messages = fragmentedSnapshots.get(securityId);
+        Map<Integer, Message> messages = fragmentedSnapshots.get(exchangeSecurityId);
         if (messages == null)
             return;
 
@@ -85,16 +85,16 @@ public abstract class SnapshotProcessor extends Processor implements ISnapshotPr
 
         if (lastFragment) {
             if (checkMessages(messages)) {
-                processSnapshotsAndIncrementals(securityId, rptSeqNum, messages.values());
+                processSnapshotsAndIncrementals(exchangeSecurityId, rptSeqNum, messages.values());
             } else {
-                fragmentedSnapshots.remove(securityId);
+                fragmentedSnapshots.remove(exchangeSecurityId);
             }
         }
     }
 
     @Override
     protected boolean checkSequence(Message readMessage) {
-        String securityId = getSecurityId(readMessage);
+        T exchangeSecurityId = getExchangeSecurityId(readMessage);
         int seqNum = readMessage.getInt("MsgSeqNum");
         long sendingTime = readMessage.getLong("SendingTime");
 
@@ -112,22 +112,22 @@ public abstract class SnapshotProcessor extends Processor implements ISnapshotPr
                 return false;
         }
 
-        if (!messageHandler.isAllowedUpdate(securityId))
+        if (!messageHandler.isAllowedUpdate(exchangeSecurityId))
             return false;
 
-        if (!sequenceValidator.isRecovering(securityId, true))
+        if (!sequenceValidator.isRecovering(exchangeSecurityId, true))
             return false;
 
         return true;
     }
 
     private void printRecoveringSecurityIds() {
-        String[] recoveringSecurityIds = sequenceValidator.getRecovering();
+        T[] recoveringSecurityIds = sequenceValidator.getRecovering();
         StringBuilder sb = new StringBuilder("Recovering ");
         if (recoveringSecurityIds != null && recoveringSecurityIds.length > 0) {
             wasRecovering = true;
             boolean first = true;
-            for (String s : recoveringSecurityIds) {
+            for (T s : recoveringSecurityIds) {
                 if (first)
                     first = false;
                 else
@@ -152,5 +152,5 @@ public abstract class SnapshotProcessor extends Processor implements ISnapshotPr
             printRecoveringSecurityIds();
     }
 
-    protected abstract String getSecurityId(Message readMessage);
+    protected abstract T getExchangeSecurityId(Message readMessage);
 }

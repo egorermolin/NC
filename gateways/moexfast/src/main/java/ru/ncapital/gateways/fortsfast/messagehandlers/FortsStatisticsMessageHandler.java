@@ -14,26 +14,25 @@ import ru.ncapital.gateways.moexfast.messagehandlers.StatisticsMessageHandler;
 /**
  * Created by Egor on 30-Sep-16.
  */
-public class FortsStatisticsMessageHandler extends StatisticsMessageHandler {
+public class FortsStatisticsMessageHandler extends StatisticsMessageHandler<Long> {
     @AssistedInject
-    public FortsStatisticsMessageHandler(MarketDataManager marketDataManager, @Assisted IGatewayConfiguration configuration) {
+    public FortsStatisticsMessageHandler(MarketDataManager<Long> marketDataManager, @Assisted IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
     }
 
     @Override
-    protected String getSecurityId(Message readMessage) {
-        long securityId = readMessage.getLong("SecurityID");
-
-        // TODO lookup for instrument symbol
-        return String.valueOf(securityId);
+    protected Long getExchangeSecurityId(Message readMessage) {
+        return readMessage.getLong("SecurityID");
     }
 
     @Override
-    protected String getSecurityId(GroupValue mdEntry) {
-        long securityId = mdEntry.getLong("SecurityID");
+    protected Long getExchangeSecurityId(GroupValue mdEntry) {
+        return mdEntry.getLong("SecurityID");
+    }
 
-        // TODO lookup for instrument symbol
-        return String.valueOf(securityId);
+    @Override
+    protected boolean getMdEntryIsBid(GroupValue mdEntry) {
+        return getMdEntryType(mdEntry) == MdEntryType.BID;
     }
 
     @Override
@@ -44,6 +43,11 @@ public class FortsStatisticsMessageHandler extends StatisticsMessageHandler {
     @Override
     protected double getMdEntryPx(GroupValue mdEntry) {
         return mdEntry.getDouble("MDEntryPx");
+    }
+
+    @Override
+    protected double getLastPx(GroupValue mdEntry) {
+        return 0;
     }
 
     @Override

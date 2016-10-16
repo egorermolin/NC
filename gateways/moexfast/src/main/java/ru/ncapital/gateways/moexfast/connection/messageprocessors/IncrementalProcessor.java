@@ -11,11 +11,9 @@ import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 /**
  * Created by egore on 1/11/16.
  */
-public abstract class IncrementalProcessor<T> extends Processor implements IIncrementalProcessor {
+public abstract class IncrementalProcessor<T> extends Processor<T> implements IIncrementalProcessor {
 
-    protected String lastDealNumber;
-
-    public IncrementalProcessor(IMessageHandler messageHandler, IMessageSequenceValidator sequenceValidator) {
+    public IncrementalProcessor(IMessageHandler<T> messageHandler, IMessageSequenceValidator<T> sequenceValidator) {
         super(messageHandler, sequenceValidator);
     }
 
@@ -34,55 +32,54 @@ public abstract class IncrementalProcessor<T> extends Processor implements IIncr
                     continue;
                 }
 
-                T securityId = getSecurityId(mdEntry);
+                T exchangeSecurityId = getExchangeSecurityId(mdEntry);
                 PerformanceData performanceData = new PerformanceData()
                         .setExchangeSendingTime(sendingTime)
                         .setGatewayDequeTime(dequeTimestamp)
                         .setGatewayInTime(inTimestamp);
 
                 int rptSeqNum = mdEntry.getInt("RptSeq");
-                String dealNumber = mdEntry.getString("DealNumber");
-                if (dealNumber != null) {
-                    if (!dealNumber.equals(lastDealNumber)) {
-                        lastDealNumber = dealNumber;
-                    } else {
-                        mdEntry.setString("DealNumber", null);
-                    }
-                }
+                String tradeId = getTradeId(mdEntry);
+                if (tradeId != null)
+                    handleTrade(mdEntry, tradeId);
 
-                if (!messageHandler.isAllowedUpdate(securityId))
+                if (!messageHandler.isAllowedUpdate(exchangeSecurityId))
                     continue;
 
-                if (sequenceValidator.isRecovering(securityId, false)) {
-                    if (sequenceValidator.onIncrementalSeq(securityId, rptSeqNum)) {
+                if (sequenceValidator.isRecovering(exchangeSecurityId, false)) {
+                    if (sequenceValidator.onIncrementalSeq(exchangeSecurityId, rptSeqNum)) {
                         messageHandler.onIncremental(mdEntry, performanceData);
 
                         // finished recovering
-                        StoredMdEntry[] storedMdEntriesToProcess = sequenceValidator.stopRecovering(securityId);
+                        StoredMdEntry[] storedMdEntriesToProcess = sequenceValidator.stopRecovering(exchangeSecurityId);
                         if (storedMdEntriesToProcess != null)
                             for (StoredMdEntry storedMdEntryToProcess : storedMdEntriesToProcess) {
-                                sequenceValidator.onIncrementalSeq(securityId,
+                                sequenceValidator.onIncrementalSeq(exchangeSecurityId,
                                         storedMdEntryToProcess.getSequenceNumber());
 
                                 messageHandler.onIncremental(storedMdEntryToProcess.getMdEntry(),
                                         storedMdEntryToProcess.getPerformanceData());
                             }
                     } else {
-                        sequenceValidator.storeIncremental(securityId, rptSeqNum, mdEntry, performanceData);
+                        sequenceValidator.storeIncremental(exchangeSecurityId, rptSeqNum, mdEntry, performanceData);
                     }
                     continue;
                 }
 
-                if (sequenceValidator.onIncrementalSeq(securityId, rptSeqNum)) {
+                if (sequenceValidator.onIncrementalSeq(exchangeSecurityId, rptSeqNum)) {
                     messageHandler.onIncremental(mdEntry, performanceData);
                 } else {
-                    sequenceValidator.storeIncremental(securityId, rptSeqNum, mdEntry, performanceData);
-                    sequenceValidator.startRecovering(securityId);
+                    sequenceValidator.storeIncremental(exchangeSecurityId, rptSeqNum, mdEntry, performanceData);
+                    sequenceValidator.startRecovering(exchangeSecurityId);
                 }
             }
             messageHandler.flushIncrementals();
         }
     }
 
-    protected abstract T getSecurityId(GroupValue mdEntry);
+    protected abstract void handleTrade(GroupValue mdEntry, String tradeId);
+
+    protected abstract String getTradeId(GroupValue mdEntry);
+
+    protected abstract T getExchangeSecurityId(GroupValue mdEntry);
 }

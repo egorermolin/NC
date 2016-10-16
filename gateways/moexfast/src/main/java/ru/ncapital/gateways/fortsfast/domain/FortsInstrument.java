@@ -1,6 +1,6 @@
 package ru.ncapital.gateways.fortsfast.domain;
 
-import ru.ncapital.gateways.moexfast.domain.Instrument;
+import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
 
 /**
  * Created by Egor on 04-Oct-16.

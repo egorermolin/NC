@@ -6,8 +6,8 @@ import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 /**
  * Created by egore on 5/30/16.
  */
-public class StoredMdEntry {
-    private String securityId;
+public class StoredMdEntry<T> {
+    private T exchangeSecurityId;
 
     private int sequenceNumber;
 
@@ -15,15 +15,15 @@ public class StoredMdEntry {
 
     private PerformanceData performanceData;
 
-    public StoredMdEntry(String securityId, int sequenceNumber, GroupValue mdEntry, PerformanceData performanceData) {
-        this.securityId = securityId;
+    public StoredMdEntry(T exchangeSecurityId, int sequenceNumber, GroupValue mdEntry, PerformanceData performanceData) {
+        this.exchangeSecurityId = exchangeSecurityId;
         this.sequenceNumber = sequenceNumber;
         this.mdEntry = mdEntry;
         this.performanceData = performanceData;
     }
 
-    public String getSecurityId() {
-        return securityId;
+    public T getExchangeSecurityId() {
+        return exchangeSecurityId;
     }
 
     public int getSequenceNumber() {

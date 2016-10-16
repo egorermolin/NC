@@ -1,23 +1,24 @@
 package ru.ncapital.gateways.micexfast
 
+import ru.ncapital.gateways.micexfast.domain.MicexDepthLevel
+import ru.ncapital.gateways.micexfast.domain.MicexPublicTrade
 import ru.ncapital.gateways.moexfast.OrderDepthEngine
-import ru.ncapital.gateways.moexfast.domain.BBO
-import ru.ncapital.gateways.moexfast.domain.DepthLevel
+import ru.ncapital.gateways.moexfast.domain.impl.BBO
+import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel
 import ru.ncapital.gateways.moexfast.domain.MdUpdateAction
-import ru.ncapital.gateways.moexfast.domain.PublicTrade
+import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade
 
 /**
  * Created by egore on 12/19/15.
  */
-class OrderDepthEngineTest extends GroovyTestCase {
+class MicexOrderDepthEngineTest extends GroovyTestCase {
     void testOnDepthLevelTradedPartially() {
         OrderDepthEngine de = new OrderDepthEngine()
         List<DepthLevel> toSend = new ArrayList<>()
 
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry1", 10.0, 5.0, null, true), new ArrayList<DepthLevel>())
-        de.onPublicTrade(new PublicTrade("AAA", "001", 10.0, 5.0, false))
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.DELETE, "entry1", 10.0, 0.0, "001", true), new ArrayList<DepthLevel>())
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry2", 10.0, 5.0, "001", false), toSend)
+        de.onDepthLevel(new MicexDepthLevel("AAA", MdUpdateAction.INSERT, "entry1", 10.0, 5.0, null, true), new ArrayList<DepthLevel>())
+        de.onDepthLevel(new MicexDepthLevel("AAA", MdUpdateAction.DELETE, "entry1", 10.0, 0.0, "001", true), new ArrayList<DepthLevel>())
+        de.onDepthLevel(new MicexDepthLevel("AAA", MdUpdateAction.INSERT, "entry2", 10.0, 5.0, "001", false), toSend)
         assert toSend.size() == 1
         assert !toSend[0].isBid
         assert toSend[0].mdUpdateAction == MdUpdateAction.INSERT

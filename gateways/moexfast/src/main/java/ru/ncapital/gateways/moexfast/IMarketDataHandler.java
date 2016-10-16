@@ -1,20 +1,23 @@
 package ru.ncapital.gateways.moexfast;
 
-import ru.ncapital.gateways.moexfast.domain.*;
+import ru.ncapital.gateways.moexfast.domain.intf.IBBO;
+import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
+import ru.ncapital.gateways.moexfast.domain.intf.IInstrument;
+import ru.ncapital.gateways.moexfast.domain.intf.IPublicTrade;
 
 /**
  * Created by egore on 12/9/15.
  */
 public interface IMarketDataHandler {
-    void onBBO(BBO bbo);
+    void onBBO(IBBO bbo);
 
-    void onDepthLevels(DepthLevel[] depthLevels);
+    void onDepthLevels(IDepthLevel[] depthLevels);
 
-    void onPublicTrade(PublicTrade publicTrade);
+    void onPublicTrade(IPublicTrade publicTrade);
 
-    void onStatistics(BBO bbo);
+    void onStatistics(IBBO bbo);
 
-    void onTradingStatus(BBO bbo);
+    void onTradingStatus(IBBO bbo);
 
     void onInstruments(IInstrument[] instruments);
 

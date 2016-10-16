@@ -2,10 +2,14 @@ package ru.ncapital.gateways.moexfast;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.moexfast.domain.BBO;
-import ru.ncapital.gateways.moexfast.domain.DepthLevel;
-import ru.ncapital.gateways.moexfast.domain.Instrument;
-import ru.ncapital.gateways.moexfast.domain.PublicTrade;
+import ru.ncapital.gateways.moexfast.domain.impl.BBO;
+import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
+import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
+import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
+import ru.ncapital.gateways.moexfast.domain.intf.IBBO;
+import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
+import ru.ncapital.gateways.moexfast.domain.intf.IInstrument;
+import ru.ncapital.gateways.moexfast.domain.intf.IPublicTrade;
 
 /**
  * Created by egore on 12/7/15.
@@ -15,7 +19,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
     private Logger logger = LoggerFactory.getLogger("DefaultMarketDataHandler");
 
     @Override
-    public void onBBO(BBO bbo) {
+    public void onBBO(IBBO bbo) {
         StringBuilder sb = new StringBuilder();
         sb.append("onBBO: ");
         sb.append(bbo.getSecurityId()).append(" ");
@@ -27,7 +31,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
     }
 
     @Override
-    public void onTradingStatus(BBO bbo) {
+    public void onTradingStatus(IBBO bbo) {
         StringBuilder sb = new StringBuilder();
         sb.append("onTradingStatus: ");
         sb.append(bbo.getSecurityId()).append(" ");
@@ -38,7 +42,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
     }
 
     @Override
-    public void onStatistics(BBO bbo) {
+    public void onStatistics(IBBO bbo) {
         StringBuilder sb = new StringBuilder();
         sb.append("onStatistics: ");
         sb.append(bbo.getSecurityId());
@@ -53,8 +57,8 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
     }
 
     @Override
-    public void onDepthLevels(DepthLevel[] depthLevels) {
-        for (DepthLevel depthLevel : depthLevels) {
+    public void onDepthLevels(IDepthLevel[] depthLevels) {
+        for (IDepthLevel depthLevel : depthLevels) {
             StringBuilder sb = new StringBuilder();
             sb.append("onDepthLevel: ");
             switch (depthLevel.getMdUpdateAction()) {
@@ -81,7 +85,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
     }
 
     @Override
-    public void onPublicTrade(PublicTrade publicTrade) {
+    public void onPublicTrade(IPublicTrade publicTrade) {
         StringBuilder sb = new StringBuilder();
         sb.append("onPublicTrade: ");
         sb.append(publicTrade.getSecurityId()).append(" ");
@@ -93,7 +97,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
     }
 
     @Override
-    public void onInstruments(Instrument[] instruments) {
+    public void onInstruments(IInstrument[] instruments) {
 
     }
 

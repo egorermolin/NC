@@ -5,24 +5,31 @@ import com.google.inject.assistedinject.AssistedInject;
 import org.openfast.GroupValue;
 import org.openfast.Message;
 import ru.ncapital.gateways.micexfast.MicexMarketDataManager;
+import ru.ncapital.gateways.micexfast.domain.MicexDepthLevel;
 import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.domain.MdEntryType;
 import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
+import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
 import ru.ncapital.gateways.moexfast.messagehandlers.OrderListMessageHandler;
+import sun.awt.X11.Depth;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by Egor on 30-Sep-16.
  */
-public class MicexOrderListMessageHandler extends OrderListMessageHandler {
+public class MicexOrderListMessageHandler extends OrderListMessageHandler<String> {
     @AssistedInject
-    public MicexOrderListMessageHandler(MarketDataManager marketDataManager, @Assisted IGatewayConfiguration configuration) {
+    public MicexOrderListMessageHandler(MicexMarketDataManager marketDataManager, @Assisted IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
     }
 
     @Override
-    protected String getSecurityId(Message readMessage) {
+    protected String getExchangeSecurityId(Message readMessage) {
         String symbol = readMessage.getString("Symbol");
         String tradingSessionId = readMessage.getString("TradingSessionID");
 
@@ -30,11 +37,16 @@ public class MicexOrderListMessageHandler extends OrderListMessageHandler {
     }
 
     @Override
-    protected String getSecurityId(GroupValue mdEntry) {
+    protected String getExchangeSecurityId(GroupValue mdEntry) {
         String symbol = mdEntry.getString("Symbol");
         String tradingSessionId = mdEntry.getString("TradingSessionID");
 
         return MicexInstrument.getSecurityId(symbol, tradingSessionId);
+    }
+
+    @Override
+    protected boolean getMdEntryIsBid(GroupValue mdEntry) {
+        throw new RuntimeException("Not implemented");
     }
 
     @Override
@@ -45,6 +57,11 @@ public class MicexOrderListMessageHandler extends OrderListMessageHandler {
     @Override
     protected double getMdEntryPx(GroupValue mdEntry) {
         return mdEntry.getDouble("MDEntryPx");
+    }
+
+    @Override
+    protected double getLastPx(GroupValue mdEntry) {
+        return getMdEntryPx(mdEntry);
     }
 
     @Override
@@ -65,5 +82,20 @@ public class MicexOrderListMessageHandler extends OrderListMessageHandler {
     @Override
     protected MdUpdateAction getMdUpdateAction(GroupValue mdEntry) {
         return MdUpdateAction.convert(mdEntry.getString("MDUpdateAction").charAt(0));
+    }
+
+    @Override
+    protected DepthLevel<String> createDepthLevel(String securityId, String exchangeSecurityId, MdUpdateAction action, String mdEntryId, double mdEntryPx, double mdEntrySize, String tradeId, boolean isBid) {
+        return new MicexDepthLevel(exchangeSecurityId, action, mdEntryId, mdEntryPx, mdEntrySize, tradeId, isBid);
+    }
+
+    @Override
+    protected List<DepthLevel<String>> createDepthLevels() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    protected DepthLevel<String>[] convertDepthLevels(List<DepthLevel<String>> depthLevels) {
+        return depthLevels.toArray((DepthLevel<String>[]) new MicexDepthLevel[0]);
     }
 }

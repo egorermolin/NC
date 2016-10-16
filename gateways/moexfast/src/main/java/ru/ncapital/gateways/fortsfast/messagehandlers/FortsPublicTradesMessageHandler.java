@@ -4,36 +4,42 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.openfast.GroupValue;
 import org.openfast.Message;
+import ru.ncapital.gateways.fortsfast.domain.FortsPublicTrade;
 import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.domain.MdEntryType;
 import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
+import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
 import ru.ncapital.gateways.moexfast.messagehandlers.PublicTradesMessageHandler;
 
 /**
  * Created by Egor on 30-Sep-16.
  */
-public class FortsPublicTradesMessageHandler extends PublicTradesMessageHandler {
+public class FortsPublicTradesMessageHandler extends PublicTradesMessageHandler<Long> {
     @AssistedInject
-    public FortsPublicTradesMessageHandler(MarketDataManager marketDataManager, @Assisted IGatewayConfiguration configuration) {
+    public FortsPublicTradesMessageHandler(MarketDataManager<Long> marketDataManager, @Assisted IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
     }
 
     @Override
-    protected String getSecurityId(Message readMessage) {
-        long securityId = readMessage.getLong("SecurityID");
-
-        // TODO lookup for instrument symbol
-        return String.valueOf(securityId);
+    protected PublicTrade<Long> createPublicTrade(String securityId, Long exchangeSecurityId, String mdEntryId, double mdEntryPx, double mdEntrySize, boolean isBid) {
+        return new FortsPublicTrade(securityId, exchangeSecurityId, mdEntryId, mdEntryPx, mdEntrySize, isBid);
     }
 
     @Override
-    protected String getSecurityId(GroupValue mdEntry) {
-        long securityId = mdEntry.getLong("SecurityID");
+    protected Long getExchangeSecurityId(Message readMessage) {
+        return readMessage.getLong("SecurityID");
+    }
 
-        // TODO lookup for instrument symbol
-        return String.valueOf(securityId);
+    @Override
+    protected Long getExchangeSecurityId(GroupValue mdEntry) {
+        return mdEntry.getLong("SecurityID");
+    }
+
+    @Override
+    protected boolean getMdEntryIsBid(GroupValue mdEntry) {
+        return getMdEntryType(mdEntry) == MdEntryType.BID;
     }
 
     @Override
@@ -44,6 +50,11 @@ public class FortsPublicTradesMessageHandler extends PublicTradesMessageHandler 
     @Override
     protected double getMdEntryPx(GroupValue mdEntry) {
         return mdEntry.getDouble("MDEntryPx");
+    }
+
+    @Override
+    protected double getLastPx(GroupValue mdEntry) {
+        return mdEntry.getDouble("LastPx");
     }
 
     @Override

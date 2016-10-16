@@ -7,15 +7,15 @@ import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.domain.MdEntryType;
-import ru.ncapital.gateways.moexfast.domain.PublicTrade;
+import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 /**
  * Created by egore on 1/28/16.
  */
-public abstract class PublicTradesMessageHandler extends AMessageHandler {
+public abstract class PublicTradesMessageHandler<T> extends AMessageHandler<T> {
 
-    public PublicTradesMessageHandler(MarketDataManager marketDataManager, IGatewayConfiguration configuration) {
+    public PublicTradesMessageHandler(MarketDataManager<T> marketDataManager, IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
     }
 
@@ -25,35 +25,31 @@ public abstract class PublicTradesMessageHandler extends AMessageHandler {
     }
 
     @Override
-    protected void onBeforeSnapshot(String securityId) {
+    protected void onBeforeSnapshot(T exchangeSecurityId) {
         throw new RuntimeException("Not implemented");
     }
 
     @Override
-    protected void onAfterSnapshot(String securityId) {
+    protected void onAfterSnapshot(T exchangeSecurityId) {
         throw new RuntimeException("Not implemented");
     }
 
     @Override
-    protected void onSnapshotMdEntry(String securityId, GroupValue mdEntry) {
+    protected void onSnapshotMdEntry(T exchangeSecurityId, GroupValue mdEntry) {
         throw new RuntimeException("Not implemented");
     }
 
     @Override
-    protected void onIncrementalMdEntry(String securityId, GroupValue mdEntry, PerformanceData perfData) {
+    protected void onIncrementalMdEntry(T exchangeSecurityId, GroupValue mdEntry, PerformanceData perfData) {
         MdEntryType mdEntryType = MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
 
         if (mdEntryType == null)
             return;
 
-        PublicTrade publicTrade = null;
+        PublicTrade<T> publicTrade = null;
         switch (mdEntryType) {
             case TRADE:
-                publicTrade = new PublicTrade(securityId,
-                        mdEntry.getString("MDEntryID"),
-                        mdEntry.getDouble("MDEntryPx"),
-                        mdEntry.getDouble("MDEntrySize"),
-                        mdEntry.getString("OrderSide").charAt(0) == 'B');
+                publicTrade = createPublicTrade(exchangeSecurityId, mdEntry);
 
                 publicTrade.getPerformanceData().updateFrom(perfData).setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
@@ -67,10 +63,25 @@ public abstract class PublicTradesMessageHandler extends AMessageHandler {
 
     @Override
     public void flushIncrementals() {
+
     }
 
     @Override
     public MessageHandlerType getType() {
         return MessageHandlerType.PUBLIC_TRADES;
     }
+
+    private PublicTrade<T> createPublicTrade(T exchangeSecurityId, GroupValue mdEntry) {
+        return createPublicTrade(
+                marketDataManager.convertExchangeSecurityIdToSecurityId(exchangeSecurityId),
+                exchangeSecurityId,
+                getMdEntryId(mdEntry),
+                getLastPx(mdEntry),
+                getMdEntrySize(mdEntry),
+                getMdEntryIsBid(mdEntry)
+        );
+    }
+
+    protected abstract PublicTrade<T> createPublicTrade(String securityId, T exchangeSecurityId, String mdEntryId, double mdEntryPx, double mdEntrySize, boolean isBid);
+
 }

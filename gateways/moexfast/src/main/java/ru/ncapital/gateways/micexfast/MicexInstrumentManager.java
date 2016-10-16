@@ -8,8 +8,7 @@ import ru.ncapital.gateways.micexfast.domain.ProductType;
 import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.InstrumentManager;
-import ru.ncapital.gateways.moexfast.domain.IInstrument;
-import ru.ncapital.gateways.moexfast.domain.Instrument;
+import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -28,7 +27,7 @@ public class MicexInstrumentManager extends InstrumentManager<String> {
     private Set<String> allowedSecurityIds = new HashSet<>();
 
     @Override
-    public InstrumentManager configure(IGatewayConfiguration configuration) {
+    public InstrumentManager<String> configure(IGatewayConfiguration configuration) {
         IMicexGatewayConfiguration micexConfiguration = (IMicexGatewayConfiguration) configuration;
 
         this.allowedTradingSessionIds.addAll(Arrays.asList(micexConfiguration.getAllowedTradingSessionIds()));
@@ -41,6 +40,16 @@ public class MicexInstrumentManager extends InstrumentManager<String> {
     }
 
     @Override
+    public String getExchangeSecurityId(String securityId) {
+        return securityId;
+    }
+
+    @Override
+    public String getSecurityId(String exchangeSecurityId) {
+        return exchangeSecurityId;
+    }
+
+    @Override
     public boolean isAllowedInstrument(Instrument<String> instrument) {
         if (super.isAllowedInstrument(instrument))
             return true;
@@ -50,7 +59,7 @@ public class MicexInstrumentManager extends InstrumentManager<String> {
             if (getLogger().isTraceEnabled())
                 getLogger().trace(instrument.getName() + " Ignored by SecurityId [SecurityId: " + instrument.getSecurityId() + "]");
 
-            ignoredInstruments.put(instrument.getSecurityId(), instrument);
+            addInstrumentToIgnored(instrument);
             return false;
         }
 
@@ -60,7 +69,7 @@ public class MicexInstrumentManager extends InstrumentManager<String> {
             if (getLogger().isTraceEnabled())
                 getLogger().trace(instrument.getName() + " Ignored by TradingSessionId " + instrument.getId());
 
-            ignoredInstruments.put(instrument.getSecurityId(), instrument);
+            addInstrumentToIgnored(instrument);
             return false;
         }
 
@@ -72,7 +81,7 @@ public class MicexInstrumentManager extends InstrumentManager<String> {
             if (getLogger().isTraceEnabled())
                 getLogger().trace(instrument.getName() + " Ignored by ProductType " + instrument.getId());
 
-            ignoredInstruments.put(instrument.getSecurityId(), instrument);
+            addInstrumentToIgnored(instrument);
             return false;
         }
 

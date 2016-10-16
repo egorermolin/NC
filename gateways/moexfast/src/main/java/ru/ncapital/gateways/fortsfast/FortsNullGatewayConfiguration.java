@@ -10,4 +10,8 @@ import ru.ncapital.gateways.moexfast.NullGatewayConfiguration;
  */
 public class FortsNullGatewayConfiguration extends NullGatewayConfiguration implements IFortsGatewayConfiguration {
 
+    @Override
+    public String[] getAllowedUnderlyings() {
+        return new String[0];
+    }
 }

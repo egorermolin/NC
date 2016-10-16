@@ -16,7 +16,9 @@ public enum MdEntryType {
     OPENING('4', "OPENING"),
     CLOSING('5', "CLOSING"),
     HIGH('7', "HIGH"),
-    LOW('8', "LOW");
+    LOW('8', "LOW"),
+
+    UNKNOWN('X', "UNKNOWN");
 
     private char type;
 
@@ -39,9 +41,10 @@ public enum MdEntryType {
 
     public char getType() { return type; }
 
-    public static MdEntryType convert(char type) { return typeMap.get(type); }
-
-    public String description() { return description; }
+    public static MdEntryType convert(char type) {
+        MdEntryType mdEntryType = typeMap.get(type);
+        return mdEntryType == null ? UNKNOWN : mdEntryType;
+    }
 
     @Override
     public String toString() {

@@ -4,8 +4,9 @@ import com.google.common.collect.SortedMultiset;
 import com.google.common.collect.TreeMultiset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.moexfast.domain.BBO;
-import ru.ncapital.gateways.moexfast.domain.DepthLevel;
+import ru.ncapital.gateways.moexfast.domain.impl.BBO;
+import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
+import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -16,9 +17,9 @@ import java.util.Map;
  * Created by egore on 12/17/15.
  */
 public class OrderDepth {
-    private Map<String, DepthLevel> depthLevels;
+    private Map<String, IDepthLevel> depthLevels;
 
-    private SortedMultiset<DepthLevel> depthLevelsSorted;
+    private SortedMultiset<IDepthLevel> depthLevelsSorted;
 
     private boolean isBid;
 
@@ -27,16 +28,16 @@ public class OrderDepth {
     public OrderDepth(boolean isBid) {
         this.isBid = isBid;
         if (isBid)
-        this.depthLevelsSorted = TreeMultiset.create(new Comparator<DepthLevel>() {
+        this.depthLevelsSorted = TreeMultiset.create(new Comparator<IDepthLevel>() {
             @Override
-            public int compare(DepthLevel depthLevel, DepthLevel depthLevel1) {
+            public int compare(IDepthLevel depthLevel, IDepthLevel depthLevel1) {
                 return depthLevel1.compareTo(depthLevel);
             }
         });
         else
-        this.depthLevelsSorted = TreeMultiset.create(new Comparator<DepthLevel>() {
+        this.depthLevelsSorted = TreeMultiset.create(new Comparator<IDepthLevel>() {
             @Override
-            public int compare(DepthLevel depthLevel, DepthLevel depthLevel1) {
+            public int compare(IDepthLevel depthLevel, IDepthLevel depthLevel1) {
                 return depthLevel.compareTo(depthLevel1);
             }
         });
@@ -48,7 +49,7 @@ public class OrderDepth {
         if (logger.isTraceEnabled())
             logger.trace("onDepthLevel: " + depthLevel.toString());
 
-        DepthLevel previousDepthLevel;
+        IDepthLevel previousDepthLevel;
         switch (depthLevel.getMdUpdateAction()) {
             case INSERT:
                 previousDepthLevel = depthLevels.get(depthLevel.getMdEntryId());
@@ -90,7 +91,7 @@ public class OrderDepth {
             if (depthLevelsSorted.size() > 0) {
                 bbo.setBidPx(depthLevelsSorted.firstEntry().getElement().getMdEntryPx());
                 bbo.setBidSize(0.0);
-                for (DepthLevel dl : depthLevelsSorted) {
+                for (IDepthLevel dl : depthLevelsSorted) {
                     if (Double.compare(dl.getMdEntryPx(), bbo.getBidPx()) != 0)
                         break;
 
@@ -104,7 +105,7 @@ public class OrderDepth {
             if (depthLevelsSorted.size() > 0) {
                 bbo.setOfferPx(depthLevelsSorted.firstEntry().getElement().getMdEntryPx());
                 bbo.setOfferSize(0.0);
-                for (DepthLevel dl : depthLevelsSorted) {
+                for (IDepthLevel dl : depthLevelsSorted) {
                     if (Double.compare(dl.getMdEntryPx(), bbo.getOfferPx()) != 0)
                         break;
 
@@ -117,7 +118,7 @@ public class OrderDepth {
         }
     }
 
-    public void extractDepthLevels(List<DepthLevel> depthLevels) {
+    public void extractDepthLevels(List<IDepthLevel> depthLevels) {
         depthLevels.addAll(this.depthLevels.values());
     }
 

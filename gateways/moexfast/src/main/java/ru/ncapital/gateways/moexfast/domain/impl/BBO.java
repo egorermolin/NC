@@ -1,12 +1,15 @@
-package ru.ncapital.gateways.moexfast.domain;
+package ru.ncapital.gateways.moexfast.domain.impl;
 
+import ru.ncapital.gateways.moexfast.domain.intf.IBBO;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 /**
  * Created by egore on 12/7/15.
  */
-public class BBO {
+public class BBO<T> implements IBBO {
     private final String securityId;
+
+    private final T exchangeSecurityId;
 
     private double bidPx;
 
@@ -36,15 +39,20 @@ public class BBO {
 
     private boolean[] isInRecoverySet = new boolean[] {false, false};
 
-    public BBO(String securityId) {
+    public BBO(String securityId, T exchangeSecurityId) {
         this.securityId = securityId;
+        this.exchangeSecurityId = exchangeSecurityId;
         this.performanceData = new PerformanceData();
     }
 
+    @Override
     public String getSecurityId() {
         return securityId;
     }
 
+    public T getExchangeSecurityId() { return exchangeSecurityId; }
+
+    @Override
     public double getBidPx() {
         return bidPx;
     }
@@ -53,6 +61,7 @@ public class BBO {
         this.bidPx = bidPx;
     }
 
+    @Override
     public double getOfferPx() {
         return offerPx;
     }
@@ -61,6 +70,7 @@ public class BBO {
         this.offerPx = offerPx;
     }
 
+    @Override
     public double getBidSize() {
         return bidSize;
     }
@@ -69,6 +79,7 @@ public class BBO {
         this.bidSize = bidSize;
     }
 
+    @Override
     public double getOfferSize() {
         return offerSize;
     }
@@ -77,6 +88,7 @@ public class BBO {
         this.offerSize = offerSize;
     }
 
+    @Override
     public String getTradingStatus() {
         return tradingStatus;
     }
@@ -85,6 +97,7 @@ public class BBO {
         this.tradingStatus = tradingStatus;
     }
 
+    @Override
     public double getLastPx() {
         return lastPx;
     }
@@ -93,6 +106,7 @@ public class BBO {
         this.lastPx = lastPx;
     }
 
+    @Override
     public double getLastSize() {
         return lastSize;
     }
@@ -101,6 +115,7 @@ public class BBO {
         this.lastSize = lastSize;
     }
 
+    @Override
     public double getLowPx() {
         return lowPx;
     }
@@ -109,6 +124,7 @@ public class BBO {
         this.lowPx = lowPx;
     }
 
+    @Override
     public double getHighPx() {
         return highPx;
     }
@@ -117,6 +133,7 @@ public class BBO {
         this.highPx = highPx;
     }
 
+    @Override
     public double getOpenPx() {
         return openPx;
     }
@@ -125,6 +142,7 @@ public class BBO {
         this.openPx = openPx;
     }
 
+    @Override
     public double getClosePx() {
         return closePx;
     }
@@ -133,6 +151,7 @@ public class BBO {
         this.closePx = closePx;
     }
 
+    @Override
     public PerformanceData getPerformanceData() {
         return performanceData;
     }
@@ -154,6 +173,7 @@ public class BBO {
     public String toString() {
         return "BBO{" +
                 "securityId='" + securityId + '\'' +
+                ", exchangeSecurityId='" + exchangeSecurityId + '\'' +
                 ", bidPx=" + bidPx +
                 ", offerPx=" + offerPx +
                 ", bidSize=" + bidSize +

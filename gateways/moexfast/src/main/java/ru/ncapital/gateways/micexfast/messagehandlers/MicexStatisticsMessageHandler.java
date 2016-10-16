@@ -21,7 +21,7 @@ public class MicexStatisticsMessageHandler extends StatisticsMessageHandler {
     }
 
     @Override
-    protected String getSecurityId(Message readMessage) {
+    protected String getExchangeSecurityId(Message readMessage) {
         String symbol = readMessage.getString("Symbol");
         String tradingSessionId = readMessage.getString("TradingSessionID");
 
@@ -29,11 +29,16 @@ public class MicexStatisticsMessageHandler extends StatisticsMessageHandler {
     }
 
     @Override
-    protected String getSecurityId(GroupValue mdEntry) {
+    protected String getExchangeSecurityId(GroupValue mdEntry) {
         String symbol = mdEntry.getString("Symbol");
         String tradingSessionId = mdEntry.getString("TradingSessionID");
 
         return MicexInstrument.getSecurityId(symbol, tradingSessionId);
+    }
+
+    @Override
+    protected boolean getMdEntryIsBid(GroupValue mdEntry) {
+        throw new RuntimeException("Not implemented");
     }
 
     @Override
@@ -44,6 +49,11 @@ public class MicexStatisticsMessageHandler extends StatisticsMessageHandler {
     @Override
     protected double getMdEntryPx(GroupValue mdEntry) {
         return mdEntry.getDouble("MDEntryPx");
+    }
+
+    @Override
+    protected double getLastPx(GroupValue mdEntry) {
+        return getMdEntryPx(mdEntry);
     }
 
     @Override

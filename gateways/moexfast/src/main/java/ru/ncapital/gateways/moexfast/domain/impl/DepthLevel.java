@@ -1,12 +1,16 @@
-package ru.ncapital.gateways.moexfast.domain;
+package ru.ncapital.gateways.moexfast.domain.impl;
 
+import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
+import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 /**
  * Created by egore on 12/14/15.
  */
-public class DepthLevel implements Comparable<DepthLevel> {
+public class DepthLevel<T> implements IDepthLevel {
     public String securityId;
+
+    public T exchangeSecurityId;
 
     public String mdEntryId;
 
@@ -22,8 +26,9 @@ public class DepthLevel implements Comparable<DepthLevel> {
 
     public String dealNumber;
 
-    public DepthLevel(String securityId, MdUpdateAction mdUpdateAction, String mdEntryId, double mdEntryPx, double mdEntrySize, String dealNumber, boolean isBid) {
+    public DepthLevel(String securityId, T exchangeSecurityId, MdUpdateAction mdUpdateAction, String mdEntryId, double mdEntryPx, double mdEntrySize, String dealNumber, boolean isBid) {
         this.securityId = securityId;
+        this.exchangeSecurityId = exchangeSecurityId;
         this.mdUpdateAction = mdUpdateAction;
         this.mdEntryId = mdEntryId;
         this.mdEntryPx = mdEntryPx;
@@ -33,70 +38,83 @@ public class DepthLevel implements Comparable<DepthLevel> {
         this.performanceData = new PerformanceData();
     }
 
-    public DepthLevel(String securityId, MdUpdateAction mdUpdateAction) {
+    public DepthLevel(String securityId, T exchangeSecurityId, MdUpdateAction mdUpdateAction) {
         this.securityId = securityId;
+        this.exchangeSecurityId = exchangeSecurityId;
         this.mdUpdateAction = mdUpdateAction;
         this.performanceData = new PerformanceData();
     }
 
-    public void setMdUpdateAction(MdUpdateAction mdUpdateAction) {
-        this.mdUpdateAction = mdUpdateAction;
+   // public void setMdUpdateAction(MdUpdateAction mdUpdateAction) {
+   //     this.mdUpdateAction = mdUpdateAction;
+   // }
+
+   // public void setMdEntrySize(double mdEntrySize) {
+   //     this.mdEntrySize = mdEntrySize;
+   // }
+
+    public T getExchangeSecurityId() {
+        return exchangeSecurityId;
     }
 
-    public void setMdEntrySize(double mdEntrySize) {
-        this.mdEntrySize = mdEntrySize;
-    }
-
+    @Override
     public String getSecurityId() {
         return securityId;
     }
 
+    @Override
     public String getMdEntryId() {
         return mdEntryId;
     }
 
+    @Override
     public MdUpdateAction getMdUpdateAction() {
         return mdUpdateAction;
     }
 
+    @Override
     public double getMdEntryPx() {
         return mdEntryPx;
     }
 
+    @Override
     public double getMdEntrySize() {
         return mdEntrySize;
     }
 
+    @Override
     public String getDealNumber() {
         return dealNumber;
     }
 
+    @Override
     public boolean isBid() {
         return isBid;
     }
 
+    @Override
     public PerformanceData getPerformanceData() {
         return performanceData;
     }
 
-    public int bidCompareTo(DepthLevel depthLevel) {
-        int c = Double.compare(depthLevel.mdEntryPx, this.mdEntryPx);
+    public int bidCompareTo(IDepthLevel depthLevel) {
+        int c = Double.compare(depthLevel.getMdEntryPx(), this.getMdEntryPx());
         if (c == 0)
-            return depthLevel.mdEntryId.compareTo(this.mdEntryId);
+            return depthLevel.getMdEntryId().compareTo(this.getMdEntryId());
         else
             return c;
     }
 
-    public int offerCompareTo(DepthLevel depthLevel) {
-        int c = Double.compare(this.mdEntryPx, depthLevel.mdEntryPx);
+    public int offerCompareTo(IDepthLevel depthLevel) {
+        int c = Double.compare(this.mdEntryPx, depthLevel.getMdEntryPx());
         if (c == 0)
-            return this.mdEntryId.compareTo(depthLevel.mdEntryId);
+            return this.getMdEntryId().compareTo(depthLevel.getMdEntryId());
         else
             return c;
     }
 
     @Override
-    public int compareTo(DepthLevel depthLevel) {
+    public int compareTo(IDepthLevel depthLevel) {
         return offerCompareTo(depthLevel);
     }
 
@@ -104,6 +122,7 @@ public class DepthLevel implements Comparable<DepthLevel> {
     public String toString() {
         return "DepthLevel{" +
                 "securityId='" + securityId + '\'' +
+                ", exchangeSecurityId='" + exchangeSecurityId + '\'' +
                 ", mdEntryId='" + mdEntryId + '\'' +
                 ", mdUpdateAction=" + mdUpdateAction +
                 ", mdEntryPx=" + mdEntryPx +

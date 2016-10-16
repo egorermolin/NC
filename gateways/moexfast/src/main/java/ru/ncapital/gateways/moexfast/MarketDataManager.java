@@ -2,15 +2,22 @@ package ru.ncapital.gateways.moexfast;
 
 import com.google.inject.Inject;
 import org.slf4j.Logger;
+import ru.ncapital.gateways.micexfast.MicexInstrumentManager;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.HeartbeatProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IIncrementalProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.ISnapshotProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
 import ru.ncapital.gateways.moexfast.domain.*;
+import ru.ncapital.gateways.moexfast.domain.impl.BBO;
+import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
+import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
+import ru.ncapital.gateways.moexfast.domain.intf.IBBO;
+import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerFactory;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 import ru.ncapital.gateways.moexfast.performance.IGatewayPerformanceLogger;
+import sun.awt.X11.Depth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,14 +27,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by egore on 12/7/15.
  */
 
-public abstract class MarketDataManager {
+public abstract class MarketDataManager<T> {
     private ConcurrentHashMap<String, Subscription> subscriptions = new ConcurrentHashMap<>();
 
-    private ConcurrentHashMap<String, BBO> bbos = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<T, BBO<T>> bbosByExchangeSecurityId = new ConcurrentHashMap<>();
 
     private Logger logger = getLogger();
 
-    private OrderDepthEngine orderDepthEngine = new OrderDepthEngine();
+    private OrderDepthEngine<T> orderDepthEngine = createDepthEngine();
 
     private IMarketDataHandler marketDataHandler;
 
@@ -50,7 +57,7 @@ public abstract class MarketDataManager {
     @Inject
     protected HeartbeatProcessor heartbeatProcessor;
 
-    protected InstrumentManager instrumentManager;
+    protected InstrumentManager<T> instrumentManager;
 
     private IGatewayPerformanceLogger performanceLogger;
 
@@ -58,15 +65,37 @@ public abstract class MarketDataManager {
 
     private boolean feedStatusALL = true;
 
-    public void setInstrumentManager(InstrumentManager instrumentManager) {
-        this.instrumentManager = instrumentManager;
-    }
-
     public MarketDataManager configure(IGatewayConfiguration configuration) {
         marketDataHandler = configuration.getMarketDataHandler();
         performanceLogger = configuration.getPerformanceLogger();
 
         return this;
+    }
+
+    protected abstract OrderDepthEngine<T> createDepthEngine();
+
+    public abstract BBO<T> createBBO(T exchangeSecurityId);
+
+    public DepthLevel<T> createSnapshotDepthLevel(T exchangeSecurityId) {
+        return orderDepthEngine.createSnapshotDepthLevel(exchangeSecurityId);
+    }
+
+    public T convertSecurityIdToExchangeSecurityId(String securityId) {
+        return instrumentManager.getExchangeSecurityId(securityId);
+    }
+
+    public String convertExchangeSecurityIdToSecurityId(T exchangeSecurityId) {
+        return instrumentManager.getSecurityId(exchangeSecurityId);
+    }
+
+    public boolean isAllowedInstrument(T exchangeSecurityId) {
+        return instrumentManager.isAllowedInstrument(exchangeSecurityId);
+    }
+
+    public abstract Logger getLogger();
+
+    public void setInstrumentManager(InstrumentManager<T> instrumentManager) {
+        this.instrumentManager = instrumentManager;
     }
 
     public boolean subscribe(Subscription subscription) {
@@ -78,38 +107,39 @@ public abstract class MarketDataManager {
                 logger.debug("Added subscription for " + subscription.getSubscriptionKey());
         }
 
-        BBO currentBBO = getOrCreateBBO(subscription.getSubscriptionKey());
+        BBO<T> currentBBO = getOrCreateBBO(
+                convertSecurityIdToExchangeSecurityId(subscription.getSubscriptionKey()));
+
         synchronized (currentBBO) {
-            List<DepthLevel> depthLevelsToSend = new ArrayList<>();
-            depthLevelsToSend.add(new DepthLevel(subscription.getSubscriptionKey(), MdUpdateAction.SNAPSHOT));
-            orderDepthEngine.getDepthLevels(subscription.getSubscriptionKey(), depthLevelsToSend);
+            List<IDepthLevel> depthLevelsToSend = new ArrayList<>();
+            orderDepthEngine.getDepthLevels(currentBBO.getExchangeSecurityId(), depthLevelsToSend);
 
             marketDataHandler.onBBO(currentBBO);
-            marketDataHandler.onDepthLevels(depthLevelsToSend.toArray(new DepthLevel[0]));
+            marketDataHandler.onDepthLevels(depthLevelsToSend.toArray(new IDepthLevel[0]));
             marketDataHandler.onStatistics(currentBBO);
             marketDataHandler.onTradingStatus(currentBBO);
         }
         return true;
     }
 
-    private BBO getOrCreateBBO(String securityId) {
-        BBO bbo = bbos.get(securityId);
+    private BBO<T> getOrCreateBBO(T exchangeSecurityId) {
+        BBO<T> bbo = bbosByExchangeSecurityId.get(exchangeSecurityId);
         if (bbo == null) {
-            bbo = new BBO(securityId);
-            if (bbos.putIfAbsent(securityId, bbo) == null)
+            bbo = createBBO(exchangeSecurityId);
+            if (bbosByExchangeSecurityId.putIfAbsent(exchangeSecurityId, bbo) == null)
                 return bbo;
 
-            return bbos.get(securityId);
+            return bbosByExchangeSecurityId.get(exchangeSecurityId);
         }
         return bbo;
     }
 
-    public void onBBO(BBO newBBO) {
+    public void onBBO(BBO<T> newBBO) {
         long gatewayOutTime = 0;
         if (logger.isTraceEnabled())
             logger.trace("onBBO " + newBBO.getSecurityId());
 
-        BBO currentBBO = getOrCreateBBO(newBBO.getSecurityId());
+        BBO<T> currentBBO = getOrCreateBBO(newBBO.getExchangeSecurityId());
         synchronized (currentBBO) {
             boolean[] changed = orderDepthEngine.updateBBO(currentBBO, newBBO);
 
@@ -128,19 +158,19 @@ public abstract class MarketDataManager {
         logPerformance(currentBBO, gatewayOutTime);
     }
 
-    public void onDepthLevels(DepthLevel[] depthLevels) {
+    public void onDepthLevels(DepthLevel<T>[] depthLevels) {
         long gatewayOutTime = 0;
         if (logger.isTraceEnabled())
             logger.trace("onDepthLevel " + depthLevels[0].getSecurityId());
 
-        BBO currentBBO = getOrCreateBBO(depthLevels[0].getSecurityId());
+        BBO<T> currentBBO = getOrCreateBBO(depthLevels[0].getExchangeSecurityId());
         synchronized (currentBBO) {
-            List<DepthLevel> depthLevelsToSend = new ArrayList<>();
+            List<IDepthLevel> depthLevelsToSend = new ArrayList<>();
             orderDepthEngine.onDepthLevels(depthLevels, depthLevelsToSend);
 
-            if (subscriptions.containsKey(depthLevels[0].getSecurityId())) {
+            if (subscriptions.containsKey(currentBBO.getSecurityId())) {
                 gatewayOutTime = Utils.currentTimeInTicks();
-                marketDataHandler.onDepthLevels(depthLevelsToSend.toArray(new DepthLevel[0]));
+                marketDataHandler.onDepthLevels(depthLevelsToSend.toArray(new IDepthLevel[0]));
             }
         }
 
@@ -148,16 +178,14 @@ public abstract class MarketDataManager {
     }
 
 
-    public void onPublicTrade(PublicTrade publicTrade) {
+    public void onPublicTrade(PublicTrade<T> publicTrade) {
         long gatewayOutTime = 0;
         if (logger.isTraceEnabled())
             logger.trace("onPublicTrade " + publicTrade.getSecurityId());
 
-        BBO currentBBO = getOrCreateBBO(publicTrade.getSecurityId());
+        BBO<T> currentBBO = getOrCreateBBO(publicTrade.getExchangeSecurityId());
         synchronized (currentBBO) {
-            orderDepthEngine.onPublicTrade(publicTrade);
-
-            if (subscriptions.containsKey(publicTrade.getSecurityId())) {
+            if (subscriptions.containsKey(currentBBO.getSecurityId())) {
                 gatewayOutTime = Utils.currentTimeInTicks();
                 marketDataHandler.onPublicTrade(publicTrade);
             }
@@ -241,16 +269,8 @@ public abstract class MarketDataManager {
         getIncrementalProcessor(type).setIsPrimary(isPrimary);
     }
 
-    public boolean isAllowedInstrument(String securityId) {
-        return instrumentManager.isAllowedInstrument(securityId);
-    }
-
-    public boolean isAllowedInstrument(Long securityId) {
-        return instrumentManager.isAllowedInstrument(securityId);
-    }
-
-    public void setRecovery(String securityId, boolean isUp, boolean orderList) {
-        BBO bbo = new BBO(securityId);
+    public void setRecovery(T exchangeSecurityId, boolean isUp, boolean orderList) {
+        BBO<T> bbo = createBBO(exchangeSecurityId);
         bbo.setInRecovery(isUp, orderList ? 0 : 1);
         onBBO(bbo);
     }
@@ -268,6 +288,4 @@ public abstract class MarketDataManager {
         if (changed)
             marketDataHandler.onFeedStatus(up, all);
     }
-
-    public abstract Logger getLogger();
 }

@@ -1,6 +1,6 @@
-package ru.ncapital.gateways.moexfast.domain;
+package ru.ncapital.gateways.moexfast.domain.impl;
 
-import ru.ncapital.gateways.fortsfast.domain.FortsInstrument;
+import ru.ncapital.gateways.moexfast.domain.intf.IInstrument;
 
 /**
  * Created by Egor on 30-Sep-16.
@@ -80,6 +80,7 @@ public abstract class Instrument<T> implements IInstrument {
         return underlying;
     }
 
+    @Override
     public String getName() {
         return getClass().getName();
     }

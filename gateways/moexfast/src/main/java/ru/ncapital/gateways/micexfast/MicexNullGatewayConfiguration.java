@@ -17,4 +17,9 @@ public class MicexNullGatewayConfiguration extends NullGatewayConfiguration impl
     public ProductType[] getAllowedProductTypes() {
         return new ProductType[0];
     }
+
+    @Override
+    public String[] getAllowedSecurityIds() {
+        return new String[0];
+    }
 }

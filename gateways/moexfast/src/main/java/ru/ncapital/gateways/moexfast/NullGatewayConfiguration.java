@@ -32,10 +32,10 @@ public class NullGatewayConfiguration implements IGatewayConfiguration {
         return MarketType.CURR;
     }
 
-    @Override
-    public String[] getAllowedSecurityIds() {
-        return new String[] {"*"};
-    }
+//    @Override
+//    public String[] getAllowedSecurityIds() {
+//        return new String[] {"*"};
+//    }
 
     @Override
     public IGatewayPerformanceLogger getPerformanceLogger() {

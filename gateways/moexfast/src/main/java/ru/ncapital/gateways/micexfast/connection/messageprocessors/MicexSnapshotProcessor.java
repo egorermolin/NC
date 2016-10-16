@@ -9,13 +9,13 @@ import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 /**
  * Created by Egor on 30-Sep-16.
  */
-public class MicexSnapshotProcessor extends SnapshotProcessor {
-    public MicexSnapshotProcessor(IMessageHandler messageHandler, IMessageSequenceValidator sequenceValidator) {
+public class MicexSnapshotProcessor extends SnapshotProcessor<String> {
+    public MicexSnapshotProcessor(IMessageHandler<String> messageHandler, IMessageSequenceValidator<String> sequenceValidator) {
         super(messageHandler, sequenceValidator);
     }
 
     @Override
-    protected String getSecurityId(Message readMessage) {
+    protected String getExchangeSecurityId(Message readMessage) {
         String symbol = readMessage.getString("Symbol");
         String tradingSessionId = readMessage.getString("TradingSessionID");
 

@@ -1,14 +1,17 @@
-package ru.ncapital.gateways.moexfast.domain;
+package ru.ncapital.gateways.moexfast.domain.impl;
 
+import ru.ncapital.gateways.moexfast.domain.intf.IPublicTrade;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 /**
  * Created by egore on 1/28/16.
  */
-public class PublicTrade {
+public class PublicTrade<T> implements IPublicTrade {
     private String securityId;
 
-    private String id;
+    private T exchangeSecurityId;
+
+    private String tradeId;
 
     private double lastPx;
 
@@ -18,35 +21,46 @@ public class PublicTrade {
 
     private PerformanceData performanceData;
 
-    public PublicTrade(String securityId, String id, double lastPx, double lastSize, boolean isBid) {
+    public PublicTrade(String securityId, T exchangeSecurityId, String tradeId, double lastPx, double lastSize, boolean isBid) {
         this.securityId = securityId;
-        this.id = id;
+        this.exchangeSecurityId = exchangeSecurityId;
+        this.tradeId = tradeId;
         this.lastPx = lastPx;
         this.lastSize = lastSize;
         this.isBid = isBid;
         this.performanceData = new PerformanceData();
     }
 
+    @Override
     public String getSecurityId() {
         return securityId;
     }
 
-    public String getId() {
-        return id;
+    public T getExchangeSecurityId() {
+        return exchangeSecurityId;
     }
 
+    @Override
+    public String getTradeId() {
+        return tradeId;
+    }
+
+    @Override
     public double getLastPx() {
         return lastPx;
     }
 
+    @Override
     public double getLastSize() {
         return lastSize;
     }
 
+    @Override
     public boolean isBid() {
         return isBid;
     }
 
+    @Override
     public PerformanceData getPerformanceData() {
         return performanceData;
     }
@@ -55,7 +69,8 @@ public class PublicTrade {
     public String toString() {
         return "PublicTrade{" +
                 "securityId='" + securityId + '\'' +
-                ", id=" + id +
+                ", exchangeSecurityId='" + exchangeSecurityId + '\'' +
+                ", tradeId=" + tradeId +
                 ", isBid=" + isBid +
                 ", lastPx=" + lastPx +
                 ", lastSize=" + lastSize +

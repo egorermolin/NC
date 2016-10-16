@@ -6,12 +6,11 @@ import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.Utils;
-import ru.ncapital.gateways.moexfast.domain.DepthLevel;
 import ru.ncapital.gateways.moexfast.domain.MdEntryType;
 import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
+import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +20,9 @@ import java.util.Map;
  */
 public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
 
-    private Map<String, List<DepthLevel>> depthLevelMap = new HashMap<String, List<DepthLevel>>();
+    private Map<T, List<DepthLevel<T>>> depthLevelMap = new HashMap<>();
 
-    public OrderListMessageHandler(MarketDataManager marketDataManager, IGatewayConfiguration configuration) {
+    public OrderListMessageHandler(MarketDataManager<T> marketDataManager, IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
     }
 
@@ -33,16 +32,15 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
     }
 
     @Override
-    protected void onSnapshotMdEntry(T securityId, GroupValue mdEntry) {
+    protected void onSnapshotMdEntry(T exchangeSecurityId, GroupValue mdEntry) {
         MdEntryType mdEntryType = getMdEntryType(mdEntry);
-        if (mdEntryType == null)
-            return;
-
-        DepthLevel depthLevel = null;
+        DepthLevel<T> depthLevel = null;
         switch (mdEntryType) {
             case BID:
                 depthLevel =
-                        new DepthLevel(securityId,
+                        createDepthLevel(
+                                marketDataManager.convertExchangeSecurityIdToSecurityId(exchangeSecurityId),
+                                exchangeSecurityId,
                                 MdUpdateAction.INSERT,
                                 getMdEntryId(mdEntry),
                                 getMdEntryPx(mdEntry),
@@ -54,7 +52,9 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
                 break;
             case OFFER:
                 depthLevel =
-                        new DepthLevel(securityId,
+                        createDepthLevel(
+                                marketDataManager.convertExchangeSecurityIdToSecurityId(exchangeSecurityId),
+                                exchangeSecurityId,
                                 MdUpdateAction.INSERT,
                                 getMdEntryId(mdEntry),
                                 getMdEntryPx(mdEntry),
@@ -72,27 +72,26 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
         }
 
         if (depthLevel != null) {
-            List<DepthLevel> depthLevelList = depthLevelMap.get(securityId);
+            List<DepthLevel<T>> depthLevelList = depthLevelMap.get(exchangeSecurityId);
             if (depthLevelList == null) {
-                depthLevelList = new ArrayList<>();
-                depthLevelMap.put(securityId, depthLevelList);
+                depthLevelList = createDepthLevels();
+                depthLevelMap.put(exchangeSecurityId, depthLevelList);
             }
             depthLevelList.add(depthLevel);
         }
     }
 
     @Override
-    public void onIncrementalMdEntry(T securityId, GroupValue mdEntry, PerformanceData perfData) {
+    public void onIncrementalMdEntry(T exchangeSecurityId, GroupValue mdEntry, PerformanceData perfData) {
         MdEntryType mdEntryType = getMdEntryType(mdEntry);
-        if (mdEntryType == null)
-            return;
-
         MdUpdateAction mdUpdateAction = getMdUpdateAction(mdEntry);
-        DepthLevel depthLevel = null;
+        DepthLevel<T> depthLevel = null;
         switch (mdEntryType) {
             case BID:
                 depthLevel =
-                        new DepthLevel(securityId,
+                        createDepthLevel(
+                                marketDataManager.convertExchangeSecurityIdToSecurityId(exchangeSecurityId),
+                                exchangeSecurityId,
                                 mdUpdateAction,
                                 getMdEntryId(mdEntry),
                                 getMdEntryPx(mdEntry),
@@ -104,7 +103,9 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
                 break;
             case OFFER:
                 depthLevel =
-                        new DepthLevel(securityId,
+                        createDepthLevel(
+                                marketDataManager.convertExchangeSecurityIdToSecurityId(exchangeSecurityId),
+                                exchangeSecurityId,
                                 mdUpdateAction,
                                 getMdEntryId(mdEntry),
                                 getMdEntryPx(mdEntry),
@@ -115,7 +116,7 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
                 depthLevel.getPerformanceData().updateFrom(perfData).setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
             case EMPTY:
-                depthLevel = new DepthLevel(securityId, MdUpdateAction.SNAPSHOT);
+                depthLevel = marketDataManager.createSnapshotDepthLevel(exchangeSecurityId);
                 break;
             default:
                 logger.warn("Unhandled incremental mdEntry " + mdEntry.toString());
@@ -123,34 +124,34 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
         }
 
         if (depthLevel != null) {
-            List<DepthLevel> depthLevelList = depthLevelMap.get(securityId);
+            List<DepthLevel<T>> depthLevelList = depthLevelMap.get(exchangeSecurityId);
             if (depthLevelList == null) {
-                depthLevelList = new ArrayList<>();
-                depthLevelMap.put(securityId, depthLevelList);
+                depthLevelList = createDepthLevels();
+                depthLevelMap.put(exchangeSecurityId, depthLevelList);
             }
             depthLevelList.add(depthLevel);
         }
     }
 
     @Override
-    protected void onBeforeSnapshot(T securityId) {
-        List<DepthLevel> depthLevelList = new ArrayList<>();
-        depthLevelMap.put(securityId, depthLevelList);
-        depthLevelList.add(new DepthLevel(securityId, MdUpdateAction.SNAPSHOT));
+    protected void onBeforeSnapshot(T exchangeSecurityId) {
+        List<DepthLevel<T>> depthLevelList = createDepthLevels();
+        depthLevelMap.put(exchangeSecurityId, depthLevelList);
+        depthLevelList.add(marketDataManager.createSnapshotDepthLevel(exchangeSecurityId));
     }
 
     @Override
-    protected void onAfterSnapshot(T securityId) {
-        for (List<DepthLevel> depthLevelList : depthLevelMap.values()) {
-            marketDataManager.onDepthLevels(depthLevelList.toArray(new DepthLevel[0]));
+    protected void onAfterSnapshot(T exchangeSecurityId) {
+        for (List<DepthLevel<T>> depthLevelList : depthLevelMap.values()) {
+            marketDataManager.onDepthLevels(convertDepthLevels(depthLevelList));
         }
         depthLevelMap.clear();
     }
 
     @Override
     public void flushIncrementals() {
-        for (List<DepthLevel> depthLevelList : depthLevelMap.values()) {
-            marketDataManager.onDepthLevels(depthLevelList.toArray(new DepthLevel[0]));
+        for (List<DepthLevel<T>> depthLevelList : depthLevelMap.values()) {
+            marketDataManager.onDepthLevels(convertDepthLevels(depthLevelList));
         }
         depthLevelMap.clear();
     }
@@ -159,4 +160,10 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
     public MessageHandlerType getType() {
         return MessageHandlerType.ORDER_LIST;
     }
+
+    protected abstract DepthLevel<T> createDepthLevel(String securityId, T exchangeSecurityId, MdUpdateAction action, String mdEntryId, double mdEntryPx, double mdEntrySize, String tradeId, boolean isBid);
+
+    protected abstract List<DepthLevel<T>> createDepthLevels();
+
+    protected abstract DepthLevel<T>[] convertDepthLevels(List<DepthLevel<T>> depthLevels);
 }

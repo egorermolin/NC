@@ -3,11 +3,11 @@ package ru.ncapital.gateways.moexfast;
 import org.openfast.Message;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.Processor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.SequenceArray;
-import ru.ncapital.gateways.moexfast.domain.BBO;
-import ru.ncapital.gateways.moexfast.domain.IInstrument;
-import ru.ncapital.gateways.moexfast.domain.Instrument;
+import ru.ncapital.gateways.moexfast.domain.impl.BBO;
+import ru.ncapital.gateways.moexfast.domain.intf.IInstrument;
+import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
 
-import java.util.Arrays;
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,12 +16,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Created by Egor on 03-Oct-16.
  */
-public abstract class InstrumentManager<T> extends Processor {
-    protected SequenceArray sequenceArrayForInstrumentStatus = new SequenceArray();
+public abstract class InstrumentManager<T> extends Processor implements IInstrumentManager {
+    private SequenceArray sequenceArrayForInstrumentStatus = new SequenceArray();
 
-    protected ConcurrentHashMap<T, Instrument<T>> instruments = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<T, Instrument<T>> instruments = new ConcurrentHashMap<>();
 
-    protected ConcurrentHashMap<T, Instrument<T>> ignoredInstruments = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<T, Instrument<T>> instrumentsBySecurityId = new ConcurrentHashMap<>();
+
+    private ConcurrentHashMap<T, Instrument<T>> ignoredInstruments = new ConcurrentHashMap<>();
 
     private Set<Integer> addedInstruments = new HashSet<>();
 
@@ -29,20 +31,20 @@ public abstract class InstrumentManager<T> extends Processor {
 
     private int numberOfInstruments;
 
-    private MarketDataManager marketDataManager;
+    private MarketDataManager<T> marketDataManager;
 
     private GatewayManager gatewayManager;
 
     private long sendingTimeOfInstrumentStart;
 
-    protected IMarketDataHandler marketDataHandler;
+    private IMarketDataHandler marketDataHandler;
 
-    public InstrumentManager configure(IGatewayConfiguration configuration) {
+    public InstrumentManager<T> configure(IGatewayConfiguration configuration) {
         this.marketDataHandler = configuration.getMarketDataHandler();
         return this;
     }
 
-    public void setMarketDataManager(MarketDataManager marketDataManager) {
+    public void setMarketDataManager(MarketDataManager<T> marketDataManager) {
         this.marketDataManager = marketDataManager;
     }
 
@@ -106,14 +108,22 @@ public abstract class InstrumentManager<T> extends Processor {
             return false;
 
         if (!isAllowedInstrument(instrument)) {
-            ignoredInstruments.putIfAbsent(instrument.getExchangeSecurityId(), instrument);
+            addInstrumentToIgnored(instrument);
             return false;
         }
 
-        if (instruments.putIfAbsent(instrument.getExchangeSecurityId(), instrument) != null)
-            return false;
+        return addInstrument(instrument);
+    }
 
-        return true;
+    private boolean addInstrument(Instrument<T> instrument) {
+        return
+                instruments.putIfAbsent(instrument.getExchangeSecurityId(), instrument) == null
+                    &&
+                instrumentsBySecurityId.putIfAbsent(instrument.getExchangeSecurityId(), instrument) == null;
+    }
+
+    protected void addInstrumentToIgnored(Instrument<T> instrument) {
+        ignoredInstruments.putIfAbsent(instrument.getExchangeSecurityId(), instrument);
     }
 
     public boolean isAllowedInstrument(T exchangeSecurityId) {
@@ -121,13 +131,15 @@ public abstract class InstrumentManager<T> extends Processor {
     }
 
     public boolean isAllowedInstrument(Instrument<T> instrument) {
-        if (instruments.containsKey(instrument.getExchangeSecurityId()))
-            return true;
+        return instruments.containsKey(instrument.getExchangeSecurityId());
+    }
 
-        if (ignoredInstruments.containsKey(instrument.getExchangeSecurityId()))
-            return false;
+    public Instrument<T> getInstrumentByExchangeSecurityId(T exchangeSecurityId) {
+        return instruments.get(exchangeSecurityId);
+    }
 
-        return false;
+    public Instrument<T> getInstrumentBySecurityId(String securityId) {
+        return instrumentsBySecurityId.get(securityId);
     }
 
     @Override
@@ -137,8 +149,8 @@ public abstract class InstrumentManager<T> extends Processor {
                 Instrument<T> instrument = createInstrument(readMessage);
                 String tradingStatus = createTradingStatusForInstrumentStatus(readMessage);
 
-                if (isAllowedInstrument(instrument.getExchangeSecurityId()))
-                    sendToClient(instrument.getSecurityId(), tradingStatus);
+                if (isAllowedInstrument(instrument))
+                    sendToClient(instrument, tradingStatus);
 
                 break;
 
@@ -154,13 +166,13 @@ public abstract class InstrumentManager<T> extends Processor {
                     break;
 
 
-                Instrument newInstrument = createFullInstrument(readMessage);
+                Instrument<T> newInstrument = createFullInstrument(readMessage);
 
                 if (addNewInstrument(newInstrument)) {
                     if (getLogger().isDebugEnabled())
                         getLogger().debug(newInstrument.getName() + " Received " + newInstrument.getId());
 
-                    sendToClient(newInstrument.getSecurityId(), newInstrument.getTradingStatus());
+                    sendToClient(newInstrument, newInstrument.getTradingStatus());
                 }
 
                 checkInstrumentFinish();
@@ -189,8 +201,8 @@ public abstract class InstrumentManager<T> extends Processor {
         }
     }
 
-    private void sendToClient(String securityId, String tradingStatus) {
-        BBO tradingStatusUpdate = new BBO(securityId);
+    private void sendToClient(Instrument<T> instrument, String tradingStatus) {
+        BBO<T> tradingStatusUpdate = marketDataManager.createBBO(instrument.getExchangeSecurityId());
         tradingStatusUpdate.setTradingStatus(tradingStatus);
         marketDataManager.onBBO(tradingStatusUpdate);
     }
@@ -201,7 +213,15 @@ public abstract class InstrumentManager<T> extends Processor {
 
     protected abstract String createTradingStatusForInstrumentStatus(Message readMessage);
 
-    protected IInstrument[] getInstruments() {
+    private IInstrument[] getInstruments() {
         return instruments.values().toArray(new IInstrument[instruments.size()]);
+    }
+
+    public T getExchangeSecurityId(String securityId) {
+        return getInstrumentBySecurityId(securityId).getExchangeSecurityId();
+    }
+
+    public String getSecurityId(T exchangeSecurityId) {
+        return getInstrumentByExchangeSecurityId(exchangeSecurityId).getSecurityId();
     }
 }

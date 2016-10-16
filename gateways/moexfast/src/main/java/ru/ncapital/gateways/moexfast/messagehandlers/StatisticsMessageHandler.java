@@ -6,17 +6,17 @@ import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.Utils;
-import ru.ncapital.gateways.moexfast.domain.BBO;
+import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.MdEntryType;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 /**
  * Created by egore on 1/21/16.
  */
-public abstract class StatisticsMessageHandler extends AMessageHandler {
-    private BBO bbo;
+public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
+    private BBO<T> bbo;
 
-    public StatisticsMessageHandler(MarketDataManager marketDataManager, IGatewayConfiguration configuration) {
+    public StatisticsMessageHandler(MarketDataManager<T> marketDataManager, IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
     }
 
@@ -26,66 +26,57 @@ public abstract class StatisticsMessageHandler extends AMessageHandler {
     }
 
     private boolean onMdEntry(GroupValue mdEntry) {
-        MdEntryType mdEntryType = MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
-
-        if (mdEntryType == null)
-            return false;
-
+        MdEntryType mdEntryType = getMdEntryType(mdEntry);
         switch (mdEntryType) {
             case BID:
-                bbo.setBidPx(mdEntry.getDouble("MDEntryPx"));
-                bbo.setBidSize(mdEntry.getDouble("MDEntrySize"));
+                bbo.setBidPx(getMdEntryPx(mdEntry));
+                bbo.setBidSize(getMdEntrySize(mdEntry));
                 break;
-
             case OFFER:
-                bbo.setOfferPx(mdEntry.getDouble("MDEntryPx"));
-                bbo.setOfferSize(mdEntry.getDouble("MDEntrySize"));
+                bbo.setOfferPx(getMdEntryPx(mdEntry));
+                bbo.setOfferSize(getMdEntrySize(mdEntry));
                 break;
-
             case LAST:
-                bbo.setLastPx(mdEntry.getDouble("MDEntryPx"));
-                bbo.setLastSize(mdEntry.getDouble("MDEntrySize"));
+                bbo.setLastPx(getLastPx(mdEntry));
+                bbo.setLastSize(getMdEntrySize(mdEntry));
                 bbo.getPerformanceData().setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
-
             case LOW:
-                bbo.setLowPx(mdEntry.getDouble("MDEntryPx"));
+                bbo.setLowPx(getMdEntryPx(mdEntry));
                 break;
-
             case HIGH:
-                bbo.setHighPx(mdEntry.getDouble("MDEntryPx"));
+                bbo.setHighPx(getMdEntryPx(mdEntry));
                 break;
-
             case OPENING:
-                bbo.setOpenPx(mdEntry.getDouble("MDEntryPx"));
+                bbo.setOpenPx(getMdEntryPx(mdEntry));
                 break;
-
             case CLOSING:
-                bbo.setClosePx(mdEntry.getDouble("MDEntryPx"));
+                bbo.setClosePx(getMdEntryPx(mdEntry));
                 break;
+            default:
+                return false;
         }
-
         return true;
     }
 
     @Override
-    protected void onBeforeSnapshot(String securityId) {
-        bbo = new BBO(securityId);
+    protected void onBeforeSnapshot(T exchangeSecurityId) {
+        bbo = marketDataManager.createBBO(exchangeSecurityId);
     }
 
     @Override
-    protected void onSnapshotMdEntry(String securityId, GroupValue mdEntry) {
+    protected void onSnapshotMdEntry(T exchangeSecurityId, GroupValue mdEntry) {
         onMdEntry(mdEntry);
     }
 
     @Override
-    protected void onAfterSnapshot(String securityId) {
+    protected void onAfterSnapshot(T exchangeSecurityId) {
         marketDataManager.onBBO(bbo);
     }
 
     @Override
-    protected void onIncrementalMdEntry(String securityId, GroupValue mdEntry, PerformanceData perfData) {
-        bbo = new BBO(securityId);
+    protected void onIncrementalMdEntry(T exchangeSecurityId, GroupValue mdEntry, PerformanceData perfData) {
+        bbo = marketDataManager.createBBO(exchangeSecurityId);
         bbo.getPerformanceData().updateFrom(perfData);
 
         if (onMdEntry(mdEntry))

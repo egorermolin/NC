@@ -5,18 +5,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.fortsfast.connection.messageprocessors.FortsIncrementalProcessor;
 import ru.ncapital.gateways.fortsfast.connection.messageprocessors.FortsSnapshotProcessor;
+import ru.ncapital.gateways.fortsfast.domain.FortsBBO;
+import ru.ncapital.gateways.fortsfast.domain.FortsDepthLevel;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.MicexIncrementalProcessor;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.MicexSnapshotProcessor;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
+import ru.ncapital.gateways.moexfast.OrderDepthEngine;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
+import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
+import ru.ncapital.gateways.moexfast.domain.impl.BBO;
+import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 
 /**
  * Created by Egor on 03-Oct-16.
  */
 @Singleton
-public class FortsMarketDataManager extends MarketDataManager {
+public class FortsMarketDataManager extends MarketDataManager<Long> {
 
     public MarketDataManager configure(IGatewayConfiguration configuration) {
         super.configure(configuration);
@@ -37,6 +43,28 @@ public class FortsMarketDataManager extends MarketDataManager {
         incrementalProcessorForPublicTrades = new FortsIncrementalProcessor(messageHandlerForPublicTrades, sequenceValidatorForPublicTrades);
 
         return this;
+    }
+
+    @Override
+    protected OrderDepthEngine<Long> createDepthEngine() {
+        return new OrderDepthEngine<Long>() {
+            @Override
+            public DepthLevel<Long> createSnapshotDepthLevel(Long exchangeSecurityId) {
+                return new FortsDepthLevel(
+                        instrumentManager.getSecurityId(exchangeSecurityId),
+                        exchangeSecurityId,
+                        MdUpdateAction.SNAPSHOT
+                );
+            }
+        };
+    }
+
+    @Override
+    public BBO<Long> createBBO(Long exchangeSecurityId) {
+        return new FortsBBO(
+                instrumentManager.getSecurityId(exchangeSecurityId),
+                exchangeSecurityId
+        );
     }
 
     @Override

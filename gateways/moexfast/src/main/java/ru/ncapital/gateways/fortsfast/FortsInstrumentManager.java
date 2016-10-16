@@ -3,13 +3,9 @@ package ru.ncapital.gateways.fortsfast;
 import com.google.inject.Singleton;
 import org.openfast.Message;
 import ru.ncapital.gateways.fortsfast.domain.FortsInstrument;
-import ru.ncapital.gateways.micexfast.IMicexGatewayConfiguration;
-import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
-import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.InstrumentManager;
-import ru.ncapital.gateways.moexfast.domain.IInstrument;
-import ru.ncapital.gateways.moexfast.domain.Instrument;
+import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -47,7 +43,7 @@ public class FortsInstrumentManager extends InstrumentManager<Long> {
             if (getLogger().isTraceEnabled())
                 getLogger().trace(instrument.getName() + " Ignored by Underlying " + instrument.getId());
 
-            ignoredInstruments.put(instrument.getExchangeSecurityId(), instrument);
+            addInstrumentToIgnored(instrument);
             return false;
         }
 
@@ -65,7 +61,7 @@ public class FortsInstrumentManager extends InstrumentManager<Long> {
 
         return tradingStatus.toString();
     }
-
+    
     @Override
     protected Instrument<Long> createInstrument(Message readMessage) {
         return new FortsInstrument(readMessage.getString("Symbol"), readMessage.getLong("SecurityId"));
@@ -94,7 +90,7 @@ public class FortsInstrumentManager extends InstrumentManager<Long> {
             instrument.setTickSize(readMessage.getDouble("MinPriceIncrement"));
 
         StringBuilder tradingStatus = new StringBuilder();
-        if (readMessage != null && readMessage.getValue("SecurityTradingStatus") != null)
+        if (readMessage.getValue("SecurityTradingStatus") != null)
             tradingStatus.append(readMessage.getInt("SecurityTradingStatus"));
         else
             tradingStatus.append("20");
