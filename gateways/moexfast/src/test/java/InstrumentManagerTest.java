@@ -8,6 +8,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openfast.*;
 import org.openfast.codec.Coder;
 import ru.ncapital.gateways.micexfast.*;
+import ru.ncapital.gateways.micexfast.domain.MicexBBO;
 import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
 import ru.ncapital.gateways.moexfast.connection.ConnectionManager;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
@@ -15,6 +16,7 @@ import ru.ncapital.gateways.micexfast.domain.ProductType;
 import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
 import ru.ncapital.gateways.moexfast.IMarketDataHandler;
 import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
+import ru.ncapital.gateways.moexfast.domain.intf.IInstrument;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -57,6 +59,7 @@ public class InstrumentManagerTest {
         when(configuration.getAllowedTradingSessionIds()).thenReturn(new TradingSessionId[] {TradingSessionId.TQBR});
         when(configuration.getAllowedSecurityIds()).thenReturn(new String[] {"SBER;TQBR", "ROSN;TQBR"});
         when(configuration.getMarketDataHandler()).thenReturn(marketDataHandler);
+        when(marketDataManager.createBBO(anyString())).thenCallRealMethod();
 
         instrumentManager = new MicexInstrumentManager();
         instrumentManager.setMarketDataManager(marketDataManager);
@@ -219,6 +222,7 @@ public class InstrumentManagerTest {
         testInstrumentAddAndFinish();
 
         Mockito.reset(marketDataManager);
+        when(marketDataManager.createBBO(anyString())).thenCallRealMethod();
 
         for (int i : new int [] {1, 1, 2, 2, 3, 3, 4, 4, 5, 5})
             instrumentManager.handleMessage(getInstrumentStatusMessageMock(i), context, coder);
@@ -252,7 +256,7 @@ public class InstrumentManagerTest {
 
         verify(gatewayManager, times(1)).onInstrumentDownloadFinished();
 
-        ArgumentCaptor<MicexInstrument[]> instrumentCapture = ArgumentCaptor.forClass(MicexInstrument[].class);
+        ArgumentCaptor<IInstrument[]> instrumentCapture = ArgumentCaptor.forClass(IInstrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
         assertEquals(2, instrumentCapture.getValue().length);
         assertEquals("SBER;TQBR", instrumentCapture.getValue()[1].getSecurityId());
@@ -271,7 +275,7 @@ public class InstrumentManagerTest {
 
         verify(marketDataManager, times(2)).onBBO(any(BBO.class));
         verify(gatewayManager, times(1)).onInstrumentDownloadFinished();
-        ArgumentCaptor<Instrument[]> instrumentCapture = ArgumentCaptor.forClass(Instrument[].class);
+        ArgumentCaptor<IInstrument[]> instrumentCapture = ArgumentCaptor.forClass(IInstrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
         assertEquals(2, instrumentCapture.getValue().length);
     }
@@ -288,7 +292,7 @@ public class InstrumentManagerTest {
 
         verify(marketDataManager, times(2)).onBBO(any(BBO.class));
         verify(gatewayManager, times(1)).onInstrumentDownloadFinished();
-        ArgumentCaptor<Instrument[]> instrumentCapture = ArgumentCaptor.forClass(Instrument[].class);
+        ArgumentCaptor<IInstrument[]> instrumentCapture = ArgumentCaptor.forClass(IInstrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
         assertEquals(2, instrumentCapture.getValue().length);
     }
@@ -305,7 +309,7 @@ public class InstrumentManagerTest {
 
         verify(marketDataManager, times(2)).onBBO(any(BBO.class));
         verify(gatewayManager, times(1)).onInstrumentDownloadFinished();
-        ArgumentCaptor<Instrument[]> instrumentCapture = ArgumentCaptor.forClass(Instrument[].class);
+        ArgumentCaptor<IInstrument[]> instrumentCapture = ArgumentCaptor.forClass(IInstrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
         assertEquals(2, instrumentCapture.getValue().length);
     }

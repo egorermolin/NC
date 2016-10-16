@@ -21,7 +21,7 @@ public abstract class PublicTradesMessageHandler<T> extends AMessageHandler<T> {
 
     @Override
     protected Logger getLogger() {
-        return LoggerFactory.getLogger("PublicTradesMessageHandler");
+        return LoggerFactory.getLogger(getClass().getName());
     }
 
     @Override
@@ -42,10 +42,6 @@ public abstract class PublicTradesMessageHandler<T> extends AMessageHandler<T> {
     @Override
     protected void onIncrementalMdEntry(T exchangeSecurityId, GroupValue mdEntry, PerformanceData perfData) {
         MdEntryType mdEntryType = MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
-
-        if (mdEntryType == null)
-            return;
-
         PublicTrade<T> publicTrade = null;
         switch (mdEntryType) {
             case TRADE:
@@ -72,16 +68,18 @@ public abstract class PublicTradesMessageHandler<T> extends AMessageHandler<T> {
     }
 
     private PublicTrade<T> createPublicTrade(T exchangeSecurityId, GroupValue mdEntry) {
-        return createPublicTrade(
+        PublicTrade<T> publicTrade = createPublicTrade(
                 marketDataManager.convertExchangeSecurityIdToSecurityId(exchangeSecurityId),
-                exchangeSecurityId,
-                getMdEntryId(mdEntry),
-                getLastPx(mdEntry),
-                getMdEntrySize(mdEntry),
-                getMdEntryIsBid(mdEntry)
+                exchangeSecurityId
         );
+
+        publicTrade.setTradeId(getTradeId(mdEntry));
+        publicTrade.setLastPx(getLastPx(mdEntry));
+        publicTrade.setLastSize(getLastSize(mdEntry));
+        publicTrade.setIsBid(getIsBid(mdEntry));
+
+        return publicTrade;
     }
 
-    protected abstract PublicTrade<T> createPublicTrade(String securityId, T exchangeSecurityId, String mdEntryId, double mdEntryPx, double mdEntrySize, boolean isBid);
-
+    protected abstract PublicTrade<T> createPublicTrade(String securityId, T exchangeSecurityId);
 }

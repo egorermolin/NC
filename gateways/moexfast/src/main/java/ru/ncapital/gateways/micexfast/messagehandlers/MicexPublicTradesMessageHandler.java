@@ -18,14 +18,15 @@ import ru.ncapital.gateways.moexfast.messagehandlers.PublicTradesMessageHandler;
  * Created by Egor on 30-Sep-16.
  */
 public class MicexPublicTradesMessageHandler extends PublicTradesMessageHandler<String> {
+
     @AssistedInject
-    public MicexPublicTradesMessageHandler(MicexMarketDataManager marketDataManager, @Assisted IGatewayConfiguration configuration) {
+    public MicexPublicTradesMessageHandler(MarketDataManager<String> marketDataManager, @Assisted IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
     }
 
     @Override
-    protected PublicTrade<String> createPublicTrade(String securityId, String exchangeSecurityId, String mdEntryId, double mdEntryPx, double mdEntrySize, boolean isBid) {
-        return new MicexPublicTrade(exchangeSecurityId, mdEntryId, mdEntryPx, mdEntrySize, isBid);
+    protected PublicTrade<String> createPublicTrade(String securityId, String exchangeSecurityId) {
+        return new MicexPublicTrade(exchangeSecurityId);
     }
 
     @Override
@@ -45,7 +46,7 @@ public class MicexPublicTradesMessageHandler extends PublicTradesMessageHandler<
     }
 
     @Override
-    protected boolean getMdEntryIsBid(GroupValue mdEntry) {
+    protected boolean getIsBid(GroupValue mdEntry) {
         return mdEntry.getString("OrderSide").charAt(0) == 'B';
     }
 
@@ -60,14 +61,21 @@ public class MicexPublicTradesMessageHandler extends PublicTradesMessageHandler<
     }
 
     @Override
+    protected double getMdEntrySize(GroupValue mdEntry) {
+        return mdEntry.getDouble("MDEntrySize");
+    }
+
+    @Override
     protected double getLastPx(GroupValue mdEntry) {
         return getMdEntryPx(mdEntry);
     }
 
     @Override
-    protected double getMdEntrySize(GroupValue mdEntry) {
-        return mdEntry.getDouble("MDEntrySize");
+    protected double getLastSize(GroupValue mdEntry) {
+        return getMdEntrySize(mdEntry);
     }
+
+
 
     @Override
     protected String getTradeId(GroupValue mdEntry) {

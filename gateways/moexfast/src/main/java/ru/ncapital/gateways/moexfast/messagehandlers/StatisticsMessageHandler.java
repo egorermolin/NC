@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.Utils;
+import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.MdEntryType;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
@@ -22,7 +23,7 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
 
     @Override
     protected Logger getLogger() {
-        return LoggerFactory.getLogger("StatisticMessageHandler");
+        return LoggerFactory.getLogger(getClass().getName());
     }
 
     private boolean onMdEntry(GroupValue mdEntry) {
@@ -38,7 +39,7 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
                 break;
             case LAST:
                 bbo.setLastPx(getLastPx(mdEntry));
-                bbo.setLastSize(getMdEntrySize(mdEntry));
+                bbo.setLastSize(getLastSize(mdEntry));
                 bbo.getPerformanceData().setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;
             case LOW:
@@ -91,4 +92,25 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
     public MessageHandlerType getType() {
         return MessageHandlerType.STATISTICS;
     }
+
+    @Override
+    protected String getMdEntryId(GroupValue mdEntry) {
+        throw new RuntimeException();
+    }
+
+    @Override
+    protected final boolean getIsBid(GroupValue mdEntry) {
+        throw new RuntimeException();
+    }
+
+    @Override
+    protected final String getTradeId(GroupValue mdEntry) {
+        throw new RuntimeException();
+    }
+
+    @Override
+    protected final MdUpdateAction getMdUpdateAction(GroupValue mdEntry) {
+        throw new RuntimeException();
+    }
+
 }

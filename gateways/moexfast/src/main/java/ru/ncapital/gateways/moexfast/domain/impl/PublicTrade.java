@@ -21,13 +21,9 @@ public class PublicTrade<T> implements IPublicTrade {
 
     private PerformanceData performanceData;
 
-    public PublicTrade(String securityId, T exchangeSecurityId, String tradeId, double lastPx, double lastSize, boolean isBid) {
+    public PublicTrade(String securityId, T exchangeSecurityId) {
         this.securityId = securityId;
         this.exchangeSecurityId = exchangeSecurityId;
-        this.tradeId = tradeId;
-        this.lastPx = lastPx;
-        this.lastSize = lastSize;
-        this.isBid = isBid;
         this.performanceData = new PerformanceData();
     }
 
@@ -45,9 +41,17 @@ public class PublicTrade<T> implements IPublicTrade {
         return tradeId;
     }
 
+    public void setTradeId(String tradeId) {
+        this.tradeId = tradeId;
+    }
+
     @Override
     public double getLastPx() {
         return lastPx;
+    }
+
+    public void setLastPx(double lastPx) {
+        this.lastPx = lastPx;
     }
 
     @Override
@@ -55,9 +59,17 @@ public class PublicTrade<T> implements IPublicTrade {
         return lastSize;
     }
 
+    public void setLastSize(double lastSize) {
+        this.lastSize = lastSize;
+    }
+
     @Override
     public boolean isBid() {
         return isBid;
+    }
+
+    public void setIsBid(boolean isBid) {
+        this.isBid = isBid;
     }
 
     @Override

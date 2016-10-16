@@ -70,15 +70,17 @@ public abstract class AMessageHandler<T> implements IMessageHandler<T> {
 
     protected abstract T getExchangeSecurityId(GroupValue mdEntry);
 
-    protected abstract boolean getMdEntryIsBid(GroupValue mdEntry);
+    protected abstract boolean getIsBid(GroupValue mdEntry);
 
     protected abstract String getMdEntryId(GroupValue mdEntry);
 
     protected abstract double getMdEntryPx(GroupValue mdEntry);
 
+    protected abstract double getMdEntrySize(GroupValue mdEntry);
+
     protected abstract double getLastPx(GroupValue mdEntry);
 
-    protected abstract double getMdEntrySize(GroupValue mdEntry);
+    protected abstract double getLastSize(GroupValue mdEntry);
 
     protected abstract String getTradeId(GroupValue mdEntry);
 

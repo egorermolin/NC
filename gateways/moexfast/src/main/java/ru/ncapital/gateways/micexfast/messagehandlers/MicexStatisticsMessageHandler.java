@@ -14,9 +14,10 @@ import ru.ncapital.gateways.moexfast.messagehandlers.StatisticsMessageHandler;
 /**
  * Created by Egor on 30-Sep-16.
  */
-public class MicexStatisticsMessageHandler extends StatisticsMessageHandler {
+public class MicexStatisticsMessageHandler extends StatisticsMessageHandler<String> {
+
     @AssistedInject
-    public MicexStatisticsMessageHandler(MarketDataManager marketDataManager, @Assisted IGatewayConfiguration configuration) {
+    public MicexStatisticsMessageHandler(MarketDataManager<String> marketDataManager, @Assisted IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
     }
 
@@ -37,13 +38,8 @@ public class MicexStatisticsMessageHandler extends StatisticsMessageHandler {
     }
 
     @Override
-    protected boolean getMdEntryIsBid(GroupValue mdEntry) {
-        throw new RuntimeException("Not implemented");
-    }
-
-    @Override
-    protected String getMdEntryId(GroupValue mdEntry) {
-        return mdEntry.getString("MDEntryID");
+    protected MdEntryType getMdEntryType(GroupValue mdEntry) {
+        return MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
     }
 
     @Override
@@ -52,27 +48,18 @@ public class MicexStatisticsMessageHandler extends StatisticsMessageHandler {
     }
 
     @Override
-    protected double getLastPx(GroupValue mdEntry) {
-        return getMdEntryPx(mdEntry);
-    }
-
-    @Override
     protected double getMdEntrySize(GroupValue mdEntry) {
         return mdEntry.getDouble("MDEntrySize");
     }
 
     @Override
-    protected String getTradeId(GroupValue mdEntry) {
-        return mdEntry.getString("DealNumber");
+    protected double getLastPx(GroupValue mdEntry) {
+        return getMdEntryPx(mdEntry);
     }
 
     @Override
-    protected MdEntryType getMdEntryType(GroupValue mdEntry) {
-        return MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
+    protected double getLastSize(GroupValue mdEntry) {
+        return getMdEntrySize(mdEntry);
     }
 
-    @Override
-    protected MdUpdateAction getMdUpdateAction(GroupValue mdEntry) {
-        return MdUpdateAction.convert(mdEntry.getString("MDUpdateAction").charAt(0));
-    }
 }

@@ -12,8 +12,18 @@ import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade
  * Created by egore on 12/19/15.
  */
 class MicexOrderDepthEngineTest extends GroovyTestCase {
+    
+    static OrderDepthEngine<String> getOrderDepthEngine() {
+        return new OrderDepthEngine<String>() {
+            @Override
+            DepthLevel<String> createSnapshotDepthLevel(String exchangeSecurityId) {
+                return new MicexDepthLevel(exchangeSecurityId, MdUpdateAction.SNAPSHOT)
+            }
+        }
+    }
+    
     void testOnDepthLevelTradedPartially() {
-        OrderDepthEngine de = new OrderDepthEngine()
+        OrderDepthEngine de = getOrderDepthEngine()
         List<DepthLevel> toSend = new ArrayList<>()
 
         de.onDepthLevel(new MicexDepthLevel("AAA", MdUpdateAction.INSERT, "entry1", 10.0, 5.0, null, true), new ArrayList<DepthLevel>())
@@ -27,13 +37,11 @@ class MicexOrderDepthEngineTest extends GroovyTestCase {
     }
 
     void testOnDepthLevelTradedPartially2() {
-        OrderDepthEngine de = new OrderDepthEngine()
+        OrderDepthEngine de = getOrderDepthEngine()
         List<DepthLevel> toSend = new ArrayList<>()
 
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry1", 10.0, 10.0, null, true), new ArrayList<DepthLevel>())
-        de.onPublicTrade(new PublicTrade("AAA", "001", 10.0, 5.0, false))
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.UPDATE, "entry1", 10.0, 5.0, "001", true), toSend)
+        de.onDepthLevel(new MicexDepthLevel("AAA", MdUpdateAction.INSERT, "entry1", 10.0, 10.0, null, true), new ArrayList<DepthLevel>())
+        de.onDepthLevel(new MicexDepthLevel("AAA", MdUpdateAction.UPDATE, "entry1", 10.0, 5.0, "001", true), toSend)
         assert toSend.size() == 1
         assert toSend[0].isBid
         assert toSend[0].mdUpdateAction == MdUpdateAction.UPDATE
@@ -42,272 +50,15 @@ class MicexOrderDepthEngineTest extends GroovyTestCase {
     }
 
     void testOnDepthLevelTradedFully() {
-        OrderDepthEngine de = new OrderDepthEngine()
+        OrderDepthEngine de = getOrderDepthEngine()
         List<DepthLevel> toSend = new ArrayList<>()
 
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry1", 10.0, 10.0, null, true), new ArrayList<DepthLevel>())
-        de.onPublicTrade(new PublicTrade("AAA", "001", 10.0, 10.0, false))
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.DELETE, "entry1", 10.0, 0.0, "001", true), toSend)
+        de.onDepthLevel(new MicexDepthLevel("AAA", MdUpdateAction.INSERT, "entry1", 10.0, 10.0, null, true), new ArrayList<DepthLevel>())
+        de.onDepthLevel(new MicexDepthLevel("AAA", MdUpdateAction.DELETE, "entry1", 10.0, 0.0, "001", true), toSend)
         assert toSend.size() == 1
         assert toSend[0].isBid
         assert toSend[0].mdUpdateAction == MdUpdateAction.DELETE
         assert toSend[0].mdEntryPx == 10.0
         assert toSend[0].mdEntrySize == 0.0
     }
-
-    void testOnDepthLevelInsert() {
-        OrderDepthEngine de = new OrderDepthEngine()
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry1", 10.0, 10.0, null, true), new ArrayList<DepthLevel>())
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry2", 11.0, 10.0, null, false), new ArrayList<DepthLevel>())
-
-        BBO bbo = de.getBBO("AAA")
-
-        assert bbo.getBidPx() == 10.0
-        assert bbo.getOfferPx() == 11.0
-        assert bbo.getBidSize() == 10.0
-        assert bbo.getOfferSize() == 10.0
-    }
-
-    void testOnDepthLevelInsertAndDeleteAll() {
-        OrderDepthEngine de = new OrderDepthEngine()
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry1", 10.0, 10.0, null, true), new ArrayList<DepthLevel>())
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry2", 11.0, 10.0, null, false), new ArrayList<DepthLevel>())
-
-        BBO bbo = de.getBBO("AAA")
-
-        assert bbo.getBidPx() == 10.0
-        assert bbo.getOfferPx() == 11.0
-        assert bbo.getBidSize() == 10.0
-        assert bbo.getOfferSize() == 10.0
-
-        List<DepthLevel> dlDeleted = new ArrayList<DepthLevel>()
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.SNAPSHOT), dlDeleted);
-
-        bbo = de.getBBO("AAA")
-
-        assert bbo.getBidPx() == 0.0
-        assert bbo.getOfferPx() == 0.0
-        assert bbo.getBidSize() == 0.0
-        assert bbo.getOfferSize() == 0.0
-
-        assert dlDeleted[0].getMdUpdateAction() == MdUpdateAction.SNAPSHOT
-
-        List<DepthLevel> dl = new ArrayList<DepthLevel>()
-        de.getDepthLevels("AAA", dl)
-        assert dl.size() == 0
-    }
-
-    void testOnDepthLevelInsertBid() {
-        OrderDepthEngine de = new OrderDepthEngine()
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry1", 10.0, 10.0, null, true), new ArrayList<DepthLevel>())
-
-        BBO bbo = de.getBBO("AAA")
-
-        assert bbo.getBidPx() == 10.0
-        assert bbo.getOfferPx() == 0.0
-        assert bbo.getBidSize() == 10.0
-        assert bbo.getOfferSize() == 0.0
-    }
-
-    void testOnDepthLevelInsertOffer() {
-        OrderDepthEngine de = new OrderDepthEngine()
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry1", 10.0, 10.0, null, false), new ArrayList<DepthLevel>())
-
-        BBO bbo = de.getBBO("AAA")
-
-        assert bbo.getBidPx() == 0.0
-        assert bbo.getOfferPx() == 10.0
-        assert bbo.getBidSize() == 0.0
-        assert bbo.getOfferSize() == 10.0
-    }
-
-    void testOnDepthLevelInsertTwoLevelsDifferentPrice() {
-        OrderDepthEngine de = new OrderDepthEngine()
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry1", 9.0, 10.0, null, true), new ArrayList<DepthLevel>())
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry2", 10.0, 10.0, null, true), new ArrayList<DepthLevel>())
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry3", 12.0, 10.0, null, false), new ArrayList<DepthLevel>())
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry4", 11.0, 10.0, null, false), new ArrayList<DepthLevel>())
-
-        BBO bbo = de.getBBO("AAA")
-
-        assert bbo.getBidPx() == 10.0
-        assert bbo.getOfferPx() == 11.0
-        assert bbo.getBidSize() == 10.0
-        assert bbo.getOfferSize() == 10.0
-    }
-
-    void testOnDepthLevelInsertTwoLevelsDifferentPrice2() {
-        OrderDepthEngine de = new OrderDepthEngine()
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry1", 9.0, 10.0, null, true), new ArrayList<DepthLevel>())
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry2", 10.0, 10.0, null, true), new ArrayList<DepthLevel>())
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry3", 12.0, 10.0, null, false), new ArrayList<DepthLevel>())
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry4", 11.0, 10.0, null, false), new ArrayList<DepthLevel>())
-
-        BBO bbo = de.getBBO("AAA")
-
-        assert bbo.getBidPx() == 10.0
-        assert bbo.getOfferPx() == 11.0
-        assert bbo.getBidSize() == 10.0
-        assert bbo.getOfferSize() == 10.0
-    }
-
-
-    void testOnDepthLevelInsertTwoLevelsSamePrice() {
-        OrderDepthEngine de = new OrderDepthEngine()
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry1", 10.0, 10.0, null, true), new ArrayList<DepthLevel>())
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry2", 10.0, 10.0, null, true), new ArrayList<DepthLevel>())
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry3", 11.0, 10.0, null, false), new ArrayList<DepthLevel>())
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry4", 11.0, 10.0, null, false), new ArrayList<DepthLevel>())
-
-        BBO bbo = de.getBBO("AAA")
-
-        assert bbo.getBidPx() == 10.0
-        assert bbo.getOfferPx() == 11.0
-        assert bbo.getBidSize() == 20.0
-        assert bbo.getOfferSize() == 20.0
-    }
-
-
-    void testOnDepthLevelInsertUpdateDeleteBid() {
-        OrderDepthEngine de = new OrderDepthEngine()
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry1", 10.0, 10.0, null, true), new ArrayList<DepthLevel>())
-        BBO bbo = de.getBBO("AAA")
-        assert bbo.getBidPx() == 10.0
-        assert bbo.getBidSize() == 10.0
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.UPDATE, "entry1", 11.0, 10.0, null, true), new ArrayList<DepthLevel>())
-        bbo = de.getBBO("AAA");
-        assert bbo.getBidPx() == 11.0
-        assert bbo.getBidSize() == 10.0
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.UPDATE, "entry1", 11.0, 20.0, null, true), new ArrayList<DepthLevel>())
-        bbo = de.getBBO("AAA");
-        assert bbo.getBidPx() == 11.0
-        assert bbo.getBidSize() == 20.0
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.DELETE, "entry1", 11.0, 0.0, null, true), new ArrayList<DepthLevel>())
-        bbo = de.getBBO("AAA");
-        assert bbo.getBidPx() == 0.0
-        assert bbo.getBidSize() == 0.0
-
-        List<DepthLevel> dl = new ArrayList<DepthLevel>()
-        de.getDepthLevels("AAA", dl)
-        assert dl.size() == 0
-    }
-
-    void testOnDepthLevelInsertUpdateDeleteBidTwoLevels() {
-        OrderDepthEngine de = new OrderDepthEngine()
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry1", 10.0, 10.0, null, true), new ArrayList<DepthLevel>())
-        BBO bbo = de.getBBO("AAA")
-        assert bbo.getBidPx() == 10.0
-        assert bbo.getBidSize() == 10.0
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry2", 10.0, 10.0, null, true), new ArrayList<DepthLevel>())
-        bbo = de.getBBO("AAA")
-        assert bbo.getBidPx() == 10.0
-        assert bbo.getBidSize() == 20.0
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.UPDATE, "entry1", 11.0, 10.0, null, true), new ArrayList<DepthLevel>())
-        bbo = de.getBBO("AAA");
-        assert bbo.getBidPx() == 11.0
-        assert bbo.getBidSize() == 10.0
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.UPDATE, "entry2", 11.0, 20.0, null, true), new ArrayList<DepthLevel>())
-        bbo = de.getBBO("AAA");
-        assert bbo.getBidPx() == 11.0
-        assert bbo.getBidSize() == 30.0
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.DELETE, "entry1", 11.0, 0.0, null, true), new ArrayList<DepthLevel>())
-        bbo = de.getBBO("AAA");
-        assert bbo.getBidPx() == 11.0
-        assert bbo.getBidSize() == 20.0
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.DELETE, "entry2", 11.0, 0.0, null, true), new ArrayList<DepthLevel>())
-        bbo = de.getBBO("AAA");
-        assert bbo.getBidPx() == 0.0
-        assert bbo.getBidSize() == 0.0
-
-        List<DepthLevel> dl = new ArrayList<DepthLevel>()
-        de.getDepthLevels("AAA", dl)
-        assert dl.size() == 0
-    }
-
-
-    void testOnDepthLevelInsertUpdateDeleteOffer() {
-        OrderDepthEngine de = new OrderDepthEngine()
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry1", 12.0, 10.0, null, false), new ArrayList<DepthLevel>())
-        BBO bbo = de.getBBO("AAA")
-        assert bbo.getOfferPx() == 12.0
-        assert bbo.getOfferSize() == 10.0
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.UPDATE, "entry1", 11.0, 10.0, null, false), new ArrayList<DepthLevel>())
-        bbo = de.getBBO("AAA");
-        assert bbo.getOfferPx() == 11.0
-        assert bbo.getOfferSize() == 10.0
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.UPDATE, "entry1", 11.0, 20.0, null, false), new ArrayList<DepthLevel>())
-        bbo = de.getBBO("AAA");
-        assert bbo.getOfferPx() == 11.0
-        assert bbo.getOfferSize() == 20.0
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.DELETE, "entry1", 11.0, 0.0, null, false), new ArrayList<DepthLevel>())
-        bbo = de.getBBO("AAA");
-        assert bbo.getOfferPx() == 0.0
-        assert bbo.getOfferSize() == 0.0
-
-        List<DepthLevel> dl = new ArrayList<DepthLevel>()
-        de.getDepthLevels("AAA", dl)
-        assert dl.size() == 0
-    }
-
-    void testOnDepthLevelInsertUpdateDeleteOfferTwoLevels() {
-        OrderDepthEngine de = new OrderDepthEngine()
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry1", 12.0, 10.0, null, false), new ArrayList<DepthLevel>())
-        BBO bbo = de.getBBO("AAA")
-        assert bbo.getOfferPx() == 12.0
-        assert bbo.getOfferSize() == 10.0
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.INSERT, "entry2", 12.0, 10.0, null, false), new ArrayList<DepthLevel>())
-        bbo = de.getBBO("AAA")
-        assert bbo.getOfferPx() == 12.0
-        assert bbo.getOfferSize() == 20.0
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.UPDATE, "entry1", 11.0, 10.0, null, false), new ArrayList<DepthLevel>())
-        bbo = de.getBBO("AAA");
-        assert bbo.getOfferPx() == 11.0
-        assert bbo.getOfferSize() == 10.0
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.UPDATE, "entry2", 11.0, 20.0, null, false), new ArrayList<DepthLevel>())
-        bbo = de.getBBO("AAA");
-        assert bbo.getOfferPx() == 11.0
-        assert bbo.getOfferSize() == 30.0
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.DELETE, "entry1", 11.0, 0.0, null, false), new ArrayList<DepthLevel>())
-        bbo = de.getBBO("AAA");
-        assert bbo.getOfferPx() == 11.0
-        assert bbo.getOfferSize() == 20.0
-
-        de.onDepthLevel(new DepthLevel("AAA", MdUpdateAction.DELETE, "entry2", 11.0, 0.0, null, false), new ArrayList<DepthLevel>())
-        bbo = de.getBBO("AAA");
-        assert bbo.getOfferPx() == 0.0
-        assert bbo.getOfferSize() == 0.0
-
-        List<DepthLevel> dl = new ArrayList<DepthLevel>()
-        de.getDepthLevels("AAA", dl)
-        assert dl.size() == 0
-    }
-
-
-
 }
