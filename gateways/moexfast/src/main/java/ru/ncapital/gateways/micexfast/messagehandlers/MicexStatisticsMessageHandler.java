@@ -61,5 +61,4 @@ public class MicexStatisticsMessageHandler extends StatisticsMessageHandler<Stri
     protected double getLastSize(GroupValue mdEntry) {
         return getMdEntrySize(mdEntry);
     }
-
 }

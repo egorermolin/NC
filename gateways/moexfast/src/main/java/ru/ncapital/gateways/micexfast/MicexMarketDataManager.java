@@ -1,21 +1,16 @@
 package ru.ncapital.gateways.micexfast;
 
 import com.google.inject.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.MicexIncrementalProcessor;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.MicexSnapshotProcessor;
-import ru.ncapital.gateways.micexfast.domain.MicexBBO;
-import ru.ncapital.gateways.micexfast.domain.MicexDepthLevel;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
-import ru.ncapital.gateways.moexfast.InstrumentManager;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.OrderDepthEngine;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
-import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
+import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 
 /**
@@ -51,25 +46,25 @@ public class MicexMarketDataManager extends MarketDataManager<String> {
         return new OrderDepthEngine<String>() {
             @Override
             public DepthLevel<String> createSnapshotDepthLevel(String exchangeSecurityId) {
-                return new MicexDepthLevel(exchangeSecurityId, MdUpdateAction.SNAPSHOT);
+                return new DepthLevel<String>(exchangeSecurityId, exchangeSecurityId) {
+                    { setMdUpdateAction(MdUpdateAction.SNAPSHOT); }
+                };
             }
         };
     }
 
     @Override
     public BBO<String> createBBO(String exchangeSecurityId) {
-        return new MicexBBO(exchangeSecurityId);
+        return new BBO<>(exchangeSecurityId, exchangeSecurityId);
     }
-
-   // @Override
-   // public String convertSubscriptionKeyToExchangeSecurityId(String subsriptionKey) {
-    //    return subsriptionKey;
-   // }
 
     @Override
-    public Logger getLogger() {
-        return LoggerFactory.getLogger("MicexMarketDataManager");
+    public DepthLevel<String> createDepthLevel(String exchangeSecurityId) {
+        return new DepthLevel<>(exchangeSecurityId, exchangeSecurityId);
     }
 
-
+    @Override
+    public PublicTrade<String> createPublicTrade(String exchangeSecurityId) {
+        return new PublicTrade<>(exchangeSecurityId, exchangeSecurityId);
+    }
 }

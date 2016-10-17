@@ -1,4 +1,5 @@
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -39,7 +40,7 @@ import static org.mockito.Mockito.when;
  * Created by egore on 10/3/16.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class CodecTest {
+public class MicexCodecTest {
 
     private MessageReader messageReader;
 
@@ -140,6 +141,7 @@ public class CodecTest {
         }
     }
 
+    @Ignore
     @Test
     public void testOpenfast100k() {
         long begin = System.currentTimeMillis();

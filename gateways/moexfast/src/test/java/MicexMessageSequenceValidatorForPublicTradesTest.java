@@ -11,12 +11,12 @@ import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalida
  * Created by egore on 17.02.2016.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class MessageSequenceValidatorForPublicTradesTest {
-    IMessageSequenceValidator sequenceValidator = Guice.createInjector(new MicexGatewayModule()).getInstance(MessageSequenceValidatorFactory.class).createMessageSequenceValidatorForPublicTrades();
-
-    @Before
-    public void setup() {
-    }
+public class MicexMessageSequenceValidatorForPublicTradesTest {
+    @SuppressWarnings("unchecked")
+    private IMessageSequenceValidator<String> sequenceValidator =
+            (IMessageSequenceValidator<String>) Guice.createInjector(new MicexGatewayModule())
+                    .getInstance(MessageSequenceValidatorFactory.class)
+                    .createMessageSequenceValidatorForPublicTrades();
 
     @Test
     public void testPublicTradesOutOfOrder() {

@@ -26,6 +26,11 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
         return LoggerFactory.getLogger(getClass().getName());
     }
 
+    @Override
+    public MessageHandlerType getType() {
+        return MessageHandlerType.STATISTICS;
+    }
+
     private boolean onMdEntry(GroupValue mdEntry) {
         MdEntryType mdEntryType = getMdEntryType(mdEntry);
         switch (mdEntryType) {
@@ -89,17 +94,12 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
     }
 
     @Override
-    public MessageHandlerType getType() {
-        return MessageHandlerType.STATISTICS;
-    }
-
-    @Override
-    protected String getMdEntryId(GroupValue mdEntry) {
+    protected final MdUpdateAction getMdUpdateAction(GroupValue mdEntry) {
         throw new RuntimeException();
     }
 
     @Override
-    protected final boolean getIsBid(GroupValue mdEntry) {
+    protected String getMdEntryId(GroupValue mdEntry) {
         throw new RuntimeException();
     }
 
@@ -109,8 +109,7 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
     }
 
     @Override
-    protected final MdUpdateAction getMdUpdateAction(GroupValue mdEntry) {
+    protected final boolean getTradeIsBid(GroupValue mdEntry) {
         throw new RuntimeException();
     }
-
 }

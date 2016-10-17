@@ -70,7 +70,9 @@ public abstract class AMessageHandler<T> implements IMessageHandler<T> {
 
     protected abstract T getExchangeSecurityId(GroupValue mdEntry);
 
-    protected abstract boolean getIsBid(GroupValue mdEntry);
+    protected abstract MdEntryType getMdEntryType(GroupValue mdEntry);
+
+    protected abstract MdUpdateAction getMdUpdateAction(GroupValue mdEntry);
 
     protected abstract String getMdEntryId(GroupValue mdEntry);
 
@@ -84,7 +86,5 @@ public abstract class AMessageHandler<T> implements IMessageHandler<T> {
 
     protected abstract String getTradeId(GroupValue mdEntry);
 
-    protected abstract MdEntryType getMdEntryType(GroupValue mdEntry);
-
-    protected abstract MdUpdateAction getMdUpdateAction(GroupValue mdEntry);
+    protected abstract boolean getTradeIsBid(GroupValue mdEntry);
 }

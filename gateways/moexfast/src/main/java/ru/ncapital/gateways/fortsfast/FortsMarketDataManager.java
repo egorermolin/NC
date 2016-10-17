@@ -1,14 +1,8 @@
 package ru.ncapital.gateways.fortsfast;
 
 import com.google.inject.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.fortsfast.connection.messageprocessors.FortsIncrementalProcessor;
 import ru.ncapital.gateways.fortsfast.connection.messageprocessors.FortsSnapshotProcessor;
-import ru.ncapital.gateways.fortsfast.domain.FortsBBO;
-import ru.ncapital.gateways.fortsfast.domain.FortsDepthLevel;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.MicexIncrementalProcessor;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.MicexSnapshotProcessor;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.OrderDepthEngine;
@@ -16,6 +10,7 @@ import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalida
 import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
+import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 
 /**
@@ -50,26 +45,34 @@ public class FortsMarketDataManager extends MarketDataManager<Long> {
         return new OrderDepthEngine<Long>() {
             @Override
             public DepthLevel<Long> createSnapshotDepthLevel(Long exchangeSecurityId) {
-                return new FortsDepthLevel(
-                        instrumentManager.getSecurityId(exchangeSecurityId),
-                        exchangeSecurityId,
-                        MdUpdateAction.SNAPSHOT
-                );
+                return new DepthLevel<Long>(instrumentManager.getSecurityId(exchangeSecurityId), exchangeSecurityId) {
+                    { setMdUpdateAction(MdUpdateAction.SNAPSHOT); }
+                };
             }
         };
     }
 
     @Override
     public BBO<Long> createBBO(Long exchangeSecurityId) {
-        return new FortsBBO(
+        return new BBO<>(
                 instrumentManager.getSecurityId(exchangeSecurityId),
                 exchangeSecurityId
         );
     }
 
     @Override
-    public Logger getLogger() {
-        return LoggerFactory.getLogger("FortsMarketDataManager");
+    public DepthLevel<Long> createDepthLevel(Long exchangeSecurityId) {
+        return new DepthLevel<>(
+                instrumentManager.getSecurityId(exchangeSecurityId),
+                exchangeSecurityId
+        );
     }
 
+    @Override
+    public PublicTrade<Long> createPublicTrade(Long exchangeSecurityId) {
+        return new PublicTrade<>(
+                instrumentManager.getSecurityId(exchangeSecurityId),
+                exchangeSecurityId
+        );
+    }
 }

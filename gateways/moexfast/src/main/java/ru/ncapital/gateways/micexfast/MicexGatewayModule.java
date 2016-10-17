@@ -14,9 +14,7 @@ import ru.ncapital.gateways.moexfast.ConfigurationManager;
 import ru.ncapital.gateways.moexfast.IGatewayManager;
 import ru.ncapital.gateways.moexfast.InstrumentManager;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
-import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
-import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
-import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorForPublicTrades;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.*;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerFactory;
 
@@ -34,9 +32,9 @@ public class MicexGatewayModule extends AbstractModule {
                 .build(MessageHandlerFactory.class));
 
         install(new FactoryModuleBuilder()
-                .implement(IMessageSequenceValidator.class, Names.named("orderlist"), new TypeLiteral<MessageSequenceValidatorForPublicTrades<String>>(){})
+                .implement(IMessageSequenceValidator.class, Names.named("orderlist"), new TypeLiteral<MessageSequenceValidatorForOrderList<String>>(){})
                 .implement(IMessageSequenceValidator.class, Names.named("publictrades"), new TypeLiteral<MessageSequenceValidatorForPublicTrades<String>>(){})
-                .implement(IMessageSequenceValidator.class, Names.named("statistics"), new TypeLiteral<MessageSequenceValidatorForPublicTrades<String>>(){})
+                .implement(IMessageSequenceValidator.class, Names.named("statistics"), new TypeLiteral<MessageSequenceValidatorForStatistics<String>>(){})
                 .build(MessageSequenceValidatorFactory.class));
 
         bind(ConfigurationManager.class).to(MicexConfigurationManager.class).in(Singleton.class);

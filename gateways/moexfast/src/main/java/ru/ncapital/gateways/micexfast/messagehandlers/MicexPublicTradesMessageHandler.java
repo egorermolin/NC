@@ -4,14 +4,10 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.openfast.GroupValue;
 import org.openfast.Message;
-import ru.ncapital.gateways.micexfast.MicexMarketDataManager;
 import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
-import ru.ncapital.gateways.micexfast.domain.MicexPublicTrade;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.domain.MdEntryType;
-import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
-import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
 import ru.ncapital.gateways.moexfast.messagehandlers.PublicTradesMessageHandler;
 
 /**
@@ -22,11 +18,6 @@ public class MicexPublicTradesMessageHandler extends PublicTradesMessageHandler<
     @AssistedInject
     public MicexPublicTradesMessageHandler(MarketDataManager<String> marketDataManager, @Assisted IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
-    }
-
-    @Override
-    protected PublicTrade<String> createPublicTrade(String securityId, String exchangeSecurityId) {
-        return new MicexPublicTrade(exchangeSecurityId);
     }
 
     @Override
@@ -46,36 +37,19 @@ public class MicexPublicTradesMessageHandler extends PublicTradesMessageHandler<
     }
 
     @Override
-    protected boolean getIsBid(GroupValue mdEntry) {
-        return mdEntry.getString("OrderSide").charAt(0) == 'B';
-    }
-
-    @Override
-    protected String getMdEntryId(GroupValue mdEntry) {
-        return mdEntry.getString("MDEntryID");
-    }
-
-    @Override
-    protected double getMdEntryPx(GroupValue mdEntry) {
-        return mdEntry.getDouble("MDEntryPx");
-    }
-
-    @Override
-    protected double getMdEntrySize(GroupValue mdEntry) {
-        return mdEntry.getDouble("MDEntrySize");
+    protected MdEntryType getMdEntryType(GroupValue mdEntry) {
+        return MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
     }
 
     @Override
     protected double getLastPx(GroupValue mdEntry) {
-        return getMdEntryPx(mdEntry);
+        return mdEntry.getDouble("MDEntryPx");
     }
 
     @Override
     protected double getLastSize(GroupValue mdEntry) {
-        return getMdEntrySize(mdEntry);
+        return mdEntry.getDouble("MDEntrySize");
     }
-
-
 
     @Override
     protected String getTradeId(GroupValue mdEntry) {
@@ -83,12 +57,8 @@ public class MicexPublicTradesMessageHandler extends PublicTradesMessageHandler<
     }
 
     @Override
-    protected MdEntryType getMdEntryType(GroupValue mdEntry) {
-        return MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
+    protected boolean getTradeIsBid(GroupValue mdEntry) {
+        return mdEntry.getString("OrderSide").charAt(0) == 'B';
     }
 
-    @Override
-    protected MdUpdateAction getMdUpdateAction(GroupValue mdEntry) {
-        return MdUpdateAction.convert(mdEntry.getString("MDUpdateAction").charAt(0));
-    }
 }

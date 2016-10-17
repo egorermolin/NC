@@ -7,17 +7,19 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openfast.*;
 import org.openfast.codec.Coder;
-import ru.ncapital.gateways.micexfast.*;
-import ru.ncapital.gateways.micexfast.domain.MicexBBO;
+import ru.ncapital.gateways.micexfast.IMicexGatewayConfiguration;
+import ru.ncapital.gateways.micexfast.MicexGatewayManager;
+import ru.ncapital.gateways.micexfast.MicexInstrumentManager;
+import ru.ncapital.gateways.micexfast.MicexMarketDataManager;
 import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
-import ru.ncapital.gateways.moexfast.connection.ConnectionManager;
-import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.micexfast.domain.ProductType;
 import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
 import ru.ncapital.gateways.moexfast.IMarketDataHandler;
-import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
+import ru.ncapital.gateways.moexfast.connection.ConnectionManager;
+import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.intf.IInstrument;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -29,7 +31,7 @@ import static org.mockito.Mockito.*;
  * Created by egore on 4/26/16.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class InstrumentManagerTest {
+public class MicexInstrumentManagerTest {
     @Mock
     private Context context;
 
@@ -259,6 +261,12 @@ public class InstrumentManagerTest {
         ArgumentCaptor<IInstrument[]> instrumentCapture = ArgumentCaptor.forClass(IInstrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
         assertEquals(2, instrumentCapture.getValue().length);
+        Arrays.sort(instrumentCapture.getValue(), new Comparator<IInstrument>() {
+            @Override
+            public int compare(IInstrument o1, IInstrument o2) {
+                return o1.getSecurityId().compareTo(o2.getSecurityId());
+            }
+        });
         assertEquals("SBER;TQBR", instrumentCapture.getValue()[1].getSecurityId());
         assertEquals("ROSN;TQBR", instrumentCapture.getValue()[0].getSecurityId());
     }

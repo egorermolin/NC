@@ -76,7 +76,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
                     break;
             }
             sb.append(depthLevel.getSecurityId()).append(" ");
-            sb.append(depthLevel.isBid() ? "B" : "S").append(depthLevel.getMdEntryId()).append(" ");
+            sb.append(depthLevel.getIsBid() ? "B" : "S").append(depthLevel.getMdEntryId()).append(" ");
             sb.append(depthLevel.getMdEntrySize()).append("@").append(depthLevel.getMdEntryPx()).append(" ");
             sb.append(depthLevel.getPerformanceData().toString());
 

@@ -17,15 +17,18 @@ import ru.ncapital.gateways.moexfast.performance.PerformanceData;
  * Created by egore on 1/14/16.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class MessageSequenceValidatorTest {
+public class MicexMessageSequenceValidatorTest {
 
-    IMessageSequenceValidator sequenceValidator = Guice.createInjector(new MicexGatewayModule()).getInstance(MessageSequenceValidatorFactory.class).createMessageSequenceValidatorForOrderList();;
+    private IMessageSequenceValidator sequenceValidator =
+            Guice.createInjector(new MicexGatewayModule())
+                    .getInstance(MessageSequenceValidatorFactory.class)
+                    .createMessageSequenceValidatorForOrderList();
 
     @Before
     public void setup() {
     }
 
-    private Message getIncermentalMock(int seqNum, int numMdEntries) {
+    private Message getIncrementalMock(int seqNum, int numMdEntries) {
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(seqNum);
 

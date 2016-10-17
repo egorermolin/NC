@@ -24,34 +24,13 @@ public class DepthLevel<T> implements IDepthLevel {
 
     public boolean isBid;
 
-    public String dealNumber;
+    public String tradeId;
 
-    public DepthLevel(String securityId, T exchangeSecurityId, MdUpdateAction mdUpdateAction, String mdEntryId, double mdEntryPx, double mdEntrySize, String dealNumber, boolean isBid) {
+    public DepthLevel(String securityId, T exchangeSecurityId) {
         this.securityId = securityId;
         this.exchangeSecurityId = exchangeSecurityId;
-        this.mdUpdateAction = mdUpdateAction;
-        this.mdEntryId = mdEntryId;
-        this.mdEntryPx = mdEntryPx;
-        this.mdEntrySize = mdEntrySize;
-        this.dealNumber = dealNumber;
-        this.isBid = isBid;
         this.performanceData = new PerformanceData();
     }
-
-    public DepthLevel(String securityId, T exchangeSecurityId, MdUpdateAction mdUpdateAction) {
-        this.securityId = securityId;
-        this.exchangeSecurityId = exchangeSecurityId;
-        this.mdUpdateAction = mdUpdateAction;
-        this.performanceData = new PerformanceData();
-    }
-
-   // public void setMdUpdateAction(MdUpdateAction mdUpdateAction) {
-   //     this.mdUpdateAction = mdUpdateAction;
-   // }
-
-   // public void setMdEntrySize(double mdEntrySize) {
-   //     this.mdEntrySize = mdEntrySize;
-   // }
 
     public T getExchangeSecurityId() {
         return exchangeSecurityId;
@@ -67,9 +46,17 @@ public class DepthLevel<T> implements IDepthLevel {
         return mdEntryId;
     }
 
+    public void setMdEntryId(String mdEntryId) {
+        this.mdEntryId = mdEntryId;
+    }
+
     @Override
     public MdUpdateAction getMdUpdateAction() {
         return mdUpdateAction;
+    }
+
+    public void setMdUpdateAction(MdUpdateAction mdUpdateAction) {
+        this.mdUpdateAction = mdUpdateAction;
     }
 
     @Override
@@ -77,19 +64,35 @@ public class DepthLevel<T> implements IDepthLevel {
         return mdEntryPx;
     }
 
+    public void setMdEntryPx(double mdEntryPx) {
+        this.mdEntryPx = mdEntryPx;
+    }
+
     @Override
     public double getMdEntrySize() {
         return mdEntrySize;
     }
 
-    @Override
-    public String getDealNumber() {
-        return dealNumber;
+    public void setMdEntrySize(double mdEntrySize) {
+        this.mdEntrySize = mdEntrySize;
     }
 
     @Override
-    public boolean isBid() {
+    public String getTradeId() {
+        return tradeId;
+    }
+
+    public void setTradeId(String tradeId) {
+        this.tradeId = tradeId;
+    }
+
+    @Override
+    public boolean getIsBid() {
         return isBid;
+    }
+
+    public void setIsBid(boolean isBid) {
+        this.isBid = isBid;
     }
 
     @Override
@@ -127,8 +130,9 @@ public class DepthLevel<T> implements IDepthLevel {
                 ", mdUpdateAction=" + mdUpdateAction +
                 ", mdEntryPx=" + mdEntryPx +
                 ", mdEntrySize=" + mdEntrySize +
-                ", performanceData=" + performanceData +
+                ", tradeId=" + tradeId +
                 ", isBid=" + isBid +
+                ", performanceData=" + performanceData +
                 '}';
     }
 }

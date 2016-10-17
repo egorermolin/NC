@@ -23,7 +23,7 @@ public class FortsInstrumentManager extends InstrumentManager<Long> {
     private Set<Long> allowedSecurityIds = new HashSet<>();
 
     @Override
-    public InstrumentManager configure(IGatewayConfiguration configuration) {
+    public InstrumentManager<Long> configure(IGatewayConfiguration configuration) {
         IFortsGatewayConfiguration fortsConfiguration = (IFortsGatewayConfiguration) configuration;
 
         this.allowedUnderlyings.addAll(Arrays.asList(fortsConfiguration.getAllowedUnderlyings()));
@@ -39,6 +39,7 @@ public class FortsInstrumentManager extends InstrumentManager<Long> {
             return true;
 
         if (allowedUnderlyings.isEmpty() || allowedUnderlyings.contains(instrument.getUnderlying())) {
+            // do nothing
         } else {
             if (getLogger().isTraceEnabled())
                 getLogger().trace(instrument.getName() + " Ignored by Underlying " + instrument.getId());

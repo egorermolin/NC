@@ -4,13 +4,9 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.openfast.GroupValue;
 import org.openfast.Message;
-import ru.ncapital.gateways.fortsfast.domain.FortsPublicTrade;
-import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.domain.MdEntryType;
-import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
-import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
 import ru.ncapital.gateways.moexfast.messagehandlers.PublicTradesMessageHandler;
 
 /**
@@ -20,11 +16,6 @@ public class FortsPublicTradesMessageHandler extends PublicTradesMessageHandler<
     @AssistedInject
     public FortsPublicTradesMessageHandler(MarketDataManager<Long> marketDataManager, @Assisted IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
-    }
-
-    @Override
-    protected PublicTrade<Long> createPublicTrade(String securityId, Long exchangeSecurityId, String mdEntryId, double mdEntryPx, double mdEntrySize, boolean isBid) {
-        return new FortsPublicTrade(securityId, exchangeSecurityId, mdEntryId, mdEntryPx, mdEntrySize, isBid);
     }
 
     @Override
@@ -38,27 +29,16 @@ public class FortsPublicTradesMessageHandler extends PublicTradesMessageHandler<
     }
 
     @Override
-    protected boolean getMdEntryIsBid(GroupValue mdEntry) {
-        return getMdEntryType(mdEntry) == MdEntryType.BID;
+    protected MdEntryType getMdEntryType(GroupValue mdEntry) {
+        return MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
     }
-
-    @Override
-    protected String getMdEntryId(GroupValue mdEntry) {
-        return String.valueOf(mdEntry.getLong("MDEntryID"));
-    }
-
-    @Override
-    protected double getMdEntryPx(GroupValue mdEntry) {
-        return mdEntry.getDouble("MDEntryPx");
-    }
-
     @Override
     protected double getLastPx(GroupValue mdEntry) {
         return mdEntry.getDouble("LastPx");
     }
 
     @Override
-    protected double getMdEntrySize(GroupValue mdEntry) {
+    protected double getLastSize(GroupValue mdEntry) {
         return mdEntry.getLong("MDEntrySize");
     }
 
@@ -68,12 +48,7 @@ public class FortsPublicTradesMessageHandler extends PublicTradesMessageHandler<
     }
 
     @Override
-    protected MdEntryType getMdEntryType(GroupValue mdEntry) {
-        return MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
-    }
-
-    @Override
-    protected MdUpdateAction getMdUpdateAction(GroupValue mdEntry) {
-        return MdUpdateAction.convert(String.valueOf(mdEntry.getInt("MDUpdateAction")).charAt(0));
+    protected boolean getTradeIsBid(GroupValue mdEntry) {
+        return getMdEntryType(mdEntry) == MdEntryType.BID;
     }
 }

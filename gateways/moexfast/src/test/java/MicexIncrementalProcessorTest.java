@@ -20,7 +20,7 @@ import static org.mockito.Mockito.mock;
  * Created by egore on 1/13/16.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class IncrementalProcessorTest {
+public class MicexIncrementalProcessorTest {
     @Mock
     private Context context;
 
@@ -28,16 +28,17 @@ public class IncrementalProcessorTest {
     private Coder coder;
 
     @Mock
-    private IMessageHandler marketDataHandler;
+    private IMessageHandler<String> marketDataHandler;
 
     @Captor
     private ArgumentCaptor<Message> messageCaptor;
 
-    private IMessageSequenceValidator sequenceValidator;
+    private IMessageSequenceValidator<String> sequenceValidator;
 
-    private IncrementalProcessor incrementalProcessor;
+    private IncrementalProcessor<String> incrementalProcessor;
 
     @Before
+    @SuppressWarnings("unchecked")
     public void setup() {
         sequenceValidator = Guice.createInjector(new MicexGatewayModule()).getInstance(MessageSequenceValidatorFactory.class).createMessageSequenceValidatorForOrderList();
         incrementalProcessor = new MicexIncrementalProcessor(marketDataHandler, sequenceValidator);

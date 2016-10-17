@@ -48,7 +48,7 @@ public abstract class OrderDepthEngine<T> {
             getOrderDepth(depthLevel.getExchangeSecurityId(), true).clearDepth();
             getOrderDepth(depthLevel.getExchangeSecurityId(), false).clearDepth();
         } else {
-            getOrderDepth(depthLevel.getExchangeSecurityId(), depthLevel.isBid()).onDepthLevel(depthLevel);
+            getOrderDepth(depthLevel.getExchangeSecurityId(), depthLevel.getIsBid()).onDepthLevel(depthLevel);
         }
         depthLevelsToSend.add(depthLevel);
     }

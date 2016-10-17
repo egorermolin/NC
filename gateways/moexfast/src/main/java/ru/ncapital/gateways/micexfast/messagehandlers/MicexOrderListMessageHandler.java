@@ -5,18 +5,14 @@ import com.google.inject.assistedinject.AssistedInject;
 import org.openfast.GroupValue;
 import org.openfast.Message;
 import ru.ncapital.gateways.micexfast.MicexMarketDataManager;
-import ru.ncapital.gateways.micexfast.domain.MicexDepthLevel;
 import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
-import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.domain.MdEntryType;
 import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
 import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
 import ru.ncapital.gateways.moexfast.messagehandlers.OrderListMessageHandler;
-import sun.awt.X11.Depth;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -45,11 +41,6 @@ public class MicexOrderListMessageHandler extends OrderListMessageHandler<String
     }
 
     @Override
-    protected boolean getMdEntryIsBid(GroupValue mdEntry) {
-        throw new RuntimeException("Not implemented");
-    }
-
-    @Override
     protected String getMdEntryId(GroupValue mdEntry) {
         return mdEntry.getString("MDEntryID");
     }
@@ -57,11 +48,6 @@ public class MicexOrderListMessageHandler extends OrderListMessageHandler<String
     @Override
     protected double getMdEntryPx(GroupValue mdEntry) {
         return mdEntry.getDouble("MDEntryPx");
-    }
-
-    @Override
-    protected double getLastPx(GroupValue mdEntry) {
-        return getMdEntryPx(mdEntry);
     }
 
     @Override
@@ -85,17 +71,13 @@ public class MicexOrderListMessageHandler extends OrderListMessageHandler<String
     }
 
     @Override
-    protected DepthLevel<String> createDepthLevel(String securityId, String exchangeSecurityId, MdUpdateAction action, String mdEntryId, double mdEntryPx, double mdEntrySize, String tradeId, boolean isBid) {
-        return new MicexDepthLevel(exchangeSecurityId, action, mdEntryId, mdEntryPx, mdEntrySize, tradeId, isBid);
-    }
-
-    @Override
-    protected List<DepthLevel<String>> createDepthLevels() {
+    protected List<DepthLevel<String>> createDepthLevelList() {
         return new ArrayList<>();
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected DepthLevel<String>[] convertDepthLevels(List<DepthLevel<String>> depthLevels) {
-        return depthLevels.toArray((DepthLevel<String>[]) new MicexDepthLevel[0]);
+        return (DepthLevel<String>[]) depthLevels.toArray();
     }
 }

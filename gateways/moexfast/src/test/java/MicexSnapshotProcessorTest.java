@@ -20,7 +20,7 @@ import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
  */
 
 @RunWith(MockitoJUnitRunner.class)
-public class SnapshotProcessorTest {
+public class MicexSnapshotProcessorTest {
     @Mock
     private Context context;
 
@@ -28,15 +28,15 @@ public class SnapshotProcessorTest {
     private Coder coder;
     
     @Mock
-    private IMessageHandler marketDataHandler;
+    private IMessageHandler<String> marketDataHandler;
 
     @Captor
     private ArgumentCaptor<Message> messageCaptor;
     
     @Mock
-    private MessageSequenceValidator sequenceValidator;
+    private MessageSequenceValidator<String> sequenceValidator;
 
-    private SnapshotProcessor snapshotProcessor;
+    private SnapshotProcessor<String> snapshotProcessor;
 
     @Before
     public void setup() {
@@ -167,6 +167,7 @@ public class SnapshotProcessorTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testSnapshotWithIncrementals() {
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
@@ -177,15 +178,15 @@ public class SnapshotProcessorTest {
         Mockito.when(message.getInt("RptSeq")).thenReturn(100);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
-        StoredMdEntry incStoredMdEntry1 = Mockito.mock(StoredMdEntry.class);
-        StoredMdEntry incStoredMdEntry2 = Mockito.mock(StoredMdEntry.class);
+        StoredMdEntry<String> incStoredMdEntry1 = (StoredMdEntry<String>) Mockito.mock(StoredMdEntry.class);
+        StoredMdEntry<String> incStoredMdEntry2 = (StoredMdEntry<String>) Mockito.mock(StoredMdEntry.class);
         Mockito.when(incStoredMdEntry1.getSequenceNumber()).thenReturn(101);
         Mockito.when(incStoredMdEntry2.getSequenceNumber()).thenReturn(102);
         GroupValue incMdEntry1 = Mockito.mock(GroupValue.class);
         GroupValue incMdEntry2 = Mockito.mock(GroupValue.class);
         Mockito.when(incStoredMdEntry1.getMdEntry()).thenReturn(incMdEntry1);
         Mockito.when(incStoredMdEntry2.getMdEntry()).thenReturn(incMdEntry2);
-        StoredMdEntry[] incStoredMdEntries = new StoredMdEntry[] {incStoredMdEntry1, incStoredMdEntry2};
+        StoredMdEntry<String>[] incStoredMdEntries = (StoredMdEntry<String>[]) new StoredMdEntry[] {incStoredMdEntry1, incStoredMdEntry2};
         Mockito.when(sequenceValidator.stopRecovering("SYMB;CETS")).thenReturn(incStoredMdEntries);
 
         snapshotProcessor.handleMessage(message, context, coder);
@@ -198,6 +199,7 @@ public class SnapshotProcessorTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testSnapshot2FragmentsWithIncrementals() {
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
@@ -216,15 +218,15 @@ public class SnapshotProcessorTest {
         Mockito.when(message2.getInt("LastFragment")).thenReturn(1);
         Mockito.when(message2.getInt("RptSeq")).thenReturn(100);
 
-        StoredMdEntry incStoredMdEntry1 = Mockito.mock(StoredMdEntry.class);
-        StoredMdEntry incStoredMdEntry2 = Mockito.mock(StoredMdEntry.class);
+        StoredMdEntry<String> incStoredMdEntry1 = (StoredMdEntry<String>) Mockito.mock(StoredMdEntry.class);
+        StoredMdEntry<String> incStoredMdEntry2 = (StoredMdEntry<String>) Mockito.mock(StoredMdEntry.class);
         Mockito.when(incStoredMdEntry1.getSequenceNumber()).thenReturn(101);
         Mockito.when(incStoredMdEntry2.getSequenceNumber()).thenReturn(102);
         GroupValue incMdEntry1 = Mockito.mock(GroupValue.class);
         GroupValue incMdEntry2 = Mockito.mock(GroupValue.class);
         Mockito.when(incStoredMdEntry1.getMdEntry()).thenReturn(incMdEntry1);
         Mockito.when(incStoredMdEntry2.getMdEntry()).thenReturn(incMdEntry2);
-        StoredMdEntry[] incStoredMdEntries = new StoredMdEntry[] {incStoredMdEntry1, incStoredMdEntry2};
+        StoredMdEntry<String>[] incStoredMdEntries = (StoredMdEntry<String>[]) new StoredMdEntry[] {incStoredMdEntry1, incStoredMdEntry2};
         Mockito.when(sequenceValidator.stopRecovering("SYMB;CETS")).thenReturn(incStoredMdEntries);
 
         snapshotProcessor.handleMessage(message, context, coder);

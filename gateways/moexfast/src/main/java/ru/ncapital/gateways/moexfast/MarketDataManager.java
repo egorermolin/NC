@@ -2,22 +2,20 @@ package ru.ncapital.gateways.moexfast;
 
 import com.google.inject.Inject;
 import org.slf4j.Logger;
-import ru.ncapital.gateways.micexfast.MicexInstrumentManager;
+import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.HeartbeatProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IIncrementalProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.ISnapshotProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
-import ru.ncapital.gateways.moexfast.domain.*;
+import ru.ncapital.gateways.moexfast.domain.Subscription;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
 import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
-import ru.ncapital.gateways.moexfast.domain.intf.IBBO;
 import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerFactory;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 import ru.ncapital.gateways.moexfast.performance.IGatewayPerformanceLogger;
-import sun.awt.X11.Depth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,9 +74,9 @@ public abstract class MarketDataManager<T> {
 
     public abstract BBO<T> createBBO(T exchangeSecurityId);
 
-    public DepthLevel<T> createSnapshotDepthLevel(T exchangeSecurityId) {
-        return orderDepthEngine.createSnapshotDepthLevel(exchangeSecurityId);
-    }
+    public abstract DepthLevel<T> createDepthLevel(T exchangeSecurityId);
+
+    public abstract PublicTrade<T> createPublicTrade(T exchangeSecurityId);
 
     public T convertSecurityIdToExchangeSecurityId(String securityId) {
         return instrumentManager.getExchangeSecurityId(securityId);
@@ -92,7 +90,9 @@ public abstract class MarketDataManager<T> {
         return instrumentManager.isAllowedInstrument(exchangeSecurityId);
     }
 
-    public abstract Logger getLogger();
+    public Logger getLogger() {
+        return LoggerFactory.getLogger(getClass().getName());
+    }
 
     public void setInstrumentManager(InstrumentManager<T> instrumentManager) {
         this.instrumentManager = instrumentManager;

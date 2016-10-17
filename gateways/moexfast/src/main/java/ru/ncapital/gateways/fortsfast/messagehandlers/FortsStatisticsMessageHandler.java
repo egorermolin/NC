@@ -31,8 +31,8 @@ public class FortsStatisticsMessageHandler extends StatisticsMessageHandler<Long
     }
 
     @Override
-    protected boolean getMdEntryIsBid(GroupValue mdEntry) {
-        return getMdEntryType(mdEntry) == MdEntryType.BID;
+    protected MdEntryType getMdEntryType(GroupValue mdEntry) {
+        return MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
     }
 
     @Override
@@ -46,27 +46,17 @@ public class FortsStatisticsMessageHandler extends StatisticsMessageHandler<Long
     }
 
     @Override
-    protected double getLastPx(GroupValue mdEntry) {
-        return 0;
-    }
-
-    @Override
     protected double getMdEntrySize(GroupValue mdEntry) {
         return mdEntry.getLong("MDEntrySize");
     }
 
     @Override
-    protected String getTradeId(GroupValue mdEntry) {
-        return String.valueOf(mdEntry.getLong("TradeID"));
+    protected double getLastPx(GroupValue mdEntry) {
+        return mdEntry.getDouble("LastPx");
     }
 
     @Override
-    protected MdEntryType getMdEntryType(GroupValue mdEntry) {
-        return MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
-    }
-
-    @Override
-    protected MdUpdateAction getMdUpdateAction(GroupValue mdEntry) {
-        return MdUpdateAction.convert(String.valueOf(mdEntry.getInt("MDUpdateAction")).charAt(0));
+    protected double getLastSize(GroupValue mdEntry) {
+        return mdEntry.getLong("MDEntrySize");
     }
 }

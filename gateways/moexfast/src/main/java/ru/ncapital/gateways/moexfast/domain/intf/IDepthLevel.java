@@ -17,9 +17,9 @@ public interface IDepthLevel extends Comparable<IDepthLevel>{
 
     double getMdEntrySize();
 
-    String getDealNumber();
+    String getTradeId();
 
-    boolean isBid();
+    boolean getIsBid();
 
     PerformanceData getPerformanceData();
 }
