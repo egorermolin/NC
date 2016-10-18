@@ -5,6 +5,7 @@ import org.openfast.Message;
 import ru.ncapital.gateways.fortsfast.domain.FortsInstrument;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.InstrumentManager;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.SequenceArray;
 import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
 
 import java.util.Arrays;
@@ -19,8 +20,6 @@ import java.util.Set;
 public class FortsInstrumentManager extends InstrumentManager<Long> {
 
     private Set<String> allowedUnderlyings = new HashSet<>();
-
-    private Set<Long> allowedSecurityIds = new HashSet<>();
 
     @Override
     public InstrumentManager<Long> configure(IGatewayConfiguration configuration) {
@@ -53,51 +52,59 @@ public class FortsInstrumentManager extends InstrumentManager<Long> {
 
     @Override
     protected String createTradingStatusForInstrumentStatus(Message readMessage) {
-        StringBuilder tradingStatus = new StringBuilder();
-
-        if (readMessage != null && readMessage.getValue("SecurityTradingStatus") != null)
-            tradingStatus.append(readMessage.getInt("SecurityTradingStatus"));
-        else
-            tradingStatus.append("20");
-
-        return tradingStatus.toString();
+        return getTradingStatus(readMessage);
     }
     
     @Override
     protected Instrument<Long> createInstrument(Message readMessage) {
-        return new FortsInstrument(readMessage.getString("Symbol"), readMessage.getLong("SecurityId"));
+        return new FortsInstrument(
+                readMessage.getString("Symbol"),
+                readMessage.getLong("SecurityID")
+        );
     }
 
     @Override
     protected Instrument<Long> createFullInstrument(Message readMessage) {
-        String symbol = readMessage.getString("Symbol");
-        long securityId = readMessage.getLong("SecurityId");
+        FortsInstrument instrument = new FortsInstrument(
+                readMessage.getString("Symbol"),
+                readMessage.getLong("SecurityID")
+        );
 
-        FortsInstrument instrument = new FortsInstrument(symbol, securityId);
         if (readMessage.getValue("Currency") != null)
             instrument.setCurrency(readMessage.getString("Currency"));
         else
             instrument.setCurrency("RUB");
 
-        if (readMessage.getSequence("NoUnderlyings") != null && readMessage.getSequence("NoUnderlyings").getLength() > 0) {
-            if (readMessage.getSequence("NoUnderlyings").get(0).getValue("UnderlyingSymbol") != null)
-                instrument.setUnderlying(readMessage.getSequence("NoUnderlyings").get(0).getString("UnderlyingSymbol"));
+        if (readMessage.getSequence("Underlyings") != null && readMessage.getSequence("Underlyings").getLength() > 0) {
+            if (readMessage.getSequence("Underlyings").get(0).getValue("UnderlyingSymbol") != null)
+                instrument.setUnderlying(readMessage.getSequence("Underlyings").get(0).getString("UnderlyingSymbol"));
         }
 
+        if (readMessage.getValue("SecurityAltID") != null)
+            instrument.setDescription(readMessage.getString("SecurityAltID"));
+
         if (readMessage.getValue("ContractMultiplier") != null)
-            instrument.setMultiplier(readMessage.getDouble("ContractMultiplier"));
+            instrument.setLotSize(readMessage.getInt("ContractMultiplier"));
 
         if (readMessage.getValue("MinPriceIncrement") != null)
             instrument.setTickSize(readMessage.getDouble("MinPriceIncrement"));
 
-        StringBuilder tradingStatus = new StringBuilder();
-        if (readMessage.getValue("SecurityTradingStatus") != null)
-            tradingStatus.append(readMessage.getInt("SecurityTradingStatus"));
-        else
-            tradingStatus.append("20");
-        instrument.setTradingStatus(tradingStatus.toString());
+        instrument.setMultiplier(1.0);
+        instrument.setTradingStatus(getTradingStatus(readMessage));
 
         return instrument;
+    }
+
+    private String getTradingStatus(Message readMessage) {
+        StringBuilder tradingStatus = new StringBuilder();
+        //tradingStatus.append(
+        //        readMessage.getValue("TradingSessionID") != null ? readMessage.getInt("TradingSessionID") : "0"
+        //);
+        //tradingStatus.append('-');
+        tradingStatus.append(
+                readMessage.getValue("SecurityTradingStatus") != null ? readMessage.getInt("SecurityTradingStatus") : "NA"
+        );
+        return tradingStatus.toString();
     }
 }
 

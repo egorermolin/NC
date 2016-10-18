@@ -1,3 +1,5 @@
+package forts;
+
 import com.google.inject.Guice;
 import org.junit.Before;
 import org.junit.Test;

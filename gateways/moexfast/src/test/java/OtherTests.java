@@ -108,11 +108,6 @@ public class OtherTests {
         assert MessageHandlerType.PUBLIC_TRADES.equals("PublicTrades");
     }
 
-    @Test
-    public void testConversion() {
-
-    }
-
     public static void main(String[] args) {
         ExecutorService executor = Executors.newCachedThreadPool();
 

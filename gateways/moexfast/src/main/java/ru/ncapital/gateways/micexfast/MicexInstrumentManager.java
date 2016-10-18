@@ -100,7 +100,6 @@ public class MicexInstrumentManager extends InstrumentManager<String> {
             tradingStatus.append(readMessage.getInt("SecurityTradingStatus"));
         else
             tradingStatus.append("18");
-
         return tradingStatus.toString();
     }
 
@@ -109,11 +108,29 @@ public class MicexInstrumentManager extends InstrumentManager<String> {
         return new MicexInstrument(readMessage.getString("Symbol"), readMessage.getString("TradingSessionID"), -1);
     }
 
+    private String getTradingStatus(Message readMessage) {
+        StringBuilder tradingStatus = new StringBuilder();
+        GroupValue tradingSession = null;
+        if (readMessage.getSequence("MarketSegmentGrp") != null && readMessage.getSequence("MarketSegmentGrp").getLength() > 0) {
+            GroupValue marketSegmentGrp = readMessage.getSequence("MarketSegmentGrp").get(0);
+            if (marketSegmentGrp.getSequence("TradingSessionRulesGrp") != null && marketSegmentGrp.getSequence("TradingSessionRulesGrp").getLength() > 0) {
+                tradingSession = marketSegmentGrp.getSequence("TradingSessionRulesGrp").get(0);
+            }
+        }
+        if (tradingSession != null && tradingSession.getValue("TradingSessionSubID") != null)
+            tradingStatus.append(tradingSession.getString("TradingSessionSubID")).append("-");
+        else
+            tradingStatus.append("NA-");
+        if (tradingSession != null && tradingSession.getValue("SecurityTradingStatus") != null)
+            tradingStatus.append(tradingSession.getInt("SecurityTradingStatus"));
+        else
+            tradingStatus.append("18");
+        return tradingStatus.toString();
+    }
+
     @Override
     protected Instrument<String> createFullInstrument(Message readMessage) {
-        String symbol = readMessage.getString("Symbol");
         String tradingSessionId = "UNKNOWN";
-
         if (readMessage.getSequence("MarketSegmentGrp") != null && readMessage.getSequence("MarketSegmentGrp").getLength() > 0) {
             GroupValue marketSegmentGrp = readMessage.getSequence("MarketSegmentGrp").get(0);
             if (marketSegmentGrp.getSequence("TradingSessionRulesGrp") != null && marketSegmentGrp.getSequence("TradingSessionRulesGrp").getLength() > 0) {
@@ -123,11 +140,12 @@ public class MicexInstrumentManager extends InstrumentManager<String> {
             }
         }
 
-        int product = -1;
-        if (readMessage.getValue("Product") != null)
-            product = readMessage.getInt("Product");
+        Instrument<String> instrument = new MicexInstrument(
+                readMessage.getString("Symbol"),
+                tradingSessionId,
+                readMessage.getValue("Product") != null ? readMessage.getInt("Product") : -1
+        );
 
-        MicexInstrument instrument = new MicexInstrument(symbol, tradingSessionId, product);
         if (readMessage.getValue("Currency") != null)
             instrument.setCurrency(readMessage.getString("Currency"));
         else
@@ -149,26 +167,7 @@ public class MicexInstrumentManager extends InstrumentManager<String> {
                 instrument.setLotSize(readMessage.getSequence("MarketSegmentGrp").get(0).getInt("RoundLot"));
         }
 
-        GroupValue tradingSession = null;
-        if (readMessage.getSequence("MarketSegmentGrp") != null && readMessage.getSequence("MarketSegmentGrp").getLength() > 0) {
-            GroupValue marketSegmentGrp = readMessage.getSequence("MarketSegmentGrp").get(0);
-            if (marketSegmentGrp.getSequence("TradingSessionRulesGrp") != null && marketSegmentGrp.getSequence("TradingSessionRulesGrp").getLength() > 0) {
-                tradingSession = marketSegmentGrp.getSequence("TradingSessionRulesGrp").get(0);
-            }
-        }
-
-        StringBuilder tradingStatus = new StringBuilder();
-        if (tradingSession != null && tradingSession.getValue("TradingSessionSubID") != null)
-            tradingStatus.append(tradingSession.getString("TradingSessionSubID")).append("-");
-        else
-            tradingStatus.append("NA-");
-
-        if (tradingSession != null && tradingSession.getValue("SecurityTradingStatus") != null)
-            tradingStatus.append(tradingSession.getInt("SecurityTradingStatus"));
-        else
-            tradingStatus.append("18");
-
-        instrument.setTradingStatus(tradingStatus.toString());
+        instrument.setTradingStatus(getTradingStatus(readMessage));
 
         return instrument;
     }

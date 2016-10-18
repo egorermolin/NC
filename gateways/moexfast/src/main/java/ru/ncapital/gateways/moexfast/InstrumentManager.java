@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Created by Egor on 03-Oct-16.
  */
 public abstract class InstrumentManager<T> extends Processor implements IInstrumentManager {
-    private SequenceArray sequenceArrayForInstrumentStatus = new SequenceArray();
+    private SequenceArray sequenceArrayForSecurityStatus = new SequenceArray();
 
     private ConcurrentHashMap<T, Instrument<T>> instruments = new ConcurrentHashMap<>();
 
@@ -75,8 +75,9 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
                 }
                 break;
 
-            case 'f':
-                if (sequenceArrayForInstrumentStatus.checkSequence(seqNum) == SequenceArray.Result.DUPLICATE)
+            case 'f': // SecurityStatus
+            case 'h': // TradingSessionStatus
+                if (sequenceArrayForSecurityStatus.checkSequence(seqNum) == SequenceArray.Result.DUPLICATE)
                     return false;
 
                 break;
@@ -145,15 +146,6 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
     @Override
     protected void processMessage(Message readMessage) {
         switch (readMessage.getString("MessageType").charAt(0)) {
-            case 'f':
-                Instrument<T> instrument = createInstrument(readMessage);
-                String tradingStatus = createTradingStatusForInstrumentStatus(readMessage);
-
-                if (isAllowedInstrument(instrument))
-                    sendToClient(instrument, tradingStatus);
-
-                break;
-
             case 'd':
                 if (numberOfInstruments == 0) {
                     synchronized (this) {
@@ -176,6 +168,15 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
                 }
 
                 checkInstrumentFinish();
+                break;
+
+            case 'f':
+                Instrument<T> instrument = createInstrument(readMessage);
+                String tradingStatus = createTradingStatusForInstrumentStatus(readMessage);
+
+                if (isAllowedInstrument(instrument))
+                    sendToClient(instrument, tradingStatus);
+
                 break;
         }
     }

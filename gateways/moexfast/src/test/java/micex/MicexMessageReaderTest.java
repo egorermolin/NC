@@ -1,3 +1,5 @@
+package micex;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +38,7 @@ import static org.mockito.Mockito.*;
  * Created by egore on 5/4/16.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class MessageReaderTest {
+public class MicexMessageReaderTest {
     private MessageReader messageReaderAsynch;
 
     private MessageReader messageReaderSynch;
