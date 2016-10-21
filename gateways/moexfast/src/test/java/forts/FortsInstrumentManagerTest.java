@@ -225,6 +225,11 @@ public class FortsInstrumentManagerTest {
         assertEquals("SiZ6", values.get(1).getSecurityId());
         assertEquals("17", values.get(1).getTradingStatus());
 
+        assertEquals(395869L, (long) instrumentManager.getExchangeSecurityId("EuZ6"));
+        assertEquals(389014L, (long) instrumentManager.getExchangeSecurityId("SiZ6"));
+        assertEquals("EuZ6", instrumentManager.getSecurityId(395869L));
+        assertEquals("SiZ6", instrumentManager.getSecurityId(389014L));
+
         ArgumentCaptor<IInstrument[]> instrumentCapture = ArgumentCaptor.forClass(IInstrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
         assertEquals(2, instrumentCapture.getValue().length);

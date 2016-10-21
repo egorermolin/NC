@@ -258,6 +258,11 @@ public class MicexInstrumentManagerTest {
         assertEquals("N-17", values.get(0).getTradingStatus());
         assertEquals("N-17", values.get(1).getTradingStatus());
 
+        assertTrue(instrumentManager.getSecurityId("ROSN;TQBR").equals("ROSN;TQBR"));
+        assertTrue(instrumentManager.getSecurityId("SBER;TQBR").equals("SBER;TQBR"));
+        assertTrue(instrumentManager.getExchangeSecurityId("ROSN;TQBR").equals("ROSN;TQBR"));
+        assertTrue(instrumentManager.getExchangeSecurityId("SBER;TQBR").equals("SBER;TQBR"));
+
         verify(gatewayManager, times(1)).onInstrumentDownloadFinished();
 
         ArgumentCaptor<IInstrument[]> instrumentCapture = ArgumentCaptor.forClass(IInstrument[].class);

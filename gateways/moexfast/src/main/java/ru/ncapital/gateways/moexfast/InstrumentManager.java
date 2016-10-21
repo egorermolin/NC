@@ -20,7 +20,7 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
 
     private ConcurrentHashMap<T, Instrument<T>> instruments = new ConcurrentHashMap<>();
 
-    private ConcurrentHashMap<T, Instrument<T>> instrumentsBySecurityId = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Instrument<T>> instrumentsBySecurityId = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<T, Instrument<T>> ignoredInstruments = new ConcurrentHashMap<>();
 
@@ -131,7 +131,7 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
     private boolean addInstrument(Instrument<T> instrument) {
         return instruments.putIfAbsent(instrument.getExchangeSecurityId(), instrument) == null
                    &&
-               instrumentsBySecurityId.putIfAbsent(instrument.getExchangeSecurityId(), instrument) == null;
+               instrumentsBySecurityId.putIfAbsent(instrument.getSecurityId(), instrument) == null;
     }
 
     protected void addInstrumentToIgnored(Instrument<T> instrument) {
@@ -227,10 +227,18 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
     }
 
     public T getExchangeSecurityId(String securityId) {
-        return getInstrumentBySecurityId(securityId).getExchangeSecurityId();
+        Instrument<T> instrument = getInstrumentBySecurityId(securityId);
+        if (instrument != null)
+            return instrument.getExchangeSecurityId();
+        else
+            return null;
     }
 
     public String getSecurityId(T exchangeSecurityId) {
-        return getInstrumentByExchangeSecurityId(exchangeSecurityId).getSecurityId();
+        Instrument<T> instrument = getInstrumentByExchangeSecurityId(exchangeSecurityId);
+        if (instrument != null)
+            return instrument.getSecurityId();
+        else
+            return null;
     }
 }
