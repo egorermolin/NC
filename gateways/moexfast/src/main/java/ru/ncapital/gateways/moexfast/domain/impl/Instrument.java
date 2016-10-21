@@ -26,7 +26,7 @@ public abstract class Instrument<T> implements IInstrument {
 
     private String underlying;
 
-    private long maturityDate;
+    private String maturityDate;
 
     public Instrument(String symbol, String securityId, T exchangeSecurityId) {
         this.symbol = symbol;
@@ -89,7 +89,7 @@ public abstract class Instrument<T> implements IInstrument {
     }
 
     @Override
-    public long getMaturityDate() { return maturityDate; }
+    public String getMaturityDate() { return maturityDate; }
 
     public void setCurrency(String currency) {
         this.currency = currency;
@@ -119,7 +119,7 @@ public abstract class Instrument<T> implements IInstrument {
         this.underlying = underlying;
     }
 
-    public void setMaturityDate(long maturityDate) {
+    public void setMaturityDate(String maturityDate) {
         this.maturityDate = maturityDate;
     }
 

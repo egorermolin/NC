@@ -27,5 +27,5 @@ public interface IInstrument {
 
     String getName();
 
-    long getMaturityDate();
+    String getMaturityDate();
 }
