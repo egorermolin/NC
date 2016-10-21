@@ -142,6 +142,12 @@ public class ConnectionManager {
                 }
                 break;
             case FUT:
+                switch (type) {
+                    case STATISTICS:
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FUT_STATISTICS_SNAP_A)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FUT_STATISTICS_SNAP_B)));
+                        break;
+                }
                 break;
         }
     }
@@ -183,6 +189,12 @@ public class ConnectionManager {
                 }
                 break;
             case FUT:
+                switch (type) {
+                    case STATISTICS:
+                        messageReaders.get(ConnectionId.FUT_STATISTICS_SNAP_A).stop();
+                        messageReaders.get(ConnectionId.FUT_STATISTICS_SNAP_B).stop();
+                        break;
+                }
                 break;
         }
     }
@@ -222,6 +234,12 @@ public class ConnectionManager {
                 }
                 break;
             case FUT:
+                switch (type) {
+                    case STATISTICS:
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FUT_STATISTICS_INCR_A)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FUT_STATISTICS_INCR_B)));
+                        break;
+                }
                 break;
         }
     }
@@ -261,6 +279,12 @@ public class ConnectionManager {
                 }
                 break;
             case FUT:
+                switch (type) {
+                    case STATISTICS:
+                        messageReaders.get(ConnectionId.FUT_STATISTICS_INCR_A).stop();
+                        messageReaders.get(ConnectionId.FUT_STATISTICS_INCR_B).stop();
+                        break;
+                }
                 break;
         }
     }
