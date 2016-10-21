@@ -31,4 +31,8 @@ public interface IBBO {
     double getClosePx();
 
     PerformanceData getPerformanceData();
+
+    boolean isInRecovery(int i);
+
+    boolean isInRecoverySet(int i);
 }

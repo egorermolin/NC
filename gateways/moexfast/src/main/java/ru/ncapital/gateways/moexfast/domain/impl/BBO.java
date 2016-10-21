@@ -166,10 +166,12 @@ public class BBO<T> implements IBBO {
         return performanceData;
     }
 
+    @Override
     public boolean isInRecovery(int i) {
         return inRecovery[i];
     }
 
+    @Override
     public boolean isInRecoverySet(int i) {
         return isInRecoverySet[i];
     }
