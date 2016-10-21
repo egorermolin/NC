@@ -77,13 +77,19 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
                     if (sequenceArray.checkSequence(seqNum) == SequenceArray.Result.DUPLICATE)
                         return false;
 
+                break;
+
             case '4': // SequenceReset
                 if (!resetSequence(sendingTime))
                     return false;
 
+                break;
+
             case 'f': // SecurityStatus
-                if (sequenceArray.checkSequence(seqNum) == SequenceArray.Result.DUPLICATE)
+                if (sequenceArrayForSecurityStatus.checkSequence(seqNum) == SequenceArray.Result.DUPLICATE)
                     return false;
+
+                break;
         }
 
         return true;

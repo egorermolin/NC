@@ -59,6 +59,7 @@ public class MicexSnapshotProcessorTest {
     @Test
     public void testSnapshot() {
         Message message = Mockito.mock(Message.class);
+        Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message.getString("TradingSessionID")).thenReturn("CETS");
@@ -77,6 +78,7 @@ public class MicexSnapshotProcessorTest {
     @Test
     public void testSnapshot2Symbols() {
         Message message = Mockito.mock(Message.class);
+        Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message.getString("TradingSessionID")).thenReturn("CETS");
@@ -86,6 +88,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
         Message message2 = Mockito.mock(Message.class);
+        Mockito.when(message2.getString("MessageType")).thenReturn("W");
         Mockito.when(message2.getInt("MsgSeqNum")).thenReturn(2);
         Mockito.when(message2.getString("Symbol")).thenReturn("SYMB2");
         Mockito.when(message2.getString("TradingSessionID")).thenReturn("CETS");
@@ -106,6 +109,7 @@ public class MicexSnapshotProcessorTest {
     @Test
     public void testSnapshotNotRecovering() {
         Message message = Mockito.mock(Message.class);
+        Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getString("Symbol")).thenReturn("SYMB3");
         Mockito.when(message.getString("TradingSessionID")).thenReturn("CETS");
@@ -122,6 +126,7 @@ public class MicexSnapshotProcessorTest {
     @Test
     public void testSnapshotDuplicateStart() {
         Message message = Mockito.mock(Message.class);
+        Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message.getString("TradingSessionID")).thenReturn("CETS");
@@ -138,6 +143,7 @@ public class MicexSnapshotProcessorTest {
     @Test
     public void testSnapshotDuplicateStart2() {
         Message message = Mockito.mock(Message.class);
+        Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message.getString("TradingSessionID")).thenReturn("CETS");
@@ -156,6 +162,7 @@ public class MicexSnapshotProcessorTest {
     @Test
     public void testSnapshotDuplicate() {
         Message message = Mockito.mock(Message.class);
+        Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(3);
         Mockito.when(message.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message.getString("TradingSessionID")).thenReturn("CETS");
@@ -172,6 +179,7 @@ public class MicexSnapshotProcessorTest {
     @SuppressWarnings("unchecked")
     public void testSnapshotWithIncrementals() {
         Message message = Mockito.mock(Message.class);
+        Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message.getString("TradingSessionID")).thenReturn("CETS");
@@ -204,6 +212,7 @@ public class MicexSnapshotProcessorTest {
     @SuppressWarnings("unchecked")
     public void testSnapshot2FragmentsWithIncrementals() {
         Message message = Mockito.mock(Message.class);
+        Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message.getString("TradingSessionID")).thenReturn("CETS");
@@ -213,6 +222,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
         Message message2 = Mockito.mock(Message.class);
+        Mockito.when(message2.getString("MessageType")).thenReturn("W");
         Mockito.when(message2.getInt("MsgSeqNum")).thenReturn(2);
         Mockito.when(message2.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message2.getString("TradingSessionID")).thenReturn("CETS");
@@ -250,6 +260,7 @@ public class MicexSnapshotProcessorTest {
     @Test
     public void testSnapshot3Fragments() {
         Message message = Mockito.mock(Message.class);
+        Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message.getString("TradingSessionID")).thenReturn("CETS");
@@ -258,6 +269,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
         Message message2 = Mockito.mock(Message.class);
+        Mockito.when(message2.getString("MessageType")).thenReturn("W");
         Mockito.when(message2.getInt("MsgSeqNum")).thenReturn(2);
         Mockito.when(message2.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message2.getString("TradingSessionID")).thenReturn("CETS");
@@ -265,6 +277,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message2.getInt("LastFragment")).thenReturn(0);
 
         Message message3 = Mockito.mock(Message.class);
+        Mockito.when(message3.getString("MessageType")).thenReturn("W");
         Mockito.when(message3.getInt("MsgSeqNum")).thenReturn(3);
         Mockito.when(message3.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message3.getString("TradingSessionID")).thenReturn("CETS");
@@ -292,6 +305,7 @@ public class MicexSnapshotProcessorTest {
     @Test
     public void testSnapshot3FragmentsWithRecoveringInMiddle() {
         Message message = Mockito.mock(Message.class);
+        Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message.getString("TradingSessionID")).thenReturn("CETS");
@@ -300,6 +314,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
         Message message2 = Mockito.mock(Message.class);
+        Mockito.when(message2.getString("MessageType")).thenReturn("W");
         Mockito.when(message2.getInt("MsgSeqNum")).thenReturn(2);
         Mockito.when(message2.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message2.getString("TradingSessionID")).thenReturn("CETS");
@@ -307,6 +322,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message2.getInt("LastFragment")).thenReturn(0);
 
         Message message3 = Mockito.mock(Message.class);
+        Mockito.when(message3.getString("MessageType")).thenReturn("W");
         Mockito.when(message3.getInt("MsgSeqNum")).thenReturn(3);
         Mockito.when(message3.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message3.getString("TradingSessionID")).thenReturn("CETS");
@@ -335,6 +351,7 @@ public class MicexSnapshotProcessorTest {
     @Test
     public void testSnapshot3FragmentsOutOfOrder() {
         Message message = Mockito.mock(Message.class);
+        Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message.getString("TradingSessionID")).thenReturn("CETS");
@@ -343,6 +360,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
         Message message2 = Mockito.mock(Message.class);
+        Mockito.when(message2.getString("MessageType")).thenReturn("W");
         Mockito.when(message2.getInt("MsgSeqNum")).thenReturn(3);
         Mockito.when(message2.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message2.getString("TradingSessionID")).thenReturn("CETS");
@@ -350,6 +368,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message2.getInt("LastFragment")).thenReturn(1);
 
         Message message3 = Mockito.mock(Message.class);
+        Mockito.when(message3.getString("MessageType")).thenReturn("W");
         Mockito.when(message3.getInt("MsgSeqNum")).thenReturn(2);
         Mockito.when(message3.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message3.getString("TradingSessionID")).thenReturn("CETS");
@@ -375,6 +394,7 @@ public class MicexSnapshotProcessorTest {
     @Test
     public void testSnapshot3FragmentsOneMissing() {
         Message message = Mockito.mock(Message.class);
+        Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message.getString("TradingSessionID")).thenReturn("CETS");
@@ -383,6 +403,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
         Message message2 = Mockito.mock(Message.class);
+        Mockito.when(message2.getString("MessageType")).thenReturn("W");
         Mockito.when(message2.getInt("MsgSeqNum")).thenReturn(3);
         Mockito.when(message2.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message2.getString("TradingSessionID")).thenReturn("CETS");
@@ -401,6 +422,7 @@ public class MicexSnapshotProcessorTest {
     @Test
     public void testSnapshot3FragmentsTwoTimes() {
         Message message = Mockito.mock(Message.class);
+        Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message.getString("TradingSessionID")).thenReturn("CETS");
@@ -409,6 +431,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
         Message message2 = Mockito.mock(Message.class);
+        Mockito.when(message2.getString("MessageType")).thenReturn("W");
         Mockito.when(message2.getInt("MsgSeqNum")).thenReturn(2);
         Mockito.when(message2.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message2.getString("TradingSessionID")).thenReturn("CETS");
@@ -416,6 +439,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message2.getInt("LastFragment")).thenReturn(0);
 
         Message message3 = Mockito.mock(Message.class);
+        Mockito.when(message3.getString("MessageType")).thenReturn("W");
         Mockito.when(message3.getInt("MsgSeqNum")).thenReturn(3);
         Mockito.when(message3.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message3.getString("TradingSessionID")).thenReturn("CETS");
@@ -454,6 +478,7 @@ public class MicexSnapshotProcessorTest {
     @Test
     public void testSnapshot4FragmentsOutOfOrder() {
         Message message = Mockito.mock(Message.class);
+        Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message.getString("TradingSessionID")).thenReturn("CETS");
@@ -462,6 +487,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
         Message message2 = Mockito.mock(Message.class);
+        Mockito.when(message2.getString("MessageType")).thenReturn("W");
         Mockito.when(message2.getInt("MsgSeqNum")).thenReturn(2);
         Mockito.when(message2.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message2.getString("TradingSessionID")).thenReturn("CETS");
@@ -469,6 +495,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message2.getInt("LastFragment")).thenReturn(0);
 
         Message message3 = Mockito.mock(Message.class);
+        Mockito.when(message3.getString("MessageType")).thenReturn("W");
         Mockito.when(message3.getInt("MsgSeqNum")).thenReturn(3);
         Mockito.when(message3.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message3.getString("TradingSessionID")).thenReturn("CETS");
@@ -476,6 +503,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message3.getInt("LastFragment")).thenReturn(0);
 
         Message message4 = Mockito.mock(Message.class);
+        Mockito.when(message4.getString("MessageType")).thenReturn("W");
         Mockito.when(message4.getInt("MsgSeqNum")).thenReturn(4);
         Mockito.when(message4.getString("Symbol")).thenReturn("SYMB");
         Mockito.when(message4.getString("TradingSessionID")).thenReturn("CETS");

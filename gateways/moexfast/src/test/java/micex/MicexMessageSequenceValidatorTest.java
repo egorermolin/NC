@@ -1,6 +1,7 @@
 package micex;
 
 import com.google.inject.Guice;
+import com.google.inject.Key;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +24,7 @@ public class MicexMessageSequenceValidatorTest {
 
     private IMessageSequenceValidator sequenceValidator =
             Guice.createInjector(new MicexGatewayModule())
-                    .getInstance(MessageSequenceValidatorFactory.class)
+                    .getInstance(new Key<MessageSequenceValidatorFactory<String>>(){})
                     .createMessageSequenceValidatorForOrderList();
 
     @Before

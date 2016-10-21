@@ -81,7 +81,7 @@ public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnap
         boolean lastFragment = readMessage.getInt("LastFragment") == 1;
 
         if (firstFragment)
-            fragmentedSnapshots.put(exchangeSecurityId, Collections.synchronizedMap(new TreeMap<>()));
+            fragmentedSnapshots.put(exchangeSecurityId, Collections.synchronizedMap(new TreeMap<Integer, Message>()));
 
         Map<Integer, Message> messages = fragmentedSnapshots.get(exchangeSecurityId);
         if (messages == null)

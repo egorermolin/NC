@@ -1,6 +1,8 @@
 package micex;
 
 import com.google.inject.Guice;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,16 +37,19 @@ public class MicexIncrementalProcessorTest {
     @Captor
     private ArgumentCaptor<Message> messageCaptor;
 
-    private IMessageSequenceValidator<String> sequenceValidator;
+    private IMessageSequenceValidator<String> sequenceValidator =
+             Guice.createInjector(new MicexGatewayModule())
+            .getInstance(new Key<MessageSequenceValidatorFactory<String>>(){})
+            .createMessageSequenceValidatorForOrderList();
 
     private IncrementalProcessor<String> incrementalProcessor;
 
     @Before
     @SuppressWarnings("unchecked")
     public void setup() {
-        sequenceValidator = Guice.createInjector(new MicexGatewayModule()).getInstance(MessageSequenceValidatorFactory.class).createMessageSequenceValidatorForOrderList();
         incrementalProcessor = new MicexIncrementalProcessor(marketDataHandler, sequenceValidator);
         incrementalProcessor.setIsPrimary(true);
+
         Mockito.when(marketDataHandler.isAllowedUpdate("SYMB;CETS")).thenReturn(true);
         Mockito.when(marketDataHandler.isAllowedUpdate("SYMB2;CETS")).thenReturn(true);
     }

@@ -26,24 +26,23 @@ public class MicexGatewayModule extends AbstractModule {
     @Override
     public void configure() {
         install(new FactoryModuleBuilder()
-                .implement(IMessageHandler.class, Names.named("orderlist"), MicexOrderListMessageHandler.class)
-                .implement(IMessageHandler.class, Names.named("publictrades"), MicexPublicTradesMessageHandler.class)
-                .implement(IMessageHandler.class, Names.named("statistics"), MicexStatisticsMessageHandler.class)
-                .build(MessageHandlerFactory.class));
+                .implement(new TypeLiteral<IMessageHandler<String>>(){}, Names.named("orderlist"), MicexOrderListMessageHandler.class)
+                .implement(new TypeLiteral<IMessageHandler<String>>(){}, Names.named("publictrades"), MicexPublicTradesMessageHandler.class)
+                .implement(new TypeLiteral<IMessageHandler<String>>(){}, Names.named("statistics"), MicexStatisticsMessageHandler.class)
+                .build(new TypeLiteral<MessageHandlerFactory<String>>(){}));
 
         install(new FactoryModuleBuilder()
-                .implement(IMessageSequenceValidator.class, Names.named("orderlist"), new TypeLiteral<MessageSequenceValidatorForOrderList<String>>(){})
-                .implement(IMessageSequenceValidator.class, Names.named("publictrades"), new TypeLiteral<MessageSequenceValidatorForPublicTrades<String>>(){})
-                .implement(IMessageSequenceValidator.class, Names.named("statistics"), new TypeLiteral<MessageSequenceValidatorForStatistics<String>>(){})
-                .build(MessageSequenceValidatorFactory.class));
+                .implement(new TypeLiteral<IMessageSequenceValidator<String>>(){}, Names.named("orderlist"), new TypeLiteral<MessageSequenceValidatorForOrderList<String>>(){})
+                .implement(new TypeLiteral<IMessageSequenceValidator<String>>(){}, Names.named("publictrades"), new TypeLiteral<MessageSequenceValidatorForPublicTrades<String>>(){})
+                .implement(new TypeLiteral<IMessageSequenceValidator<String>>(){}, Names.named("statistics"), new TypeLiteral<MessageSequenceValidatorForStatistics<String>>(){})
+                .build(new TypeLiteral<MessageSequenceValidatorFactory<String>>(){}));
+
+        bind(new TypeLiteral<MarketDataManager<String>>(){}).to(MicexMarketDataManager.class).in(Singleton.class);
+        bind(new TypeLiteral<InstrumentManager<String>>(){}).to(MicexInstrumentManager.class).in(Singleton.class);
 
         bind(ConfigurationManager.class).to(MicexConfigurationManager.class).in(Singleton.class);
-        bind(new TypeLiteral<MarketDataManager<String>>(){}).to(MicexMarketDataManager.class).in(Singleton.class);
         bind(MarketDataManager.class).to(MicexMarketDataManager.class).in(Singleton.class);
-
-        bind(new TypeLiteral<InstrumentManager<String>>(){}).to(MicexInstrumentManager.class).in(Singleton.class);
         bind(InstrumentManager.class).to(MicexInstrumentManager.class).in(Singleton.class);
-
         bind(IGatewayManager.class).to(MicexGatewayManager.class).in(Singleton.class);
     }
 }

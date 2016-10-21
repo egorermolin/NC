@@ -1,6 +1,7 @@
 package micex;
 
 import com.google.inject.Guice;
+import com.google.inject.Key;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,8 +17,8 @@ import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalida
 public class MicexMessageSequenceValidatorForPublicTradesTest {
     @SuppressWarnings("unchecked")
     private IMessageSequenceValidator<String> sequenceValidator =
-            (IMessageSequenceValidator<String>) Guice.createInjector(new MicexGatewayModule())
-                    .getInstance(MessageSequenceValidatorFactory.class)
+                     Guice.createInjector(new MicexGatewayModule())
+                    .getInstance(new Key<MessageSequenceValidatorFactory<String>>(){})
                     .createMessageSequenceValidatorForPublicTrades();
 
     @Test
