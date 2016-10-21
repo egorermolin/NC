@@ -26,4 +26,6 @@ public interface IInstrument {
     String getUnderlying();
 
     String getName();
+
+    long getMaturityDate();
 }
