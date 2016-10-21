@@ -41,7 +41,7 @@ public class FortsInstrumentManager extends InstrumentManager<Long> {
             // do nothing
         } else {
             if (getLogger().isTraceEnabled())
-                getLogger().trace(instrument.getName() + " Ignored by Underlying " + instrument.getId());
+                getLogger().trace("Ignored by Underlying: " + instrument.getId());
 
             addInstrumentToIgnored(instrument);
             return false;

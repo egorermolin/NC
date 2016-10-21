@@ -90,10 +90,10 @@ public class MainClass {
             @Override
             public MarketType getMarketType() { return MarketType.FUT; }
 
-            //@Override
-           // public String[] getAllowedSecurityIds() {
-            //    return new String[] {"*"};
-           // }
+            @Override
+            public String[] getAllowedUnderlyings() {
+               return new String[] {"*"};
+            }
 
             @Override
             public boolean isAsynchChannelReader() {
@@ -112,12 +112,12 @@ public class MainClass {
         logger.info("TOTAL " + instruments.length + " INSTRUMENTS");
 
         for (IInstrument instrument : instruments) {
-            logger.info(instrument.getName() + " " + instrument.toString());
-            //gwManager.subscribeForMarketData(instrument.getSecurityId());
+            logger.info(instrument.toString());
+            // gwManager.subscribeForMarketData(instrument.getSecurityId());
         }
 
         try {
-            Thread.sleep(1200000);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             Utils.printStackTrace(e, logger, "InterruptedException occurred..");
         }

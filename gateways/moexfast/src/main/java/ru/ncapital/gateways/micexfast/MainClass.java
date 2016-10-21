@@ -136,8 +136,8 @@ public class MainClass {
         logger.info("TOTAL " + instruments.length + " INSTRUMENTS");
 
         for (IInstrument instrument : instruments) {
-            logger.info(instrument.getName() + " " + instrument.toString());
-            gwManager.subscribeForMarketData(instrument.getSecurityId());
+            logger.info(instrument.toString());
+            // gwManager.subscribeForMarketData(instrument.getSecurityId());
         }
 
         try {

@@ -98,14 +98,14 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
     protected boolean isDuplicateInstrument(Instrument<T> instrument) {
         if (instruments.containsKey(instrument.getExchangeSecurityId())) {
             if (getLogger().isTraceEnabled())
-                getLogger().trace(instrument.getName() + " Duplicate " + instrument.getId());
+                getLogger().trace("Duplicate " + instrument.getId());
 
             return true;
         }
 
         if (ignoredInstruments.containsKey(instrument.getExchangeSecurityId())) {
             if (getLogger().isTraceEnabled())
-                getLogger().trace(instrument.getName() + " Duplicate Ignored " + instrument.getId());
+                getLogger().trace("Duplicate Ignored " + instrument.getId());
 
             return true;
         }
@@ -169,7 +169,7 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
                 Instrument<T> newInstrument = createFullInstrument(readMessage);
                 if (addNewInstrument(newInstrument)) {
                     if (getLogger().isDebugEnabled())
-                        getLogger().debug(newInstrument.getName() + " Received " + newInstrument.getId());
+                        getLogger().debug("Received " + newInstrument.getId());
 
                     sendToClient(newInstrument, newInstrument.getTradingStatus());
                 }

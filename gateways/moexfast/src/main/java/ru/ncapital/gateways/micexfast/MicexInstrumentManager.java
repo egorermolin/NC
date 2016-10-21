@@ -57,7 +57,7 @@ public class MicexInstrumentManager extends InstrumentManager<String> {
         if (allowedSecurityIds.isEmpty() || allowedSecurityIds.contains(instrument.getSecurityId())) {
         } else {
             if (getLogger().isTraceEnabled())
-                getLogger().trace(instrument.getName() + " Ignored by SecurityId [SecurityId: " + instrument.getSecurityId() + "]");
+                getLogger().trace("Ignored by SecurityId: " + instrument.getId());
 
             addInstrumentToIgnored(instrument);
             return false;
@@ -67,7 +67,7 @@ public class MicexInstrumentManager extends InstrumentManager<String> {
         if (allowedTradingSessionIds.isEmpty() || allowedTradingSessionIds.contains(TradingSessionId.convert(micexInstrument.getTradingSessionId()))) {
         } else {
             if (getLogger().isTraceEnabled())
-                getLogger().trace(instrument.getName() + " Ignored by TradingSessionId " + instrument.getId());
+                getLogger().trace("Ignored by TradingSessionId: " + instrument.getId());
 
             addInstrumentToIgnored(instrument);
             return false;
@@ -79,7 +79,7 @@ public class MicexInstrumentManager extends InstrumentManager<String> {
         if (allowedProductTypes.isEmpty() || allowedProductTypes.contains(micexInstrument.getProductType())) {
         } else {
             if (getLogger().isTraceEnabled())
-                getLogger().trace(instrument.getName() + " Ignored by ProductType " + instrument.getId());
+                getLogger().trace("Ignored by ProductType " + instrument.getId());
 
             addInstrumentToIgnored(instrument);
             return false;
