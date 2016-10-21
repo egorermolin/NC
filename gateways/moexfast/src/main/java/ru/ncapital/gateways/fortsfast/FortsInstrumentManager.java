@@ -89,7 +89,7 @@ public class FortsInstrumentManager extends InstrumentManager<Long> {
             instrument.setTickSize(readMessage.getDouble("MinPriceIncrement"));
 
         if (readMessage.getValue("MaturityDate") != null)
-            instrument.setMaturityDate(readMessage.getString("MaturityDate"));
+            instrument.setMaturityDate(String.valueOf(readMessage.getInt("MaturityDate")));
 
         if (readMessage.getValue("MinPriceIncrement") != null
                 && readMessage.getValue("MinPriceIncrementAmount") != null)
