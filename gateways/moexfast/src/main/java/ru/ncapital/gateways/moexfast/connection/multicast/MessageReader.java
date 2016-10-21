@@ -374,6 +374,20 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
                 }
                 break;
+            case FUT_STATISTICS_INCR_A:
+            case FUT_STATISTICS_INCR_B:
+                for (String name : new String[]{"DefaultIncrementalRefreshMessage", "Heartbeat"}) {
+                    MessageTemplate template = messageTemplates.get(name);
+                    messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
+                }
+                break;
+            case FUT_STATISTICS_SNAP_A:
+            case FUT_STATISTICS_SNAP_B:
+                for (String name : new String[]{"DefaultSnapshotMessage", "Heartbeat"}) {
+                    MessageTemplate template = messageTemplates.get(name);
+                    messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
+                }
+                break;
             default:
                 for (MessageTemplate template : messageTemplates.values())
                     messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
@@ -482,6 +496,14 @@ public class MessageReader implements IMulticastEventListener {
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.STATISTICS)));
                     break;
 
+                case FUT_STATISTICS_INCR_A:
+                    marketDataManager.setIncrementalProcessorIsPrimary(MessageHandlerType.STATISTICS, true);
+                case FUT_STATISTICS_INCR_B:
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("DefaultIncrementalRefreshMessage"), marketDataManager.getIncrementalProcessor(MessageHandlerType.STATISTICS));
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
+                    multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.STATISTICS)));
+                    break;
+
                 case CURR_STATISTICS_SNAP_A:
                 case CURR_STATISTICS_SNAP_B:
                 case FOND_STATISTICS_SNAP_A:
@@ -493,8 +515,8 @@ public class MessageReader implements IMulticastEventListener {
 
                 case FUT_STATISTICS_SNAP_A:
                 case FUT_STATISTICS_SNAP_B:
-                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("DefaultSnapshotMessage"), marketDataManager.getSnapshotProcessor(MessageHandlerType.STATISTICS));
-                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("DefaultIncrementalRefreshMessage"), marketDataManager.getSnapshotProcessor(MessageHandlerType.STATISTICS));
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.STATISTICS)));
                     break;
 

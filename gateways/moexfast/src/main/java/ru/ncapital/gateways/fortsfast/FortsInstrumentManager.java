@@ -46,6 +46,10 @@ public class FortsInstrumentManager extends InstrumentManager<Long> {
             return false;
         }
 
+        FortsInstrument fortsInstrument = (FortsInstrument) instrument;
+        if (fortsInstrument.getSecurityType() != null && fortsInstrument.getSecurityType().equals("MLEG"))
+            return false;
+
         return true;
     }
 
@@ -78,6 +82,9 @@ public class FortsInstrumentManager extends InstrumentManager<Long> {
             if (readMessage.getSequence("Underlyings").get(0).getValue("UnderlyingSymbol") != null)
                 instrument.setUnderlying(readMessage.getSequence("Underlyings").get(0).getString("UnderlyingSymbol"));
         }
+
+        if (readMessage.getValue("SecurityType") != null)
+            instrument.setSecurityType(readMessage.getString("SecurityType"));
 
         if (readMessage.getValue("SecurityAltID") != null)
             instrument.setDescription(readMessage.getString("SecurityAltID"));
