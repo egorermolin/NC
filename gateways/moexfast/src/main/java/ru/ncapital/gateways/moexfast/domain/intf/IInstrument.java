@@ -7,6 +7,8 @@ package ru.ncapital.gateways.moexfast.domain.intf;
  * Created by Egor on 13-Oct-16.
  */
 public interface IInstrument {
+    String getSymbol();
+
     String getSecurityId();
 
     String getCurrency();

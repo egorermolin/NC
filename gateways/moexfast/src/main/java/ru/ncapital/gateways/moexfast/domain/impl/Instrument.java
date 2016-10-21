@@ -32,6 +32,7 @@ public abstract class Instrument<T> implements IInstrument {
         this.exchangeSecurityId = exchangeSecurityId;
     }
 
+    @Override
     public String getSymbol() {
         return symbol;
     }
