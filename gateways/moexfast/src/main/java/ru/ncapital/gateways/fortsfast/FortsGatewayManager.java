@@ -18,9 +18,16 @@ import ru.ncapital.gateways.moexfast.connection.ConnectionManager;
 public class FortsGatewayManager extends GatewayManager {
 
      public static void setLogLevel(Level level) {
-        String[] loggers = {"FortsGatewayManager", "HeartbeatProcessor",
+        String[] loggers = {"FortsGatewayManager", "FortsMarketDataManager", "FortsInstrumentManager",
+                "HeartbeatProcessor",
                 "FUT-INFO-R-A-Processor", "FUT-INFO-R-B-Processor",
-                "FUT-INFO-I-A-Processor", "FUT-INFO-I-B-Processor"
+                "FUT-INFO-I-A-Processor", "FUT-INFO-I-B-Processor",
+                "FUT-TRADES-S-A-Processor", "FUT-TRADES-S-B-Processor",
+                "FUT-TRADES-I-A-Processor", "FUT-TRADES-I-B-Processor",
+                "FUT-BOOK-1-S-A-Processor", "FUT-BOOK-1-S-B-Processor",
+                "FUT-BOOK-1-I-A-Processor", "FUT-BOOK-1-I-B-Processor",
+                "ORDERS-LOG-S-A-Processor", "ORDERS-LOG-S-B-Processor",
+                "ORDERS-LOG-I-A-Processor", "ORDERS-LOG-I-B-Processor",
         };
 
         for (String logger : loggers)

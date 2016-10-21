@@ -15,7 +15,8 @@ import ru.ncapital.gateways.moexfast.connection.ConnectionManager;
 @Singleton
 public class MicexGatewayManager extends GatewayManager {
      public static void setLogLevel(Level level) {
-        String[] loggers = {"MicexGatewayManager", "MicexMarketDataManager", "HeartbeatProcessor",
+        String[] loggers = {"MicexGatewayManager", "MicexMarketDataManager", "FortsInstrumentManager",
+            "HeartbeatProcessor",
             "CURR-IDF-A-Processor", "CURR-IDF-B-Processor",
             "CURR-ISF-A-Processor", "CURR-ISF-B-Processor",
             "CURR-OLR-A-Processor", "CURR-OLR-B-Processor",
