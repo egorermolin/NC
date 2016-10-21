@@ -14,11 +14,11 @@ public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnap
 
     private Map<T, Map<Integer, Message>> fragmentedSnapshots = new HashMap<>();
 
-    private long sendingTimeOfSnapshotStart = 0;
+    private long timeOfLastSequenceReset = 0;
 
     private boolean wasRecovering;
 
-    public SnapshotProcessor(IMessageHandler messageHandler, IMessageSequenceValidator sequenceValidator) {
+    public SnapshotProcessor(IMessageHandler<T> messageHandler, IMessageSequenceValidator<T> sequenceValidator) {
         super(messageHandler, sequenceValidator);
     }
 
@@ -67,6 +67,12 @@ public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnap
 
     @Override
     public void processMessage(Message readMessage) {
+        if (readMessage.getValue("RouteFirst") == null)
+            readMessage.setInteger("RouteFirst", 1);
+
+        if (readMessage.getValue("LastFragment") == null)
+            readMessage.setInteger("LastFragment", 1);
+
         int seqNum = readMessage.getInt("MsgSeqNum");
         T exchangeSecurityId = getExchangeSecurityId(readMessage);
 
@@ -75,7 +81,7 @@ public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnap
         boolean lastFragment = readMessage.getInt("LastFragment") == 1;
 
         if (firstFragment)
-            fragmentedSnapshots.put(exchangeSecurityId, Collections.synchronizedMap(new TreeMap<Integer, Message>()));
+            fragmentedSnapshots.put(exchangeSecurityId, Collections.synchronizedMap(new TreeMap<>()));
 
         Map<Integer, Message> messages = fragmentedSnapshots.get(exchangeSecurityId);
         if (messages == null)
@@ -92,21 +98,27 @@ public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnap
         }
     }
 
+    private synchronized boolean resetSequence(long sendingTime) {
+        if (timeOfLastSequenceReset < sendingTime) {
+            // new snapshot cycle
+            timeOfLastSequenceReset = sendingTime;
+            reset();
+        } else
+            return false;
+
+        return true;
+    }
+
     @Override
     protected boolean checkSequence(Message readMessage) {
         T exchangeSecurityId = getExchangeSecurityId(readMessage);
         int seqNum = readMessage.getInt("MsgSeqNum");
         long sendingTime = readMessage.getLong("SendingTime");
+        char messageType = readMessage.getString("MessageType").charAt(0);
 
-        if (seqNum == 1) {
-            synchronized (this) {
-                if (sendingTimeOfSnapshotStart < sendingTime) {
-                    // new snapshot cycle
-                    sendingTimeOfSnapshotStart = sendingTime;
-                    reset();
-                } else
-                    return false;
-            }
+        if (seqNum == 1 || messageType == '4') { // SequenceReset
+            if (!resetSequence(sendingTime))
+                return false;
         } else {
             if (sequenceArray.checkSequence(seqNum) == SequenceArray.Result.DUPLICATE)
                 return false;

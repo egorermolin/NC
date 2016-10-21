@@ -47,10 +47,10 @@ public abstract class MarketDataManager<T> {
     protected IIncrementalProcessor incrementalProcessorForPublicTrades;
 
     @Inject
-    protected MessageSequenceValidatorFactory messageSequenceValidatorFactory;
+    protected MessageSequenceValidatorFactory<T> messageSequenceValidatorFactory;
 
     @Inject
-    protected MessageHandlerFactory messageHandlerFactory;
+    protected MessageHandlerFactory<T> messageHandlerFactory;
 
     @Inject
     protected HeartbeatProcessor heartbeatProcessor;

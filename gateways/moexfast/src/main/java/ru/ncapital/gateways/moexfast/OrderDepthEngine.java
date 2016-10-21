@@ -63,19 +63,19 @@ public abstract class OrderDepthEngine<T> {
             logger.trace("Updating BBO: " + previousBBO + " from " + newBBO);
 
         boolean[] changed = new boolean[] {false, false, false};
-        if (Double.compare(newBBO.getBidPx(), 0.0) != 0 && Double.compare(newBBO.getBidPx(), previousBBO.getBidPx()) != 0) {
+        if ((Double.compare(newBBO.getBidPx(), 0.0) != 0 || newBBO.isEmpty()) && Double.compare(newBBO.getBidPx(), previousBBO.getBidPx()) != 0) {
             changed[0] = true;
             previousBBO.setBidPx(newBBO.getBidPx());
         }
-        if (Double.compare(newBBO.getOfferPx(), 0.0) != 0 && Double.compare(newBBO.getOfferPx(), previousBBO.getOfferPx()) != 0) {
+        if ((Double.compare(newBBO.getOfferPx(), 0.0) != 0 || newBBO.isEmpty()) && Double.compare(newBBO.getOfferPx(), previousBBO.getOfferPx()) != 0) {
             changed[0] = true;
             previousBBO.setOfferPx(newBBO.getOfferPx());
         }
-        if (Double.compare(newBBO.getBidSize(), 0.0) != 0 && Double.compare(newBBO.getBidSize(), previousBBO.getBidSize()) != 0) {
+        if ((Double.compare(newBBO.getBidSize(), 0.0) != 0 || newBBO.isEmpty()) && Double.compare(newBBO.getBidSize(), previousBBO.getBidSize()) != 0) {
             changed[0] = true;
             previousBBO.setBidSize(newBBO.getBidSize());
         }
-        if (Double.compare(newBBO.getOfferSize(), 0.0) != 0 && Double.compare(newBBO.getOfferSize(), previousBBO.getOfferSize()) != 0) {
+        if ((Double.compare(newBBO.getOfferSize(), 0.0) != 0 || newBBO.isEmpty()) && Double.compare(newBBO.getOfferSize(), previousBBO.getOfferSize()) != 0) {
             changed[0] = true;
             previousBBO.setOfferSize(newBBO.getOfferSize());
         }

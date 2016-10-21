@@ -41,9 +41,8 @@ public abstract class AMessageHandler<T> implements IMessageHandler<T> {
             onBeforeSnapshot(exchangeSecurityId);
 
         SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
-        for (int i = 0; i < mdEntries.getLength(); ++i) {
+        for (int i = 0; i < mdEntries.getLength(); ++i)
             onSnapshotMdEntry(exchangeSecurityId, mdEntries.get(i));
-        }
 
         if (lastFragment)
             onAfterSnapshot(exchangeSecurityId);

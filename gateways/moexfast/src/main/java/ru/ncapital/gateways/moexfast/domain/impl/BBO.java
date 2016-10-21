@@ -35,6 +35,8 @@ public class BBO<T> implements IBBO {
 
     private String tradingStatus;
 
+    private boolean empty;
+
     private boolean[] inRecovery = new boolean[] {false, false};
 
     private boolean[] isInRecoverySet = new boolean[] {false, false};
@@ -149,6 +151,14 @@ public class BBO<T> implements IBBO {
 
     public void setClosePx(double closePx) {
         this.closePx = closePx;
+    }
+
+    public boolean isEmpty() {
+        return empty;
+    }
+
+    public void setEmpty(boolean empty) {
+        this.empty = empty;
     }
 
     @Override

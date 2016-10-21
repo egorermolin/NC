@@ -3,7 +3,10 @@ package forts;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openfast.*;
 import org.openfast.codec.Coder;
@@ -13,6 +16,7 @@ import ru.ncapital.gateways.fortsfast.FortsMarketDataManager;
 import ru.ncapital.gateways.fortsfast.IFortsGatewayConfiguration;
 import ru.ncapital.gateways.fortsfast.domain.FortsInstrument;
 import ru.ncapital.gateways.moexfast.IMarketDataHandler;
+import ru.ncapital.gateways.moexfast.InstrumentManager;
 import ru.ncapital.gateways.moexfast.connection.ConnectionManager;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.intf.IInstrument;
@@ -22,9 +26,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -72,12 +74,11 @@ public class FortsInstrumentManagerTest {
         instrumentManager.configure(configuration);
 
         when(marketDataManager.createBBO(anyLong())).thenCallRealMethod();
-        doCallRealMethod().when(marketDataManager).setInstrumentManager(any());
+        doCallRealMethod().when(marketDataManager).setInstrumentManager(any(InstrumentManager.class));
         marketDataManager.setInstrumentManager(instrumentManager);
     }
 
     private void initUnderlyingAndTradingStatus(Message messageMock, String underlying) {
-
         SequenceValue underlyingSeq = mock(SequenceValue.class);
         GroupValue underlyingGrp = mock(GroupValue.class);
 
@@ -191,7 +192,7 @@ public class FortsInstrumentManagerTest {
 
         Mockito.reset(marketDataManager);
         when(marketDataManager.createBBO(anyLong())).thenCallRealMethod();
-        doCallRealMethod().when(marketDataManager).setInstrumentManager(any());
+        doCallRealMethod().when(marketDataManager).setInstrumentManager(any(InstrumentManager.class));
         marketDataManager.setInstrumentManager(instrumentManager);
 
         for (int i : new int [] {1, 1, 2, 2, 3, 3, 4, 4})
@@ -234,7 +235,9 @@ public class FortsInstrumentManagerTest {
             }
         });
         assertEquals("EuZ6", instrumentCapture.getValue()[0].getSecurityId());
+        assertEquals("Eu", instrumentCapture.getValue()[0].getUnderlying());
         assertEquals("SiZ6", instrumentCapture.getValue()[1].getSecurityId());
+        assertEquals("Si", instrumentCapture.getValue()[1].getUnderlying());
     }
 
     @Test
@@ -247,7 +250,7 @@ public class FortsInstrumentManagerTest {
         for (int i : new int [] {1, 1, 2, 2, 3, 3, 4, 4})
             instrumentManager.handleMessage(getSecurityDefinitionMessageMock(i), context, coder);
 
-        verify(marketDataManager, times(2)).onBBO(any());
+        verify(marketDataManager, times(2)).onBBO(any(BBO.class));
         verify(gatewayManager, times(1)).onInstrumentDownloadFinished();
         ArgumentCaptor<IInstrument[]> instrumentCapture = ArgumentCaptor.forClass(IInstrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
@@ -264,7 +267,7 @@ public class FortsInstrumentManagerTest {
         for (int i : new int [] {1, 1, 2, 2, 3, 3, 4, 4})
             instrumentManager.handleMessage(getSecurityDefinitionMessageMock(i), context, coder);
 
-        verify(marketDataManager, times(2)).onBBO(any());
+        verify(marketDataManager, times(2)).onBBO(any(BBO.class));
         verify(gatewayManager, times(1)).onInstrumentDownloadFinished();
         ArgumentCaptor<IInstrument[]> instrumentCapture = ArgumentCaptor.forClass(IInstrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());
@@ -281,7 +284,7 @@ public class FortsInstrumentManagerTest {
         for (int i : new int [] {1, 1, 2, 2, 4, 4})
             instrumentManager.handleMessage(getSecurityDefinitionMessageMock(i), context, coder);
 
-        verify(marketDataManager, times(2)).onBBO(any());
+        verify(marketDataManager, times(2)).onBBO(any(BBO.class));
         verify(gatewayManager, times(1)).onInstrumentDownloadFinished();
         ArgumentCaptor<IInstrument[]> instrumentCapture = ArgumentCaptor.forClass(IInstrument[].class);
         verify(marketDataHandler, times(1)).onInstruments(instrumentCapture.capture());

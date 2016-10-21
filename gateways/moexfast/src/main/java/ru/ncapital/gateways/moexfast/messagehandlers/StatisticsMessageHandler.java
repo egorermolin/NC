@@ -59,6 +59,9 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
             case CLOSING:
                 bbo.setClosePx(getMdEntryPx(mdEntry));
                 break;
+            case EMPTY:
+                bbo.setEmpty(true);
+                break;
             default:
                 return false;
         }

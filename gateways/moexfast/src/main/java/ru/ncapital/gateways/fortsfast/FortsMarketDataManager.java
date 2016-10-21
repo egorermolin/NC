@@ -22,13 +22,13 @@ public class FortsMarketDataManager extends MarketDataManager<Long> {
     public MarketDataManager configure(IGatewayConfiguration configuration) {
         super.configure(configuration);
 
-        IMessageHandler messageHandlerForOrderList = messageHandlerFactory.createOrderListMessageHandler(configuration);
-        IMessageHandler messageHandlerForStatistics = messageHandlerFactory.createStatisticsMessageHandler(configuration);
-        IMessageHandler messageHandlerForPublicTrades = messageHandlerFactory.createPublicTradesMessageHandler(configuration);
+        IMessageHandler<Long> messageHandlerForOrderList = messageHandlerFactory.createOrderListMessageHandler(configuration);
+        IMessageHandler<Long> messageHandlerForStatistics = messageHandlerFactory.createStatisticsMessageHandler(configuration);
+        IMessageHandler<Long> messageHandlerForPublicTrades = messageHandlerFactory.createPublicTradesMessageHandler(configuration);
 
-        IMessageSequenceValidator sequenceValidatorForOrderList = messageSequenceValidatorFactory.createMessageSequenceValidatorForOrderList();
-        IMessageSequenceValidator sequenceValidatorForStatistics = messageSequenceValidatorFactory.createMessageSequenceValidatorForStatistics();
-        IMessageSequenceValidator sequenceValidatorForPublicTrades = messageSequenceValidatorFactory.createMessageSequenceValidatorForPublicTrades();
+        IMessageSequenceValidator<Long> sequenceValidatorForOrderList = messageSequenceValidatorFactory.createMessageSequenceValidatorForOrderList();
+        IMessageSequenceValidator<Long> sequenceValidatorForStatistics = messageSequenceValidatorFactory.createMessageSequenceValidatorForStatistics();
+        IMessageSequenceValidator<Long> sequenceValidatorForPublicTrades = messageSequenceValidatorFactory.createMessageSequenceValidatorForPublicTrades();
 
         snapshotProcessorForOrderList = new FortsSnapshotProcessor(messageHandlerForOrderList, sequenceValidatorForOrderList);
         snapshotProcessorForStatistics = new FortsSnapshotProcessor(messageHandlerForStatistics, sequenceValidatorForStatistics);

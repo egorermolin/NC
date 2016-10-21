@@ -59,7 +59,7 @@ public class FortsInstrumentManager extends InstrumentManager<Long> {
     protected Instrument<Long> createInstrument(Message readMessage) {
         return new FortsInstrument(
                 readMessage.getString("Symbol"),
-                readMessage.getLong("SecurityID")
+                FortsInstrument.getExchangeSecurityId(readMessage.getLong("SecurityID"))
         );
     }
 
@@ -67,7 +67,7 @@ public class FortsInstrumentManager extends InstrumentManager<Long> {
     protected Instrument<Long> createFullInstrument(Message readMessage) {
         FortsInstrument instrument = new FortsInstrument(
                 readMessage.getString("Symbol"),
-                readMessage.getLong("SecurityID")
+                FortsInstrument.getExchangeSecurityId(readMessage.getLong("SecurityID"))
         );
 
         if (readMessage.getValue("Currency") != null)

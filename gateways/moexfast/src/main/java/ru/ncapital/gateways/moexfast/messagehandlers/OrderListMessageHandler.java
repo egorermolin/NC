@@ -52,6 +52,7 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
         switch (getMdEntryType(mdEntry)) {
             case BID:
                 depthLevel = marketDataManager.createDepthLevel(exchangeSecurityId);
+
                 depthLevel.setMdUpdateAction(MdUpdateAction.INSERT);
                 depthLevel.setMdEntryId(getMdEntryId(mdEntry));
                 depthLevel.setMdEntryPx(getMdEntryPx(mdEntry));
@@ -63,6 +64,7 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
                 break;
             case OFFER:
                 depthLevel = marketDataManager.createDepthLevel(exchangeSecurityId);
+
                 depthLevel.setMdUpdateAction(MdUpdateAction.INSERT);
                 depthLevel.setMdEntryId(getMdEntryId(mdEntry));
                 depthLevel.setMdEntryPx(getMdEntryPx(mdEntry));
@@ -86,6 +88,7 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
         switch (getMdEntryType(mdEntry)) {
             case BID:
                 depthLevel = marketDataManager.createDepthLevel(exchangeSecurityId);
+
                 depthLevel.setMdUpdateAction(getMdUpdateAction(mdEntry));
                 depthLevel.setMdEntryId(getMdEntryId(mdEntry));
                 depthLevel.setMdEntryPx(getMdEntryPx(mdEntry));
@@ -98,6 +101,7 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
                 break;
             case OFFER:
                 depthLevel = marketDataManager.createDepthLevel(exchangeSecurityId);
+
                 depthLevel.setMdUpdateAction(getMdUpdateAction(mdEntry));
                 depthLevel.setMdEntryId(getMdEntryId(mdEntry));
                 depthLevel.setMdEntryPx(getMdEntryPx(mdEntry));
@@ -110,6 +114,7 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
                 break;
             case EMPTY:
                 depthLevel = marketDataManager.createDepthLevel(exchangeSecurityId);
+
                 depthLevel.setMdUpdateAction(MdUpdateAction.SNAPSHOT);
 
                 getDepthLevelList(exchangeSecurityId).add(depthLevel);

@@ -23,13 +23,13 @@ public class MicexMarketDataManager extends MarketDataManager<String> {
     public MarketDataManager configure(IGatewayConfiguration configuration) {
         super.configure(configuration);
 
-        IMessageHandler messageHandlerForOrderList = messageHandlerFactory.createOrderListMessageHandler(configuration);
-        IMessageHandler messageHandlerForStatistics = messageHandlerFactory.createStatisticsMessageHandler(configuration);
-        IMessageHandler messageHandlerForPublicTrades = messageHandlerFactory.createPublicTradesMessageHandler(configuration);
+        IMessageHandler<String> messageHandlerForOrderList = messageHandlerFactory.createOrderListMessageHandler(configuration);
+        IMessageHandler<String> messageHandlerForStatistics = messageHandlerFactory.createStatisticsMessageHandler(configuration);
+        IMessageHandler<String> messageHandlerForPublicTrades = messageHandlerFactory.createPublicTradesMessageHandler(configuration);
 
-        IMessageSequenceValidator sequenceValidatorForOrderList = messageSequenceValidatorFactory.createMessageSequenceValidatorForOrderList();
-        IMessageSequenceValidator sequenceValidatorForStatistics = messageSequenceValidatorFactory.createMessageSequenceValidatorForStatistics();
-        IMessageSequenceValidator sequenceValidatorForPublicTrades = messageSequenceValidatorFactory.createMessageSequenceValidatorForPublicTrades();
+        IMessageSequenceValidator<String> sequenceValidatorForOrderList = messageSequenceValidatorFactory.createMessageSequenceValidatorForOrderList();
+        IMessageSequenceValidator<String> sequenceValidatorForStatistics = messageSequenceValidatorFactory.createMessageSequenceValidatorForStatistics();
+        IMessageSequenceValidator<String> sequenceValidatorForPublicTrades = messageSequenceValidatorFactory.createMessageSequenceValidatorForPublicTrades();
 
         snapshotProcessorForOrderList = new MicexSnapshotProcessor(messageHandlerForOrderList, sequenceValidatorForOrderList);
         snapshotProcessorForStatistics = new MicexSnapshotProcessor(messageHandlerForStatistics, sequenceValidatorForStatistics);

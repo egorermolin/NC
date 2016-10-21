@@ -63,14 +63,13 @@ public abstract class IncrementalProcessor<T> extends Processor<T> implements II
                     } else {
                         sequenceValidator.storeIncremental(exchangeSecurityId, rptSeqNum, mdEntry, performanceData);
                     }
-                    continue;
-                }
-
-                if (sequenceValidator.onIncrementalSeq(exchangeSecurityId, rptSeqNum)) {
-                    messageHandler.onIncremental(mdEntry, performanceData);
                 } else {
-                    sequenceValidator.storeIncremental(exchangeSecurityId, rptSeqNum, mdEntry, performanceData);
-                    sequenceValidator.startRecovering(exchangeSecurityId);
+                    if (sequenceValidator.onIncrementalSeq(exchangeSecurityId, rptSeqNum)) {
+                        messageHandler.onIncremental(mdEntry, performanceData);
+                    } else {
+                        sequenceValidator.storeIncremental(exchangeSecurityId, rptSeqNum, mdEntry, performanceData);
+                        sequenceValidator.startRecovering(exchangeSecurityId);
+                    }
                 }
             }
             messageHandler.flushIncrementals();

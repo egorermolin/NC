@@ -7,7 +7,6 @@ import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.intf.IInstrument;
 import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
 
-import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,7 +34,7 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
 
     private GatewayManager gatewayManager;
 
-    private long sendingTimeOfInstrumentStart;
+    private long timeOfLastSequenceReset;
 
     private IMarketDataHandler marketDataHandler;
 
@@ -52,6 +51,17 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
         this.gatewayManager = gatewayManager;
     }
 
+    private synchronized boolean resetSequence(long sendingTime) {
+        if (timeOfLastSequenceReset < sendingTime) {
+            // new snapshot cycle
+            timeOfLastSequenceReset = sendingTime;
+            sequenceArray.clear();
+        } else
+            return false;
+
+        return true;
+    }
+
     @Override
     protected boolean checkSequence(Message readMessage) {
         int seqNum = readMessage.getInt("MsgSeqNum");
@@ -60,27 +70,20 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
 
         switch (messageType) {
             case 'd':
-                if (seqNum == 1) {
-                    synchronized (this) {
-                        if (sendingTimeOfInstrumentStart < sendingTime) {
-                            // new snapshot cycle
-                            sendingTimeOfInstrumentStart = sendingTime;
-                            sequenceArray.clear();
-                        } else
-                            return false;
-                    }
-                } else {
+                if (seqNum == 1)
+                    if (!resetSequence(sendingTime))
+                        return false;
+                else
                     if (sequenceArray.checkSequence(seqNum) == SequenceArray.Result.DUPLICATE)
                         return false;
-                }
-                break;
 
-            case 'f': // SecurityStatus
-            case 'h': // TradingSessionStatus
-                if (sequenceArrayForSecurityStatus.checkSequence(seqNum) == SequenceArray.Result.DUPLICATE)
+            case '4': // SequenceReset
+                if (!resetSequence(sendingTime))
                     return false;
 
-                break;
+            case 'f': // SecurityStatus
+                if (sequenceArray.checkSequence(seqNum) == SequenceArray.Result.DUPLICATE)
+                    return false;
         }
 
         return true;
@@ -117,10 +120,9 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
     }
 
     private boolean addInstrument(Instrument<T> instrument) {
-        return
-                instruments.putIfAbsent(instrument.getExchangeSecurityId(), instrument) == null
-                    &&
-                instrumentsBySecurityId.putIfAbsent(instrument.getExchangeSecurityId(), instrument) == null;
+        return instruments.putIfAbsent(instrument.getExchangeSecurityId(), instrument) == null
+                   &&
+               instrumentsBySecurityId.putIfAbsent(instrument.getExchangeSecurityId(), instrument) == null;
     }
 
     protected void addInstrumentToIgnored(Instrument<T> instrument) {
@@ -159,21 +161,18 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
 
 
                 Instrument<T> newInstrument = createFullInstrument(readMessage);
-
                 if (addNewInstrument(newInstrument)) {
                     if (getLogger().isDebugEnabled())
                         getLogger().debug(newInstrument.getName() + " Received " + newInstrument.getId());
 
                     sendToClient(newInstrument, newInstrument.getTradingStatus());
                 }
-
                 checkInstrumentFinish();
                 break;
 
             case 'f':
                 Instrument<T> instrument = createInstrument(readMessage);
                 String tradingStatus = createTradingStatusForInstrumentStatus(readMessage);
-
                 if (isAllowedInstrument(instrument))
                     sendToClient(instrument, tradingStatus);
 

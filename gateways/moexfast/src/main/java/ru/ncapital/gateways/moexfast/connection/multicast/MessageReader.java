@@ -402,9 +402,15 @@ public class MessageReader implements IMulticastEventListener {
                 case CURR_INSTRUMENT_SNAP_B:
                 case FOND_INSTRUMENT_SNAP_A:
                 case FOND_INSTRUMENT_SNAP_B:
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("d"), instrumentManager);
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
+                    multicastInputStream.setInTimestamp(initAndGetInTimestamp(null));
+                    break;
+
                 case FUT_INSTRUMENT_SNAP_A:
                 case FUT_INSTRUMENT_SNAP_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("d"), instrumentManager);
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("4"), instrumentManager);
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(null));
                     break;
@@ -456,10 +462,17 @@ public class MessageReader implements IMulticastEventListener {
                     break;
 
                 case CURR_STATISTICS_SNAP_A:
-                case FOND_STATISTICS_SNAP_A:
                 case CURR_STATISTICS_SNAP_B:
+                case FOND_STATISTICS_SNAP_A:
                 case FOND_STATISTICS_SNAP_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("W-Generic"), marketDataManager.getSnapshotProcessor(MessageHandlerType.STATISTICS));
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
+                    multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.STATISTICS)));
+                    break;
+
+                case FUT_STATISTICS_SNAP_A:
+                case FUT_STATISTICS_SNAP_B:
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("DefaultSnapshotMessage"), marketDataManager.getSnapshotProcessor(MessageHandlerType.STATISTICS));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.STATISTICS)));
                     break;

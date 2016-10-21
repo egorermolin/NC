@@ -4,6 +4,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.openfast.GroupValue;
 import org.openfast.Message;
+import ru.ncapital.gateways.fortsfast.domain.FortsInstrument;
 import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
@@ -22,12 +23,12 @@ public class FortsStatisticsMessageHandler extends StatisticsMessageHandler<Long
 
     @Override
     protected Long getExchangeSecurityId(Message readMessage) {
-        return readMessage.getLong("SecurityID");
+        return FortsInstrument.getExchangeSecurityId(readMessage.getLong("SecurityID"));
     }
 
     @Override
     protected Long getExchangeSecurityId(GroupValue mdEntry) {
-        return mdEntry.getLong("SecurityID");
+        return FortsInstrument.getExchangeSecurityId(mdEntry.getLong("SecurityID"));
     }
 
     @Override
