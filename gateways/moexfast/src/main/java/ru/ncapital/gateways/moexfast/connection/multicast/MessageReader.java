@@ -28,9 +28,7 @@ import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.MembershipKey;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -352,37 +350,41 @@ public class MessageReader implements IMulticastEventListener {
 
         if (logger.isDebugEnabled())
             logger.debug("Joined [Group: " + connection.getIp() + "(" + InetAddress.getByName(connection.getIp()) + ")]" +
-                                "[Interface: " + intf + "(" + getNetworkInterface(intf).toString() + ")]" +
-                                "[Source: " + connection.getSource() + "(" + InetAddress.getByName(connection.getSource()) + ")]" +
-                                "[Key: " + membership.toString() + "]");
+                    "[Interface: " + intf + "(" + getNetworkInterface(intf).toString() + ")]" +
+                    "[Source: " + connection.getSource() + "(" + InetAddress.getByName(connection.getSource()) + ")]" +
+                    "[Key: " + membership.toString() + "]");
 
         multicastInputStream = new MoexFastMulticastInputStream(this, channel, logger, asynch, connectionId);
         messageReader = new MessageInputStream(multicastInputStream);
 
-        for (MessageTemplate template : new XMLMessageTemplateLoader().load(new FileInputStream(fastTemplatesFile))) {
-            switch (connectionId) {
-                case FUT_INSTRUMENT_SNAP_A:
-                case FUT_INSTRUMENT_SNAP_B:
-                    if (template.getId() == "SecurityDefinition" ||
-                        template.getId() == "SequenceReset" ||
-                        template.getId() == "Heartbeat")
-                            messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
-                    break;
-                case FUT_INSTRUMENT_INCR_A:
-                case FUT_INSTRUMENT_INCR_B:
-                    if (template.getId() == "SecurityStatus" ||
-                        template.getId() == "SequenceReset" ||
-                        template.getId() == "Heartbeat")
-                            messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
-                    break;
-                default:
+        Map<String, MessageTemplate> messageTemplates = new HashMap<>();
+        for (MessageTemplate template : new XMLMessageTemplateLoader().load(new FileInputStream(fastTemplatesFile)))
+            messageTemplates.put(template.getName(), template);
+
+        switch (connectionId) {
+            case FUT_INSTRUMENT_SNAP_A:
+            case FUT_INSTRUMENT_SNAP_B:
+                for (String name : new String[]{"SecurityDefinition", "SequenceReset", "Heartbeat"}) {
+                    MessageTemplate template = messageTemplates.get(name);
                     messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
-            }
+                }
+                break;
+            case FUT_INSTRUMENT_INCR_A:
+            case FUT_INSTRUMENT_INCR_B:
+                for (String name : new String[]{"SecurityStatus", "SequenceReset", "Heartbeat"}) {
+                    MessageTemplate template = messageTemplates.get(name);
+                    messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
+                }
+                break;
+            default:
+                for (MessageTemplate template : messageTemplates.values())
+                    messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
+
+                break;
         }
 
         if (instrumentManager == null && marketDataManager == null) {
-            registerMessageHandler(new MessageHandler()
-            {
+            registerMessageHandler(new MessageHandler() {
                 @Override
                 public void handleMessage(Message readMessage, Context context, Coder coder) {
                     long decodedTimeInTodayMicros = Utils.currentTimeInTodayMicros();
@@ -524,6 +526,7 @@ public class MessageReader implements IMulticastEventListener {
         if ("trace".equals(level))
             enableTrace();
     }
+
 
     private void registerMessageHandler(MessageHandler messageHandler) {
         messageReader.addMessageHandler(messageHandler);
