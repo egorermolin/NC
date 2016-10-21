@@ -78,6 +78,6 @@ public class MicexOrderListMessageHandler extends OrderListMessageHandler<String
     @Override
     @SuppressWarnings("unchecked")
     protected DepthLevel<String>[] convertDepthLevels(List<DepthLevel<String>> depthLevels) {
-        return (DepthLevel<String>[]) depthLevels.toArray();
+        return depthLevels.toArray(new DepthLevel[0]);
     }
 }

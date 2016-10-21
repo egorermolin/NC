@@ -72,6 +72,6 @@ public class FortsOrderListMessageHandler extends OrderListMessageHandler<Long> 
     @Override
     @SuppressWarnings("unchecked")
     protected DepthLevel<Long>[] convertDepthLevels(List<DepthLevel<Long>> depthLevels) {
-        return (DepthLevel<Long>[]) depthLevels.toArray();
+        return depthLevels.toArray(new DepthLevel[0]);
     }
 }

@@ -28,7 +28,7 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
 
     @Override
     protected Logger getLogger() {
-        return LoggerFactory.getLogger(getClass().getName());
+        return LoggerFactory.getLogger(getClass().getSimpleName());
     }
 
     @Override

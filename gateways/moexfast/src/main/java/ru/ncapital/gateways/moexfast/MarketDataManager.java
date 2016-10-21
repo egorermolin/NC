@@ -91,7 +91,7 @@ public abstract class MarketDataManager<T> {
     }
 
     public Logger getLogger() {
-        return LoggerFactory.getLogger(getClass().getName());
+        return LoggerFactory.getLogger(getClass().getSimpleName());
     }
 
     public void setInstrumentManager(InstrumentManager<T> instrumentManager) {
