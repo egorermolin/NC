@@ -2,8 +2,8 @@ package ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalid
 
 import org.openfast.GroupValue;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.StoredMdEntry;
-import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
+import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 /**
  * Created by egore on 2/3/16.

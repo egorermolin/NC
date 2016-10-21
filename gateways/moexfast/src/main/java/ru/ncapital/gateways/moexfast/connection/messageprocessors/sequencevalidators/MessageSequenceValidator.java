@@ -6,8 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.StoredMdEntry;
-import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
+import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 import java.util.*;
 

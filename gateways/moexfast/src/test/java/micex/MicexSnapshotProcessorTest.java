@@ -3,19 +3,22 @@ package micex;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openfast.Context;
 import org.openfast.GroupValue;
 import org.openfast.Message;
 import org.openfast.codec.Coder;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.MicexSnapshotProcessor;
-import ru.ncapital.gateways.moexfast.connection.messageprocessors.StoredMdEntry;
-import ru.ncapital.gateways.moexfast.performance.PerformanceData;
-import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
-import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.SnapshotProcessor;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.StoredMdEntry;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidator;
+import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
+import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 /**
  * Created by egore on 1/11/16.

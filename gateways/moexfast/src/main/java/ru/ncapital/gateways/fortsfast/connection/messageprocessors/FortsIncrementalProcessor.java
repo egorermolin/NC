@@ -1,7 +1,6 @@
 package ru.ncapital.gateways.fortsfast.connection.messageprocessors;
 
 import org.openfast.GroupValue;
-import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IncrementalProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;

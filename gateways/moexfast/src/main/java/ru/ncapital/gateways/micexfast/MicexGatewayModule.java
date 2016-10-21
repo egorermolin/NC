@@ -5,8 +5,6 @@ import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
-import ru.ncapital.gateways.fortsfast.FortsInstrumentManager;
-import ru.ncapital.gateways.fortsfast.FortsMarketDataManager;
 import ru.ncapital.gateways.micexfast.messagehandlers.MicexOrderListMessageHandler;
 import ru.ncapital.gateways.micexfast.messagehandlers.MicexPublicTradesMessageHandler;
 import ru.ncapital.gateways.micexfast.messagehandlers.MicexStatisticsMessageHandler;

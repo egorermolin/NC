@@ -2,10 +2,6 @@ package ru.ncapital.gateways.moexfast;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.moexfast.domain.impl.BBO;
-import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
-import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
-import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
 import ru.ncapital.gateways.moexfast.domain.intf.IBBO;
 import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
 import ru.ncapital.gateways.moexfast.domain.intf.IInstrument;

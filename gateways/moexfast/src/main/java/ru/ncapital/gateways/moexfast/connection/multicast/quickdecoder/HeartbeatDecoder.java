@@ -1,10 +1,8 @@
 package ru.ncapital.gateways.moexfast.connection.multicast.quickdecoder;
 
-import org.openfast.*;
-import org.openfast.error.FastConstants;
-import org.openfast.template.Field;
-import org.openfast.template.Group;
-import org.openfast.template.MessageTemplate;
+import org.openfast.BitVectorReader;
+import org.openfast.Context;
+import org.openfast.FieldValue;
 
 import java.io.InputStream;
 

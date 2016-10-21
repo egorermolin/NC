@@ -1,6 +1,5 @@
 package ru.ncapital.gateways.fortsfast.domain;
 
-import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
 import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
 
 /**

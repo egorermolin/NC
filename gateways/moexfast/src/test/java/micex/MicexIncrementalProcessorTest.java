@@ -2,7 +2,6 @@ package micex;
 
 import com.google.inject.Guice;
 import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,8 +14,8 @@ import ru.ncapital.gateways.micexfast.connection.messageprocessors.MicexIncremen
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IncrementalProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
-import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
+import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 import static org.mockito.Mockito.mock;
 

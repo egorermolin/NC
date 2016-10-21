@@ -5,7 +5,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import ru.ncapital.gateways.micexfast.MicexGatewayModule;
 import ru.ncapital.gateways.moexfast.GatewayManager;
 import ru.ncapital.gateways.moexfast.IGatewayManager;
 import ru.ncapital.gateways.moexfast.connection.ConnectionManager;

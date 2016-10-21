@@ -1,11 +1,8 @@
 package ru.ncapital.gateways.moexfast.connection.multicast.quickdecoder;
 
-import org.omg.CORBA.TypeCode;
 import org.openfast.*;
 import org.openfast.template.LongValue;
-import org.openfast.template.Scalar;
 import org.openfast.template.Sequence;
-import org.openfast.template.type.Type;
 import org.openfast.template.type.codec.TypeCodec;
 
 import java.io.InputStream;

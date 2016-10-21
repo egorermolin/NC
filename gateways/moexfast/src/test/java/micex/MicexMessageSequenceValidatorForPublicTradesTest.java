@@ -2,7 +2,6 @@ package micex;
 
 import com.google.inject.Guice;
 import com.google.inject.Key;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;

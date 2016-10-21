@@ -9,7 +9,9 @@ import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.SequenceArray;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
 
 import static junit.framework.TestCase.assertEquals;
 

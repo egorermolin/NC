@@ -2,7 +2,6 @@ package ru.ncapital.gateways.fortsfast.connection.messageprocessors;
 
 import org.openfast.Message;
 import ru.ncapital.gateways.fortsfast.domain.FortsInstrument;
-import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.SnapshotProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;

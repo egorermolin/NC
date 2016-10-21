@@ -4,8 +4,8 @@ import org.openfast.Message;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.Processor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.SequenceArray;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
-import ru.ncapital.gateways.moexfast.domain.intf.IInstrument;
 import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
+import ru.ncapital.gateways.moexfast.domain.intf.IInstrument;
 
 import java.util.HashSet;
 import java.util.Set;

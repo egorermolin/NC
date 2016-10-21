@@ -2,7 +2,6 @@ package ru.ncapital.gateways.fortsfast;
 
 import com.google.inject.Singleton;
 import ru.ncapital.gateways.fortsfast.xml.FortsXMLReader;
-import ru.ncapital.gateways.micexfast.xml.MicexXMLReader;
 import ru.ncapital.gateways.moexfast.ConfigurationManager;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.connection.ConnectionId;

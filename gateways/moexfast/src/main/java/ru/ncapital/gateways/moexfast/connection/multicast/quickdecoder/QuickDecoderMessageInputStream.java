@@ -1,7 +1,6 @@
 package ru.ncapital.gateways.moexfast.connection.multicast.quickdecoder;
 
 import org.openfast.*;
-import org.openfast.codec.FastDecoder;
 import org.openfast.error.FastException;
 import org.openfast.template.MessageTemplate;
 import org.openfast.template.type.codec.TypeCodec;

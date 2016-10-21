@@ -5,7 +5,6 @@ import ru.ncapital.gateways.fortsfast.FortsNullGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.MicexConfigurationManager;
 import ru.ncapital.gateways.micexfast.MicexNullGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.ConfigurationManager;
-import ru.ncapital.gateways.moexfast.NullGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.connection.ConnectionId;
 
 /**

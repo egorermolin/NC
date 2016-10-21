@@ -5,7 +5,6 @@ import org.openfast.Message;
 import ru.ncapital.gateways.fortsfast.domain.FortsInstrument;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.InstrumentManager;
-import ru.ncapital.gateways.moexfast.connection.messageprocessors.SequenceArray;
 import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
 
 import java.util.Arrays;
@@ -90,7 +89,7 @@ public class FortsInstrumentManager extends InstrumentManager<Long> {
             instrument.setTickSize(readMessage.getDouble("MinPriceIncrement"));
 
         if (readMessage.getValue("MaturityDate") != null)
-            instrument.setMaturityDate(readMessage.getLong("MaturityDate"));
+            instrument.setMaturityDate(readMessage.getString("MaturityDate"));
 
         if (readMessage.getValue("MinPriceIncrement") != null
                 && readMessage.getValue("MinPriceIncrementAmount") != null)

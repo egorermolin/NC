@@ -6,9 +6,9 @@ import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.Utils;
+import ru.ncapital.gateways.moexfast.domain.MdEntryType;
 import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
-import ru.ncapital.gateways.moexfast.domain.MdEntryType;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 /**

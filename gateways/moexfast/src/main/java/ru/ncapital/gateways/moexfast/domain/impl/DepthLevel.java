@@ -1,7 +1,7 @@
 package ru.ncapital.gateways.moexfast.domain.impl;
 
-import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
 import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
+import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 /**
