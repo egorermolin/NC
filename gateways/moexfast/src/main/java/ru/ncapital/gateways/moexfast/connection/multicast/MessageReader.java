@@ -359,8 +359,26 @@ public class MessageReader implements IMulticastEventListener {
         multicastInputStream = new MoexFastMulticastInputStream(this, channel, logger, asynch, connectionId);
         messageReader = new MessageInputStream(multicastInputStream);
 
-        for (MessageTemplate template : new XMLMessageTemplateLoader().load(new FileInputStream(fastTemplatesFile)))
-            messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
+        for (MessageTemplate template : new XMLMessageTemplateLoader().load(new FileInputStream(fastTemplatesFile))) {
+            switch (connectionId) {
+                case FUT_INSTRUMENT_SNAP_A:
+                case FUT_INSTRUMENT_SNAP_B:
+                    if (template.getId() == "SecurityDefinition" ||
+                        template.getId() == "SequenceReset" ||
+                        template.getId() == "Heartbeat")
+                            messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
+                    break;
+                case FUT_INSTRUMENT_INCR_A:
+                case FUT_INSTRUMENT_INCR_B:
+                    if (template.getId() == "SecurityStatus" ||
+                        template.getId() == "SequenceReset" ||
+                        template.getId() == "Heartbeat")
+                            messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
+                    break;
+                default:
+                    messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
+            }
+        }
 
         if (instrumentManager == null && marketDataManager == null) {
             registerMessageHandler(new MessageHandler()
@@ -391,10 +409,14 @@ public class MessageReader implements IMulticastEventListener {
                 case CURR_INSTRUMENT_INCR_B:
                 case FOND_INSTRUMENT_INCR_A:
                 case FOND_INSTRUMENT_INCR_B:
-                case FUT_INSTRUMENT_INCR_A:
-                case FUT_INSTRUMENT_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("f"), instrumentManager);
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
+                    multicastInputStream.setInTimestamp(initAndGetInTimestamp(null));
+                    break;
+                case FUT_INSTRUMENT_INCR_A:
+                case FUT_INSTRUMENT_INCR_B:
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("SecurityDefinition"), instrumentManager);
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(null));
                     break;
 
@@ -406,12 +428,11 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(null));
                     break;
-
                 case FUT_INSTRUMENT_SNAP_A:
                 case FUT_INSTRUMENT_SNAP_B:
-                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("d"), instrumentManager);
-                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("4"), instrumentManager);
-                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("SecurityDefinition"), instrumentManager);
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("SequenceReset"), instrumentManager);
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(null));
                     break;
 

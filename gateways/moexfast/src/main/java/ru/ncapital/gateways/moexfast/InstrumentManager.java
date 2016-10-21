@@ -51,11 +51,14 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
         this.gatewayManager = gatewayManager;
     }
 
-    private synchronized boolean resetSequence(long sendingTime) {
+    private synchronized boolean resetSequence(long sendingTime, boolean securityStatus) {
         if (timeOfLastSequenceReset < sendingTime) {
             // new snapshot cycle
             timeOfLastSequenceReset = sendingTime;
-            sequenceArray.clear();
+            if (securityStatus)
+                sequenceArrayForSecurityStatus.clear();
+            else
+                sequenceArray.clear();
         } else
             return false;
 
@@ -71,7 +74,7 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
         switch (messageType) {
             case 'd':
                 if (seqNum == 1)
-                    if (!resetSequence(sendingTime))
+                    if (!resetSequence(sendingTime, false))
                         return false;
                 else
                     if (sequenceArray.checkSequence(seqNum) == SequenceArray.Result.DUPLICATE)
@@ -80,7 +83,7 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
                 break;
 
             case '4': // SequenceReset
-                if (!resetSequence(sendingTime))
+                if (!resetSequence(sendingTime, seqNum == 1))
                     return false;
 
                 break;
