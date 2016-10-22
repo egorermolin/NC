@@ -17,6 +17,8 @@ import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
     private BBO<T> bbo;
 
+    private MdEntryHandler<T> mdEntryHandler = new MdEntryHandler<>(this);
+
     public StatisticsMessageHandler(MarketDataManager<T> marketDataManager, IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
     }
@@ -31,43 +33,6 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
         return MessageHandlerType.STATISTICS;
     }
 
-    private boolean onMdEntry(GroupValue mdEntry) {
-        MdEntryType mdEntryType = getMdEntryType(mdEntry);
-        switch (mdEntryType) {
-            case BID:
-                bbo.setBidPx(getMdEntryPx(mdEntry));
-                bbo.setBidSize(getMdEntrySize(mdEntry));
-                break;
-            case OFFER:
-                bbo.setOfferPx(getMdEntryPx(mdEntry));
-                bbo.setOfferSize(getMdEntrySize(mdEntry));
-                break;
-            case LAST:
-                bbo.setLastPx(getLastPx(mdEntry));
-                bbo.setLastSize(getLastSize(mdEntry));
-                bbo.getPerformanceData().setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
-                break;
-            case LOW:
-                bbo.setLowPx(getMdEntryPx(mdEntry));
-                break;
-            case HIGH:
-                bbo.setHighPx(getMdEntryPx(mdEntry));
-                break;
-            case OPENING:
-                bbo.setOpenPx(getMdEntryPx(mdEntry));
-                break;
-            case CLOSING:
-                bbo.setClosePx(getMdEntryPx(mdEntry));
-                break;
-            case EMPTY:
-                bbo.setEmpty(true);
-                break;
-            default:
-                return false;
-        }
-        return true;
-    }
-
     @Override
     protected void onBeforeSnapshot(T exchangeSecurityId) {
         bbo = marketDataManager.createBBO(exchangeSecurityId);
@@ -75,7 +40,7 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
 
     @Override
     protected void onSnapshotMdEntry(T exchangeSecurityId, GroupValue mdEntry) {
-        onMdEntry(mdEntry);
+        mdEntryHandler.onMdEntry(bbo, mdEntry);
     }
 
     @Override
@@ -85,15 +50,28 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
 
     @Override
     protected void onIncrementalMdEntry(T exchangeSecurityId, GroupValue mdEntry, PerformanceData perfData) {
-        bbo = marketDataManager.createBBO(exchangeSecurityId);
-        bbo.getPerformanceData().updateFrom(perfData);
+        if (bbo == null) {
+            bbo = marketDataManager.createBBO(exchangeSecurityId);
+            bbo.getPerformanceData().updateFrom(perfData);
+        }
 
-        if (onMdEntry(mdEntry))
+        if (bbo.getExchangeSecurityId().equals(exchangeSecurityId)) {
+            mdEntryHandler.onMdEntry(bbo, mdEntry);
+        } else {
+            // flush existing bbo
             marketDataManager.onBBO(bbo);
+            bbo = null;
+
+            // process another bbo
+            onIncrementalMdEntry(exchangeSecurityId, mdEntry, perfData);
+        }
     }
 
     @Override
     public void flushIncrementals() {
+        // if there was registered bbo update
+        if (bbo != null)
+            marketDataManager.onBBO(bbo);
     }
 
     @Override

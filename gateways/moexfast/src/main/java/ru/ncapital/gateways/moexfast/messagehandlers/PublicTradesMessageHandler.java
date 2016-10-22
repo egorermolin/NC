@@ -48,9 +48,10 @@ public abstract class PublicTradesMessageHandler<T> extends AMessageHandler<T> {
     @Override
     protected void onIncrementalMdEntry(T exchangeSecurityId, GroupValue mdEntry, PerformanceData perfData) {
         MdEntryType mdEntryType = getMdEntryType(mdEntry);
+        PublicTrade<T> publicTrade = null;
         switch (mdEntryType) {
             case TRADE:
-                PublicTrade<T> publicTrade = marketDataManager.createPublicTrade(exchangeSecurityId);
+                publicTrade = marketDataManager.createPublicTrade(exchangeSecurityId);
 
                 publicTrade.setTradeId(getTradeId(mdEntry));
                 publicTrade.setLastPx(getLastPx(mdEntry));
@@ -63,6 +64,9 @@ public abstract class PublicTradesMessageHandler<T> extends AMessageHandler<T> {
             default:
                 break;
         }
+
+        if (publicTrade != null)
+            marketDataManager.onPublicTrade(publicTrade);
     }
 
     @Override
