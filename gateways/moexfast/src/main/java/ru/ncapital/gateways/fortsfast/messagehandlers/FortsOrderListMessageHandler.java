@@ -35,43 +35,7 @@ public class FortsOrderListMessageHandler extends OrderListMessageHandler<Long> 
     }
 
     @Override
-    protected MdEntryType getMdEntryType(GroupValue mdEntry) {
-        return MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
-    }
-
-    @Override
-    protected MdUpdateAction getMdUpdateAction(GroupValue mdEntry) {
-        return MdUpdateAction.convert(String.valueOf(mdEntry.getInt("MDUpdateAction")).charAt(0));
-    }
-
-    @Override
-    protected String getMdEntryId(GroupValue mdEntry) {
-        return String.valueOf(mdEntry.getLong("MDEntryID"));
-    }
-
-    @Override
-    protected double getMdEntryPx(GroupValue mdEntry) {
-        return mdEntry.getDouble("MDEntryPx");
-    }
-
-    @Override
-    protected double getMdEntrySize(GroupValue mdEntry) {
-        return mdEntry.getLong("MDEntrySize");
-    }
-
-    @Override
     protected String getTradeId(GroupValue mdEntry) {
         return String.valueOf(mdEntry.getLong("TradeID"));
-    }
-
-    @Override
-    protected List<DepthLevel<Long>> createDepthLevelList() {
-        return new ArrayList<>();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    protected DepthLevel<Long>[] convertDepthLevels(List<DepthLevel<Long>> depthLevels) {
-        return depthLevels.toArray(new DepthLevel[0]);
     }
 }

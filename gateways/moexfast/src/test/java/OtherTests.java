@@ -107,7 +107,6 @@ public class OtherTests {
     public void testMessageHandlerType() {
         assert MessageHandlerType.ORDER_LIST.equals("OrderList");
         assert MessageHandlerType.STATISTICS.equals("Statistics");
-        assert MessageHandlerType.PUBLIC_TRADES.equals("PublicTrades");
     }
 
     public static void main(String[] args) {

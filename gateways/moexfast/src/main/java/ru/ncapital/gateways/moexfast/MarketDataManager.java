@@ -248,8 +248,6 @@ public abstract class MarketDataManager<T> {
         switch (type) {
             case ORDER_LIST:
                 return incrementalProcessorForOrderList;
-            case PUBLIC_TRADES:
-                return incrementalProcessorForPublicTrades;
             case STATISTICS:
                 return incrementalProcessorForStatistics;
         }

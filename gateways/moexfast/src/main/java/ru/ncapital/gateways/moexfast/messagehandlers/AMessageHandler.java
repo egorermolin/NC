@@ -69,15 +69,25 @@ public abstract class AMessageHandler<T> implements IMessageHandler<T> {
 
     protected abstract T getExchangeSecurityId(GroupValue mdEntry);
 
-    protected abstract MdEntryType getMdEntryType(GroupValue mdEntry);
+    protected MdEntryType getMdEntryType(GroupValue mdEntry) {
+        return MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
+    }
 
-    protected abstract MdUpdateAction getMdUpdateAction(GroupValue mdEntry);
+    protected MdUpdateAction getMdUpdateAction(GroupValue mdEntry) {
+        return MdUpdateAction.convert(mdEntry.getString("MDUpdateAction").charAt(0));
+    }
 
-    protected abstract String getMdEntryId(GroupValue mdEntry);
+    protected String getMdEntryId(GroupValue mdEntry) {
+        return String.valueOf(mdEntry.getLong("MDEntryID"));
+    }
 
-    protected abstract double getMdEntryPx(GroupValue mdEntry);
+    protected double getMdEntryPx(GroupValue mdEntry) {
+        return mdEntry.getDouble("MDEntryPx");
+    }
 
-    protected abstract double getMdEntrySize(GroupValue mdEntry);
+    protected double getMdEntrySize(GroupValue mdEntry) {
+        return mdEntry.getDouble("MDEntrySize");
+    }
 
     protected abstract double getLastPx(GroupValue mdEntry);
 
@@ -85,5 +95,7 @@ public abstract class AMessageHandler<T> implements IMessageHandler<T> {
 
     protected abstract String getTradeId(GroupValue mdEntry);
 
-    protected abstract boolean getTradeIsBid(GroupValue mdEntry);
+    protected final boolean getTradeIsBid(GroupValue mdEntry) {
+        return mdEntry.getString("OrderSide").charAt(0) == '1';
+    }
 }

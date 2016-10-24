@@ -14,12 +14,7 @@ public class FortsIncrementalProcessor extends IncrementalProcessor<Long> {
     }
 
     @Override
-    protected void handleTrade(GroupValue mdEntry, String tradeId) {
-    }
-
-    @Override
-    protected String getTradeId(GroupValue mdEntry) {
-        return mdEntry.getString("TradeId");
+    protected void checkTradeId(GroupValue mdEntry) {
     }
 
     @Override

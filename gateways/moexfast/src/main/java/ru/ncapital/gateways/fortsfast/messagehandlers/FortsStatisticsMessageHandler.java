@@ -30,32 +30,17 @@ public class FortsStatisticsMessageHandler extends StatisticsMessageHandler<Long
     }
 
     @Override
-    protected MdEntryType getMdEntryType(GroupValue mdEntry) {
-        return MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
-    }
-
-    @Override
-    protected String getMdEntryId(GroupValue mdEntry) {
-        return String.valueOf(mdEntry.getLong("MDEntryID"));
-    }
-
-    @Override
-    protected double getMdEntryPx(GroupValue mdEntry) {
-        return mdEntry.getDouble("MDEntryPx");
-    }
-
-    @Override
-    protected double getMdEntrySize(GroupValue mdEntry) {
-        return mdEntry.getLong("MDEntrySize");
-    }
-
-    @Override
     protected double getLastPx(GroupValue mdEntry) {
-        return mdEntry.getDouble("LastPx");
+        return mdEntry.getDouble("MDEntryPx");
     }
 
     @Override
     protected double getLastSize(GroupValue mdEntry) {
         return mdEntry.getLong("MDEntrySize");
+    }
+
+    @Override
+    protected String getTradeId(GroupValue mdEntry) {
+        return mdEntry.getString("TradeID");
     }
 }

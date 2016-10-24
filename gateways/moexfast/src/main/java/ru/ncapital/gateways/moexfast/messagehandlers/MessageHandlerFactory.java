@@ -9,5 +9,4 @@ import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 public interface MessageHandlerFactory<T> {
     @Named("orderlist") IMessageHandler<T> createOrderListMessageHandler(IGatewayConfiguration configuration);
     @Named("statistics") IMessageHandler<T> createStatisticsMessageHandler(IGatewayConfiguration configuration);
-    @Named("publictrades") IMessageHandler<T> createPublicTradesMessageHandler(IGatewayConfiguration configuration);
 }

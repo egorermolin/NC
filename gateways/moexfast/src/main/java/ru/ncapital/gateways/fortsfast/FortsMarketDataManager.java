@@ -24,18 +24,15 @@ public class FortsMarketDataManager extends MarketDataManager<Long> {
 
         IMessageHandler<Long> messageHandlerForOrderList = messageHandlerFactory.createOrderListMessageHandler(configuration);
         IMessageHandler<Long> messageHandlerForStatistics = messageHandlerFactory.createStatisticsMessageHandler(configuration);
-        IMessageHandler<Long> messageHandlerForPublicTrades = messageHandlerFactory.createPublicTradesMessageHandler(configuration);
 
         IMessageSequenceValidator<Long> sequenceValidatorForOrderList = messageSequenceValidatorFactory.createMessageSequenceValidatorForOrderList();
         IMessageSequenceValidator<Long> sequenceValidatorForStatistics = messageSequenceValidatorFactory.createMessageSequenceValidatorForStatistics();
-        IMessageSequenceValidator<Long> sequenceValidatorForPublicTrades = messageSequenceValidatorFactory.createMessageSequenceValidatorForPublicTrades();
 
         snapshotProcessorForOrderList = new FortsSnapshotProcessor(messageHandlerForOrderList, sequenceValidatorForOrderList);
         snapshotProcessorForStatistics = new FortsSnapshotProcessor(messageHandlerForStatistics, sequenceValidatorForStatistics);
 
         incrementalProcessorForOrderList = new FortsIncrementalProcessor(messageHandlerForOrderList, sequenceValidatorForOrderList);
         incrementalProcessorForStatistics = new FortsIncrementalProcessor(messageHandlerForStatistics, sequenceValidatorForStatistics);
-        incrementalProcessorForPublicTrades = new FortsIncrementalProcessor(messageHandlerForPublicTrades, sequenceValidatorForPublicTrades);
 
         return this;
     }

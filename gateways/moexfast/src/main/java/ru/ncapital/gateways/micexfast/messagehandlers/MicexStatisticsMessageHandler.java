@@ -37,21 +37,6 @@ public class MicexStatisticsMessageHandler extends StatisticsMessageHandler<Stri
     }
 
     @Override
-    protected MdEntryType getMdEntryType(GroupValue mdEntry) {
-        return MdEntryType.convert(mdEntry.getString("MDEntryType").charAt(0));
-    }
-
-    @Override
-    protected double getMdEntryPx(GroupValue mdEntry) {
-        return mdEntry.getDouble("MDEntryPx");
-    }
-
-    @Override
-    protected double getMdEntrySize(GroupValue mdEntry) {
-        return mdEntry.getDouble("MDEntrySize");
-    }
-
-    @Override
     protected double getLastPx(GroupValue mdEntry) {
         return getMdEntryPx(mdEntry);
     }
@@ -59,5 +44,10 @@ public class MicexStatisticsMessageHandler extends StatisticsMessageHandler<Stri
     @Override
     protected double getLastSize(GroupValue mdEntry) {
         return getMdEntrySize(mdEntry);
+    }
+
+    @Override
+    protected String getTradeId(GroupValue mdEntry) {
+        return mdEntry.getString("DealNumber");
     }
 }

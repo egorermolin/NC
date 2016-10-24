@@ -39,9 +39,7 @@ public abstract class IncrementalProcessor<T> extends Processor<T> implements II
                         .setGatewayInTime(inTimestamp);
 
                 int rptSeqNum = mdEntry.getInt("RptSeq");
-                String tradeId = getTradeId(mdEntry);
-                if (tradeId != null)
-                    handleTrade(mdEntry, tradeId);
+                checkTradeId(mdEntry);
 
                 if (!messageHandler.isAllowedUpdate(exchangeSecurityId))
                     continue;
@@ -76,9 +74,8 @@ public abstract class IncrementalProcessor<T> extends Processor<T> implements II
         }
     }
 
-    protected abstract void handleTrade(GroupValue mdEntry, String tradeId);
-
-    protected abstract String getTradeId(GroupValue mdEntry);
+    protected void checkTradeId(GroupValue mdEntry) {
+    }
 
     protected abstract T getExchangeSecurityId(GroupValue mdEntry);
 }

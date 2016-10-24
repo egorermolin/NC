@@ -10,6 +10,7 @@ import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
 import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,7 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
     private List<DepthLevel<T>> getDepthLevelList(T exchangeSecurityId) {
         List<DepthLevel<T>> depthLevelList = depthLevelMap.get(exchangeSecurityId);
         if (depthLevelList == null) {
-            depthLevelList = createDepthLevelList();
+            depthLevelList = new ArrayList<>();
             depthLevelMap.put(exchangeSecurityId, depthLevelList);
         }
         return depthLevelList;
@@ -135,7 +136,7 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
     @Override
     protected void onAfterSnapshot(T exchangeSecurityId) {
         for (List<DepthLevel<T>> depthLevelList : depthLevelMap.values())
-            marketDataManager.onDepthLevels(convertDepthLevels(depthLevelList));
+            marketDataManager.onDepthLevels(depthLevelList.toArray(new DepthLevel[0]));
 
         depthLevelMap.clear();
     }
@@ -143,14 +144,10 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
     @Override
     public void flushIncrementals() {
         for (List<DepthLevel<T>> depthLevelList : depthLevelMap.values())
-            marketDataManager.onDepthLevels(convertDepthLevels(depthLevelList));
+            marketDataManager.onDepthLevels(depthLevelList.toArray(new DepthLevel[0]));
 
         depthLevelMap.clear();
     }
-
-    protected abstract List<DepthLevel<T>> createDepthLevelList();
-
-    protected abstract DepthLevel<T>[] convertDepthLevels(List<DepthLevel<T>> depthLevels);
 
     @Override
     protected final double getLastPx(GroupValue mdEntry) {

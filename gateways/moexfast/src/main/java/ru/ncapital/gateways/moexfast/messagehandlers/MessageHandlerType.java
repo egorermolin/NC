@@ -6,7 +6,6 @@ package ru.ncapital.gateways.moexfast.messagehandlers;
 public enum MessageHandlerType {
     ORDER_LIST("OrderList"),
     STATISTICS("Statistics"),
-    PUBLIC_TRADES("PublicTrades"),
     HEARTBEAT("Heartbeat");
 
     private String description;

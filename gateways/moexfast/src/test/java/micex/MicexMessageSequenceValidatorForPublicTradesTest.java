@@ -2,6 +2,7 @@ package micex;
 
 import com.google.inject.Guice;
 import com.google.inject.Key;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -18,9 +19,10 @@ public class MicexMessageSequenceValidatorForPublicTradesTest {
     private IMessageSequenceValidator<String> sequenceValidator =
                      Guice.createInjector(new MicexGatewayModule())
                     .getInstance(new Key<MessageSequenceValidatorFactory<String>>(){})
-                    .createMessageSequenceValidatorForPublicTrades();
+                    .createMessageSequenceValidatorForStatistics();
 
     @Test
+    @Ignore
     public void testPublicTradesOutOfOrder() {
         assert !sequenceValidator.isRecovering("AAA", false);
         assert sequenceValidator.onIncrementalSeq("AAA", 100);

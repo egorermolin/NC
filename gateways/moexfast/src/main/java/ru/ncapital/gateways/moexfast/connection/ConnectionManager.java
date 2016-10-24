@@ -117,11 +117,6 @@ public class ConnectionManager {
                         starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_STATISTICS_SNAP_A)));
                         starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_STATISTICS_SNAP_B)));
                         break;
-                    case PUBLIC_TRADES:
-                        if (logger.isDebugEnabled())
-                            logger.debug("NO SNAPSHOT CHANNEL FOR PUBLIC TRADES");
-
-                        break;
                 }
                 break;
             case FOND:
@@ -133,11 +128,6 @@ public class ConnectionManager {
                     case STATISTICS:
                         starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_STATISTICS_SNAP_A)));
                         starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_STATISTICS_SNAP_B)));
-                        break;
-                    case PUBLIC_TRADES:
-                        if (logger.isDebugEnabled())
-                            logger.debug("NO SNAPSHOT CHANNEL FOR PUBLIC TRADES");
-
                         break;
                 }
                 break;
@@ -164,11 +154,6 @@ public class ConnectionManager {
                         messageReaders.get(ConnectionId.CURR_STATISTICS_SNAP_A).stop();
                         messageReaders.get(ConnectionId.CURR_STATISTICS_SNAP_B).stop();
                         break;
-                    case PUBLIC_TRADES:
-                        if (logger.isDebugEnabled())
-                            logger.debug("NO SNAPSHOT CHANNEL FOR PUBLIC TRADES");
-
-                        break;
                 }
                 break;
             case FOND:
@@ -180,11 +165,6 @@ public class ConnectionManager {
                     case STATISTICS:
                         messageReaders.get(ConnectionId.FOND_STATISTICS_SNAP_A).stop();
                         messageReaders.get(ConnectionId.FOND_STATISTICS_SNAP_B).stop();
-                        break;
-                    case PUBLIC_TRADES:
-                        if (logger.isDebugEnabled())
-                            logger.debug("NO SNAPSHOT CHANNEL FOR PUBLIC TRADES");
-
                         break;
                 }
                 break;
@@ -210,8 +190,6 @@ public class ConnectionManager {
                     case STATISTICS:
                         starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_STATISTICS_INCR_A)));
                         starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_STATISTICS_INCR_B)));
-                        break;
-                    case PUBLIC_TRADES:
                         starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_A)));
                         starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_B)));
                         break;
@@ -226,8 +204,6 @@ public class ConnectionManager {
                     case STATISTICS:
                         starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_STATISTICS_INCR_A)));
                         starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_STATISTICS_INCR_B)));
-                        break;
-                    case PUBLIC_TRADES:
                         starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_A)));
                         starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_B)));
                         break;
@@ -255,8 +231,6 @@ public class ConnectionManager {
                     case STATISTICS:
                         messageReaders.get(ConnectionId.CURR_STATISTICS_INCR_A).stop();
                         messageReaders.get(ConnectionId.CURR_STATISTICS_INCR_B).stop();
-                        break;
-                    case PUBLIC_TRADES:
                         messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_A).stop();
                         messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_B).stop();
                         break;
@@ -271,8 +245,6 @@ public class ConnectionManager {
                     case STATISTICS:
                         messageReaders.get(ConnectionId.FOND_STATISTICS_INCR_A).stop();
                         messageReaders.get(ConnectionId.FOND_STATISTICS_INCR_B).stop();
-                        break;
-                    case PUBLIC_TRADES:
                         messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_A).stop();
                         messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_B).stop();
                         break;

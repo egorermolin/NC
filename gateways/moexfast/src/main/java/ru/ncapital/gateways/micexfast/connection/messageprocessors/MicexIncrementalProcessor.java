@@ -18,7 +18,8 @@ public class MicexIncrementalProcessor extends IncrementalProcessor<String> {
     }
 
     @Override
-    protected void handleTrade(GroupValue mdEntry, String tradeId) {
+    protected void checkTradeId(GroupValue mdEntry) {
+        String tradeId = mdEntry.getString("DealNumber");
         if (tradeId != null) {
             if (!tradeId.equals(lastDealNumber)) {
                 lastDealNumber = tradeId;
@@ -26,11 +27,6 @@ public class MicexIncrementalProcessor extends IncrementalProcessor<String> {
                 mdEntry.setString("DealNumber", null);
             }
         }
-    }
-
-    @Override
-    protected String getTradeId(GroupValue mdEntry) {
-        return mdEntry.getString("DealNumber");
     }
 
     @Override

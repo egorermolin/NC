@@ -25,18 +25,15 @@ public class MicexMarketDataManager extends MarketDataManager<String> {
 
         IMessageHandler<String> messageHandlerForOrderList = messageHandlerFactory.createOrderListMessageHandler(configuration);
         IMessageHandler<String> messageHandlerForStatistics = messageHandlerFactory.createStatisticsMessageHandler(configuration);
-        IMessageHandler<String> messageHandlerForPublicTrades = messageHandlerFactory.createPublicTradesMessageHandler(configuration);
 
         IMessageSequenceValidator<String> sequenceValidatorForOrderList = messageSequenceValidatorFactory.createMessageSequenceValidatorForOrderList();
         IMessageSequenceValidator<String> sequenceValidatorForStatistics = messageSequenceValidatorFactory.createMessageSequenceValidatorForStatistics();
-        IMessageSequenceValidator<String> sequenceValidatorForPublicTrades = messageSequenceValidatorFactory.createMessageSequenceValidatorForPublicTrades();
 
         snapshotProcessorForOrderList = new MicexSnapshotProcessor(messageHandlerForOrderList, sequenceValidatorForOrderList);
         snapshotProcessorForStatistics = new MicexSnapshotProcessor(messageHandlerForStatistics, sequenceValidatorForStatistics);
 
         incrementalProcessorForOrderList = new MicexIncrementalProcessor(messageHandlerForOrderList, sequenceValidatorForOrderList);
         incrementalProcessorForStatistics = new MicexIncrementalProcessor(messageHandlerForStatistics, sequenceValidatorForStatistics);
-        incrementalProcessorForPublicTrades = new MicexIncrementalProcessor(messageHandlerForPublicTrades, sequenceValidatorForPublicTrades);
 
         return this;
     }
