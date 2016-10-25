@@ -7,15 +7,14 @@ import org.openfast.Message;
 import ru.ncapital.gateways.fortsfast.domain.FortsInstrument;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
-import ru.ncapital.gateways.moexfast.domain.MdEntryType;
 import ru.ncapital.gateways.moexfast.messagehandlers.StatisticsMessageHandler;
 
 /**
  * Created by Egor on 30-Sep-16.
  */
-public class FortsStatisticsMessageHandler extends StatisticsMessageHandler<Long> {
+public class FortsOrderBookMessageHandler extends StatisticsMessageHandler<Long> {
     @AssistedInject
-    public FortsStatisticsMessageHandler(MarketDataManager<Long> marketDataManager, @Assisted IGatewayConfiguration configuration) {
+    public FortsOrderBookMessageHandler(MarketDataManager<Long> marketDataManager, @Assisted IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
     }
 

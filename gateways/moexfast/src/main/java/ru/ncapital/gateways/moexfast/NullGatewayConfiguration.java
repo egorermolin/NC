@@ -32,11 +32,6 @@ public class NullGatewayConfiguration implements IGatewayConfiguration {
         return MarketType.CURR;
     }
 
-//    @Override
-//    public String[] getAllowedSecurityIds() {
-//        return new String[] {"*"};
-//    }
-
     @Override
     public IGatewayPerformanceLogger getPerformanceLogger() {
         return null;
@@ -60,5 +55,10 @@ public class NullGatewayConfiguration implements IGatewayConfiguration {
     @Override
     public boolean restartOnAllFeedDown() {
         return true;
+    }
+
+    @Override
+    public boolean publicTradesFromOrdersLog() {
+        return false;
     }
 }

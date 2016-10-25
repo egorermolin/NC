@@ -155,8 +155,8 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
                 break;
             case TRADE:
                 publicTrade.setTradeId(getTradeId(mdEntry));
-                publicTrade.setLastPx(getLastPx(mdEntry));
-                publicTrade.setLastSize(getLastSize(mdEntry));
+                publicTrade.setLastPx(getMdEntryPx(mdEntry));
+                publicTrade.setLastSize(getMdEntryPx(mdEntry));
                 publicTrade.setIsBid(getTradeIsBid(mdEntry));
                 publicTrade.getPerformanceData().setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
                 break;

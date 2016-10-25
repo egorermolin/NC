@@ -38,6 +38,10 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
 
     private IMarketDataHandler marketDataHandler;
 
+    public InstrumentManager() {
+        super(null, null);
+    }
+
     public InstrumentManager<T> configure(IGatewayConfiguration configuration) {
         this.marketDataHandler = configuration.getMarketDataHandler();
         return this;

@@ -31,15 +31,15 @@ public abstract class IncrementalProcessor<T> extends Processor<T> implements II
                     getLogger().warn("Market Reset received " + readMessage);
                     continue;
                 }
+                int rptSeqNum = mdEntry.getInt("RptSeq");
+
+                checkTradeId(mdEntry);
 
                 T exchangeSecurityId = getExchangeSecurityId(mdEntry);
                 PerformanceData performanceData = new PerformanceData()
                         .setExchangeSendingTime(sendingTime)
                         .setGatewayDequeTime(dequeTimestamp)
                         .setGatewayInTime(inTimestamp);
-
-                int rptSeqNum = mdEntry.getInt("RptSeq");
-                checkTradeId(mdEntry);
 
                 if (!messageHandler.isAllowedUpdate(exchangeSecurityId))
                     continue;

@@ -19,10 +19,9 @@ public class MicexMessageSequenceValidatorForPublicTradesTest {
     private IMessageSequenceValidator<String> sequenceValidator =
                      Guice.createInjector(new MicexGatewayModule())
                     .getInstance(new Key<MessageSequenceValidatorFactory<String>>(){})
-                    .createMessageSequenceValidatorForStatistics();
+                    .createMessageSequenceValidatorForPublicTrades();
 
     @Test
-    @Ignore
     public void testPublicTradesOutOfOrder() {
         assert !sequenceValidator.isRecovering("AAA", false);
         assert sequenceValidator.onIncrementalSeq("AAA", 100);

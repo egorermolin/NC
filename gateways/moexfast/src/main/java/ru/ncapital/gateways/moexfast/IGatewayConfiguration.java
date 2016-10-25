@@ -26,4 +26,6 @@ public interface IGatewayConfiguration {
     long getFeedDownTimeout();
 
     boolean restartOnAllFeedDown();
+
+    boolean publicTradesFromOrdersLog();
 }

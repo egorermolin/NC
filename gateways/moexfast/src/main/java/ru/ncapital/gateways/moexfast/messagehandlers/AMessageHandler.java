@@ -89,10 +89,6 @@ public abstract class AMessageHandler<T> implements IMessageHandler<T> {
         return mdEntry.getDouble("MDEntrySize");
     }
 
-    protected abstract double getLastPx(GroupValue mdEntry);
-
-    protected abstract double getLastSize(GroupValue mdEntry);
-
     protected abstract String getTradeId(GroupValue mdEntry);
 
     protected final boolean getTradeIsBid(GroupValue mdEntry) {

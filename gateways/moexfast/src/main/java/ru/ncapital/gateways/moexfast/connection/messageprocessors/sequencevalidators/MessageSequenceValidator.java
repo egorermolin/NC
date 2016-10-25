@@ -33,7 +33,7 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
     @Inject
     private MarketDataManager<T> marketDataManager;
 
-    protected MessageSequenceValidator(MessageHandlerType type) {
+    public MessageSequenceValidator(MessageHandlerType type) {
         this.type = type;
     }
 
@@ -42,7 +42,7 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
         return type;
     }
 
-    private SequenceNumber getSequenceNumber(T exchangeSecurityId) {
+    protected SequenceNumber getSequenceNumber(T exchangeSecurityId) {
         SequenceNumber<T> sequenceNumber = sequenceNumbers.get(exchangeSecurityId);
         if (sequenceNumber == null) {
             sequenceNumber = new SequenceNumber<>();
@@ -204,5 +204,9 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
     @Override
     public T[] getRecovering() {
         return (T[]) exchangeSecurityIdsToRecover.toArray();
+    }
+
+    public void setMarketDataManager(MarketDataManager<T> marketDataManager) {
+        this.marketDataManager = marketDataManager;
     }
 }

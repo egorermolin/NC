@@ -40,9 +40,13 @@ public abstract class MarketDataManager<T> {
 
     protected ISnapshotProcessor snapshotProcessorForStatistics;
 
+    protected ISnapshotProcessor snapshotProcessorForOrderBook;
+
     protected IIncrementalProcessor incrementalProcessorForOrderList;
 
     protected IIncrementalProcessor incrementalProcessorForStatistics;
+
+    protected IIncrementalProcessor incrementalProcessorForOrderBook;
 
     protected IIncrementalProcessor incrementalProcessorForPublicTrades;
 
@@ -239,6 +243,8 @@ public abstract class MarketDataManager<T> {
                 return snapshotProcessorForOrderList;
             case STATISTICS:
                 return snapshotProcessorForStatistics;
+            case ORDER_BOOK:
+                return snapshotProcessorForOrderBook;
         }
 
         throw new RuntimeException("Unknown Snapshot Processor " + type);
@@ -250,6 +256,10 @@ public abstract class MarketDataManager<T> {
                 return incrementalProcessorForOrderList;
             case STATISTICS:
                 return incrementalProcessorForStatistics;
+            case ORDER_BOOK:
+                return incrementalProcessorForOrderBook;
+            case PUBLIC_TRADES:
+                return incrementalProcessorForPublicTrades;
         }
 
         throw new RuntimeException("Unknown Incremental Processor " + type);

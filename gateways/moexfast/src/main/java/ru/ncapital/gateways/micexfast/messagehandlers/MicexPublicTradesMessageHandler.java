@@ -7,16 +7,15 @@ import org.openfast.Message;
 import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
-import ru.ncapital.gateways.moexfast.domain.MdEntryType;
 import ru.ncapital.gateways.moexfast.messagehandlers.StatisticsMessageHandler;
 
 /**
  * Created by Egor on 30-Sep-16.
  */
-public class MicexStatisticsMessageHandler extends StatisticsMessageHandler<String> {
+public class MicexPublicTradesMessageHandler extends StatisticsMessageHandler<String> {
 
     @AssistedInject
-    public MicexStatisticsMessageHandler(MarketDataManager<String> marketDataManager, @Assisted IGatewayConfiguration configuration) {
+    public MicexPublicTradesMessageHandler(MarketDataManager<String> marketDataManager, @Assisted IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
     }
 
@@ -38,6 +37,6 @@ public class MicexStatisticsMessageHandler extends StatisticsMessageHandler<Stri
 
     @Override
     protected String getTradeId(GroupValue mdEntry) {
-        return null;
+        return mdEntry.getString("DealNumber");
     }
 }

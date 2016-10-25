@@ -22,9 +22,6 @@ public abstract class Processor<T> extends BaseProcessorWithMessageBackup implem
         this.sequenceValidator = sequenceValidator;
     }
 
-    protected Processor() {
-    }
-
     @Override
     public IMessageSequenceValidator<T> getSequenceValidator() {
         return sequenceValidator;

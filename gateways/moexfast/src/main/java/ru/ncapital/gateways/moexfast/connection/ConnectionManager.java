@@ -47,6 +47,8 @@ public class ConnectionManager {
 
     private boolean restartOnAllFeedDown;
 
+    private boolean publicTradesFromOrderList;
+
     private AtomicBoolean shuttingDown = new AtomicBoolean(false);
 
     @Inject
@@ -68,6 +70,7 @@ public class ConnectionManager {
 
     public ConnectionManager configure(IGatewayConfiguration configuration) {
         this.marketType = configuration.getMarketType();
+        this.publicTradesFromOrderList = configuration.publicTradesFromOrdersLog();
         return this;
     }
 
@@ -133,9 +136,13 @@ public class ConnectionManager {
                 break;
             case FUT:
                 switch (type) {
+                    case ORDER_LIST:
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FUT_ORDER_LIST_SNAP_A)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FUT_ORDER_LIST_SNAP_B)));
+                        break;
                     case STATISTICS:
-                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FUT_STATISTICS_SNAP_A)));
-                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FUT_STATISTICS_SNAP_B)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FUT_ORDER_BOOK_SNAP_A)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FUT_ORDER_BOOK_SNAP_B)));
                         break;
                 }
                 break;
@@ -170,9 +177,13 @@ public class ConnectionManager {
                 break;
             case FUT:
                 switch (type) {
+                    case ORDER_LIST:
+                        messageReaders.get(ConnectionId.FUT_ORDER_LIST_SNAP_A).stop();
+                        messageReaders.get(ConnectionId.FUT_ORDER_LIST_SNAP_B).stop();
+                        break;
                     case STATISTICS:
-                        messageReaders.get(ConnectionId.FUT_STATISTICS_SNAP_A).stop();
-                        messageReaders.get(ConnectionId.FUT_STATISTICS_SNAP_B).stop();
+                        messageReaders.get(ConnectionId.FUT_ORDER_BOOK_SNAP_A).stop();
+                        messageReaders.get(ConnectionId.FUT_ORDER_BOOK_SNAP_B).stop();
                         break;
                 }
                 break;
@@ -190,8 +201,10 @@ public class ConnectionManager {
                     case STATISTICS:
                         starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_STATISTICS_INCR_A)));
                         starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_STATISTICS_INCR_B)));
-                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_A)));
-                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_B)));
+                        if (!publicTradesFromOrderList) {
+                            starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_A)));
+                            starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_B)));
+                        }
                         break;
                 }
                 break;
@@ -204,14 +217,22 @@ public class ConnectionManager {
                     case STATISTICS:
                         starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_STATISTICS_INCR_A)));
                         starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_STATISTICS_INCR_B)));
-                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_A)));
-                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_B)));
+                        if (!publicTradesFromOrderList) {
+                            starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_A)));
+                            starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_B)));
+                        }
                         break;
                 }
                 break;
             case FUT:
                 switch (type) {
+                    case ORDER_LIST:
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FUT_ORDER_LIST_INCR_A)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FUT_ORDER_LIST_INCR_B)));
+                        break;
                     case STATISTICS:
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FUT_ORDER_BOOK_INCR_A)));
+                        starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FUT_ORDER_BOOK_INCR_B)));
                         starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FUT_STATISTICS_INCR_A)));
                         starterService.execute(new MessageReaderStarter(messageReaders.get(ConnectionId.FUT_STATISTICS_INCR_B)));
                         break;
@@ -231,8 +252,10 @@ public class ConnectionManager {
                     case STATISTICS:
                         messageReaders.get(ConnectionId.CURR_STATISTICS_INCR_A).stop();
                         messageReaders.get(ConnectionId.CURR_STATISTICS_INCR_B).stop();
-                        messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_A).stop();
-                        messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_B).stop();
+                        if (!publicTradesFromOrderList) {
+                            messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_A).stop();
+                            messageReaders.get(ConnectionId.CURR_PUB_TRADES_INCR_B).stop();
+                        }
                         break;
                 }
                 break;
@@ -245,14 +268,22 @@ public class ConnectionManager {
                     case STATISTICS:
                         messageReaders.get(ConnectionId.FOND_STATISTICS_INCR_A).stop();
                         messageReaders.get(ConnectionId.FOND_STATISTICS_INCR_B).stop();
-                        messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_A).stop();
-                        messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_B).stop();
+                        if (!publicTradesFromOrderList) {
+                            messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_A).stop();
+                            messageReaders.get(ConnectionId.FOND_PUB_TRADES_INCR_B).stop();
+                        }
                         break;
                 }
                 break;
             case FUT:
                 switch (type) {
+                    case ORDER_LIST:
+                        messageReaders.get(ConnectionId.FUT_ORDER_LIST_INCR_A).stop();
+                        messageReaders.get(ConnectionId.FUT_ORDER_LIST_INCR_B).stop();
+                        break;
                     case STATISTICS:
+                        messageReaders.get(ConnectionId.FUT_ORDER_BOOK_INCR_A).stop();
+                        messageReaders.get(ConnectionId.FUT_ORDER_BOOK_INCR_B).stop();
                         messageReaders.get(ConnectionId.FUT_STATISTICS_INCR_A).stop();
                         messageReaders.get(ConnectionId.FUT_STATISTICS_INCR_B).stop();
                         break;

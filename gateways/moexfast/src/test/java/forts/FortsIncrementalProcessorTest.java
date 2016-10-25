@@ -1,6 +1,7 @@
-package micex;
+package forts;
 
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.inject.Key;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -10,11 +11,16 @@ import org.mockito.*;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openfast.*;
 import org.openfast.codec.Coder;
-import ru.ncapital.gateways.micexfast.MicexGatewayModule;
-import ru.ncapital.gateways.micexfast.connection.messageprocessors.MicexIncrementalProcessor;
+import ru.ncapital.gateways.fortsfast.FortsGatewayModule;
+import ru.ncapital.gateways.fortsfast.FortsInstrumentManager;
+import ru.ncapital.gateways.fortsfast.FortsMarketDataManager;
+import ru.ncapital.gateways.fortsfast.connection.messageprocessors.FortsIncrementalProcessor;
+import ru.ncapital.gateways.moexfast.InstrumentManager;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IncrementalProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorForOrderList;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
@@ -24,7 +30,7 @@ import static org.mockito.Mockito.mock;
  * Created by egore on 1/13/16.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class MicexIncrementalProcessorTest {
+public class FortsIncrementalProcessorTest {
     @Mock
     private Context context;
 
@@ -32,26 +38,31 @@ public class MicexIncrementalProcessorTest {
     private Coder coder;
 
     @Mock
-    private IMessageHandler<String> marketDataHandler;
+    private IMessageHandler<Long> marketDataHandler;
 
     @Captor
     private ArgumentCaptor<Message> messageCaptor;
 
-    private IMessageSequenceValidator<String> sequenceValidator =
-             Guice.createInjector(new MicexGatewayModule())
-            .getInstance(new Key<MessageSequenceValidatorFactory<String>>(){})
-            .createMessageSequenceValidatorForOrderList();
+    @Mock
+    private FortsInstrumentManager instrumentManager;
 
-    private IncrementalProcessor<String> incrementalProcessor;
+    @Mock
+    private FortsMarketDataManager marketDataManager;
+
+    private MessageSequenceValidator<Long> sequenceValidator = new MessageSequenceValidatorForOrderList<Long>();
+
+    private IncrementalProcessor<Long> incrementalProcessor;
 
     @Before
     @SuppressWarnings("unchecked")
     public void setup() {
-        incrementalProcessor = new MicexIncrementalProcessor(marketDataHandler, sequenceValidator);
+        incrementalProcessor = new FortsIncrementalProcessor(marketDataHandler, sequenceValidator);
         incrementalProcessor.setIsPrimary(true);
 
-        Mockito.when(marketDataHandler.isAllowedUpdate("SYMB;CETS")).thenReturn(true);
-        Mockito.when(marketDataHandler.isAllowedUpdate("SYMB2;CETS")).thenReturn(true);
+        sequenceValidator.setMarketDataManager(marketDataManager);
+
+        Mockito.when(marketDataHandler.isAllowedUpdate(380922L)).thenReturn(true);
+        Mockito.when(marketDataHandler.isAllowedUpdate(380925L)).thenReturn(true);
     }
 
     private Message getIncermentalMock(int seqNum, int numMdEntries) {
@@ -74,16 +85,15 @@ public class MicexIncrementalProcessorTest {
 
     @Test
     public void testIncremental() {
-        sequenceValidator.startRecovering("SYMB;CETS");
+        sequenceValidator.startRecovering(380922L);
         sequenceValidator.getRecovering();
-        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
+        sequenceValidator.onSnapshotSeq(380922L, 99);
+        assert sequenceValidator.stopRecovering(380922L) == null;
 
         Message message = getIncermentalMock(1, 1);
         GroupValue entry1 = message.getSequence("GroupMDEntries").get(0);
 
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
         Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -96,8 +106,7 @@ public class MicexIncrementalProcessorTest {
         message = getIncermentalMock(1, 1);
         GroupValue entry2 = message.getSequence("GroupMDEntries").get(0);
 
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
         Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -107,27 +116,61 @@ public class MicexIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry2), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
 
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering(380922L, false);
+    }
+
+
+    @Test
+    public void testIncremental2() {
+        sequenceValidator.startRecovering(380922L);
+        sequenceValidator.onSnapshotSeq(380922L, 99);
+        assert sequenceValidator.stopRecovering(380922L) == null;
+
+        Message message = getIncermentalMock(1, 1);
+        GroupValue entry1 = message.getSequence("GroupMDEntries").get(0);
+
+        Mockito.when(message.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(380922L);
+        Mockito.when(message.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+
+        incrementalProcessor.setIsPrimary(true);
+        incrementalProcessor.handleMessage(message, context, coder);
+
+        Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry1), Mockito.any(PerformanceData.class));
+        Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
+
+        message = getIncermentalMock(1, 1);
+        GroupValue entry2 = message.getSequence("GroupMDEntries").get(0);
+
+        Mockito.when(message.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(380922L);
+        Mockito.when(message.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+
+        incrementalProcessor.setIsPrimary(false);
+        incrementalProcessor.handleMessage(message, context, coder);
+
+        Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry2), Mockito.any(PerformanceData.class));
+        Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
+
+        assert !sequenceValidator.isRecovering(380922L, false);
     }
 
     @Test
     public void testIncremental2Symbols() {
-        sequenceValidator.startRecovering("SYMB;CETS");
-        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
+        sequenceValidator.startRecovering(380922L);
+        sequenceValidator.onSnapshotSeq(380922L, 99);
+        assert sequenceValidator.stopRecovering(380922L) == null;
 
-        sequenceValidator.startRecovering("SYMB2;CETS");
-        sequenceValidator.onSnapshotSeq("SYMB2;CETS", 199);
-        assert sequenceValidator.stopRecovering("SYMB2;CETS") == null;
+        sequenceValidator.startRecovering(380925L);
+        sequenceValidator.onSnapshotSeq(380925L, 199);
+        assert sequenceValidator.stopRecovering(380925L) == null;
 
         Message message = getIncermentalMock(1, 2);
         GroupValue entry1 = message.getSequence("GroupMDEntries").get(0);
         GroupValue entry2 = message.getSequence("GroupMDEntries").get(1);
 
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message.getSequence("GroupMDEntries").get(1).getString("Symbol")).thenReturn("SYMB2");
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
-        Mockito.when(message.getSequence("GroupMDEntries").get(1).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message.getSequence("GroupMDEntries").get(1).getLong("SecurityID")).thenReturn(97516870L);
         Mockito.when(message.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
         Mockito.when(message.getSequence("GroupMDEntries").get(1).getInt("RptSeq")).thenReturn(200);
         Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
@@ -139,23 +182,22 @@ public class MicexIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry2), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
 
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
-        assert !sequenceValidator.isRecovering("SYMB2;CETS", false);
+        assert !sequenceValidator.isRecovering(380922L, false);
+        assert !sequenceValidator.isRecovering(380925L, false);
     }
 
     @Test
     public void testIncrementalOutOfSequence() {
-        sequenceValidator.startRecovering("SYMB;CETS");
-        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
+        sequenceValidator.startRecovering(380922L);
+        sequenceValidator.onSnapshotSeq(380922L, 99);
+        assert sequenceValidator.stopRecovering(380922L) == null;
 
         // ===
 
         Message message1 = getIncermentalMock(2, 1);
         GroupValue entry11 = message1.getSequence("GroupMDEntries").get(0);
 
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(101);
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -163,15 +205,14 @@ public class MicexIncrementalProcessorTest {
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
-        assert sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert sequenceValidator.isRecovering(380922L, false);
 
         // ===
 
         Message message2 = getIncermentalMock(1, 1);
         GroupValue entry21 = message2.getSequence("GroupMDEntries").get(0);
 
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -181,14 +222,14 @@ public class MicexIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(2)).flushIncrementals();
 
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering(380922L, false);
     }
 
     @Test
     public void testIncrementalOutOfSequence2() {
-        sequenceValidator.startRecovering("SYMB;CETS");
-        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
+        sequenceValidator.startRecovering(380922L);
+        sequenceValidator.onSnapshotSeq(380922L, 99);
+        assert sequenceValidator.stopRecovering(380922L) == null;
 
         // ===
 
@@ -196,12 +237,10 @@ public class MicexIncrementalProcessorTest {
         GroupValue entry11 = message1.getSequence("GroupMDEntries").get(0);
         GroupValue entry12 = message1.getSequence("GroupMDEntries").get(0);
 
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(102);
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
-        Mockito.when(message1.getSequence("GroupMDEntries").get(1).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message1.getSequence("GroupMDEntries").get(1).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message1.getSequence("GroupMDEntries").get(1).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message1.getSequence("GroupMDEntries").get(1).getInt("RptSeq")).thenReturn(103);
         Mockito.when(message1.getSequence("GroupMDEntries").get(1).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -209,7 +248,7 @@ public class MicexIncrementalProcessorTest {
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry12), Mockito.any(PerformanceData.class));
-        assert sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert sequenceValidator.isRecovering(380922L, false);
 
         // ===
 
@@ -217,12 +256,10 @@ public class MicexIncrementalProcessorTest {
         GroupValue entry21 = message2.getSequence("GroupMDEntries").get(0);
         GroupValue entry22 = message2.getSequence("GroupMDEntries").get(1);
 
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
-        Mockito.when(message2.getSequence("GroupMDEntries").get(1).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message2.getSequence("GroupMDEntries").get(1).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message2.getSequence("GroupMDEntries").get(1).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message2.getSequence("GroupMDEntries").get(1).getInt("RptSeq")).thenReturn(101);
         Mockito.when(message2.getSequence("GroupMDEntries").get(1).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -233,37 +270,35 @@ public class MicexIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry22), Mockito.any(PerformanceData.class));
 
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering(380922L, false);
     }
 
     @Test
     public void testIncrementalOutOfSequenceFailed() {
-        sequenceValidator.startRecovering("SYMB;CETS");
-        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
+        sequenceValidator.startRecovering(380922L);
+        sequenceValidator.onSnapshotSeq(380922L, 99);
+        assert sequenceValidator.stopRecovering(380922L) == null;
 
         // ===
 
         Message message1 = getIncermentalMock(3, 1);
         GroupValue entry11 = message1.getSequence("GroupMDEntries").get(0);
 
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(102);
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.handleMessage(message1, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
-        assert sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert sequenceValidator.isRecovering(380922L, false);
 
         // ===
 
         Message message2 = getIncermentalMock(1, 1);
         GroupValue entry21 = message2.getSequence("GroupMDEntries").get(0);
 
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -272,27 +307,26 @@ public class MicexIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
 
-        assert sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert sequenceValidator.isRecovering(380922L, false);
 
         // ===
 
-        sequenceValidator.onSnapshotSeq("SYMB;CETS", 102);
-        assert sequenceValidator.stopRecovering("SYMB;CETS").length == 0;
+        sequenceValidator.onSnapshotSeq(380922L, 102);
+        assert sequenceValidator.stopRecovering(380922L).length == 0;
     }
 
     @Test
     public void testIncrementalWith2Channels() {
-        sequenceValidator.startRecovering("SYMB;CETS");
-        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
+        sequenceValidator.startRecovering(380922L);
+        sequenceValidator.onSnapshotSeq(380922L, 99);
+        assert sequenceValidator.stopRecovering(380922L) == null;
 
         // ===
 
         Message message1 = getIncermentalMock(1, 1);
         GroupValue entry11 = message1.getSequence("GroupMDEntries").get(0);
 
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -300,15 +334,14 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message1, context, coder);
 
         Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering(380922L, false);
 
         // ===
 
         Message message2 = getIncermentalMock(1, 1);
         GroupValue entry21 = message2.getSequence("GroupMDEntries").get(0);
 
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -316,15 +349,14 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message2, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering(380922L, false);
 
         // ===
 
         Message message3 = getIncermentalMock(2, 1);
         GroupValue entry31 = message3.getSequence("GroupMDEntries").get(0);
 
-        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message3.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(101);
         Mockito.when(message3.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -333,15 +365,14 @@ public class MicexIncrementalProcessorTest {
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry31), Mockito.any(PerformanceData.class));
 
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering(380922L, false);
 
         // ===
 
         Message message4 = getIncermentalMock(2, 1);
         GroupValue entry41 = message4.getSequence("GroupMDEntries").get(0);
 
-        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message4.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(101);
         Mockito.when(message4.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -349,15 +380,15 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message4, context, coder);
 
         Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(entry41), Mockito.any(PerformanceData.class));
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering(380922L, false);
     }
 
     @Ignore
     @Test
     public void testIncrementalWith2ChannelsWithFailover() {
-        sequenceValidator.startRecovering("SYMB;CETS");
-        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
+        sequenceValidator.startRecovering(380922L);
+        sequenceValidator.onSnapshotSeq(380922L, 99);
+        assert sequenceValidator.stopRecovering(380922L) == null;
 
         // ===
 
@@ -365,8 +396,7 @@ public class MicexIncrementalProcessorTest {
             Message message1 = getIncermentalMock(i, 1);
             GroupValue entry11 = message1.getSequence("GroupMDEntries").get(0);
 
-            Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-            Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+            Mockito.when(message1.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
             Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(99 + i);
             Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -374,15 +404,14 @@ public class MicexIncrementalProcessorTest {
             incrementalProcessor.handleMessage(message1, context, coder);
 
             Mockito.verify(marketDataHandler, Mockito.times(i % 2)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
-            assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+            assert !sequenceValidator.isRecovering(380922L, false);
 
             // ===
 
             Message message2 = getIncermentalMock(i, 1);
             GroupValue entry21 = message2.getSequence("GroupMDEntries").get(0);
 
-            Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-            Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+            Mockito.when(message2.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
             Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(99 + i);
             Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -390,7 +419,7 @@ public class MicexIncrementalProcessorTest {
             incrementalProcessor.handleMessage(message2, context, coder);
 
             Mockito.verify(marketDataHandler, Mockito.times(1 - i % 2)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
-            assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+            assert !sequenceValidator.isRecovering(380922L, false);
         }
 
         // ===
@@ -398,8 +427,7 @@ public class MicexIncrementalProcessorTest {
         Message message3 = getIncermentalMock(1, 1);
         GroupValue entry31 = message3.getSequence("GroupMDEntries").get(0);
 
-        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message3.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(1);
         Mockito.when(message3.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -407,15 +435,14 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message3, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry31), Mockito.any(PerformanceData.class));
-        assert sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert sequenceValidator.isRecovering(380922L, false);
 
         // ===
 
         Message message4 = getIncermentalMock(1, 1);
         GroupValue entry41 = message4.getSequence("GroupMDEntries").get(0);
 
-        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message4.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(1);
         Mockito.when(message4.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -423,25 +450,24 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message4, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry41), Mockito.any(PerformanceData.class));
-        assert sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert sequenceValidator.isRecovering(380922L, false);
 
-        sequenceValidator.onSnapshotSeq("SYMB;CETS", 1);
-        assert sequenceValidator.stopRecovering("SYMB;CETS").length == 0;
+        sequenceValidator.onSnapshotSeq(380922L, 1);
+        assert sequenceValidator.stopRecovering(380922L).length == 0;
     }
 
     @Ignore
     @Test
     public void testIncrementalManyMessagesWith2Channels() {
-        sequenceValidator.startRecovering("SYMB;CETS");
-        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
+        sequenceValidator.startRecovering(380922L);
+        sequenceValidator.onSnapshotSeq(380922L, 99);
+        assert sequenceValidator.stopRecovering(380922L) == null;
 
         for (int i = 1; i < 1000; ++i) {
             Message message1 = getIncermentalMock(i, 1);
             GroupValue entry11 = message1.getSequence("GroupMDEntries").get(0);
 
-            Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-            Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+            Mockito.when(message1.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
             Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(99 + i);
             Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -449,15 +475,14 @@ public class MicexIncrementalProcessorTest {
             incrementalProcessor.handleMessage(message1, context, coder);
 
             Mockito.verify(marketDataHandler, Mockito.times(i % 2)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
-            assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+            assert !sequenceValidator.isRecovering(380922L, false);
 
             // ===
 
             Message message2 = getIncermentalMock(i, 1);
             GroupValue entry21 = message2.getSequence("GroupMDEntries").get(0);
 
-            Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-            Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+            Mockito.when(message2.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
             Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(99 + i);
             Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -465,23 +490,22 @@ public class MicexIncrementalProcessorTest {
             incrementalProcessor.handleMessage(message2, context, coder);
 
             Mockito.verify(marketDataHandler, Mockito.times(1 - i % 2)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
-            assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+            assert !sequenceValidator.isRecovering(380922L, false);
         }
     }
 
     @Test
     public void testIncrementalOutOfSequenceWith2Channels() {
-        sequenceValidator.startRecovering("SYMB;CETS");
-        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
+        sequenceValidator.startRecovering(380922L);
+        sequenceValidator.onSnapshotSeq(380922L, 99);
+        assert sequenceValidator.stopRecovering(380922L) == null;
 
         // ===
 
         Message message1 = getIncermentalMock(1, 1);
         GroupValue entry11 = message1.getSequence("GroupMDEntries").get(0);
 
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
         Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -489,15 +513,14 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message1, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering(380922L, false);
 
         // ===
 
         Message message2 = getIncermentalMock(2, 1);
         GroupValue entry21 = message2.getSequence("GroupMDEntries").get(0);
 
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(101);
         Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -505,15 +528,14 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message2, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering(380922L, false);
 
         // ===
 
         Message message3 = getIncermentalMock(3, 1);
         GroupValue entry31 = message3.getSequence("GroupMDEntries").get(0);
 
-        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message3.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(102);
         Mockito.when(message3.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -525,15 +547,14 @@ public class MicexIncrementalProcessorTest {
         marketDataHandlerInOrder.verify(marketDataHandler).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
         marketDataHandlerInOrder.verify(marketDataHandler).onIncremental(Mockito.eq(entry31), Mockito.any(PerformanceData.class));
 
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering(380922L, false);
 
         // ===
 
         Message message4 = getIncermentalMock(3, 1);
         GroupValue entry41 = message4.getSequence("GroupMDEntries").get(0);
 
-        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
+        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message4.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(102);
         Mockito.when(message4.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
@@ -541,90 +562,6 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message4, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry41), Mockito.any(PerformanceData.class));
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
-    }
-
-    @Test
-    public void testTradeId() {
-        sequenceValidator.startRecovering("SYMB;CETS");
-        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
-
-        Message message = getIncermentalMock(1, 1);
-        GroupValue entry1 = message.getSequence("GroupMDEntries").get(0);
-
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("DealNumber")).thenReturn("1000");
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("DealNumber")).thenReturn(mock(FieldValue.class));
-
-        incrementalProcessor.setIsPrimary(true);
-        incrementalProcessor.handleMessage(message, context, coder);
-
-        Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry1), Mockito.any(PerformanceData.class));
-        Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
-        Mockito.verify(message.getSequence("GroupMDEntries").get(0), Mockito.times(0)).setString("DealNumber", null);
-
-        message = getIncermentalMock(2, 1);
-        GroupValue entry2 = message.getSequence("GroupMDEntries").get(0);
-
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(101);
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("DealNumber")).thenReturn("1000");
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("DealNumber")).thenReturn(mock(FieldValue.class));
-
-        incrementalProcessor.handleMessage(message, context, coder);
-
-        Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry2), Mockito.any(PerformanceData.class));
-        Mockito.verify(marketDataHandler, Mockito.times(2)).flushIncrementals();
-        Mockito.verify(entry2, Mockito.times(1)).setString("DealNumber", null);
-
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
-    }
-
-    @Test
-    public void testTradeId2() {
-        sequenceValidator.startRecovering("SYMB;CETS");
-        sequenceValidator.onSnapshotSeq("SYMB;CETS", 99);
-        assert sequenceValidator.stopRecovering("SYMB;CETS") == null;
-
-        Message message = getIncermentalMock(1, 1);
-        GroupValue entry1 = message.getSequence("GroupMDEntries").get(0);
-
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("DealNumber")).thenReturn("1000");
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("DealNumber")).thenReturn(mock(FieldValue.class));
-
-        incrementalProcessor.setIsPrimary(true);
-        incrementalProcessor.handleMessage(message, context, coder);
-
-        Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry1), Mockito.any(PerformanceData.class));
-        Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
-        Mockito.verify(message.getSequence("GroupMDEntries").get(0), Mockito.times(0)).setString("DealNumber", null);
-
-        message = getIncermentalMock(2, 1);
-        GroupValue entry2 = message.getSequence("GroupMDEntries").get(0);
-
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(101);
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("DealNumber")).thenReturn("1001");
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("DealNumber")).thenReturn(mock(FieldValue.class));
-
-        incrementalProcessor.handleMessage(message, context, coder);
-
-        Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry2), Mockito.any(PerformanceData.class));
-        Mockito.verify(marketDataHandler, Mockito.times(2)).flushIncrementals();
-        Mockito.verify(entry2, Mockito.times(0)).setString("DealNumber", null);
-
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering(380922L, false);
     }
 }

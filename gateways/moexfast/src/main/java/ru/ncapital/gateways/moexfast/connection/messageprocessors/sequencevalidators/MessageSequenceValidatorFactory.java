@@ -8,4 +8,6 @@ import com.google.inject.name.Named;
 public interface MessageSequenceValidatorFactory<T> {
     @Named("orderlist") IMessageSequenceValidator<T> createMessageSequenceValidatorForOrderList();
     @Named("statistics") IMessageSequenceValidator<T> createMessageSequenceValidatorForStatistics();
+    @Named("publictrades") IMessageSequenceValidator<T> createMessageSequenceValidatorForPublicTrades();
+    @Named("orderbook") IMessageSequenceValidator<T> createMessageSequenceValidatorForOrderBook();
 }

@@ -17,7 +17,10 @@ public class FortsInstrument extends Instrument<Long> {
     }
 
     public static long getExchangeSecurityId(long exchangeSecurityId) {
-        return (long) Math.floor(exchangeSecurityId / 256.0);
+        if (exchangeSecurityId >> 24 > 0)
+            return exchangeSecurityId >> 8;
+        else
+            return exchangeSecurityId;
     }
 
     public void setSecurityType(String securityType) {

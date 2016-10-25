@@ -1,6 +1,7 @@
 package micex;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -202,6 +203,7 @@ public class MicexMessageReaderTest {
         assertEquals(20151211075748086L, messageCaptor.getValue().getLong("SendingTime"));
     }
 
+    @Ignore
     @Test
     public void testPayloadASynch100000() throws IOException {
         final byte[] payload = new byte[] {

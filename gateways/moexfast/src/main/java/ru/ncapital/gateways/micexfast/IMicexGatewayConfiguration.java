@@ -7,7 +7,7 @@ import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 /**
  * Created by egore on 16.02.2016.
  */
-public interface IMicexGatewayConfiguration extends IGatewayConfiguration{
+public interface IMicexGatewayConfiguration extends IGatewayConfiguration {
     TradingSessionId[] getAllowedTradingSessionIds();
 
     ProductType[] getAllowedProductTypes();

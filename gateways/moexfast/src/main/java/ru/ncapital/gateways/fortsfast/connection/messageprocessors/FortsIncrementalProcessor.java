@@ -1,6 +1,7 @@
 package ru.ncapital.gateways.fortsfast.connection.messageprocessors;
 
 import org.openfast.GroupValue;
+import ru.ncapital.gateways.fortsfast.domain.FortsInstrument;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IncrementalProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
@@ -14,11 +15,7 @@ public class FortsIncrementalProcessor extends IncrementalProcessor<Long> {
     }
 
     @Override
-    protected void checkTradeId(GroupValue mdEntry) {
-    }
-
-    @Override
     protected Long getExchangeSecurityId(GroupValue mdEntry) {
-        return mdEntry.getLong("SecurityID");
+        return FortsInstrument.getExchangeSecurityId(mdEntry.getLong("SecurityID"));
     }
 }
