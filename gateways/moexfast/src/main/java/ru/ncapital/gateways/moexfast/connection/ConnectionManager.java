@@ -383,7 +383,8 @@ public class ConnectionManager {
         if (isListenSnapshotChannelOnlyIfNeeded) {
             snapshotProcessorsToWatch.add(marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_LIST));
             snapshotProcessorsToWatch.add(marketDataManager.getSnapshotProcessor(MessageHandlerType.STATISTICS));
-            snapshotProcessorsToWatch.add(marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_BOOK));
+            if (marketType == MarketType.FUT)
+                snapshotProcessorsToWatch.add(marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_BOOK));
         }
     }
 

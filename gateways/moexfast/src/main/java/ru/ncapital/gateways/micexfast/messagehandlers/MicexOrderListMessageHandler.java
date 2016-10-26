@@ -26,12 +26,8 @@ public class MicexOrderListMessageHandler extends OrderListMessageHandler<String
 
     @Override
     protected DepthLevel<String>[] depthLevelsToArray(List<DepthLevel<String>> list) {
-        class MicexDepthLevel extends DepthLevel<String> {
-            MicexDepthLevel(String securityId, String exchangeSecurityId) {
-                super(securityId, exchangeSecurityId);
-            }
-        }
-        DepthLevel<String>[] array = new MicexDepthLevel[list.size()];
+        @SuppressWarnings("unchecked")
+        DepthLevel<String>[] array = new DepthLevel[list.size()];
         for (int i = 0; i < array.length; ++i)
             array[i] = list.get(i);
 
