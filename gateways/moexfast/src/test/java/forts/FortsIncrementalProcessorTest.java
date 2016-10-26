@@ -44,12 +44,9 @@ public class FortsIncrementalProcessorTest {
     private ArgumentCaptor<Message> messageCaptor;
 
     @Mock
-    private FortsInstrumentManager instrumentManager;
-
-    @Mock
     private FortsMarketDataManager marketDataManager;
 
-    private MessageSequenceValidator<Long> sequenceValidator = new MessageSequenceValidatorForOrderList<Long>();
+    private MessageSequenceValidator<Long> sequenceValidator = new MessageSequenceValidatorForOrderList<>();
 
     private IncrementalProcessor<Long> incrementalProcessor;
 
