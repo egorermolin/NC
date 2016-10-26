@@ -392,7 +392,7 @@ public class MessageReader implements IMulticastEventListener {
             case FUT_ORDER_BOOK_SNAP_B:
             case FUT_STATISTICS_SNAP_A:
             case FUT_STATISTICS_SNAP_B:
-                for (String name : new String[]{"DefaultSnapshotMessage", "SequenceReset", "Heartbeat"}) {
+                for (String name : new String[]{"DefaultSnapshotMessage", "TradingSessionStatus", "SequenceReset", "Heartbeat"}) {
                     MessageTemplate template = messageTemplates.get(name);
                     messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
                 }
@@ -551,6 +551,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("DefaultSnapshotMessage"), marketDataManager.getSnapshotProcessor(MessageHandlerType.STATISTICS));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("SequenceReset"), marketDataManager.getSnapshotProcessor(MessageHandlerType.STATISTICS));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("TradingSessionStatus"), marketDataManager.getSnapshotProcessor(MessageHandlerType.STATISTICS));
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.STATISTICS)));
                     break;
 
@@ -584,6 +585,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("DefaultSnapshotMessage"), marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_BOOK));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("SequenceReset"), marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_BOOK));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("TradingSessionStatus"), marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_BOOK));
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.ORDER_BOOK)));
                     break;
             }

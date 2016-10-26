@@ -33,19 +33,21 @@ public abstract class AMessageHandler<T> implements IMessageHandler<T> {
 
     @Override
     public void onSnapshot(Message readMessage) {
-        T exchangeSecurityId = getExchangeSecurityId(readMessage);
-        boolean firstFragment = readMessage.getInt("RouteFirst") == 1;
-        boolean lastFragment = readMessage.getInt("LastFragment") == 1;
+        if (readMessage.getString("MessageType").charAt(0) == 'W') {
+            T exchangeSecurityId = getExchangeSecurityId(readMessage);
+            boolean firstFragment = readMessage.getInt("RouteFirst") == 1;
+            boolean lastFragment = readMessage.getInt("LastFragment") == 1;
 
-        if (firstFragment)
-            onBeforeSnapshot(exchangeSecurityId);
+            if (firstFragment)
+                onBeforeSnapshot(exchangeSecurityId);
 
-        SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
-        for (int i = 0; i < mdEntries.getLength(); ++i)
-            onSnapshotMdEntry(exchangeSecurityId, mdEntries.get(i));
+            SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
+            for (int i = 0; i < mdEntries.getLength(); ++i)
+                onSnapshotMdEntry(exchangeSecurityId, mdEntries.get(i));
 
-        if (lastFragment)
-            onAfterSnapshot(exchangeSecurityId);
+            if (lastFragment)
+                onAfterSnapshot(exchangeSecurityId);
+        }
     }
 
     @Override
