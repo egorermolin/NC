@@ -68,7 +68,7 @@ public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnap
     @Override
     public void processMessage(Message readMessage) {
         if (readMessage.getValue("RouteFirst") == null)
-            readMessage.setInteger("RouteFirst", 1);
+            readMessage. setInteger("RouteFirst", 1);
 
         if (readMessage.getValue("LastFragment") == null)
             readMessage.setInteger("LastFragment", 1);
@@ -111,7 +111,6 @@ public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnap
 
     @Override
     protected boolean checkSequence(Message readMessage) {
-        T exchangeSecurityId = getExchangeSecurityId(readMessage);
         int seqNum = readMessage.getInt("MsgSeqNum");
         long sendingTime = readMessage.getLong("SendingTime");
         char messageType = readMessage.getString("MessageType").charAt(0);
@@ -124,11 +123,14 @@ public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnap
                 return false;
         }
 
-        if (!messageHandler.isAllowedUpdate(exchangeSecurityId))
-            return false;
+        if (messageType == 'W') {
+            T exchangeSecurityId = getExchangeSecurityId(readMessage);
+            if (!messageHandler.isAllowedUpdate(exchangeSecurityId))
+                return false;
 
-        if (!sequenceValidator.isRecovering(exchangeSecurityId, true))
-            return false;
+            if (!sequenceValidator.isRecovering(exchangeSecurityId, true))
+                return false;
+        }
 
         return true;
     }

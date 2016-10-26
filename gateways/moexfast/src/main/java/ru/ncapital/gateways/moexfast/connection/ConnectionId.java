@@ -6,6 +6,9 @@ import java.util.HashMap;
  * Created by egore on 2/3/16.
  */
 public enum ConnectionId {
+    MULTICAST_CHANNEL_A("MULTICAST-A"),
+    MULTICAST_CHANNEL_B("MULTICAST-B"),
+
     CURR_INSTRUMENT_SNAP_A("CURR-IDF-A"),
     CURR_INSTRUMENT_SNAP_B("CURR-IDF-B"),
     CURR_INSTRUMENT_INCR_A("CURR-ISF-A"),
