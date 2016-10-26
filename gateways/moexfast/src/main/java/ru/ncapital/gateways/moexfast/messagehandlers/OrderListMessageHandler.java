@@ -128,7 +128,8 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
     @Override
     protected void onAfterSnapshot(T exchangeSecurityId) {
         for (List<DepthLevel<T>> depthLevelList : depthLevelMap.values())
-            marketDataManager.onDepthLevels(depthLevelList.toArray(new DepthLevel[0]));
+            if (depthLevelList.size() > 0)
+                marketDataManager.onDepthLevels(depthLevelsToArray(depthLevelList));
 
         depthLevelMap.clear();
     }
@@ -136,8 +137,11 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
     @Override
     public void flushIncrementals() {
         for (List<DepthLevel<T>> depthLevelList : depthLevelMap.values())
-            marketDataManager.onDepthLevels(depthLevelList.toArray(new DepthLevel[0]));
+            if (depthLevelList.size() > 0)
+                marketDataManager.onDepthLevels(depthLevelsToArray(depthLevelList));
 
         depthLevelMap.clear();
     }
+
+    protected abstract DepthLevel<T>[] depthLevelsToArray(List<DepthLevel<T>> list);
 }

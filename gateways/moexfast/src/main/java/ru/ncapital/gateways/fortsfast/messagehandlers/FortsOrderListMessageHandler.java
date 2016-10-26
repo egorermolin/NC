@@ -25,6 +25,20 @@ public class FortsOrderListMessageHandler extends OrderListMessageHandler<Long> 
     }
 
     @Override
+    protected DepthLevel<Long>[] depthLevelsToArray(List<DepthLevel<Long>> list) {
+        class FortsDepthLevel extends DepthLevel<Long> {
+            FortsDepthLevel(String securityId, Long exchangeSecurityId) {
+                super(securityId, exchangeSecurityId);
+            }
+        }
+        DepthLevel<Long>[] array = new FortsDepthLevel[list.size()];
+        for (int i = 0; i < array.length; ++i)
+            array[i] = list.get(i);
+
+        return array;
+    }
+
+    @Override
     protected Long getExchangeSecurityId(Message readMessage) {
         return readMessage.getLong("SecurityID");
     }

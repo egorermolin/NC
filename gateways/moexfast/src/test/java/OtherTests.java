@@ -9,6 +9,9 @@ import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.SequenceArray;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
@@ -21,6 +24,75 @@ import static junit.framework.TestCase.assertEquals;
 @RunWith(MockitoJUnitRunner.class)
 public class OtherTests {
     ScheduledFuture<?> futureTask ;
+
+    static <C, T extends C> C[] toArray(Class<C> c, List<T> l) {
+        @SuppressWarnings("unchecked")
+        C[] array = (C[]) Array.newInstance(c, l.size());
+
+        return l.toArray(array);
+    }
+
+    @Test
+    public void classTest() {
+        class A<T> {
+            T value;
+
+            A(T v) {this.value = v;}
+        };
+
+        class AString extends A<String> {
+            AString(String v) {
+                super(v);
+            }
+        }
+
+        abstract class M<T> {
+            abstract A<T> create(T v);
+
+            void f(A<T>[] al) {
+                for (A<T> a : al)
+                    System.out.println(a.value);
+            }
+        }
+
+        class MString extends M<String> {
+            A<String> create(String v) {
+                return new AString(v);
+            }
+        }
+
+        abstract class B<T> {
+            List<A<T>> list = new ArrayList<>();
+
+            M<T> m;
+
+            void add(T v) {
+                list.add(m.create(v));
+            }
+
+            void f() {
+                m.f(toArray(list));
+            }
+
+            abstract A<T>[] toArray(List<A<T>> l);
+        }
+
+        B<String> b = new B<String>() {
+            @Override
+            A<String>[] toArray(List<A<String>> l) {
+                A<String>[] out = new AString[l.size()];
+                for (int i = 0; i < out.length; ++i)
+                    out[i] = l.get(i);
+                return out;
+            }
+        };
+        b.m = new MString();
+
+        b.add("AAA");
+        b.add("BBB");
+
+        b.f();
+    }
 
     @Test
     public void testGetMdEntryTimeInUsec() {
