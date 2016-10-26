@@ -1,0 +1,1 @@
+/pub/tools/versions/jre1.8.0_20/bin/java -cp moexfast-1.0-SNAPSHOT.jar:openfast-1.1.1.jar:log4j-1.2.17.jar:slf4j-api-1.7.13.jar:slf4j-log4j12-1.7.13.jar ru.ncapital.gateways.moexfast.connection.multicast.MulticastMessageReader MULTICAST-B ../RDDFastTemplates.xml lo debug

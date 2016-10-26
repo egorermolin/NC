@@ -55,6 +55,9 @@
         </string>
         <uInt32 name="MsgSeqNum" id="34"/>
         <uInt64 name="SendingTime" id="52"/>
+        <uInt32 name="RouteFirst" id="7944">
+            <constant value="1"/>
+        </uInt32>
         <uInt32 name="LastFragment" id="893" presence="optional"/>
         <uInt32 name="RptSeq" id="83"/>
         <uInt32 name="TotNumReports" id="911"/>

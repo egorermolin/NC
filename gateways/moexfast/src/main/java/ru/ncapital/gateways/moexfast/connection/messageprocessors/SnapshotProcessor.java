@@ -130,9 +130,11 @@ public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnap
 
             if (!sequenceValidator.isRecovering(exchangeSecurityId, true))
                 return false;
+
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     private void printRecoveringSecurityIds() {
