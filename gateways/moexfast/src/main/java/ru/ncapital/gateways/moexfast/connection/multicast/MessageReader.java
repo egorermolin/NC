@@ -487,7 +487,7 @@ public class MessageReader implements IMulticastEventListener {
                     break;
                 case FUT_ORDER_LIST_INCR_A:
                 case FUT_ORDER_LIST_INCR_B:
-                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("OrdersLog"), marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_LIST));
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("OrdersLog"), marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.ORDER_LIST)));
                     break;
