@@ -1,17 +1,21 @@
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openfast.FieldValue;
-import org.openfast.GroupValue;
+import org.openfast.*;
+import org.openfast.template.MessageTemplate;
+import org.openfast.template.loader.XMLMessageTemplateLoader;
 import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.SequenceArray;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
@@ -25,73 +29,36 @@ import static junit.framework.TestCase.assertEquals;
 public class OtherTests {
     ScheduledFuture<?> futureTask ;
 
-    static <C, T extends C> C[] toArray(Class<C> c, List<T> l) {
-        @SuppressWarnings("unchecked")
-        C[] array = (C[]) Array.newInstance(c, l.size());
-
-        return l.toArray(array);
-    }
-
+    @Ignore
     @Test
-    public void classTest() {
-        class A<T> {
-            T value;
+    public void testDecode() throws FileNotFoundException {
+        MessageInputStream stream = new MessageInputStream(new InputStream() {
+            private ByteBuffer data = ByteBuffer.wrap(PacketData.BYTES_PRODUCT_SNAPSHOT_START);
 
-            A(T v) {this.value = v;}
-        };
-
-        class AString extends A<String> {
-            AString(String v) {
-                super(v);
-            }
-        }
-
-        abstract class M<T> {
-            abstract A<T> create(T v);
-
-            void f(A<T>[] al) {
-                for (A<T> a : al)
-                    System.out.println(a.value);
-            }
-        }
-
-        class MString extends M<String> {
-            A<String> create(String v) {
-                return new AString(v);
-            }
-        }
-
-        abstract class B<T> {
-            List<A<T>> list = new ArrayList<>();
-
-            M<T> m;
-
-            void add(T v) {
-                list.add(m.create(v));
-            }
-
-            void f() {
-                m.f(toArray(list));
-            }
-
-            abstract A<T>[] toArray(List<A<T>> l);
-        }
-
-        B<String> b = new B<String>() {
             @Override
-            A<String>[] toArray(List<A<String>> l) {
-                A<String>[] out = new AString[l.size()];
-                for (int i = 0; i < out.length; ++i)
-                    out[i] = l.get(i);
-                return out;
+            public int read() throws IOException {
+                if (data.hasRemaining())
+                    return data.get() & 0xFF;
+
+                return -1;
             }
-        };
-        b.m = new MString();
+        });
 
-        b.add("AAA");
-        b.add("BBB");
+        for (MessageTemplate template : new XMLMessageTemplateLoader().load(new FileInputStream("C:\\Users\\Egor\\Desktop\\RDDFastTemplates.xml"))) {
+            System.out.println("Loaded " + template.getId() + " " + template.getName());
+            stream.registerTemplate(Integer.valueOf(template.getId()), template);
+        }
 
-        b.f();
+        stream.addMessageHandler((readMessage, context, coder) -> System.out.println(readMessage));
+
+        stream.setBlockReader(MessageBlockReader.NULL);
+
+        // stream.getContext().setTraceEnabled(true);
+
+        while (true) {
+            if (stream.readMessage() == null)
+                break;
+        }
     }
 
     @Test
