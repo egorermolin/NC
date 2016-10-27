@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openfast.*;
+import org.openfast.codec.Coder;
 import org.openfast.template.MessageTemplate;
 import org.openfast.template.loader.XMLMessageTemplateLoader;
 import ru.ncapital.gateways.moexfast.Utils;
@@ -49,7 +50,12 @@ public class OtherTests {
             stream.registerTemplate(Integer.valueOf(template.getId()), template);
         }
 
-        stream.addMessageHandler((readMessage, context, coder) -> System.out.println(readMessage));
+        stream.addMessageHandler(new MessageHandler() {
+            @Override
+            public void handleMessage(Message readMessage, Context context, Coder coder) {
+                System.out.println(readMessage);
+            }
+        });
 
         stream.setBlockReader(MessageBlockReader.NULL);
 
