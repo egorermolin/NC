@@ -48,7 +48,7 @@ public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnap
         for (int seqNum : messages.keySet()) {
             if (lastSeqNum == 0) {
                 lastSeqNum = seqNum;
-                if (messages.get(seqNum).getInt("RouteFirst") != 1)
+                if (messages.get(seqNum).getValue("RouteFirst") != null && messages.get(seqNum).getInt("RouteFirst") != 1)
                     // missing first fragment
                     return false;
             } else if (lastSeqNum + 1 < seqNum) {
@@ -58,7 +58,7 @@ public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnap
                 lastSeqNum = seqNum;
             }
         }
-        if (messages.get(lastSeqNum).getInt("LastFragment") != 1)
+        if (messages.get(lastSeqNum).getValue("LastFragment") != null && messages.get(lastSeqNum).getInt("LastFragment") != 1)
             // missing last fragment
             return false;
 
