@@ -35,8 +35,8 @@ public abstract class AMessageHandler<T> implements IMessageHandler<T> {
     public void onSnapshot(Message readMessage) {
         if (readMessage.getString("MessageType").charAt(0) == 'W') {
             T exchangeSecurityId = getExchangeSecurityId(readMessage);
-            boolean firstFragment = readMessage.getInt("RouteFirst") == 1;
-            boolean lastFragment = readMessage.getInt("LastFragment") == 1;
+            boolean firstFragment = readMessage.getValue("RouteFirst") == null || readMessage.getInt("RouteFirst") == 1;
+            boolean lastFragment = readMessage.getValue("LastFragment") == null || readMessage.getInt("LastFragment") == 1;
 
             if (firstFragment)
                 onBeforeSnapshot(exchangeSecurityId);
@@ -92,6 +92,8 @@ public abstract class AMessageHandler<T> implements IMessageHandler<T> {
     }
 
     protected abstract String getTradeId(GroupValue mdEntry);
+
+    protected abstract SequenceValue getMdEntries(Message readMessage);
 
     protected final boolean getTradeIsBid(GroupValue mdEntry) {
         return mdEntry.getString("OrderSide").charAt(0) == '1';

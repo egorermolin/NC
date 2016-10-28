@@ -4,6 +4,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.openfast.GroupValue;
 import org.openfast.Message;
+import org.openfast.SequenceValue;
 import ru.ncapital.gateways.fortsfast.domain.FortsInstrument;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
@@ -31,5 +32,10 @@ public class FortsOrderBookMessageHandler extends StatisticsMessageHandler<Long>
     @Override
     protected String getTradeId(GroupValue mdEntry) {
         return null;
+    }
+
+    @Override
+    protected SequenceValue getMdEntries(Message readMessage) {
+        return readMessage.getSequence("MDEntries");
     }
 }

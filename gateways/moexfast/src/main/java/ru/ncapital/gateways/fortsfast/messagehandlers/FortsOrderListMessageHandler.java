@@ -4,6 +4,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.openfast.GroupValue;
 import org.openfast.Message;
+import org.openfast.SequenceValue;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.domain.MdEntryType;
@@ -47,5 +48,10 @@ public class FortsOrderListMessageHandler extends OrderListMessageHandler<Long> 
     @Override
     protected String getTradeId(GroupValue mdEntry) {
         return String.valueOf(mdEntry.getLong("TradeID"));
+    }
+
+    @Override
+    protected SequenceValue getMdEntries(Message readMessage) {
+        return readMessage.getSequence("MDEntries");
     }
 }

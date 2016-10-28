@@ -13,7 +13,7 @@
         <uInt32 name="MsgSeqNum" id="34"/>
         <uInt64 name="SendingTime" id="52"/>
         <uInt32 name="LastFragment" id="893" presence="optional"/>
-        <sequence name="GroupMDEntries">
+        <sequence name="MDEntries">
             <length name="NoMDEntries" id="268"/>
             <uInt32 name="MDUpdateAction" id="279"/>
             <string name="MDEntryType" id="269"/>
@@ -55,9 +55,6 @@
         </string>
         <uInt32 name="MsgSeqNum" id="34"/>
         <uInt64 name="SendingTime" id="52"/>
-        <uInt32 name="RouteFirst" id="7944">
-            <constant value="1"/>
-        </uInt32>
         <uInt32 name="LastFragment" id="893" presence="optional"/>
         <uInt32 name="RptSeq" id="83"/>
         <uInt32 name="TotNumReports" id="911"/>
@@ -68,7 +65,7 @@
         </uInt32>
         <string name="Symbol" id="55" presence="optional"/>
         <string name="SecurityGroup" id="1151" presence="optional"/>
-        <sequence name="GroupMDEntries">
+        <sequence name="MDEntries">
             <length name="NoMDEntries" id="268"/>
             <string name="MDEntryType" id="269"/>
             <uInt32 name="ExchangeTradingSessionID" id="5842" presence="optional"/>
@@ -315,7 +312,7 @@
         <uInt32 name="MsgSeqNum" id="34"/>
         <uInt64 name="SendingTime" id="52"/>
         <uInt32 name="LastFragment" id="893"/>
-        <sequence name="GroupMDEntries">
+        <sequence name="MDEntries">
             <length name="NoMDEntries" id="268"/>
             <uInt32 name="MDUpdateAction" id="279"/>
             <string name="MDEntryType" id="269"/>
@@ -351,13 +348,13 @@
         <uInt32 name="LastMsgSeqNumProcessed" id="369"/>
         <uInt32 name="RptSeq" id="83" presence="optional"/>
         <uInt32 name="LastFragment" id="893"/>
-        <uInt32 name="RouteFirst" id="7944"/> 
+        <uInt32 name="RouteFirst" id="7944"/>
         <uInt32 name="ExchangeTradingSessionID" id="5842"/>
         <uInt64 name="SecurityID" id="48" presence="optional"/>
         <uInt32 name="SecurityIDSource" id="22">
             <constant value="8"/>
         </uInt32>
-        <sequence name="GroupMDEntries">
+        <sequence name="MDEntries">
             <length name="NoMDEntries" id="268"/>
             <string name="MDEntryType" id="269"/>
             <int64 name="MDEntryID" id="278" presence="optional"/>

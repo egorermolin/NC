@@ -1,6 +1,8 @@
 package ru.ncapital.gateways.micexfast.connection.messageprocessors;
 
 import org.openfast.GroupValue;
+import org.openfast.Message;
+import org.openfast.SequenceValue;
 import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IncrementalProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
@@ -35,5 +37,10 @@ public class MicexIncrementalProcessor extends IncrementalProcessor<String> {
         String tradingSessionId = mdEntry.getString("TradingSessionID");
 
         return MicexInstrument.getSecurityId(symbol, tradingSessionId);
+    }
+
+    @Override
+    protected SequenceValue getMdEntries(Message readMessage) {
+        return readMessage.getSequence("GroupMDEntries");
     }
 }

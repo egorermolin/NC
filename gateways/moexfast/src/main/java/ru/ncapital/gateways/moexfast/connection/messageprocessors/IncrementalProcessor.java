@@ -24,7 +24,7 @@ public abstract class IncrementalProcessor<T> extends Processor<T> implements II
         long sendingTime = Utils.convertTodayToTicks((readMessage.getLong("SendingTime") % 1_00_00_00_000L) * 1_000L);
 
         synchronized (sequenceValidator) {
-            SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
+            SequenceValue mdEntries = getMdEntries(readMessage);
             for (int i = 0; i < mdEntries.getLength(); ++i) {
                 GroupValue mdEntry = mdEntries.get(i);
                 if (mdEntry.getValue("RptSeq") == null) {
@@ -74,8 +74,9 @@ public abstract class IncrementalProcessor<T> extends Processor<T> implements II
         }
     }
 
-    protected void checkTradeId(GroupValue mdEntry) {
-    }
+    protected void checkTradeId(GroupValue mdEntry) { }
 
     protected abstract T getExchangeSecurityId(GroupValue mdEntry);
+
+    protected abstract SequenceValue getMdEntries(Message readMessage);
 }

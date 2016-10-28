@@ -7,6 +7,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.openfast.GroupValue;
 import org.openfast.Message;
+import org.openfast.SequenceValue;
 import org.slf4j.Logger;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
@@ -23,6 +24,7 @@ public class NullMessageHandler<T> extends AMessageHandler<T> {
 
     @Override
     public void flushIncrementals() {
+
     }
 
     @Override
@@ -67,6 +69,11 @@ public class NullMessageHandler<T> extends AMessageHandler<T> {
 
     @Override
     protected String getTradeId(GroupValue mdEntry) {
+        return null;
+    }
+
+    @Override
+    protected SequenceValue getMdEntries(Message readMessage) {
         return null;
     }
 }

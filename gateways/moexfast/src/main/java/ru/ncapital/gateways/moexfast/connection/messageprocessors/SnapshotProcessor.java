@@ -67,18 +67,12 @@ public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnap
 
     @Override
     public void processMessage(Message readMessage) {
-        if (readMessage.getValue("RouteFirst") == null)
-            readMessage. setInteger("RouteFirst", 1);
-
-        if (readMessage.getValue("LastFragment") == null)
-            readMessage.setInteger("LastFragment", 1);
-
         int seqNum = readMessage.getInt("MsgSeqNum");
         T exchangeSecurityId = getExchangeSecurityId(readMessage);
 
         int rptSeqNum = readMessage.getInt("RptSeq");
-        boolean firstFragment = readMessage.getInt("RouteFirst") == 1;
-        boolean lastFragment = readMessage.getInt("LastFragment") == 1;
+        boolean firstFragment = readMessage.getValue("RouteFirst") == null || readMessage.getInt("RouteFirst") == 1;
+        boolean lastFragment = readMessage.getValue("LastFragment") == null || readMessage.getInt("LastFragment") == 1;
 
         if (firstFragment)
             fragmentedSnapshots.put(exchangeSecurityId, Collections.synchronizedMap(new TreeMap<Integer, Message>()));

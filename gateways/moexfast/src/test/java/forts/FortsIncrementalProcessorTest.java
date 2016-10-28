@@ -69,7 +69,7 @@ public class FortsIncrementalProcessorTest {
         Mockito.when(message.getLong("SendingTime")).thenReturn(123L);
 
         SequenceValue mdEntries = mock(SequenceValue.class);
-        Mockito.when(message.getSequence("GroupMDEntries")).thenReturn(mdEntries);
+        Mockito.when(message.getSequence("MDEntries")).thenReturn(mdEntries);
         Mockito.when(mdEntries.getLength()).thenReturn(numMdEntries);
 
         for (int i = 0; i < numMdEntries; ++i) {
@@ -88,11 +88,11 @@ public class FortsIncrementalProcessorTest {
         assert sequenceValidator.stopRecovering(380922L) == null;
 
         Message message = getIncermentalMock(1, 1);
-        GroupValue entry1 = message.getSequence("GroupMDEntries").get(0);
+        GroupValue entry1 = message.getSequence("MDEntries").get(0);
 
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(true);
         incrementalProcessor.handleMessage(message, context, coder);
@@ -101,11 +101,11 @@ public class FortsIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
 
         message = getIncermentalMock(1, 1);
-        GroupValue entry2 = message.getSequence("GroupMDEntries").get(0);
+        GroupValue entry2 = message.getSequence("MDEntries").get(0);
 
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(false);
         incrementalProcessor.handleMessage(message, context, coder);
@@ -124,11 +124,11 @@ public class FortsIncrementalProcessorTest {
         assert sequenceValidator.stopRecovering(380922L) == null;
 
         Message message = getIncermentalMock(1, 1);
-        GroupValue entry1 = message.getSequence("GroupMDEntries").get(0);
+        GroupValue entry1 = message.getSequence("MDEntries").get(0);
 
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(380922L);
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(380922L);
+        Mockito.when(message.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(true);
         incrementalProcessor.handleMessage(message, context, coder);
@@ -137,11 +137,11 @@ public class FortsIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
 
         message = getIncermentalMock(1, 1);
-        GroupValue entry2 = message.getSequence("GroupMDEntries").get(0);
+        GroupValue entry2 = message.getSequence("MDEntries").get(0);
 
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(380922L);
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(380922L);
+        Mockito.when(message.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(false);
         incrementalProcessor.handleMessage(message, context, coder);
@@ -163,15 +163,15 @@ public class FortsIncrementalProcessorTest {
         assert sequenceValidator.stopRecovering(380925L) == null;
 
         Message message = getIncermentalMock(1, 2);
-        GroupValue entry1 = message.getSequence("GroupMDEntries").get(0);
-        GroupValue entry2 = message.getSequence("GroupMDEntries").get(1);
+        GroupValue entry1 = message.getSequence("MDEntries").get(0);
+        GroupValue entry2 = message.getSequence("MDEntries").get(1);
 
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message.getSequence("GroupMDEntries").get(1).getLong("SecurityID")).thenReturn(97516870L);
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
-        Mockito.when(message.getSequence("GroupMDEntries").get(1).getInt("RptSeq")).thenReturn(200);
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
-        Mockito.when(message.getSequence("GroupMDEntries").get(1).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message.getSequence("MDEntries").get(1).getLong("SecurityID")).thenReturn(97516870L);
+        Mockito.when(message.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message.getSequence("MDEntries").get(1).getInt("RptSeq")).thenReturn(200);
+        Mockito.when(message.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message.getSequence("MDEntries").get(1).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.handleMessage(message, context, coder);
 
@@ -192,11 +192,11 @@ public class FortsIncrementalProcessorTest {
         // ===
 
         Message message1 = getIncermentalMock(2, 1);
-        GroupValue entry11 = message1.getSequence("GroupMDEntries").get(0);
+        GroupValue entry11 = message1.getSequence("MDEntries").get(0);
 
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(101);
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message1.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message1.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(101);
+        Mockito.when(message1.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.handleMessage(message1, context, coder);
 
@@ -207,11 +207,11 @@ public class FortsIncrementalProcessorTest {
         // ===
 
         Message message2 = getIncermentalMock(1, 1);
-        GroupValue entry21 = message2.getSequence("GroupMDEntries").get(0);
+        GroupValue entry21 = message2.getSequence("MDEntries").get(0);
 
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message2.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message2.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message2.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.handleMessage(message2, context, coder);
 
@@ -231,15 +231,15 @@ public class FortsIncrementalProcessorTest {
         // ===
 
         Message message1 = getIncermentalMock(2, 2);
-        GroupValue entry11 = message1.getSequence("GroupMDEntries").get(0);
-        GroupValue entry12 = message1.getSequence("GroupMDEntries").get(0);
+        GroupValue entry11 = message1.getSequence("MDEntries").get(0);
+        GroupValue entry12 = message1.getSequence("MDEntries").get(0);
 
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(102);
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
-        Mockito.when(message1.getSequence("GroupMDEntries").get(1).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message1.getSequence("GroupMDEntries").get(1).getInt("RptSeq")).thenReturn(103);
-        Mockito.when(message1.getSequence("GroupMDEntries").get(1).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message1.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message1.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(102);
+        Mockito.when(message1.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message1.getSequence("MDEntries").get(1).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message1.getSequence("MDEntries").get(1).getInt("RptSeq")).thenReturn(103);
+        Mockito.when(message1.getSequence("MDEntries").get(1).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.handleMessage(message1, context, coder);
 
@@ -250,15 +250,15 @@ public class FortsIncrementalProcessorTest {
         // ===
 
         Message message2 = getIncermentalMock(1, 2);
-        GroupValue entry21 = message2.getSequence("GroupMDEntries").get(0);
-        GroupValue entry22 = message2.getSequence("GroupMDEntries").get(1);
+        GroupValue entry21 = message2.getSequence("MDEntries").get(0);
+        GroupValue entry22 = message2.getSequence("MDEntries").get(1);
 
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
-        Mockito.when(message2.getSequence("GroupMDEntries").get(1).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message2.getSequence("GroupMDEntries").get(1).getInt("RptSeq")).thenReturn(101);
-        Mockito.when(message2.getSequence("GroupMDEntries").get(1).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message2.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message2.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message2.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message2.getSequence("MDEntries").get(1).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message2.getSequence("MDEntries").get(1).getInt("RptSeq")).thenReturn(101);
+        Mockito.when(message2.getSequence("MDEntries").get(1).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.handleMessage(message2, context, coder);
 
@@ -279,11 +279,11 @@ public class FortsIncrementalProcessorTest {
         // ===
 
         Message message1 = getIncermentalMock(3, 1);
-        GroupValue entry11 = message1.getSequence("GroupMDEntries").get(0);
+        GroupValue entry11 = message1.getSequence("MDEntries").get(0);
 
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(102);
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message1.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message1.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(102);
+        Mockito.when(message1.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.handleMessage(message1, context, coder);
 
@@ -293,11 +293,11 @@ public class FortsIncrementalProcessorTest {
         // ===
 
         Message message2 = getIncermentalMock(1, 1);
-        GroupValue entry21 = message2.getSequence("GroupMDEntries").get(0);
+        GroupValue entry21 = message2.getSequence("MDEntries").get(0);
 
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message2.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message2.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message2.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.handleMessage(message2, context, coder);
 
@@ -321,11 +321,11 @@ public class FortsIncrementalProcessorTest {
         // ===
 
         Message message1 = getIncermentalMock(1, 1);
-        GroupValue entry11 = message1.getSequence("GroupMDEntries").get(0);
+        GroupValue entry11 = message1.getSequence("MDEntries").get(0);
 
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message1.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message1.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message1.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(true);
         incrementalProcessor.handleMessage(message1, context, coder);
@@ -336,11 +336,11 @@ public class FortsIncrementalProcessorTest {
         // ===
 
         Message message2 = getIncermentalMock(1, 1);
-        GroupValue entry21 = message2.getSequence("GroupMDEntries").get(0);
+        GroupValue entry21 = message2.getSequence("MDEntries").get(0);
 
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message2.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message2.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message2.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(false);
         incrementalProcessor.handleMessage(message2, context, coder);
@@ -351,11 +351,11 @@ public class FortsIncrementalProcessorTest {
         // ===
 
         Message message3 = getIncermentalMock(2, 1);
-        GroupValue entry31 = message3.getSequence("GroupMDEntries").get(0);
+        GroupValue entry31 = message3.getSequence("MDEntries").get(0);
 
-        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(101);
-        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message3.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message3.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(101);
+        Mockito.when(message3.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(false);
         incrementalProcessor.handleMessage(message3, context, coder);
@@ -367,11 +367,11 @@ public class FortsIncrementalProcessorTest {
         // ===
 
         Message message4 = getIncermentalMock(2, 1);
-        GroupValue entry41 = message4.getSequence("GroupMDEntries").get(0);
+        GroupValue entry41 = message4.getSequence("MDEntries").get(0);
 
-        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(101);
-        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message4.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message4.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(101);
+        Mockito.when(message4.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(true);
         incrementalProcessor.handleMessage(message4, context, coder);
@@ -391,11 +391,11 @@ public class FortsIncrementalProcessorTest {
 
         for (int i = 1; i < 150; ++i) {
             Message message1 = getIncermentalMock(i, 1);
-            GroupValue entry11 = message1.getSequence("GroupMDEntries").get(0);
+            GroupValue entry11 = message1.getSequence("MDEntries").get(0);
 
-            Mockito.when(message1.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-            Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(99 + i);
-            Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+            Mockito.when(message1.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+            Mockito.when(message1.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(99 + i);
+            Mockito.when(message1.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
             incrementalProcessor.setIsPrimary(i % 2 == 1);
             incrementalProcessor.handleMessage(message1, context, coder);
@@ -406,11 +406,11 @@ public class FortsIncrementalProcessorTest {
             // ===
 
             Message message2 = getIncermentalMock(i, 1);
-            GroupValue entry21 = message2.getSequence("GroupMDEntries").get(0);
+            GroupValue entry21 = message2.getSequence("MDEntries").get(0);
 
-            Mockito.when(message2.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-            Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(99 + i);
-            Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+            Mockito.when(message2.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+            Mockito.when(message2.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(99 + i);
+            Mockito.when(message2.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
             incrementalProcessor.setIsPrimary(i % 2 == 0);
             incrementalProcessor.handleMessage(message2, context, coder);
@@ -422,11 +422,11 @@ public class FortsIncrementalProcessorTest {
         // ===
 
         Message message3 = getIncermentalMock(1, 1);
-        GroupValue entry31 = message3.getSequence("GroupMDEntries").get(0);
+        GroupValue entry31 = message3.getSequence("MDEntries").get(0);
 
-        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(1);
-        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message3.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message3.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(1);
+        Mockito.when(message3.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(true);
         incrementalProcessor.handleMessage(message3, context, coder);
@@ -437,11 +437,11 @@ public class FortsIncrementalProcessorTest {
         // ===
 
         Message message4 = getIncermentalMock(1, 1);
-        GroupValue entry41 = message4.getSequence("GroupMDEntries").get(0);
+        GroupValue entry41 = message4.getSequence("MDEntries").get(0);
 
-        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(1);
-        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message4.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message4.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(1);
+        Mockito.when(message4.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(false);
         incrementalProcessor.handleMessage(message4, context, coder);
@@ -462,11 +462,11 @@ public class FortsIncrementalProcessorTest {
 
         for (int i = 1; i < 1000; ++i) {
             Message message1 = getIncermentalMock(i, 1);
-            GroupValue entry11 = message1.getSequence("GroupMDEntries").get(0);
+            GroupValue entry11 = message1.getSequence("MDEntries").get(0);
 
-            Mockito.when(message1.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-            Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(99 + i);
-            Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+            Mockito.when(message1.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+            Mockito.when(message1.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(99 + i);
+            Mockito.when(message1.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
             incrementalProcessor.setIsPrimary(i % 2 == 1);
             incrementalProcessor.handleMessage(message1, context, coder);
@@ -477,11 +477,11 @@ public class FortsIncrementalProcessorTest {
             // ===
 
             Message message2 = getIncermentalMock(i, 1);
-            GroupValue entry21 = message2.getSequence("GroupMDEntries").get(0);
+            GroupValue entry21 = message2.getSequence("MDEntries").get(0);
 
-            Mockito.when(message2.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-            Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(99 + i);
-            Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+            Mockito.when(message2.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+            Mockito.when(message2.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(99 + i);
+            Mockito.when(message2.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
             incrementalProcessor.setIsPrimary(i % 2 == 0);
             incrementalProcessor.handleMessage(message2, context, coder);
@@ -500,11 +500,11 @@ public class FortsIncrementalProcessorTest {
         // ===
 
         Message message1 = getIncermentalMock(1, 1);
-        GroupValue entry11 = message1.getSequence("GroupMDEntries").get(0);
+        GroupValue entry11 = message1.getSequence("MDEntries").get(0);
 
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(100);
-        Mockito.when(message1.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message1.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message1.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message1.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(false);
         incrementalProcessor.handleMessage(message1, context, coder);
@@ -515,11 +515,11 @@ public class FortsIncrementalProcessorTest {
         // ===
 
         Message message2 = getIncermentalMock(2, 1);
-        GroupValue entry21 = message2.getSequence("GroupMDEntries").get(0);
+        GroupValue entry21 = message2.getSequence("MDEntries").get(0);
 
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(101);
-        Mockito.when(message2.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message2.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message2.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(101);
+        Mockito.when(message2.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(false);
         incrementalProcessor.handleMessage(message2, context, coder);
@@ -530,11 +530,11 @@ public class FortsIncrementalProcessorTest {
         // ===
 
         Message message3 = getIncermentalMock(3, 1);
-        GroupValue entry31 = message3.getSequence("GroupMDEntries").get(0);
+        GroupValue entry31 = message3.getSequence("MDEntries").get(0);
 
-        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(102);
-        Mockito.when(message3.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message3.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message3.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(102);
+        Mockito.when(message3.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(true);
         incrementalProcessor.handleMessage(message3, context, coder);
@@ -549,11 +549,11 @@ public class FortsIncrementalProcessorTest {
         // ===
 
         Message message4 = getIncermentalMock(3, 1);
-        GroupValue entry41 = message4.getSequence("GroupMDEntries").get(0);
+        GroupValue entry41 = message4.getSequence("MDEntries").get(0);
 
-        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
-        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(102);
-        Mockito.when(message4.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
+        Mockito.when(message4.getSequence("MDEntries").get(0).getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message4.getSequence("MDEntries").get(0).getInt("RptSeq")).thenReturn(102);
+        Mockito.when(message4.getSequence("MDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
 
         incrementalProcessor.setIsPrimary(false);
         incrementalProcessor.handleMessage(message4, context, coder);

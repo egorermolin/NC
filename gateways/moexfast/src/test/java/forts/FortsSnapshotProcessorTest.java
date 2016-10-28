@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openfast.Context;
+import org.openfast.FieldValue;
 import org.openfast.GroupValue;
 import org.openfast.Message;
 import org.openfast.codec.Coder;
@@ -20,6 +21,8 @@ import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalida
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * Created by egore on 1/11/16.
@@ -62,7 +65,7 @@ public class FortsSnapshotProcessorTest {
 
     @Test
     public void testSnapshot() {
-        Message message = Mockito.mock(Message.class);
+        Message message = mock(Message.class);
         Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getLong("SecurityID")).thenReturn(97516102L);
@@ -80,7 +83,7 @@ public class FortsSnapshotProcessorTest {
 
     @Test
     public void testSnapshot2Symbols() {
-        Message message = Mockito.mock(Message.class);
+        Message message = mock(Message.class);
         Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getLong("SecurityID")).thenReturn(97516102L);
@@ -89,7 +92,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message.getInt("RptSeq")).thenReturn(100);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
-        Message message2 = Mockito.mock(Message.class);
+        Message message2 = mock(Message.class);
         Mockito.when(message2.getString("MessageType")).thenReturn("W");
         Mockito.when(message2.getInt("MsgSeqNum")).thenReturn(2);
         Mockito.when(message2.getLong("SecurityID")).thenReturn(97516870L);
@@ -109,7 +112,7 @@ public class FortsSnapshotProcessorTest {
 
     @Test
     public void testSnapshotNotRecovering() {
-        Message message = Mockito.mock(Message.class);
+        Message message = mock(Message.class);
         Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getLong("SecurityID")).thenReturn(97517570L);
@@ -125,7 +128,7 @@ public class FortsSnapshotProcessorTest {
 
     @Test
     public void testSnapshotDuplicateStart() {
-        Message message = Mockito.mock(Message.class);
+        Message message = mock(Message.class);
         Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getLong("SecurityID")).thenReturn(97516102L);
@@ -141,7 +144,7 @@ public class FortsSnapshotProcessorTest {
 
     @Test
     public void testSnapshotDuplicateStart2() {
-        Message message = Mockito.mock(Message.class);
+        Message message = mock(Message.class);
         Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getLong("SecurityID")).thenReturn(97516102L);
@@ -159,7 +162,7 @@ public class FortsSnapshotProcessorTest {
 
     @Test
     public void testSnapshotDuplicate() {
-        Message message = Mockito.mock(Message.class);
+        Message message = mock(Message.class);
         Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(3);
         Mockito.when(message.getLong("SecurityID")).thenReturn(97516102L);
@@ -175,7 +178,7 @@ public class FortsSnapshotProcessorTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testSnapshotWithIncrementals() {
-        Message message = Mockito.mock(Message.class);
+        Message message = mock(Message.class);
         Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getLong("SecurityID")).thenReturn(97516102L);
@@ -184,12 +187,12 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message.getInt("RptSeq")).thenReturn(100);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
-        StoredMdEntry<String> incStoredMdEntry1 = (StoredMdEntry<String>) Mockito.mock(StoredMdEntry.class);
-        StoredMdEntry<String> incStoredMdEntry2 = (StoredMdEntry<String>) Mockito.mock(StoredMdEntry.class);
+        StoredMdEntry<String> incStoredMdEntry1 = (StoredMdEntry<String>) mock(StoredMdEntry.class);
+        StoredMdEntry<String> incStoredMdEntry2 = (StoredMdEntry<String>) mock(StoredMdEntry.class);
         Mockito.when(incStoredMdEntry1.getSequenceNumber()).thenReturn(101);
         Mockito.when(incStoredMdEntry2.getSequenceNumber()).thenReturn(102);
-        GroupValue incMdEntry1 = Mockito.mock(GroupValue.class);
-        GroupValue incMdEntry2 = Mockito.mock(GroupValue.class);
+        GroupValue incMdEntry1 = mock(GroupValue.class);
+        GroupValue incMdEntry2 = mock(GroupValue.class);
         Mockito.when(incStoredMdEntry1.getMdEntry()).thenReturn(incMdEntry1);
         Mockito.when(incStoredMdEntry2.getMdEntry()).thenReturn(incMdEntry2);
         StoredMdEntry<Long>[] incStoredMdEntries = (StoredMdEntry<Long>[]) new StoredMdEntry[] {incStoredMdEntry1, incStoredMdEntry2};
@@ -207,29 +210,31 @@ public class FortsSnapshotProcessorTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testSnapshot2FragmentsWithIncrementals() {
-        Message message = Mockito.mock(Message.class);
+        Message message = mock(Message.class);
         Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message.getInt("RouteFirst")).thenReturn(1);
+        Mockito.when(message.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message.getInt("LastFragment")).thenReturn(0);
         Mockito.when(message.getInt("RptSeq")).thenReturn(100);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
-        Message message2 = Mockito.mock(Message.class);
+        Message message2 = mock(Message.class);
         Mockito.when(message2.getString("MessageType")).thenReturn("W");
         Mockito.when(message2.getInt("MsgSeqNum")).thenReturn(2);
         Mockito.when(message2.getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message2.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message2.getInt("LastFragment")).thenReturn(1);
         Mockito.when(message2.getInt("RptSeq")).thenReturn(100);
 
-        StoredMdEntry<String> incStoredMdEntry1 = (StoredMdEntry<String>) Mockito.mock(StoredMdEntry.class);
-        StoredMdEntry<String> incStoredMdEntry2 = (StoredMdEntry<String>) Mockito.mock(StoredMdEntry.class);
+        StoredMdEntry<String> incStoredMdEntry1 = (StoredMdEntry<String>) mock(StoredMdEntry.class);
+        StoredMdEntry<String> incStoredMdEntry2 = (StoredMdEntry<String>) mock(StoredMdEntry.class);
         Mockito.when(incStoredMdEntry1.getSequenceNumber()).thenReturn(101);
         Mockito.when(incStoredMdEntry2.getSequenceNumber()).thenReturn(102);
-        GroupValue incMdEntry1 = Mockito.mock(GroupValue.class);
-        GroupValue incMdEntry2 = Mockito.mock(GroupValue.class);
+        GroupValue incMdEntry1 = mock(GroupValue.class);
+        GroupValue incMdEntry2 = mock(GroupValue.class);
         Mockito.when(incStoredMdEntry1.getMdEntry()).thenReturn(incMdEntry1);
         Mockito.when(incStoredMdEntry2.getMdEntry()).thenReturn(incMdEntry2);
         StoredMdEntry<Long>[] incStoredMdEntries = (StoredMdEntry<Long>[]) new StoredMdEntry[] {incStoredMdEntry1, incStoredMdEntry2};
@@ -253,25 +258,29 @@ public class FortsSnapshotProcessorTest {
 
     @Test
     public void testSnapshot3Fragments() {
-        Message message = Mockito.mock(Message.class);
+        Message message = mock(Message.class);
         Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message.getInt("RouteFirst")).thenReturn(1);
+        Mockito.when(message.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message.getInt("LastFragment")).thenReturn(0);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
-        Message message2 = Mockito.mock(Message.class);
+        Message message2 = mock(Message.class);
         Mockito.when(message2.getString("MessageType")).thenReturn("W");
         Mockito.when(message2.getInt("MsgSeqNum")).thenReturn(2);
         Mockito.when(message2.getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message2.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("RouteFirst")).thenReturn(0);
+        Mockito.when(message2.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("LastFragment")).thenReturn(0);
 
-        Message message3 = Mockito.mock(Message.class);
+        Message message3 = mock(Message.class);
         Mockito.when(message3.getString("MessageType")).thenReturn("W");
         Mockito.when(message3.getInt("MsgSeqNum")).thenReturn(3);
         Mockito.when(message3.getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message3.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message3.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message3.getInt("LastFragment")).thenReturn(1);
 
@@ -295,25 +304,29 @@ public class FortsSnapshotProcessorTest {
 
     @Test
     public void testSnapshot3FragmentsWithRecoveringInMiddle() {
-        Message message = Mockito.mock(Message.class);
+        Message message = mock(Message.class);
         Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message.getInt("RouteFirst")).thenReturn(1);
+        Mockito.when(message.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message.getInt("LastFragment")).thenReturn(0);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
-        Message message2 = Mockito.mock(Message.class);
+        Message message2 = mock(Message.class);
         Mockito.when(message2.getString("MessageType")).thenReturn("W");
         Mockito.when(message2.getInt("MsgSeqNum")).thenReturn(2);
         Mockito.when(message2.getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message2.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("RouteFirst")).thenReturn(0);
+        Mockito.when(message2.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("LastFragment")).thenReturn(0);
 
-        Message message3 = Mockito.mock(Message.class);
+        Message message3 = mock(Message.class);
         Mockito.when(message3.getString("MessageType")).thenReturn("W");
         Mockito.when(message3.getInt("MsgSeqNum")).thenReturn(3);
         Mockito.when(message3.getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message3.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message3.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message3.getInt("LastFragment")).thenReturn(1);
 
@@ -338,26 +351,30 @@ public class FortsSnapshotProcessorTest {
 
     @Test
     public void testSnapshot3FragmentsOutOfOrder() {
-        Message message = Mockito.mock(Message.class);
+        Message message = mock(Message.class);
         Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message.getInt("RouteFirst")).thenReturn(1);
+        Mockito.when(message.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message.getInt("LastFragment")).thenReturn(0);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
-        Message message2 = Mockito.mock(Message.class);
+        Message message2 = mock(Message.class);
         Mockito.when(message2.getString("MessageType")).thenReturn("W");
         Mockito.when(message2.getInt("MsgSeqNum")).thenReturn(3);
         Mockito.when(message2.getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message2.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message2.getInt("LastFragment")).thenReturn(1);
 
-        Message message3 = Mockito.mock(Message.class);
+        Message message3 = mock(Message.class);
         Mockito.when(message3.getString("MessageType")).thenReturn("W");
         Mockito.when(message3.getInt("MsgSeqNum")).thenReturn(2);
         Mockito.when(message3.getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message3.getInt("RouteFirst")).thenReturn(1);
+        Mockito.when(message3.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message3.getInt("LastFragment")).thenReturn(0);
 
         snapshotProcessor.handleMessage(message, context, coder);
@@ -378,18 +395,20 @@ public class FortsSnapshotProcessorTest {
 
     @Test
     public void testSnapshot3FragmentsOneMissing() {
-        Message message = Mockito.mock(Message.class);
+        Message message = mock(Message.class);
         Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message.getInt("RouteFirst")).thenReturn(1);
+        Mockito.when(message.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message.getInt("LastFragment")).thenReturn(0);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
-        Message message2 = Mockito.mock(Message.class);
+        Message message2 = mock(Message.class);
         Mockito.when(message2.getString("MessageType")).thenReturn("W");
         Mockito.when(message2.getInt("MsgSeqNum")).thenReturn(3);
         Mockito.when(message2.getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message2.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message2.getInt("LastFragment")).thenReturn(1);
 
@@ -404,25 +423,30 @@ public class FortsSnapshotProcessorTest {
 
     @Test
     public void testSnapshot3FragmentsTwoTimes() {
-        Message message = Mockito.mock(Message.class);
+        Message message = mock(Message.class);
         Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message.getInt("RouteFirst")).thenReturn(1);
+        Mockito.when(message.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message.getInt("LastFragment")).thenReturn(0);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
-        Message message2 = Mockito.mock(Message.class);
+        Message message2 = mock(Message.class);
         Mockito.when(message2.getString("MessageType")).thenReturn("W");
         Mockito.when(message2.getInt("MsgSeqNum")).thenReturn(2);
         Mockito.when(message2.getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message2.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("RouteFirst")).thenReturn(0);
+        Mockito.when(message2.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("LastFragment")).thenReturn(0);
 
-        Message message3 = Mockito.mock(Message.class);
+        Message message3 = mock(Message.class);
         Mockito.when(message3.getString("MessageType")).thenReturn("W");
         Mockito.when(message3.getInt("MsgSeqNum")).thenReturn(3);
         Mockito.when(message3.getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message3.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message3.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message3.getInt("LastFragment")).thenReturn(1);
 
@@ -457,32 +481,38 @@ public class FortsSnapshotProcessorTest {
 
     @Test
     public void testSnapshot4FragmentsOutOfOrder() {
-        Message message = Mockito.mock(Message.class);
+        Message message = mock(Message.class);
         Mockito.when(message.getString("MessageType")).thenReturn("W");
         Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
         Mockito.when(message.getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message.getInt("RouteFirst")).thenReturn(1);
+        Mockito.when(message.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message.getInt("LastFragment")).thenReturn(0);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
-        Message message2 = Mockito.mock(Message.class);
+        Message message2 = mock(Message.class);
         Mockito.when(message2.getString("MessageType")).thenReturn("W");
         Mockito.when(message2.getInt("MsgSeqNum")).thenReturn(2);
         Mockito.when(message2.getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message2.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("RouteFirst")).thenReturn(0);
+        Mockito.when(message2.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("LastFragment")).thenReturn(0);
 
-        Message message3 = Mockito.mock(Message.class);
+        Message message3 = mock(Message.class);
         Mockito.when(message3.getString("MessageType")).thenReturn("W");
         Mockito.when(message3.getInt("MsgSeqNum")).thenReturn(3);
         Mockito.when(message3.getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message3.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message3.getInt("RouteFirst")).thenReturn(0);
+        Mockito.when(message3.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message3.getInt("LastFragment")).thenReturn(0);
 
-        Message message4 = Mockito.mock(Message.class);
+        Message message4 = mock(Message.class);
         Mockito.when(message4.getString("MessageType")).thenReturn("W");
         Mockito.when(message4.getInt("MsgSeqNum")).thenReturn(4);
         Mockito.when(message4.getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message4.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message4.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message4.getInt("LastFragment")).thenReturn(1);
 

@@ -4,6 +4,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.openfast.GroupValue;
 import org.openfast.Message;
+import org.openfast.SequenceValue;
 import ru.ncapital.gateways.micexfast.MicexMarketDataManager;
 import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
@@ -53,5 +54,10 @@ public class MicexOrderListMessageHandler extends OrderListMessageHandler<String
     @Override
     protected String getTradeId(GroupValue mdEntry) {
         return mdEntry.getString("DealNumber");
+    }
+
+    @Override
+    protected SequenceValue getMdEntries(Message readMessage) {
+        return readMessage.getSequence("GroupMDEntries");
     }
 }
