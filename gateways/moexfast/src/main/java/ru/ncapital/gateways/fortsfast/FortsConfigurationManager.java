@@ -29,7 +29,9 @@ public class FortsConfigurationManager extends ConfigurationManager {
             List<ConnectionId> fortsConnectionIdsList = new ArrayList<>();
             for (ConnectionId connectionId : ConnectionId.values()) {
                 final String connectionIdString = connectionId.toString();
-                if (connectionIdString.contains("FUT-") || connectionIdString.contains("ORDERS-"))
+                if (connectionIdString.contains("FUT-") ||
+                        connectionIdString.contains("ORDERS-") ||
+                        connectionIdString.contains("NEWS-"))
                     fortsConnectionIdsList.add(connectionId);
             }
 

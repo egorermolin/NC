@@ -58,7 +58,9 @@ public enum ConnectionId {
     FUT_STATISTICS_SNAP_A("FUT-TRADES-S-A"),
     FUT_STATISTICS_SNAP_B("FUT-TRADES-S-B"),
     FUT_STATISTICS_INCR_A("FUT-TRADES-I-A"),
-    FUT_STATISTICS_INCR_B("FUT-TRADES-I-B");
+    FUT_STATISTICS_INCR_B("FUT-TRADES-I-B"),
+    FUT_NEWS_INCR_A("NEWS-I-A"),
+    FUT_NEWS_INCR_B("NEWS-I-B");
 
     private final String connectionId;
 

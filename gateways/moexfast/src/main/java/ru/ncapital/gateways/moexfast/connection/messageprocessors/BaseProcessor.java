@@ -3,9 +3,6 @@ package ru.ncapital.gateways.moexfast.connection.messageprocessors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Created by egore on 24.02.2016.
- */
 public class BaseProcessor {
     private ThreadLocal<Logger> logger = new ThreadLocal<Logger>() {
         @Override
@@ -17,19 +14,23 @@ public class BaseProcessor {
     private ThreadLocal<Long> inTimestamp = new ThreadLocal<Long>() {
         @Override
         public Long initialValue() {
-            return new Long(0);
+            return 0L;
         }
     };
 
     private ThreadLocal<Boolean> isPrimary = new ThreadLocal<Boolean>() {
         @Override
         public Boolean initialValue() {
-            return new Boolean(false);
+            return Boolean.FALSE;
         }
     };
 
-    public Long getInTimestamp() {
+    Long getInTimestamp() {
         return inTimestamp.get();
+    }
+
+    boolean isPrimary() {
+        return isPrimary.get();
     }
 
     public ThreadLocal<Long> getInTimestampHolder() {
@@ -38,10 +39,6 @@ public class BaseProcessor {
 
     public void setIsPrimary(boolean isPrimary) {
         this.isPrimary.set(isPrimary);
-    }
-
-    public boolean isPrimary() {
-        return isPrimary.get();
     }
 
     public Logger getLogger() {

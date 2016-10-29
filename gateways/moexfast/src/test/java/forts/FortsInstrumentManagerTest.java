@@ -74,8 +74,7 @@ public class FortsInstrumentManagerTest {
         instrumentManager.configure(configuration);
 
         when(marketDataManager.createBBO(anyLong())).thenCallRealMethod();
-        doCallRealMethod().when(marketDataManager).setInstrumentManager(any(InstrumentManager.class));
-        marketDataManager.setInstrumentManager(instrumentManager);
+        when(marketDataManager.getInstrumentManager()).thenReturn(instrumentManager);
     }
 
     private void initUnderlyingAndTradingStatus(Message messageMock, String underlying) {
@@ -192,8 +191,7 @@ public class FortsInstrumentManagerTest {
 
         Mockito.reset(marketDataManager);
         when(marketDataManager.createBBO(anyLong())).thenCallRealMethod();
-        doCallRealMethod().when(marketDataManager).setInstrumentManager(any(InstrumentManager.class));
-        marketDataManager.setInstrumentManager(instrumentManager);
+        when(marketDataManager.getInstrumentManager()).thenReturn(instrumentManager);
 
         for (int i : new int [] {1, 1, 2, 2, 3, 3, 4, 4})
             instrumentManager.handleMessage(getSecurityStatusMessageMock(i), context, coder);

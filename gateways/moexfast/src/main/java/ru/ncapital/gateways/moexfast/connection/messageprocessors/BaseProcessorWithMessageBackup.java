@@ -4,9 +4,6 @@ import org.openfast.Message;
 
 import java.util.*;
 
-/**
- * Created by egore on 24.02.2016.
- */
 public class BaseProcessorWithMessageBackup extends BaseProcessor {
     private Queue<Integer> backupCacheQueue = new LinkedList<Integer>();
 
@@ -14,7 +11,7 @@ public class BaseProcessorWithMessageBackup extends BaseProcessor {
 
     private boolean backupCacheQueueFull = false;
 
-    protected void addBackupMessage(int seqNum, Message readMessage) {
+    void addBackupMessage(int seqNum, Message readMessage) {
         backupCacheQueue.add(seqNum);
         backupCache.put(seqNum, readMessage);
         if (backupCacheQueueFull)
@@ -23,7 +20,7 @@ public class BaseProcessorWithMessageBackup extends BaseProcessor {
             backupCacheQueueFull = backupCacheQueue.size() > 100;
     }
 
-    protected Message getBackupMessage(int seqNum) {
+    Message getBackupMessage(int seqNum) {
         return backupCache.get(seqNum);
     }
 }

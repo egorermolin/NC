@@ -7,10 +7,7 @@ import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 import java.util.*;
 
-/**
- * Created by egore on 1/11/16.
- */
-public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnapshotProcessor {
+public abstract class SnapshotProcessor<T> extends Processor implements ISnapshotProcessor {
 
     private Map<T, Map<Integer, Message>> fragmentedSnapshots = new HashMap<>();
 
@@ -18,8 +15,13 @@ public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnap
 
     private boolean wasRecovering;
 
+    private IMessageHandler<T> messageHandler;
+
+    private final IMessageSequenceValidator<T> sequenceValidator;
+
     public SnapshotProcessor(IMessageHandler<T> messageHandler, IMessageSequenceValidator<T> sequenceValidator) {
-        super(messageHandler, sequenceValidator);
+        this.messageHandler = messageHandler;
+        this.sequenceValidator = sequenceValidator;
     }
 
     private void processSnapshotsAndIncrementals(T exchangeSecurityId, int rptSeqNum, Collection<Message> messages) {
@@ -48,7 +50,8 @@ public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnap
         for (int seqNum : messages.keySet()) {
             if (lastSeqNum == 0) {
                 lastSeqNum = seqNum;
-                if (messages.get(seqNum).getValue("RouteFirst") != null && messages.get(seqNum).getInt("RouteFirst") != 1)
+                if (messages.get(seqNum).getValue("RouteFirst") != null
+                        && messages.get(seqNum).getInt("RouteFirst") != 1)
                     // missing first fragment
                     return false;
             } else if (lastSeqNum + 1 < seqNum) {
@@ -58,11 +61,9 @@ public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnap
                 lastSeqNum = seqNum;
             }
         }
-        if (messages.get(lastSeqNum).getValue("LastFragment") != null && messages.get(lastSeqNum).getInt("LastFragment") != 1)
-            // missing last fragment
-            return false;
 
-        return true;
+        return messages.get(lastSeqNum).getValue("LastFragment") == null
+                || messages.get(lastSeqNum).getInt("LastFragment") == 1;
     }
 
     @Override
@@ -119,13 +120,8 @@ public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnap
 
         if (messageType == 'W') {
             T exchangeSecurityId = getExchangeSecurityId(readMessage);
-            if (!messageHandler.isAllowedUpdate(exchangeSecurityId))
-                return false;
-
-            if (!sequenceValidator.isRecovering(exchangeSecurityId, true))
-                return false;
-
-            return true;
+            return messageHandler.isAllowedUpdate(exchangeSecurityId)
+                    && sequenceValidator.isRecovering(exchangeSecurityId, true);
         }
 
         return false;
@@ -160,6 +156,11 @@ public abstract class SnapshotProcessor<T> extends Processor<T> implements ISnap
         fragmentedSnapshots.clear();
         if (sequenceValidator.isRecovering())
             printRecoveringSecurityIds();
+    }
+
+    @Override
+    public IMessageSequenceValidator getSequenceValidator() {
+        return sequenceValidator;
     }
 
     protected abstract T getExchangeSecurityId(Message readMessage);

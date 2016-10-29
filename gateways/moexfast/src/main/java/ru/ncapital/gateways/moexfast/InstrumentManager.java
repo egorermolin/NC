@@ -1,7 +1,10 @@
 package ru.ncapital.gateways.moexfast;
 
+import org.openfast.Context;
 import org.openfast.Message;
-import ru.ncapital.gateways.moexfast.connection.messageprocessors.Processor;
+import org.openfast.codec.Coder;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.BaseProcessor;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.IProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.SequenceArray;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
@@ -12,10 +15,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * Created by Egor on 03-Oct-16.
- */
-public abstract class InstrumentManager<T> extends Processor implements IInstrumentManager {
+public abstract class InstrumentManager<T> extends BaseProcessor implements IProcessor, IInstrumentManager {
+    private SequenceArray sequenceArray = new SequenceArray();
+
     private SequenceArray sequenceArrayForSecurityStatus = new SequenceArray();
 
     private ConcurrentHashMap<T, Instrument<T>> instruments = new ConcurrentHashMap<>();
@@ -37,10 +39,6 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
     private long timeOfLastSequenceReset;
 
     private IMarketDataHandler marketDataHandler;
-
-    public InstrumentManager() {
-        super(null, null);
-    }
 
     public InstrumentManager<T> configure(IGatewayConfiguration configuration) {
         this.marketDataHandler = configuration.getMarketDataHandler();
@@ -70,7 +68,16 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
     }
 
     @Override
-    protected boolean checkSequence(Message readMessage) {
+    public void handleMessage(Message readMessage, Context context, Coder coder) {
+        if (checkSequence(readMessage)) {
+            if (getLogger().isTraceEnabled())
+                getLogger().trace(readMessage.toString());
+
+            processMessage(readMessage);
+        }
+    }
+
+    private boolean checkSequence(Message readMessage) {
         int seqNum = readMessage.getInt("MsgSeqNum");
         long sendingTime = readMessage.getLong("SendingTime");
         char messageType = readMessage.getString("MessageType").charAt(0);
@@ -102,7 +109,7 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
         return true;
     }
 
-    protected boolean isDuplicateInstrument(Instrument<T> instrument) {
+    private boolean isDuplicateInstrument(Instrument<T> instrument) {
         if (instruments.containsKey(instrument.getExchangeSecurityId())) {
             if (getLogger().isTraceEnabled())
                 getLogger().trace("Duplicate " + instrument.getId());
@@ -120,7 +127,7 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
         return false;
     }
 
-    protected boolean addNewInstrument(Instrument<T> instrument) {
+    private boolean addNewInstrument(Instrument<T> instrument) {
         if (isDuplicateInstrument(instrument))
             return false;
 
@@ -150,16 +157,15 @@ public abstract class InstrumentManager<T> extends Processor implements IInstrum
         return instruments.containsKey(instrument.getExchangeSecurityId());
     }
 
-    public Instrument<T> getInstrumentByExchangeSecurityId(T exchangeSecurityId) {
+    private Instrument<T> getInstrumentByExchangeSecurityId(T exchangeSecurityId) {
         return instruments.get(exchangeSecurityId);
     }
 
-    public Instrument<T> getInstrumentBySecurityId(String securityId) {
+    private Instrument<T> getInstrumentBySecurityId(String securityId) {
         return instrumentsBySecurityId.get(securityId);
     }
 
-    @Override
-    protected void processMessage(Message readMessage) {
+    private void processMessage(Message readMessage) {
         switch (readMessage.getString("MessageType").charAt(0)) {
             case 'd':
                 if (numberOfInstruments == 0) {

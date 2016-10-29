@@ -3,10 +3,7 @@ package ru.ncapital.gateways.moexfast;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.moexfast.connection.messageprocessors.HeartbeatProcessor;
-import ru.ncapital.gateways.moexfast.connection.messageprocessors.IIncrementalProcessor;
-import ru.ncapital.gateways.moexfast.connection.messageprocessors.IProcessor;
-import ru.ncapital.gateways.moexfast.connection.messageprocessors.ISnapshotProcessor;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.*;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
 import ru.ncapital.gateways.moexfast.domain.Subscription;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
@@ -20,10 +17,6 @@ import ru.ncapital.gateways.moexfast.performance.IGatewayPerformanceLogger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-
-/**
- * Created by egore on 12/7/15.
- */
 
 public abstract class MarketDataManager<T> {
     private ConcurrentHashMap<String, Subscription> subscriptions = new ConcurrentHashMap<>();
@@ -56,10 +49,11 @@ public abstract class MarketDataManager<T> {
     @Inject
     protected MessageHandlerFactory<T> messageHandlerFactory;
 
-    @Inject
-    protected HeartbeatProcessor heartbeatProcessor;
+    private HeartbeatProcessor heartbeatProcessor;
 
-    protected InstrumentManager<T> instrumentManager;
+    private NewsProcessor newsProcessor;
+
+    private InstrumentManager<T> instrumentManager;
 
     private IGatewayPerformanceLogger performanceLogger;
 
@@ -70,7 +64,8 @@ public abstract class MarketDataManager<T> {
     public MarketDataManager configure(IGatewayConfiguration configuration) {
         marketDataHandler = configuration.getMarketDataHandler();
         performanceLogger = configuration.getPerformanceLogger();
-
+        heartbeatProcessor = new HeartbeatProcessor();
+        newsProcessor = new NewsProcessor(marketDataHandler);
         return this;
     }
 
@@ -82,12 +77,8 @@ public abstract class MarketDataManager<T> {
 
     public abstract PublicTrade<T> createPublicTrade(T exchangeSecurityId);
 
-    public T convertSecurityIdToExchangeSecurityId(String securityId) {
+    private T convertSecurityIdToExchangeSecurityId(String securityId) {
         return instrumentManager.getExchangeSecurityId(securityId);
-    }
-
-    public String convertExchangeSecurityIdToSecurityId(T exchangeSecurityId) {
-        return instrumentManager.getSecurityId(exchangeSecurityId);
     }
 
     public boolean isAllowedInstrument(T exchangeSecurityId) {
@@ -102,7 +93,7 @@ public abstract class MarketDataManager<T> {
         this.instrumentManager = instrumentManager;
     }
 
-    public boolean subscribe(Subscription subscription) {
+    boolean subscribe(Subscription subscription) {
         if (logger.isTraceEnabled())
             logger.trace("onSubscribe " + subscription.getSubscriptionKey());
 
@@ -233,8 +224,16 @@ public abstract class MarketDataManager<T> {
         performanceLogger.notifyPublicTradePerformance(publicTrade.getPerformanceData());
     }
 
+    public InstrumentManager<T> getInstrumentManager() {
+        return instrumentManager;
+    }
+
     public IProcessor getHeartbeatProcessor() {
         return heartbeatProcessor;
+    }
+
+    public IProcessor getNewsProcessor() {
+        return newsProcessor;
     }
 
     public ISnapshotProcessor getSnapshotProcessor(MessageHandlerType type) {

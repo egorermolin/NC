@@ -5,9 +5,6 @@ import ru.ncapital.gateways.moexfast.connection.messageprocessors.StoredMdEntry;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
-/**
- * Created by egore on 2/3/16.
- */
 public interface IMessageSequenceValidator<T> {
     boolean onSnapshotSeq(T exchangeSecurityId, int seqNum);
 

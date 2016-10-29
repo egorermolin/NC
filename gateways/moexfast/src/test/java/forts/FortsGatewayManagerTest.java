@@ -4,19 +4,21 @@ import com.google.inject.Guice;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import ru.ncapital.gateways.fortsfast.FortsGatewayManager;
 import ru.ncapital.gateways.fortsfast.FortsGatewayModule;
 import ru.ncapital.gateways.fortsfast.FortsMarketDataManager;
 import ru.ncapital.gateways.fortsfast.FortsNullGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.DefaultMarketDataHandler;
+import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.IMarketDataHandler;
 
-/**
- * Created by egore on 2/2/16.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class FortsGatewayManagerTest {
+
+    @Mock
+    IGatewayConfiguration configuration;
 
     @Before
     public void setup() {
@@ -46,6 +48,7 @@ public class FortsGatewayManagerTest {
     @Test
     public void testCreate() {
         FortsMarketDataManager md = Guice.createInjector(new FortsGatewayModule()).getInstance(FortsMarketDataManager.class);
+        md.configure(configuration);
         assert md.getHeartbeatProcessor() != null;
     }
 }

@@ -15,17 +15,7 @@ public class SequenceArray {
     private int iNewPosition;
 
     public enum Result {
-        OUT_OF_SEQUENCE(-1), DUPLICATE(0), IN_SEQUENCE(1);
-
-        private int iValue;
-
-        Result(int value) {
-            iValue = value;
-        }
-
-        int value() {
-            return iValue;
-        }
+        OUT_OF_SEQUENCE, DUPLICATE, IN_SEQUENCE
     }
 
     public SequenceArray() {
@@ -44,7 +34,7 @@ public class SequenceArray {
         iNewPosition = 0;
     }
 
-    public synchronized Result checkDuplicate(final int value) {
+    synchronized Result checkDuplicate(final int value) {
         switch (findPosition(value)) {
             case 1:
                 return checkInSequence() ? Result.IN_SEQUENCE : Result.OUT_OF_SEQUENCE;
@@ -121,8 +111,8 @@ public class SequenceArray {
             if (iVector[i] == value)
                 return 0;
 
-            if (iVector[i] > value)
-                continue;
+            //if (iVector[i] > value)
+                //continue;
         }
 
         for (int i = SEQUENCE_ARRAY_SIZE - 1; i > iPosition; --i, ++j) {
@@ -134,8 +124,8 @@ public class SequenceArray {
             if (iVector[i] == value)
                 return 0;
 
-            if (iVector[i] > value)
-                continue;
+            //if (iVector[i] > value)
+                //continue;
         }
 
         reset();

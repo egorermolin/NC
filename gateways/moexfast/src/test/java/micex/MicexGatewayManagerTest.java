@@ -4,6 +4,7 @@ import com.google.inject.Guice;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import ru.ncapital.gateways.micexfast.MicexGatewayManager;
 import ru.ncapital.gateways.micexfast.MicexGatewayModule;
@@ -12,13 +13,14 @@ import ru.ncapital.gateways.micexfast.MicexNullGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.domain.ProductType;
 import ru.ncapital.gateways.micexfast.domain.TradingSessionId;
 import ru.ncapital.gateways.moexfast.DefaultMarketDataHandler;
+import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.IMarketDataHandler;
 
-/**
- * Created by egore on 2/2/16.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class MicexGatewayManagerTest {
+
+    @Mock
+    IGatewayConfiguration configuration;
 
     @Before
     public void setup() {
@@ -58,6 +60,7 @@ public class MicexGatewayManagerTest {
     @Test
     public void testCreate() {
         MicexMarketDataManager md = Guice.createInjector(new MicexGatewayModule()).getInstance(MicexMarketDataManager.class);
+        md.configure(configuration);
         assert md.getHeartbeatProcessor() != null;
     }
 }

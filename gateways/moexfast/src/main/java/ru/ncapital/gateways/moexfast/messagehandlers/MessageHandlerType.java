@@ -7,8 +7,7 @@ public enum MessageHandlerType {
     ORDER_LIST("OrderList"),
     STATISTICS("Statistics"),
     PUBLIC_TRADES("PublicTrades"),
-    ORDER_BOOK("OrderBook"),
-    HEARTBEAT("Heartbeat");
+    ORDER_BOOK("OrderBook");
 
     private String description;
 

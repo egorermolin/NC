@@ -6,9 +6,6 @@ import ru.ncapital.gateways.moexfast.connection.messageprocessors.SnapshotProces
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 
-/**
- * Created by Egor on 30-Sep-16.
- */
 public class FortsSnapshotProcessor extends SnapshotProcessor<Long> {
     public FortsSnapshotProcessor(IMessageHandler<Long> messageHandler, IMessageSequenceValidator<Long> sequenceValidator) {
         super(messageHandler, sequenceValidator);

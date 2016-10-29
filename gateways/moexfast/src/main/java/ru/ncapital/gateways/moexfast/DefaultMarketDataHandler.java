@@ -2,10 +2,7 @@ package ru.ncapital.gateways.moexfast;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.ncapital.gateways.moexfast.domain.intf.IBBO;
-import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
-import ru.ncapital.gateways.moexfast.domain.intf.IInstrument;
-import ru.ncapital.gateways.moexfast.domain.intf.IPublicTrade;
+import ru.ncapital.gateways.moexfast.domain.intf.*;
 
 /**
  * Created by egore on 12/7/15.
@@ -95,6 +92,15 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
     @Override
     public void onInstruments(IInstrument[] instruments) {
 
+    }
+
+    @Override
+    public void onNews(INews news) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("onPublicTrade: ");
+        sb.append(news.getMessage());
+
+        logger.info(sb.toString());
     }
 
     @Override
