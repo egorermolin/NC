@@ -54,12 +54,32 @@ task ikvm(dependsOn: copyLibs, type: Exec) {
     args = myArgs
 }
 
-task genMessageReader(dependsOn: copyLibs, type: Exec) {
+task genMICEXMessageReader(dependsOn: copyLibs, type: Exec) {
     def myArgs = []
     myArgs.add '-target:exe'
     myArgs.add '-version:' + version - '-SNAPSHOT' + '.0.0'
-    myArgs.add '-out:' + exeTargetDir + '\\message_reader.exe'
-    myArgs.add '-main:ru.ncapital.gateways.moexfast.connection.multicast.MessageReader'
+    myArgs.add '-out:' + exeTargetDir + '\\micex_message_reader.exe'
+    myArgs.add '-main:ru.ncapital.gateways.micexfast.connection.multicast.MicexMessageReader'
+    myArgs.add '-sharedclassloader'
+    myArgs.add dllSourceDir + '\\moexfast-' + version + '.jar'
+    myArgs.add dllSourceDir + '\\guava* '
+    myArgs.add dllSourceDir + '\\guice* '
+    myArgs.add dllSourceDir + '\\aopalliance* '
+    myArgs.add dllSourceDir + '\\javax* '
+    myArgs.add dllSourceDir + '\\log4j* '
+    myArgs.add dllSourceDir + '\\openfast* '
+    myArgs.add dllSourceDir + '\\slf4j* '
+
+    executable = ikvmDir + '\\ikvmc.exe'
+    args = myArgs
+}
+
+task genFORTSMessageReader(dependsOn: copyLibs, type: Exec) {
+    def myArgs = []
+    myArgs.add '-target:exe'
+    myArgs.add '-version:' + version - '-SNAPSHOT' + '.0.0'
+    myArgs.add '-out:' + exeTargetDir + '\\forts_message_reader.exe'
+    myArgs.add '-main:ru.ncapital.gateways.fortsfast.connection.multicast.FortsMessageReader'
     myArgs.add '-sharedclassloader'
     myArgs.add dllSourceDir + '\\moexfast-' + version + '.jar'
     myArgs.add dllSourceDir + '\\guava* '

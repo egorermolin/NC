@@ -3,6 +3,9 @@ package ru.ncapital.gateways.moexfast.connection.messageprocessors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Created by egore on 24.02.2016.
+ */
 public class BaseProcessor {
     private ThreadLocal<Logger> logger = new ThreadLocal<Logger>() {
         @Override

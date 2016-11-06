@@ -15,6 +15,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Created by Egor on 03-Oct-16.
+ */
 public abstract class InstrumentManager<T> extends BaseProcessor implements IProcessor, IInstrumentManager {
     private SequenceArray sequenceArray = new SequenceArray();
 

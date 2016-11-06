@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Created by egore on 12/7/15.
+ */
 public abstract class MarketDataManager<T> {
     private ConcurrentHashMap<String, Subscription> subscriptions = new ConcurrentHashMap<>();
 

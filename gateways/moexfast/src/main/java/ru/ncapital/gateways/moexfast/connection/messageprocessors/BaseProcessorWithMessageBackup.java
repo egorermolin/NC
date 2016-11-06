@@ -4,6 +4,9 @@ import org.openfast.Message;
 
 import java.util.*;
 
+/**
+ * Created by egore on 24.02.2016.
+ */
 public class BaseProcessorWithMessageBackup extends BaseProcessor {
     private Queue<Integer> backupCacheQueue = new LinkedList<Integer>();
 

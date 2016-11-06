@@ -7,6 +7,9 @@ import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 import java.util.*;
 
+/**
+ * Created by egore on 1/11/16.
+ */
 public abstract class SnapshotProcessor<T> extends Processor implements ISnapshotProcessor {
 
     private Map<T, Map<Integer, Message>> fragmentedSnapshots = new HashMap<>();

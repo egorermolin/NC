@@ -4,6 +4,9 @@ import org.openfast.Context;
 import org.openfast.Message;
 import org.openfast.codec.Coder;
 
+/**
+ * Created by egore on 24.02.2016.
+ */
 abstract class Processor extends BaseProcessorWithMessageBackup implements IProcessor {
 
     SequenceArray sequenceArray = new SequenceArray();

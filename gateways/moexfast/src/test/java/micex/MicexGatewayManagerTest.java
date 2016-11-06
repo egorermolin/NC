@@ -16,6 +16,9 @@ import ru.ncapital.gateways.moexfast.DefaultMarketDataHandler;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.IMarketDataHandler;
 
+/**
+ * Created by egore on 2/2/16.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class MicexGatewayManagerTest {
 

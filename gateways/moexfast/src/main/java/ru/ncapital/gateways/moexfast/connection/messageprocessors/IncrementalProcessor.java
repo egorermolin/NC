@@ -8,6 +8,9 @@ import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalida
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
+/**
+ * Created by egore on 1/11/16.
+ */
 public abstract class IncrementalProcessor<T> extends Processor implements IIncrementalProcessor {
 
     private final IMessageSequenceValidator<T> sequenceValidator;

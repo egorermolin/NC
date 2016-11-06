@@ -3,6 +3,9 @@ package ru.ncapital.gateways.moexfast.connection.messageprocessors;
 import org.openfast.GroupValue;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
+/**
+ * Created by egore on 5/30/16.
+ */
 public class StoredMdEntry<T> {
     private T exchangeSecurityId;
 
