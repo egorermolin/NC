@@ -369,21 +369,21 @@ public class MessageReader implements IMulticastEventListener {
                 break;
             case FUT_INSTRUMENT_INCR_A:
             case FUT_INSTRUMENT_INCR_B:
-                for (String name : new String[]{"SecurityStatus", "Heartbeat"}) {
+                for (String name : new String[]{"SecurityStatus", "SequenceReset", "Heartbeat"}) {
                     MessageTemplate template = messageTemplates.get(name);
                     messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
                 }
                 break;
             case FUT_ORDER_LIST_SNAP_A:
             case FUT_ORDER_LIST_SNAP_B:
-                for (String name : new String[]{"OrdersBook", "SequenceReset", "Heartbeat"}) {
+                for (String name : new String[]{"OrdersBook", "TradingSessionStatus", "SequenceReset", "Heartbeat"}) {
                     MessageTemplate template = messageTemplates.get(name);
                     messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
                 }
                 break;
             case FUT_ORDER_LIST_INCR_A:
             case FUT_ORDER_LIST_INCR_B:
-                for (String name : new String[]{"OrdersLog", "Heartbeat"}) {
+                for (String name : new String[]{"OrdersLog", "TradingSessionStatus", "SequenceReset", "Heartbeat"}) {
                     MessageTemplate template = messageTemplates.get(name);
                     messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
                 }
@@ -401,14 +401,14 @@ public class MessageReader implements IMulticastEventListener {
             case FUT_ORDER_BOOK_INCR_B:
             case FUT_STATISTICS_INCR_A:
             case FUT_STATISTICS_INCR_B:
-                for (String name : new String[]{"DefaultIncrementalRefreshMessage", "Heartbeat"}) {
+                for (String name : new String[]{"DefaultIncrementalRefreshMessage", "TradingSessionStatus", "SequenceReset", "Heartbeat"}) {
                     MessageTemplate template = messageTemplates.get(name);
                     messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
                 }
                 break;
             case FUT_NEWS_INCR_A:
             case FUT_NEWS_INCR_B:
-                for (String name : new String[]{"News", "Heartbeat"}) {
+                for (String name : new String[]{"News", "SequenceReset", "Heartbeat"}) {
                     MessageTemplate template = messageTemplates.get(name);
                     messageReader.registerTemplate(Integer.valueOf(template.getId()), template);
                 }
@@ -456,6 +456,7 @@ public class MessageReader implements IMulticastEventListener {
                 case FUT_INSTRUMENT_INCR_A:
                 case FUT_INSTRUMENT_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("SecurityDefinition"), instrumentManager);
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("SequenceReset"), instrumentManager);
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(null));
                     break;
@@ -496,7 +497,9 @@ public class MessageReader implements IMulticastEventListener {
                     marketDataManager.setIncrementalProcessorIsPrimary(MessageHandlerType.ORDER_LIST, true);
                 case FUT_ORDER_LIST_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("OrdersLog"), marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST));
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("SequenceReset"), marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("TradingSessionStatus"), marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST));
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.ORDER_LIST)));
                     break;
 
@@ -518,6 +521,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("OrdersBook"), marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_LIST));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("SequenceReset"), marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_LIST));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("TradingSessionStatus"), marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_LIST));
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.ORDER_LIST)));
                     break;
 
@@ -540,7 +544,9 @@ public class MessageReader implements IMulticastEventListener {
                     marketDataManager.setIncrementalProcessorIsPrimary(MessageHandlerType.STATISTICS, true);
                 case FUT_STATISTICS_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("DefaultIncrementalRefreshMessage"), marketDataManager.getIncrementalProcessor(MessageHandlerType.STATISTICS));
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("SequenceReset"), marketDataManager.getIncrementalProcessor(MessageHandlerType.STATISTICS));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("TradingSessionStatus"), marketDataManager.getIncrementalProcessor(MessageHandlerType.STATISTICS));
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.STATISTICS)));
                     break;
 
@@ -583,7 +589,9 @@ public class MessageReader implements IMulticastEventListener {
                     marketDataManager.setIncrementalProcessorIsPrimary(MessageHandlerType.ORDER_BOOK, true);
                 case FUT_ORDER_BOOK_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("DefaultIncrementalRefreshMessage"), marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_BOOK));
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("SequenceReset"), marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_BOOK));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("TradingSessionStatus"), marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_BOOK));
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.ORDER_BOOK)));
                     break;
                 case FUT_ORDER_BOOK_SNAP_A:

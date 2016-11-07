@@ -30,6 +30,9 @@ public abstract class IncrementalProcessor<T> extends Processor implements IIncr
 
         synchronized (sequenceValidator) {
             SequenceValue mdEntries = getMdEntries(readMessage);
+            if (mdEntries == null)
+                return;
+
             for (int i = 0; i < mdEntries.getLength(); ++i) {
                 GroupValue mdEntry = mdEntries.get(i);
                 if (mdEntry.getValue("RptSeq") == null) {
