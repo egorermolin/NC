@@ -22,7 +22,7 @@ import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 @RunWith(MockitoJUnitRunner.class)
 public class MicexMessageSequenceValidatorTest {
 
-    private IMessageSequenceValidator sequenceValidator =
+    private IMessageSequenceValidator<String> sequenceValidator =
             Guice.createInjector(new MicexGatewayModule())
                     .getInstance(new Key<MessageSequenceValidatorFactory<String>>(){})
                     .createMessageSequenceValidatorForOrderList();

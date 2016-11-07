@@ -120,6 +120,7 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
             case LOW:
             case OPENING:
             case CLOSING:
+            case EMPTY:
                 getOrCreateBBO(exchangeSecurityId, perfData);
                 break;
             case TRADE:
@@ -153,15 +154,15 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
             case CLOSING:
                 bbo.setClosePx(getMdEntryPx(mdEntry));
                 break;
+            case EMPTY:
+                bbo.setEmpty(true);
+                break;
             case TRADE:
                 publicTrade.setTradeId(getTradeId(mdEntry));
                 publicTrade.setLastPx(getMdEntryPx(mdEntry));
                 publicTrade.setLastSize(getMdEntryPx(mdEntry));
                 publicTrade.setIsBid(getTradeIsBid(mdEntry));
                 publicTrade.getPerformanceData().setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
-                break;
-            case EMPTY:
-                bbo.setEmpty(true);
                 break;
             default:
                 break;

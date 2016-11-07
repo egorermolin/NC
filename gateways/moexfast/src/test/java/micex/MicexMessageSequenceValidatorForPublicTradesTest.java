@@ -15,7 +15,7 @@ import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalida
  */
 @RunWith(MockitoJUnitRunner.class)
 public class MicexMessageSequenceValidatorForPublicTradesTest {
-    @SuppressWarnings("unchecked")
+
     private IMessageSequenceValidator<String> sequenceValidator =
                      Guice.createInjector(new MicexGatewayModule())
                     .getInstance(new Key<MessageSequenceValidatorFactory<String>>(){})
