@@ -40,26 +40,64 @@ public abstract class ConfigurationManager {
         return connections.get(connectionId);
     }
 
-    public String getPrimaryNetworkInterface() {
-        return networkInterface.split(";")[0];
+    public String getPrimaryNetworkInterface(boolean orderList) {
+        if (networkInterface.contains("|")) {
+            String networkInterfacePart = networkInterface.split("\\|")[orderList ? 1 : 0];
+            if (networkInterfacePart.contains(";"))
+                return networkInterfacePart.split(";")[0];
+
+            return networkInterfacePart;
+        }
+
+        if (networkInterface.contains(";"))
+            return networkInterface.split(";")[0];
+
+        return networkInterface;
     }
 
-    public String getSecondaryNetworkInterface() {
-        return networkInterface.contains(";") ? networkInterface.split(";")[1] : networkInterface;
+    public String getSecondaryNetworkInterface(boolean orderList) {
+        if (networkInterface.contains("|")) {
+            String networkInterfacePart = networkInterface.split("\\|")[orderList ? 1 : 0];
+            if (networkInterfacePart.contains(";"))
+                return networkInterfacePart.split(";")[1];
+
+            return networkInterfacePart;
+        }
+
+        if (networkInterface.contains(";"))
+            return networkInterface.split(";")[1];
+
+        return networkInterface;
     }
 
     public boolean checkInterfaces() {
         try {
-            if (NetworkInterface.getByName(getPrimaryNetworkInterface()) == null)
-                throw new RuntimeException("Invalid Primary Interface " + getPrimaryNetworkInterface());
+            if (NetworkInterface.getByName(getPrimaryNetworkInterface(false)) == null)
+                throw new RuntimeException("Invalid Primary Interface " + getPrimaryNetworkInterface(false));
         } catch (Exception e) {
             LoggerFactory.getLogger("ConfigurationManager").error(e.toString(), e);
             return false;
         }
 
         try {
-            if (NetworkInterface.getByName(getSecondaryNetworkInterface()) == null)
-                throw new RuntimeException("Invalid Secondary Interface " + getSecondaryNetworkInterface());
+            if (NetworkInterface.getByName(getSecondaryNetworkInterface(false)) == null)
+                throw new RuntimeException("Invalid Secondary Interface " + getSecondaryNetworkInterface(false));
+        } catch (Exception e) {
+            LoggerFactory.getLogger("ConfigurationManager").error(e.toString(), e);
+            return false;
+        }
+
+        try {
+            if (NetworkInterface.getByName(getPrimaryNetworkInterface(true)) == null)
+                throw new RuntimeException("Invalid Primary Interface For Order List" + getPrimaryNetworkInterface(true));
+        } catch (Exception e) {
+            LoggerFactory.getLogger("ConfigurationManager").error(e.toString(), e);
+            return false;
+        }
+
+        try {
+            if (NetworkInterface.getByName(getSecondaryNetworkInterface(true)) == null)
+                throw new RuntimeException("Invalid Secondary Interface For Order List" + getSecondaryNetworkInterface(true));
         } catch (Exception e) {
             LoggerFactory.getLogger("ConfigurationManager").error(e.toString(), e);
             return false;

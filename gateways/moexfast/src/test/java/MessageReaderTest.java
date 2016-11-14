@@ -68,8 +68,8 @@ public class MessageReaderTest {
     @Before
     public void setup() throws IOException {
         when(configurationManager.getConnection(any(ConnectionId.class))).thenReturn(connection);
-        when(configurationManager.getPrimaryNetworkInterface()).thenReturn("localhost");
-        when(configurationManager.getSecondaryNetworkInterface()).thenReturn("localhost");
+        when(configurationManager.getPrimaryNetworkInterface(false)).thenReturn("localhost");
+        when(configurationManager.getSecondaryNetworkInterface(false)).thenReturn("localhost");
         when(configurationManager.getFastTemplatesFile()).thenReturn("src/main/resources/micex/fast_templates.xml");
         when(channel.join(any(InetAddress.class), any(NetworkInterface.class), any(InetAddress.class))).thenReturn(membershipKey);
 
