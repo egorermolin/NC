@@ -108,6 +108,11 @@ public abstract class MarketDataManager<T> {
         BBO<T> currentBBO = getOrCreateBBO(
                 convertSecurityIdToExchangeSecurityId(subscription.getSubscriptionKey()));
 
+        if (currentBBO == null) {
+            logger.warn("Instrument not found [" + subscription.getSubscriptionKey() + "]");
+            return false;
+        }
+
         synchronized (currentBBO) {
             List<IDepthLevel> depthLevelsToSend = new ArrayList<>();
             orderDepthEngine.getDepthLevels(currentBBO.getExchangeSecurityId(), depthLevelsToSend);
@@ -121,6 +126,9 @@ public abstract class MarketDataManager<T> {
     }
 
     private BBO<T> getOrCreateBBO(T exchangeSecurityId) {
+        if (exchangeSecurityId == null)
+            return null;
+
         BBO<T> bbo = bbosByExchangeSecurityId.get(exchangeSecurityId);
         if (bbo == null) {
             bbo = createBBO(exchangeSecurityId);
