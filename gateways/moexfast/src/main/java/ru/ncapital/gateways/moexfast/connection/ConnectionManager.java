@@ -70,7 +70,7 @@ public class ConnectionManager {
 
     public ConnectionManager configure(IGatewayConfiguration configuration) {
         this.marketType = configuration.getMarketType();
-        this.publicTradesFromOrderList = configuration.publicTradesFromOrdersLog();
+        this.publicTradesFromOrderList = configuration.publicTradesFromOrdersList();
         return this;
     }
 

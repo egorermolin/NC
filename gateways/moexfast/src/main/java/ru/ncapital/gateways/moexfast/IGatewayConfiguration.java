@@ -27,5 +27,5 @@ public interface IGatewayConfiguration {
 
     boolean restartOnAllFeedDown();
 
-    boolean publicTradesFromOrdersLog();
+    boolean publicTradesFromOrdersList();
 }

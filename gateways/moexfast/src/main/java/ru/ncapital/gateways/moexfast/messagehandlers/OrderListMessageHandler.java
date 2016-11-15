@@ -28,10 +28,8 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
 
     public OrderListMessageHandler(MarketDataManager<T> marketDataManager, IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
-    }
 
-    public void setPublicTradesFromOrderList(boolean value) {
-        this.publicTradesFromOrderList = value;
+        this.publicTradesFromOrderList = configuration.publicTradesFromOrdersList();
     }
 
     @Override
@@ -100,7 +98,7 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
         }
 
         // trade
-        if (depthLevel.getTradeId() != null) {
+        if (depthLevel != null && depthLevel.getTradeId() != null) {
             // technical trade
             if (depthLevel.getMdUpdateAction() == MdUpdateAction.INSERT)
                 getDepthLevelList(exchangeSecurityId).remove(depthLevel);

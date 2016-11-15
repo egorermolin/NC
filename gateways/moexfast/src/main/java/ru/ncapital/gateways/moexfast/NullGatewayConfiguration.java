@@ -58,7 +58,7 @@ public class NullGatewayConfiguration implements IGatewayConfiguration {
     }
 
     @Override
-    public boolean publicTradesFromOrdersLog() {
+    public boolean publicTradesFromOrdersList() {
         return false;
     }
 }
