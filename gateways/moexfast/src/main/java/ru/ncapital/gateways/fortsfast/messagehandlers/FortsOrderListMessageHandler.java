@@ -47,6 +47,9 @@ public class FortsOrderListMessageHandler extends OrderListMessageHandler<Long> 
 
     @Override
     protected String getTradeId(GroupValue mdEntry) {
+        if (mdEntry.getValue("TradeID") == null)
+            return null;
+
         return String.valueOf(mdEntry.getLong("TradeID"));
     }
 
