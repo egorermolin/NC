@@ -76,7 +76,7 @@ public class OrderDepth {
                 break;
             case DELETE:
                 previousDepthLevel = depthLevels.get(depthLevel.getMdEntryId());
-                if (previousDepthLevel == null || Double.compare(previousDepthLevel.getMdEntryPx(), depthLevel.getMdEntryPx()) != 0) {
+                if (previousDepthLevel == null) {
                     logger.error("Entry not found for dl delete " + depthLevel.getMdEntryId() + " (Received dl: " + depthLevel + ") (Previous dl: " + previousDepthLevel + ")");
                 } else {
                     depthLevelsSorted.remove(previousDepthLevel);

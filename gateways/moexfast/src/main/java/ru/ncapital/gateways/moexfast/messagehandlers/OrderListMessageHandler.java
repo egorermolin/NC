@@ -106,7 +106,7 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
             if (publicTradesFromOrderList) {
                 PublicTrade<T> publicTrade = marketDataManager.createPublicTrade(exchangeSecurityId);
                 publicTrade.setTradeId(depthLevel.getTradeId());
-                publicTrade.setLastPx(depthLevel.getMdEntryPx());
+                publicTrade.setLastPx(depthLevel.getMdEntrySize());
                 publicTrade.setLastSize(depthLevel.getMdEntryPx());
                 publicTrade.setIsBid(depthLevel.getIsBid());
                 publicTrade.getPerformanceData().updateFrom(depthLevel.getPerformanceData());
