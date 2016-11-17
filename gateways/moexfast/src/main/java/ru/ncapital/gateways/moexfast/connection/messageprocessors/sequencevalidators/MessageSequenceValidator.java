@@ -42,6 +42,15 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
         return type;
     }
 
+    @Override
+    public void onMarketReset() {
+        for (SequenceNumber<T> sequenceNumber : sequenceNumbers.values()) {
+            synchronized (sequenceNumber) {
+                sequenceNumber.lastSeqNum = 0;
+            }
+        }
+    }
+
     protected SequenceNumber getSequenceNumber(T exchangeSecurityId) {
         SequenceNumber<T> sequenceNumber = sequenceNumbers.get(exchangeSecurityId);
         if (sequenceNumber == null) {
@@ -79,6 +88,9 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
                         logger.get().debug("OutOfSequence [Symbol: " + exchangeSecurityId + "][Expected: " + (sequenceNumber.lastSeqNum + 1) + "][Received: " + seqNum + "]");
 
                     sequenceNumber.numberOfMissingSequences = seqNum - sequenceNumber.lastSeqNum - 1;
+                } else {
+                    if (logger.get().isDebugEnabled())
+                        logger.get().debug("First message for " + exchangeSecurityId + " " + seqNum);
                 }
 
                 return false;
@@ -118,7 +130,7 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
         SequenceNumber sequenceNumber = getSequenceNumber(exchangeSecurityId);
         synchronized (sequenceNumber) {
             logger.get().info("Start Recovering " + exchangeSecurityId
-                    + ((sequenceNumber.numberOfMissingSequences > 0) ? (" " + sequenceNumber.numberOfMissingSequences) : ""));
+                    + ((sequenceNumber.numberOfMissingSequences > 0) ? (" " + sequenceNumber.numberOfMissingSequences) : " N/A"));
         }
 
         exchangeSecurityIdsToRecover.add(exchangeSecurityId);
@@ -172,8 +184,7 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
 
         StoredMdEntry<T>[] mdEntriesToProcess = storedMdEntriesToProcess.remove(exchangeSecurityId);
 
-        logger.get().info("Stop Recovering "
-                + exchangeSecurityId + ((mdEntriesToProcess.length > 0) ? (" " + mdEntriesToProcess.length) : ""));
+        logger.get().info("Stop Recovering " + exchangeSecurityId + ((mdEntriesToProcess.length > 0) ? (" " + mdEntriesToProcess.length) : ""));
 
         return mdEntriesToProcess;
     }
@@ -187,6 +198,9 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
             SequenceNumber sequenceNumber = getSequenceNumber(exchangeSecurityId);
             synchronized (sequenceNumber) {
                 if (sequenceNumber.lastSeqNum == -1) {
+                    if (logger.get().isDebugEnabled())
+                        logger.get().debug("First message for " + exchangeSecurityId);
+
                     startRecovering(exchangeSecurityId);
                     return true;
                 }

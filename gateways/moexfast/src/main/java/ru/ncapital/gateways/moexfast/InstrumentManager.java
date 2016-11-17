@@ -10,6 +10,7 @@ import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
 import ru.ncapital.gateways.moexfast.domain.intf.IInstrument;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -207,7 +208,7 @@ public abstract class InstrumentManager<T> extends BaseProcessor implements IPro
             if (!instrumentsDownloaded.getAndSet(true)) {
                 getLogger().info("FINISHED INSTRUMENTS " + instruments.size());
                 gatewayManager.onInstrumentDownloadFinished();
-                marketDataHandler.onInstruments(getInstruments());
+                marketDataHandler.onInstruments(getInstruments().toArray(new IInstrument[instruments.size()]));
             }
         } else {
             if ((instruments.size() + ignoredInstruments.size()) % 1000 == 0) {
@@ -235,8 +236,8 @@ public abstract class InstrumentManager<T> extends BaseProcessor implements IPro
 
     protected abstract String createTradingStatusForInstrumentStatus(Message readMessage);
 
-    private IInstrument[] getInstruments() {
-        return instruments.values().toArray(new IInstrument[instruments.size()]);
+    protected Collection<Instrument<T>> getInstruments() {
+        return instruments.values();
     }
 
     public T getExchangeSecurityId(String securityId) {

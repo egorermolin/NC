@@ -32,6 +32,11 @@ public abstract class AMessageHandler<T> implements IMessageHandler<T> {
     }
 
     @Override
+    public void onMarketReset() {
+        marketDataManager.onMarketReset(getType());
+    }
+
+    @Override
     public void onSnapshot(Message readMessage) {
         if (readMessage.getString("MessageType").charAt(0) == 'W') {
             T exchangeSecurityId = getExchangeSecurityId(readMessage);

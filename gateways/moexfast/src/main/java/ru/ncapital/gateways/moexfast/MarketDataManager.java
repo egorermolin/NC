@@ -5,9 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.*;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
+import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
 import ru.ncapital.gateways.moexfast.domain.Subscription;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
+import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
 import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
 import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerFactory;
@@ -94,6 +96,29 @@ public abstract class MarketDataManager<T> {
 
     public void setInstrumentManager(InstrumentManager<T> instrumentManager) {
         this.instrumentManager = instrumentManager;
+    }
+
+    public void onMarketReset(MessageHandlerType type) {
+        for (Instrument<T> instrument : this.instrumentManager.getInstruments()) {
+            T exchangeSecurityId = instrument.getExchangeSecurityId();
+            switch (type) {
+                case ORDER_BOOK:
+                case STATISTICS:
+                    BBO<T> bbo = getOrCreateBBO(exchangeSecurityId);
+                    bbo.setEmpty(true);
+
+                    onBBO(bbo);
+                    break;
+                case ORDER_LIST:
+                    DepthLevel<T> depthLevel = createDepthLevel(exchangeSecurityId);
+                    depthLevel.setMdUpdateAction(MdUpdateAction.SNAPSHOT);
+
+                    onDepthLevels(new DepthLevel[]{depthLevel});
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     boolean subscribe(Subscription subscription) {

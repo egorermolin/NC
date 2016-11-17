@@ -37,6 +37,8 @@ public abstract class IncrementalProcessor<T> extends Processor implements IIncr
                 GroupValue mdEntry = mdEntries.get(i);
                 if (mdEntry.getValue("RptSeq") == null) {
                     getLogger().warn("Market Reset received " + readMessage);
+                    // sequenceValidator.onMarketReset();
+                    // messageHandler.onMarketReset();
                     continue;
                 }
                 int rptSeqNum = mdEntry.getInt("RptSeq");

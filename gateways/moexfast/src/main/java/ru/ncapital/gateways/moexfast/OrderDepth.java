@@ -66,10 +66,12 @@ public class OrderDepth {
             case UPDATE:
                 previousDepthLevel = depthLevels.get(depthLevel.getMdEntryId());
                 if (previousDepthLevel == null) {
-                    logger.error("Entry not found for dl update " + depthLevel.getMdEntryId() + " (Received dl: " + depthLevel + ") (Previous dl: " + previousDepthLevel + ")");
+                    logger.error("Entry not found for dl update " + depthLevel.getMdEntryId() + " (Received dl: " + depthLevel + ")");
                 } else {
                     depthLevelsSorted.remove(previousDepthLevel);
                     depthLevels.remove(previousDepthLevel.getMdEntryId());
+                    // keep original price of the order
+                    depthLevel.setMdEntryPx(previousDepthLevel.getMdEntryPx());
                 }
                 depthLevelsSorted.add(depthLevel);
                 depthLevels.put(depthLevel.getMdEntryId(), depthLevel);
@@ -77,7 +79,7 @@ public class OrderDepth {
             case DELETE:
                 previousDepthLevel = depthLevels.get(depthLevel.getMdEntryId());
                 if (previousDepthLevel == null) {
-                    logger.error("Entry not found for dl delete " + depthLevel.getMdEntryId() + " (Received dl: " + depthLevel + ") (Previous dl: " + previousDepthLevel + ")");
+                    logger.error("Entry not found for dl delete " + depthLevel.getMdEntryId() + " (Received dl: " + depthLevel + ")");
                 } else {
                     depthLevelsSorted.remove(previousDepthLevel);
                     depthLevels.remove(previousDepthLevel.getMdEntryId());

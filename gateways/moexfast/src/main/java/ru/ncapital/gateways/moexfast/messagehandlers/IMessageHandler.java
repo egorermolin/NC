@@ -17,4 +17,6 @@ public interface IMessageHandler<T> {
     void flushIncrementals();
 
     MessageHandlerType getType();
+
+    void onMarketReset();
 }

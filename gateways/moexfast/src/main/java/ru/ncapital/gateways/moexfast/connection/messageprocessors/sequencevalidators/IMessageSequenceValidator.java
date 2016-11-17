@@ -26,4 +26,6 @@ public interface IMessageSequenceValidator<T> {
     T[] getRecovering();
 
     MessageHandlerType getType();
+
+    void onMarketReset();
 }
