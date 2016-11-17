@@ -129,8 +129,13 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
     public void startRecovering(T exchangeSecurityId) {
         SequenceNumber sequenceNumber = getSequenceNumber(exchangeSecurityId);
         synchronized (sequenceNumber) {
-            logger.get().info("Start Recovering " + exchangeSecurityId
-                    + ((sequenceNumber.numberOfMissingSequences > 0) ? (" " + sequenceNumber.numberOfMissingSequences) : " N/A"));
+            if (sequenceNumber.numberOfMissingSequences > 0) {
+                logger.get().info("Start Recovering " + exchangeSecurityId + " " + sequenceNumber.numberOfMissingSequences);
+            } else if (sequenceNumber.numberOfMissingSequences == 0) {
+                logger.get().info("Start Recovering " + exchangeSecurityId + " FIRST");
+            } else {
+                logger.get().info("Start Recovering " + exchangeSecurityId + " RESET");
+            }
         }
 
         exchangeSecurityIdsToRecover.add(exchangeSecurityId);
