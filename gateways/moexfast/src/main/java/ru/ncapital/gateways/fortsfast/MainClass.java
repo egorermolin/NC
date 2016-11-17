@@ -112,8 +112,10 @@ public class MainClass {
             // gwManager.subscribeForMarketData(instrument.getSecurityId());
         }
 
+        gwManager.subscribeForMarketData("GZZ6");
+
         try {
-            Thread.sleep(1000);
+            Thread.sleep(1000000);
         } catch (InterruptedException e) {
             Utils.printStackTrace(e, logger, "InterruptedException occurred..");
         }

@@ -235,7 +235,7 @@ public class MessageReader implements IMulticastEventListener {
         this.asynch = configurationManager.isAsynchChannelReader();
         this.connection = configurationManager.getConnection(connectionId);
         switch (this.connectionId) {
-            case FUT_ORDER_BOOK_INCR_A:
+            case FUT_ORDER_LIST_INCR_A:
             case FUT_ORDER_LIST_SNAP_A:
                 this.intf = configurationManager.getPrimaryNetworkInterface(true);
                 break;

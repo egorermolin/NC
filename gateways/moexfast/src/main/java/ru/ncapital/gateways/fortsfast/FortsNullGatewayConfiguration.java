@@ -11,4 +11,9 @@ public class FortsNullGatewayConfiguration extends NullGatewayConfiguration impl
     public String[] getAllowedUnderlyings() {
         return new String[0];
     }
+
+    @Override
+    public boolean publicTradesFromOrdersList() {
+        return true;
+    }
 }
