@@ -80,7 +80,8 @@ public abstract class IncrementalProcessor<T> extends Processor implements IIncr
                     }
                 }
             }
-            messageHandler.flushIncrementals();
+            if (readMessage.getValue("LastFragment") == null || readMessage.getInt("LastFragment") == 1)
+                messageHandler.flushIncrementals();
         }
     }
 
