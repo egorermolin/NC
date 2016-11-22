@@ -110,18 +110,18 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
     }
 
     @Override
-    public void storeIncremental(T exchangeSecurityId, int seqNum, GroupValue mdEntry, PerformanceData perfData) {
+    public void storeIncremental(T exchangeSecurityId, int seqNum, GroupValue mdEntry, PerformanceData perfData, boolean lastFragment, boolean lastEntryInTransaction) {
         if (logger.get().isTraceEnabled())
             logger.get().trace("STORE -> " + exchangeSecurityId + " " + seqNum);
 
         SequenceNumber sequenceNumber = getSequenceNumber(exchangeSecurityId);
         synchronized (sequenceNumber) {
             if (!storedMdEntriesByExchangeSecurityId.containsKey(exchangeSecurityId)) {
-                storedMdEntriesByExchangeSecurityId.put(exchangeSecurityId, new TreeMap<Integer, StoredMdEntry<T>>());
+                storedMdEntriesByExchangeSecurityId.put(exchangeSecurityId, new TreeMap<>());
             }
 
             Map<Integer, StoredMdEntry<T>> storedMdEntries = storedMdEntriesByExchangeSecurityId.get(exchangeSecurityId);
-            storedMdEntries.put(seqNum, new StoredMdEntry<>(exchangeSecurityId, seqNum, mdEntry, perfData));
+            storedMdEntries.put(seqNum, new StoredMdEntry<>(exchangeSecurityId, seqNum, mdEntry, perfData, lastFragment, lastEntryInTransaction));
         }
     }
 

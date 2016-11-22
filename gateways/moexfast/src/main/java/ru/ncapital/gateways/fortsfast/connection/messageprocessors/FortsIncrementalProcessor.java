@@ -25,4 +25,16 @@ public class FortsIncrementalProcessor extends IncrementalProcessor<Long> {
     protected SequenceValue getMdEntries(Message readMessage) {
         return readMessage.getSequence("MDEntries");
     }
+
+    @Override
+    protected boolean isLastEntryInTransaction(GroupValue mdEntry) {
+        return mdEntry.getValue("MDFlags") != null || (mdEntry.getLong("MDFlags") & 0x1000) != 0;
+    }
+
+    @Override
+    protected boolean isLastFragment(Message readMessage) {
+        return readMessage.getValue("LastFragment") == null || readMessage.getInt("LastFragment") == 1;
+    }
+
+
 }

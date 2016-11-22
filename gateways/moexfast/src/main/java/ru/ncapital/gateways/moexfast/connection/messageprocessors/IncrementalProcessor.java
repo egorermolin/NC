@@ -27,6 +27,8 @@ public abstract class IncrementalProcessor<T> extends Processor implements IIncr
         long inTimestamp = getInTimestamp();
         long dequeTimestamp = Utils.currentTimeInTicks();
         long sendingTime = Utils.convertTodayToTicks((readMessage.getLong("SendingTime") % 1_00_00_00_000L) * 1_000L);
+        boolean lastFragment = isLastFragment(readMessage);
+        //
 
         synchronized (sequenceValidator) {
             SequenceValue mdEntries = getMdEntries(readMessage);
@@ -37,11 +39,12 @@ public abstract class IncrementalProcessor<T> extends Processor implements IIncr
                 GroupValue mdEntry = mdEntries.get(i);
                 if (mdEntry.getValue("RptSeq") == null) {
                     getLogger().warn("Market Reset received " + readMessage);
-                    // sequenceValidator.onMarketReset();
-                    // messageHandler.onMarketReset();
+                    sequenceValidator.onMarketReset();
+                    messageHandler.onMarketReset();
                     continue;
                 }
                 int rptSeqNum = mdEntry.getInt("RptSeq");
+                boolean lastEntryInTransaction = isLastEntryInTransaction(mdEntry);
 
                 checkTradeId(mdEntry);
 
@@ -69,18 +72,20 @@ public abstract class IncrementalProcessor<T> extends Processor implements IIncr
                                         storedMdEntryToProcess.getPerformanceData());
                             }
                     } else {
-                        sequenceValidator.storeIncremental(exchangeSecurityId, rptSeqNum, mdEntry, performanceData);
+                        sequenceValidator.storeIncremental(exchangeSecurityId, rptSeqNum, mdEntry, performanceData, lastFragment, lastEntryInTransaction);
                     }
                 } else {
                     if (sequenceValidator.onIncrementalSeq(exchangeSecurityId, rptSeqNum)) {
                         messageHandler.onIncremental(mdEntry, performanceData);
                     } else {
-                        sequenceValidator.storeIncremental(exchangeSecurityId, rptSeqNum, mdEntry, performanceData);
+                        sequenceValidator.storeIncremental(exchangeSecurityId, rptSeqNum, mdEntry, performanceData, lastFragment, lastEntryInTransaction);
                         sequenceValidator.startRecovering(exchangeSecurityId);
                     }
                 }
+                if (lastEntryInTransaction)
+                    messageHandler.flushIncrementals();
             }
-            if (readMessage.getValue("LastFragment") == null || readMessage.getInt("LastFragment") == 1)
+            if (lastFragment)
                 messageHandler.flushIncrementals();
         }
     }
@@ -90,4 +95,8 @@ public abstract class IncrementalProcessor<T> extends Processor implements IIncr
     protected abstract T getExchangeSecurityId(GroupValue mdEntry);
 
     protected abstract SequenceValue getMdEntries(Message readMessage);
+
+    protected abstract boolean isLastEntryInTransaction(GroupValue mdEntry);
+
+    protected abstract boolean isLastFragment(Message readMessage);
 }

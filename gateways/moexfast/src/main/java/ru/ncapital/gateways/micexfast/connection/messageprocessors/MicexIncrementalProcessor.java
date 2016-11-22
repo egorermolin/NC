@@ -43,4 +43,14 @@ public class MicexIncrementalProcessor extends IncrementalProcessor<String> {
     protected SequenceValue getMdEntries(Message readMessage) {
         return readMessage.getSequence("GroupMDEntries");
     }
+
+    @Override
+    protected boolean isLastEntryInTransaction(GroupValue mdEntry) {
+        return false;
+    }
+
+    @Override
+    protected boolean isLastFragment(Message readMessage) {
+        return true;
+    }
 }

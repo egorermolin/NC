@@ -113,7 +113,7 @@ public abstract class MarketDataManager<T> {
                     DepthLevel<T> depthLevel = createDepthLevel(exchangeSecurityId);
                     depthLevel.setMdUpdateAction(MdUpdateAction.SNAPSHOT);
 
-                    onDepthLevels(new DepthLevel[]{depthLevel});
+                    onDepthLevels(new DepthLevel[]{ depthLevel });
                     break;
                 default:
                     break;

@@ -194,14 +194,10 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message.getInt("RptSeq")).thenReturn(100);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
 
-        StoredMdEntry<String> incStoredMdEntry1 = (StoredMdEntry<String>) Mockito.mock(StoredMdEntry.class);
-        StoredMdEntry<String> incStoredMdEntry2 = (StoredMdEntry<String>) Mockito.mock(StoredMdEntry.class);
-        Mockito.when(incStoredMdEntry1.getSequenceNumber()).thenReturn(101);
-        Mockito.when(incStoredMdEntry2.getSequenceNumber()).thenReturn(102);
         GroupValue incMdEntry1 = Mockito.mock(GroupValue.class);
         GroupValue incMdEntry2 = Mockito.mock(GroupValue.class);
-        Mockito.when(incStoredMdEntry1.getMdEntry()).thenReturn(incMdEntry1);
-        Mockito.when(incStoredMdEntry2.getMdEntry()).thenReturn(incMdEntry2);
+        StoredMdEntry<String> incStoredMdEntry1 = new StoredMdEntry<>("SYMB:CETS", 101, incMdEntry1, new PerformanceData(), true, false);
+        StoredMdEntry<String> incStoredMdEntry2 = new StoredMdEntry<>("SYMB:CETS", 102, incMdEntry2, new PerformanceData(), true, false);
         StoredMdEntry<String>[] incStoredMdEntries = (StoredMdEntry<String>[]) new StoredMdEntry[] {incStoredMdEntry1, incStoredMdEntry2};
         Mockito.when(sequenceValidator.stopRecovering("SYMB;CETS")).thenReturn(incStoredMdEntries);
 
@@ -242,6 +238,10 @@ public class MicexSnapshotProcessorTest {
         StoredMdEntry<String> incStoredMdEntry2 = (StoredMdEntry<String>) Mockito.mock(StoredMdEntry.class);
         Mockito.when(incStoredMdEntry1.getSequenceNumber()).thenReturn(101);
         Mockito.when(incStoredMdEntry2.getSequenceNumber()).thenReturn(102);
+        Mockito.when(incStoredMdEntry1.isLastFragment()).thenReturn(true);
+        Mockito.when(incStoredMdEntry2.isLastFragment()).thenReturn(true);
+        Mockito.when(incStoredMdEntry1.isLastEntryInTransaction()).thenReturn(false);
+        Mockito.when(incStoredMdEntry2.isLastEntryInTransaction()).thenReturn(false);
         GroupValue incMdEntry1 = Mockito.mock(GroupValue.class);
         GroupValue incMdEntry2 = Mockito.mock(GroupValue.class);
         Mockito.when(incStoredMdEntry1.getMdEntry()).thenReturn(incMdEntry1);

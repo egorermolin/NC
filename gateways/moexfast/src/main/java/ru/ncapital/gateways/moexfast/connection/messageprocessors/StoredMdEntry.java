@@ -15,11 +15,16 @@ public class StoredMdEntry<T> {
 
     private PerformanceData performanceData;
 
-    public StoredMdEntry(T exchangeSecurityId, int sequenceNumber, GroupValue mdEntry, PerformanceData performanceData) {
+    private boolean lastFragment;
+
+    private boolean lastEntryInTransaction;
+
+    public StoredMdEntry(T exchangeSecurityId, int sequenceNumber, GroupValue mdEntry, PerformanceData performanceData, boolean lastFragment, boolean lastEntryInTransaction) {
         this.exchangeSecurityId = exchangeSecurityId;
         this.sequenceNumber = sequenceNumber;
         this.mdEntry = mdEntry;
         this.performanceData = performanceData;
+        this.lastFragment = lastFragment;
     }
 
     public T getExchangeSecurityId() {
@@ -36,5 +41,13 @@ public class StoredMdEntry<T> {
 
     public PerformanceData getPerformanceData() {
         return performanceData;
+    }
+
+    public boolean isLastFragment() {
+        return lastFragment;
+    }
+
+    public boolean isLastEntryInTransaction() {
+        return lastEntryInTransaction;
     }
 }

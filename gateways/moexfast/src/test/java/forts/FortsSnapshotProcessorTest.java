@@ -23,6 +23,7 @@ import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 
 /**
  * Created by egore on 1/11/16.
@@ -103,7 +104,7 @@ public class FortsSnapshotProcessorTest {
         snapshotProcessor.handleMessage(message, context, coder);
         snapshotProcessor.handleMessage(message2, context, coder);
 
-        Mockito.verify(marketDataHandler, Mockito.times(2)).onSnapshot(messageCaptor.capture());
+        Mockito.verify(marketDataHandler, times(2)).onSnapshot(messageCaptor.capture());
         Mockito.verify(sequenceValidator).isRecovering(380922L, true);
         Mockito.verify(sequenceValidator).isRecovering(380925L, true);
         Mockito.verify(sequenceValidator).stopRecovering(380922L);
@@ -139,7 +140,7 @@ public class FortsSnapshotProcessorTest {
         snapshotProcessor.handleMessage(message, context, coder);
         snapshotProcessor.handleMessage(message, context, coder);
 
-        Mockito.verify(marketDataHandler, Mockito.times(1)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(1)).onSnapshot(Mockito.eq(message));
     }
 
     @Test
@@ -157,7 +158,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message.getLong("SendingTime")).thenReturn(2L);
         snapshotProcessor.handleMessage(message, context, coder);
 
-        Mockito.verify(marketDataHandler, Mockito.times(2)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(2)).onSnapshot(Mockito.eq(message));
     }
 
     @Test
@@ -172,7 +173,7 @@ public class FortsSnapshotProcessorTest {
         snapshotProcessor.handleMessage(message, context, coder);
         snapshotProcessor.handleMessage(message, context, coder);
 
-        Mockito.verify(marketDataHandler, Mockito.times(1)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(1)).onSnapshot(Mockito.eq(message));
     }
 
     @Test
@@ -191,6 +192,10 @@ public class FortsSnapshotProcessorTest {
         StoredMdEntry<String> incStoredMdEntry2 = (StoredMdEntry<String>) mock(StoredMdEntry.class);
         Mockito.when(incStoredMdEntry1.getSequenceNumber()).thenReturn(101);
         Mockito.when(incStoredMdEntry2.getSequenceNumber()).thenReturn(102);
+        Mockito.when(incStoredMdEntry1.isLastFragment()).thenReturn(true);
+        Mockito.when(incStoredMdEntry2.isLastFragment()).thenReturn(true);
+        Mockito.when(incStoredMdEntry1.isLastEntryInTransaction()).thenReturn(true);
+        Mockito.when(incStoredMdEntry2.isLastEntryInTransaction()).thenReturn(true);
         GroupValue incMdEntry1 = mock(GroupValue.class);
         GroupValue incMdEntry2 = mock(GroupValue.class);
         Mockito.when(incStoredMdEntry1.getMdEntry()).thenReturn(incMdEntry1);
@@ -204,7 +209,79 @@ public class FortsSnapshotProcessorTest {
         Mockito.verify(sequenceValidator).onIncrementalSeq(380922L, 102);
         Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(incMdEntry1), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(incMdEntry2), Mockito.any(PerformanceData.class));
-        Mockito.verify(marketDataHandler).flushIncrementals();
+        Mockito.verify(marketDataHandler, times(3)).flushIncrementals();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testSnapshotWithIncrementals2() {
+        Message message = mock(Message.class);
+        Mockito.when(message.getString("MessageType")).thenReturn("W");
+        Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
+        Mockito.when(message.getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message.getInt("RouteFirst")).thenReturn(1);
+        Mockito.when(message.getInt("LastFragment")).thenReturn(1);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+
+        StoredMdEntry<String> incStoredMdEntry1 = (StoredMdEntry<String>) mock(StoredMdEntry.class);
+        StoredMdEntry<String> incStoredMdEntry2 = (StoredMdEntry<String>) mock(StoredMdEntry.class);
+        Mockito.when(incStoredMdEntry1.getSequenceNumber()).thenReturn(101);
+        Mockito.when(incStoredMdEntry2.getSequenceNumber()).thenReturn(102);
+        Mockito.when(incStoredMdEntry1.isLastFragment()).thenReturn(true);
+        Mockito.when(incStoredMdEntry2.isLastFragment()).thenReturn(false);
+        Mockito.when(incStoredMdEntry1.isLastEntryInTransaction()).thenReturn(true);
+        Mockito.when(incStoredMdEntry2.isLastEntryInTransaction()).thenReturn(false);
+        GroupValue incMdEntry1 = mock(GroupValue.class);
+        GroupValue incMdEntry2 = mock(GroupValue.class);
+        Mockito.when(incStoredMdEntry1.getMdEntry()).thenReturn(incMdEntry1);
+        Mockito.when(incStoredMdEntry2.getMdEntry()).thenReturn(incMdEntry2);
+        StoredMdEntry<Long>[] incStoredMdEntries = (StoredMdEntry<Long>[]) new StoredMdEntry[] {incStoredMdEntry1, incStoredMdEntry2};
+        Mockito.when(sequenceValidator.stopRecovering(380922L)).thenReturn(incStoredMdEntries);
+
+        snapshotProcessor.handleMessage(message, context, coder);
+
+        Mockito.verify(sequenceValidator).onIncrementalSeq(380922L, 101);
+        Mockito.verify(sequenceValidator).onIncrementalSeq(380922L, 102);
+        Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(incMdEntry1), Mockito.any(PerformanceData.class));
+        Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(incMdEntry2), Mockito.any(PerformanceData.class));
+        Mockito.verify(marketDataHandler, times(1)).flushIncrementals();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testSnapshotWithIncrementals3() {
+        Message message = mock(Message.class);
+        Mockito.when(message.getString("MessageType")).thenReturn("W");
+        Mockito.when(message.getInt("MsgSeqNum")).thenReturn(1);
+        Mockito.when(message.getLong("SecurityID")).thenReturn(97516102L);
+        Mockito.when(message.getInt("RouteFirst")).thenReturn(1);
+        Mockito.when(message.getInt("LastFragment")).thenReturn(1);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
+        Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+
+        StoredMdEntry<String> incStoredMdEntry1 = (StoredMdEntry<String>) mock(StoredMdEntry.class);
+        StoredMdEntry<String> incStoredMdEntry2 = (StoredMdEntry<String>) mock(StoredMdEntry.class);
+        Mockito.when(incStoredMdEntry1.getSequenceNumber()).thenReturn(101);
+        Mockito.when(incStoredMdEntry2.getSequenceNumber()).thenReturn(102);
+        Mockito.when(incStoredMdEntry1.isLastFragment()).thenReturn(false);
+        Mockito.when(incStoredMdEntry2.isLastFragment()).thenReturn(false);
+        Mockito.when(incStoredMdEntry1.isLastEntryInTransaction()).thenReturn(false);
+        Mockito.when(incStoredMdEntry2.isLastEntryInTransaction()).thenReturn(false);
+        GroupValue incMdEntry1 = mock(GroupValue.class);
+        GroupValue incMdEntry2 = mock(GroupValue.class);
+        Mockito.when(incStoredMdEntry1.getMdEntry()).thenReturn(incMdEntry1);
+        Mockito.when(incStoredMdEntry2.getMdEntry()).thenReturn(incMdEntry2);
+        StoredMdEntry<Long>[] incStoredMdEntries = (StoredMdEntry<Long>[]) new StoredMdEntry[] {incStoredMdEntry1, incStoredMdEntry2};
+        Mockito.when(sequenceValidator.stopRecovering(380922L)).thenReturn(incStoredMdEntries);
+
+        snapshotProcessor.handleMessage(message, context, coder);
+
+        Mockito.verify(sequenceValidator).onIncrementalSeq(380922L, 101);
+        Mockito.verify(sequenceValidator).onIncrementalSeq(380922L, 102);
+        Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(incMdEntry1), Mockito.any(PerformanceData.class));
+        Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(incMdEntry2), Mockito.any(PerformanceData.class));
+        Mockito.verify(marketDataHandler, times(0)).flushIncrementals();
     }
 
     @Test
@@ -233,6 +310,10 @@ public class FortsSnapshotProcessorTest {
         StoredMdEntry<String> incStoredMdEntry2 = (StoredMdEntry<String>) mock(StoredMdEntry.class);
         Mockito.when(incStoredMdEntry1.getSequenceNumber()).thenReturn(101);
         Mockito.when(incStoredMdEntry2.getSequenceNumber()).thenReturn(102);
+        Mockito.when(incStoredMdEntry1.isLastFragment()).thenReturn(true);
+        Mockito.when(incStoredMdEntry2.isLastFragment()).thenReturn(true);
+        Mockito.when(incStoredMdEntry1.isLastEntryInTransaction()).thenReturn(true);
+        Mockito.when(incStoredMdEntry2.isLastEntryInTransaction()).thenReturn(true);
         GroupValue incMdEntry1 = mock(GroupValue.class);
         GroupValue incMdEntry2 = mock(GroupValue.class);
         Mockito.when(incStoredMdEntry1.getMdEntry()).thenReturn(incMdEntry1);
@@ -241,16 +322,16 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(sequenceValidator.stopRecovering(380922L)).thenReturn(incStoredMdEntries);
 
         snapshotProcessor.handleMessage(message, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message2));
 
         snapshotProcessor.handleMessage(message2, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(2)).onSnapshot(messageCaptor.capture());
+        Mockito.verify(marketDataHandler, times(2)).onSnapshot(messageCaptor.capture());
         Mockito.verify(sequenceValidator).onIncrementalSeq(380922L, 101);
         Mockito.verify(sequenceValidator).onIncrementalSeq(380922L, 102);
         Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(incMdEntry1), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(incMdEntry2), Mockito.any(PerformanceData.class));
-        Mockito.verify(marketDataHandler).flushIncrementals();
+        Mockito.verify(marketDataHandler, times(3)).flushIncrementals();
 
         assert messageCaptor.getAllValues().get(0).getInt("MsgSeqNum") == 1;
         assert messageCaptor.getAllValues().get(1).getInt("MsgSeqNum") == 2;
@@ -285,17 +366,17 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message3.getInt("LastFragment")).thenReturn(1);
 
         snapshotProcessor.handleMessage(message, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message3));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message2));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message3));
 
         snapshotProcessor.handleMessage(message2, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message3));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message2));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message3));
 
         snapshotProcessor.handleMessage(message3, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(3)).onSnapshot(messageCaptor.capture());
+        Mockito.verify(marketDataHandler, times(3)).onSnapshot(messageCaptor.capture());
 
         assert messageCaptor.getAllValues().get(0).getInt("MsgSeqNum") == 1;
         assert messageCaptor.getAllValues().get(1).getInt("MsgSeqNum") == 2;
@@ -333,19 +414,19 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(sequenceValidator.isRecovering(380922L, true)).thenReturn(false);
 
         snapshotProcessor.handleMessage(message, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message3));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message2));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message3));
 
         snapshotProcessor.handleMessage(message2, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message3));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message2));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message3));
 
         Mockito.when(sequenceValidator.isRecovering(380922L, true)).thenReturn(true);
 
         snapshotProcessor.handleMessage(message3, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.any(Message.class));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.any(Message.class));
     }
 
 
@@ -378,19 +459,19 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message3.getInt("LastFragment")).thenReturn(0);
 
         snapshotProcessor.handleMessage(message, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message3));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message2));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message3));
 
         snapshotProcessor.handleMessage(message2, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message3));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message2));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message3));
 
         snapshotProcessor.handleMessage(message3, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message3));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message2));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message3));
     }
 
     @Test
@@ -413,12 +494,12 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message2.getInt("LastFragment")).thenReturn(1);
 
         snapshotProcessor.handleMessage(message, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message2));
 
         snapshotProcessor.handleMessage(message2, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message2));
     }
 
     @Test
@@ -451,28 +532,28 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message3.getInt("LastFragment")).thenReturn(1);
 
         snapshotProcessor.handleMessage(message, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message3));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message2));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message3));
 
         snapshotProcessor.handleMessage(message3, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message3));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message2));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message3));
 
         Mockito.when(message.getLong("SendingTime")).thenReturn(2L);
         snapshotProcessor.handleMessage(message, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message3));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message2));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message3));
 
         snapshotProcessor.handleMessage(message2, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message3));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message2));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message3));
 
         snapshotProcessor.handleMessage(message3, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(3)).onSnapshot(messageCaptor.capture());
+        Mockito.verify(marketDataHandler, times(3)).onSnapshot(messageCaptor.capture());
 
         assert messageCaptor.getAllValues().get(0).getInt("MsgSeqNum") == 1;
         assert messageCaptor.getAllValues().get(1).getInt("MsgSeqNum") == 2;
@@ -517,25 +598,25 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message4.getInt("LastFragment")).thenReturn(1);
 
         snapshotProcessor.handleMessage(message, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message3));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message4));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message2));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message3));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message4));
 
         snapshotProcessor.handleMessage(message3, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message3));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message4));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message2));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message3));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message4));
 
         snapshotProcessor.handleMessage(message2, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message3));
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message4));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message2));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message3));
+        Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message4));
 
         snapshotProcessor.handleMessage(message4, context, coder);
-        Mockito.verify(marketDataHandler, Mockito.times(4)).onSnapshot(messageCaptor.capture());
+        Mockito.verify(marketDataHandler, times(4)).onSnapshot(messageCaptor.capture());
 
         assert messageCaptor.getAllValues().get(0).getInt("MsgSeqNum") == 1;
         assert messageCaptor.getAllValues().get(1).getInt("MsgSeqNum") == 2;

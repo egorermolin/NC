@@ -15,7 +15,7 @@ public interface IMessageSequenceValidator<T> {
 
     void startRecovering(T exchangeSecurityId);
 
-    void storeIncremental(T exchangeSecurityId, int seqNum, GroupValue mdEntry, PerformanceData perfData);
+    void storeIncremental(T exchangeSecurityId, int seqNum, GroupValue mdEntry, PerformanceData perfData, boolean lastFragment, boolean lastEntryInTransaction);
 
     StoredMdEntry[] stopRecovering(T exchangeSecurityId);
 

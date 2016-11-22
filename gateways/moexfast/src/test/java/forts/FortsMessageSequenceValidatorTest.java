@@ -54,6 +54,8 @@ public class FortsMessageSequenceValidatorTest {
 
     @Test
     public void testRecoveringSnapshot() {
+        assert !sequenceValidator.isRecovering(380922L, true);
+        sequenceValidator.startRecovering(380922L);
         assert sequenceValidator.isRecovering(380922L, true);
         sequenceValidator.onSnapshotSeq(380922L, 100);
         sequenceValidator.stopRecovering(380922L);
@@ -96,9 +98,9 @@ public class FortsMessageSequenceValidatorTest {
         GroupValue mdEntry3 = Mockito.mock(GroupValue.class);
 
         sequenceValidator.startRecovering(380922L);
-        sequenceValidator.storeIncremental(380922L, 100, mdEntry1, new PerformanceData());
-        sequenceValidator.storeIncremental(380922L, 101, mdEntry2, new PerformanceData());
-        sequenceValidator.storeIncremental(380922L, 102, mdEntry3, new PerformanceData());
+        sequenceValidator.storeIncremental(380922L, 100, mdEntry1, new PerformanceData(), true, false);
+        sequenceValidator.storeIncremental(380922L, 101, mdEntry2, new PerformanceData(), true, false);
+        sequenceValidator.storeIncremental(380922L, 102, mdEntry3, new PerformanceData(), true, false);
 
         assert sequenceValidator.onSnapshotSeq(380922L, 100);
         StoredMdEntry[] storedMdEntries = sequenceValidator.stopRecovering(380922L);
@@ -114,9 +116,9 @@ public class FortsMessageSequenceValidatorTest {
         GroupValue mdEntry3 = Mockito.mock(GroupValue.class);
 
         sequenceValidator.startRecovering(380922L);
-        sequenceValidator.storeIncremental(380922L, 100, mdEntry1, new PerformanceData());
-        sequenceValidator.storeIncremental(380922L, 101, mdEntry2, new PerformanceData());
-        sequenceValidator.storeIncremental(380922L, 104, mdEntry3, new PerformanceData());
+        sequenceValidator.storeIncremental(380922L, 100, mdEntry1, new PerformanceData(), true, false);
+        sequenceValidator.storeIncremental(380922L, 101, mdEntry2, new PerformanceData(), true, false);
+        sequenceValidator.storeIncremental(380922L, 104, mdEntry3, new PerformanceData(), true, false);
 
         assert sequenceValidator.onSnapshotSeq(380922L, 100);
         assert sequenceValidator.stopRecovering(380922L) == null;

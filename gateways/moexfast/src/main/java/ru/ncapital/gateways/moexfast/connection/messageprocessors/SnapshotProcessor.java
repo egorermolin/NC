@@ -36,12 +36,21 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
                 // finished recovering
                 StoredMdEntry[] storedMdEntriesToProcess = sequenceValidator.stopRecovering(exchangeSecurityId);
                 if (storedMdEntriesToProcess != null) {
+                    boolean lastFragment = true;
+
                     for (StoredMdEntry storedMdEntry : storedMdEntriesToProcess) {
+                        lastFragment = storedMdEntry.isLastFragment();
+
                         sequenceValidator.onIncrementalSeq(exchangeSecurityId, storedMdEntry.getSequenceNumber());
 
                         messageHandler.onIncremental(storedMdEntry.getMdEntry(), new PerformanceData());
+
+                        if (storedMdEntry.isLastEntryInTransaction())
+                            messageHandler.flushIncrementals();
                     }
-                    messageHandler.flushIncrementals();
+
+                    if (lastFragment)
+                        messageHandler.flushIncrementals();
                 }
             }
         }
