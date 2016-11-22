@@ -28,7 +28,13 @@ public class FortsIncrementalProcessor extends IncrementalProcessor<Long> {
 
     @Override
     protected boolean isLastEntryInTransaction(GroupValue mdEntry) {
-        return mdEntry.getValue("MDFlags") != null || (mdEntry.getLong("MDFlags") & 0x1000) != 0;
+        if (mdEntry.getValue("MDFlags") == null)
+            return false;
+
+        long mdFlags = mdEntry.getLong("MDFlags");
+        long lastEntryInTransaction = mdFlags & 0x1000;
+
+        return lastEntryInTransaction != 0;
     }
 
     @Override
