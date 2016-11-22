@@ -117,7 +117,7 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
         SequenceNumber sequenceNumber = getSequenceNumber(exchangeSecurityId);
         synchronized (sequenceNumber) {
             if (!storedMdEntriesByExchangeSecurityId.containsKey(exchangeSecurityId)) {
-                storedMdEntriesByExchangeSecurityId.put(exchangeSecurityId, new TreeMap<>());
+                storedMdEntriesByExchangeSecurityId.put(exchangeSecurityId, new TreeMap<Integer, StoredMdEntry<T>>());
             }
 
             Map<Integer, StoredMdEntry<T>> storedMdEntries = storedMdEntriesByExchangeSecurityId.get(exchangeSecurityId);
