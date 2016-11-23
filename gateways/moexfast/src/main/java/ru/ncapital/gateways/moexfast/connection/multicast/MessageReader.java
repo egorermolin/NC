@@ -255,10 +255,10 @@ public class MessageReader implements IMulticastEventListener {
         this.marketDataManager = marketDataManager;
         this.instrumentManager = instumentManager;
 
-        this.logger = LoggerFactory.getLogger(connectionId.getConnectionId() + "-MessageReader");
+        this.logger = LoggerFactory.getLogger(connection.getId() + "-MessageReader");
 
         if (logger.isDebugEnabled())
-            logger.debug("Created [Connection: " + connectionId.getConnectionId() + "]");
+            logger.debug("Created [Connection: " + connection.getId() + "]");
     }
 
     public DatagramChannel openChannel() throws IOException {
