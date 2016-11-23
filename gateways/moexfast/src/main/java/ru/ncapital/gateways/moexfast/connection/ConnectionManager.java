@@ -504,8 +504,7 @@ public class ConnectionManager {
                 if (currentTime - lastReceivedTimestamp < feedDownTimeout) {
                     up++;
                 } else {
-                    if (logger.isDebugEnabled())
-                        logger.debug("Message Reader [" + messageReader.getConnectionId() + "] is down since [" + Utils.convertTicksToTodayString(lastReceivedTimestamp) + "]");
+                    logger.warn("Message Reader [" + messageReader.getConnectionId() + "] is down since [" + Utils.convertTicksToTodayString(lastReceivedTimestamp) + "]");
                 }
             }
         }
