@@ -234,6 +234,7 @@ public class MessageReader implements IMulticastEventListener {
         this.connectionId = connectionId;
         this.asynch = configurationManager.isAsynchChannelReader();
         this.connection = configurationManager.getConnection(connectionId);
+
         switch (this.connectionId) {
             case FUT_ORDER_LIST_INCR_A:
             case FUT_ORDER_LIST_SNAP_A:
@@ -255,13 +256,16 @@ public class MessageReader implements IMulticastEventListener {
         this.marketDataManager = marketDataManager;
         this.instrumentManager = instumentManager;
 
-        this.logger = LoggerFactory.getLogger(connection.getId() + "-MessageReader");
+        this.logger = LoggerFactory.getLogger(connectionId.getConnectionId() + "-MessageReader");
 
         if (logger.isDebugEnabled())
-            logger.debug("Created [Connection: " + connection.getId() + "]");
+            logger.debug("Created [Connection: " + connectionId.getConnectionId() + "]");
     }
 
     public DatagramChannel openChannel() throws IOException {
+        if (connection == null)
+            throw new RuntimeException("Connection " + connectionId.getConnectionId() + " is not created");
+
         return DatagramChannel.open(StandardProtocolFamily.INET)
                 .setOption(StandardSocketOptions.SO_REUSEADDR, true)
                 .bind(new InetSocketAddress(connection.getPort()));
