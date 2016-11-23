@@ -28,7 +28,6 @@ public abstract class IncrementalProcessor<T> extends Processor implements IIncr
         long dequeTimestamp = Utils.currentTimeInTicks();
         long sendingTime = Utils.convertTodayToTicks((readMessage.getLong("SendingTime") % 1_00_00_00_000L) * 1_000L);
         boolean lastFragment = isLastFragment(readMessage);
-        //
 
         synchronized (sequenceValidator) {
             SequenceValue mdEntries = getMdEntries(readMessage);

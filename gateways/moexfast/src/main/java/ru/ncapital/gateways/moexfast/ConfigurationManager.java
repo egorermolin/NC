@@ -44,30 +44,34 @@ public abstract class ConfigurationManager {
         if (networkInterface.contains("|")) {
             String networkInterfacePart = networkInterface.split("\\|")[orderList ? 1 : 0];
             if (networkInterfacePart.contains(";"))
-                return networkInterfacePart.split(";")[0];
+                if (!networkInterfacePart.split(";")[0].isEmpty())
+                    return networkInterfacePart.split(";")[0];
 
-            return networkInterfacePart;
+            return networkInterfacePart.replace(";", "");
         }
 
         if (networkInterface.contains(";"))
-            return networkInterface.split(";")[0];
+            if (!networkInterface.split(";")[0].isEmpty())
+                return networkInterface.split(";")[0];
 
-        return networkInterface;
+        return networkInterface.replace(";", "");
     }
 
     public String getSecondaryNetworkInterface(boolean orderList) {
         if (networkInterface.contains("|")) {
             String networkInterfacePart = networkInterface.split("\\|")[orderList ? 1 : 0];
             if (networkInterfacePart.contains(";"))
-                return networkInterfacePart.split(";")[1];
+                if (!networkInterfacePart.split(";")[1].isEmpty())
+                    return networkInterfacePart.split(";")[1];
 
-            return networkInterfacePart;
+            return networkInterfacePart.replace(";", "");
         }
 
         if (networkInterface.contains(";"))
-            return networkInterface.split(";")[1];
+            if (!networkInterface.split(";")[1].isEmpty())
+                return networkInterface.split(";")[1];
 
-        return networkInterface;
+        return networkInterface.replace(";", "");
     }
 
     public boolean checkInterfaces() {

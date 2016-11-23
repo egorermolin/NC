@@ -234,6 +234,7 @@ public class MessageReader implements IMulticastEventListener {
         this.connectionId = connectionId;
         this.asynch = configurationManager.isAsynchChannelReader();
         this.connection = configurationManager.getConnection(connectionId);
+
         switch (this.connectionId) {
             case FUT_ORDER_LIST_INCR_A:
             case FUT_ORDER_LIST_SNAP_A:
@@ -262,6 +263,9 @@ public class MessageReader implements IMulticastEventListener {
     }
 
     public DatagramChannel openChannel() throws IOException {
+        if (connection == null)
+            throw new RuntimeException("Connection " + connectionId.getConnectionId() + " is not created");
+
         return DatagramChannel.open(StandardProtocolFamily.INET)
                 .setOption(StandardSocketOptions.SO_REUSEADDR, true)
                 .bind(new InetSocketAddress(connection.getPort()));

@@ -19,6 +19,10 @@ public class Connection {
         this.source = source;
     }
 
+    public ConnectionId getId() {
+        return id;
+    }
+
     public String getSource() {
         return source;
     }
