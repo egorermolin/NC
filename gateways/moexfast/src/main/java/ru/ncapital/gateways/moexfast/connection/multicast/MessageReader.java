@@ -263,7 +263,7 @@ public class MessageReader implements IMulticastEventListener {
             logger.debug("Created [Connection: " + connectionId.getConnectionId() + "]");
     }
 
-    private DatagramChannel openChannel() throws IOException {
+    public DatagramChannel openChannel() throws IOException {
         if (connection == null)
             throw new RuntimeException("Connection " + connectionId.getConnectionId() + " is not created");
 
@@ -272,7 +272,7 @@ public class MessageReader implements IMulticastEventListener {
                 .bind(new InetSocketAddress(connection.getPort()));
     }
 
-    private NetworkInterface getNetworkInterface(String name) throws SocketException {
+    public NetworkInterface getNetworkInterface(String name) throws SocketException {
         if (name.contains("."))
             return NetworkInterface.getByName(ListNetIntf.getNetworkInterfaceName(name));
         else
