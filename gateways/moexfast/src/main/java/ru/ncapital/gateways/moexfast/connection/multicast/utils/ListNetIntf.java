@@ -13,7 +13,7 @@ import static java.lang.System.out;
  */
 public class ListNetIntf {
 
-    static void displayInterfaceInformation(NetworkInterface netint) throws SocketException {
+    private static void displayInterfaceInformation(NetworkInterface netint) throws SocketException {
         out.printf("Display name: %s\n", netint.getDisplayName());
         out.printf("Name: %s\n", netint.getName());
         Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
@@ -23,10 +23,22 @@ public class ListNetIntf {
         out.printf("\n");
     }
 
+    public static String getNetworkInterfaceName(String hostname) throws SocketException {
+        Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+        for (NetworkInterface netint : Collections.list(nets)) {
+            Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
+            for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+                if (inetAddress.getHostName().equals(hostname))
+                    return netint.getName();
+            }
+        }
+
+        throw new SocketException("No interface found for " + hostname);
+    }
+
     public static void main(String args[]) throws SocketException {
         Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
         for (NetworkInterface netint : Collections.list(nets))
             displayInterfaceInformation(netint);
     }
-
 }

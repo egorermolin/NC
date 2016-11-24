@@ -6,6 +6,9 @@ import ru.ncapital.gateways.micexfast.MicexConfigurationManager;
 import ru.ncapital.gateways.micexfast.MicexNullGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.ConfigurationManager;
 import ru.ncapital.gateways.moexfast.connection.ConnectionId;
+import ru.ncapital.gateways.moexfast.connection.multicast.utils.ListNetIntf;
+
+import java.net.SocketException;
 
 /**
  * Created by egore on 10.02.2016.
@@ -192,5 +195,10 @@ public class ConfigurationManagerTest {
         Assert.assertEquals("eth1", cm.getSecondaryNetworkInterface(false));
         Assert.assertEquals("eth2", cm.getPrimaryNetworkInterface(true));
         Assert.assertEquals("eth3", cm.getSecondaryNetworkInterface(true));
+    }
+
+    @Test
+    public void testNetworkInterface() throws SocketException {
+        Assert.assertEquals("lo", ListNetIntf.getNetworkInterfaceName("127.0.0.1"));
     }
 }

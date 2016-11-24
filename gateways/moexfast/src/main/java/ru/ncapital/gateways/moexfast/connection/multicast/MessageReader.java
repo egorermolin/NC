@@ -15,6 +15,7 @@ import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.connection.Connection;
 import ru.ncapital.gateways.moexfast.connection.ConnectionId;
+import ru.ncapital.gateways.moexfast.connection.multicast.utils.ListNetIntf;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 
 import java.io.BufferedWriter;
@@ -262,7 +263,7 @@ public class MessageReader implements IMulticastEventListener {
             logger.debug("Created [Connection: " + connectionId.getConnectionId() + "]");
     }
 
-    public DatagramChannel openChannel() throws IOException {
+    private DatagramChannel openChannel() throws IOException {
         if (connection == null)
             throw new RuntimeException("Connection " + connectionId.getConnectionId() + " is not created");
 
@@ -271,8 +272,11 @@ public class MessageReader implements IMulticastEventListener {
                 .bind(new InetSocketAddress(connection.getPort()));
     }
 
-    public NetworkInterface getNetworkInterface(String name) throws SocketException {
-        return NetworkInterface.getByName(name);
+    private NetworkInterface getNetworkInterface(String name) throws SocketException {
+        if (name.contains("."))
+            return NetworkInterface.getByName(ListNetIntf.getNetworkInterfaceName(name));
+        else
+            return NetworkInterface.getByName(name);
     }
 
     public void init(String level) throws IOException {
