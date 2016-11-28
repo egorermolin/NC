@@ -72,11 +72,15 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
 
     @Override
     public void flushIncrementals() {
-        if (bbo != null)
+        if (bbo != null) {
             marketDataManager.onBBO(bbo);
+            bbo = null;
+        }
 
-        if (publicTrade != null)
+        if (publicTrade != null) {
             marketDataManager.onPublicTrade(publicTrade);
+            publicTrade = null;
+        }
     }
 
     private BBO<T> getOrCreateBBO(T exchangeSecurityId, PerformanceData perfData) {

@@ -83,14 +83,17 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
         SequenceNumber sequenceNumber = getSequenceNumber(exchangeSecurityId);
         synchronized (sequenceNumber) {
             if (sequenceNumber.lastSeqNum + 1 != seqNum) {
-                if (sequenceNumber.lastSeqNum > 0 && !isRecovering(exchangeSecurityId, false)) {
+                if (isRecovering(exchangeSecurityId, false))
+                    return false;
+
+                if (sequenceNumber.lastSeqNum > 0) {
                     if (logger.get().isDebugEnabled())
                         logger.get().debug("OutOfSequence [Symbol: " + exchangeSecurityId + "][Expected: " + (sequenceNumber.lastSeqNum + 1) + "][Received: " + seqNum + "]");
 
                     sequenceNumber.numberOfMissingSequences = seqNum - sequenceNumber.lastSeqNum - 1;
                 } else {
                     if (logger.get().isDebugEnabled())
-                        logger.get().debug("First message for " + exchangeSecurityId + " " + seqNum);
+                        logger.get().debug("First message for [Symbol: " + exchangeSecurityId + "][Received: " + seqNum + "]");
                 }
 
                 return false;
