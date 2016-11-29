@@ -3,8 +3,10 @@ package ru.ncapital.gateways.moexfast;
 import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.connection.Connection;
 import ru.ncapital.gateways.moexfast.connection.ConnectionId;
+import ru.ncapital.gateways.moexfast.connection.multicast.utils.ListNetIntf;
 
 import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.Map;
 
 /**
@@ -38,6 +40,13 @@ public abstract class ConfigurationManager {
 
     public Connection getConnection(ConnectionId connectionId) {
         return connections.get(connectionId);
+    }
+
+    public static NetworkInterface convertNetworkInterface(String name) throws SocketException {
+        if (name.contains("."))
+            return NetworkInterface.getByName(ListNetIntf.getNetworkInterfaceName(name));
+        else
+            return NetworkInterface.getByName(name);
     }
 
     public String getPrimaryNetworkInterface(boolean orderList) {
@@ -76,7 +85,7 @@ public abstract class ConfigurationManager {
 
     public boolean checkInterfaces() {
         try {
-            if (NetworkInterface.getByName(getPrimaryNetworkInterface(false)) == null)
+            if (convertNetworkInterface(getPrimaryNetworkInterface(false)) == null)
                 throw new RuntimeException("Invalid Primary Interface " + getPrimaryNetworkInterface(false));
         } catch (Exception e) {
             LoggerFactory.getLogger("ConfigurationManager").error(e.toString(), e);
@@ -84,7 +93,7 @@ public abstract class ConfigurationManager {
         }
 
         try {
-            if (NetworkInterface.getByName(getSecondaryNetworkInterface(false)) == null)
+            if (convertNetworkInterface(getSecondaryNetworkInterface(false)) == null)
                 throw new RuntimeException("Invalid Secondary Interface " + getSecondaryNetworkInterface(false));
         } catch (Exception e) {
             LoggerFactory.getLogger("ConfigurationManager").error(e.toString(), e);
@@ -92,7 +101,7 @@ public abstract class ConfigurationManager {
         }
 
         try {
-            if (NetworkInterface.getByName(getPrimaryNetworkInterface(true)) == null)
+            if (convertNetworkInterface(getPrimaryNetworkInterface(true)) == null)
                 throw new RuntimeException("Invalid Primary Interface For Order List" + getPrimaryNetworkInterface(true));
         } catch (Exception e) {
             LoggerFactory.getLogger("ConfigurationManager").error(e.toString(), e);
@@ -100,7 +109,7 @@ public abstract class ConfigurationManager {
         }
 
         try {
-            if (NetworkInterface.getByName(getSecondaryNetworkInterface(true)) == null)
+            if (convertNetworkInterface(getSecondaryNetworkInterface(true)) == null)
                 throw new RuntimeException("Invalid Secondary Interface For Order List" + getSecondaryNetworkInterface(true));
         } catch (Exception e) {
             LoggerFactory.getLogger("ConfigurationManager").error(e.toString(), e);

@@ -273,10 +273,7 @@ public class MessageReader implements IMulticastEventListener {
     }
 
     public NetworkInterface getNetworkInterface(String name) throws SocketException {
-        if (name.contains("."))
-            return NetworkInterface.getByName(ListNetIntf.getNetworkInterfaceName(name));
-        else
-            return NetworkInterface.getByName(name);
+        return ConfigurationManager.convertNetworkInterface(name);
     }
 
     public void init(String level) throws IOException {
