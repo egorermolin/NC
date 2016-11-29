@@ -28,7 +28,7 @@ public class ListNetIntf {
         for (NetworkInterface netint : Collections.list(nets)) {
             Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
             for (InetAddress inetAddress : Collections.list(inetAddresses)) {
-                if (inetAddress.getHostName().contains(hostname))
+                if (inetAddress.toString().contains(hostname))
                     return netint.getName();
             }
         }

@@ -363,7 +363,7 @@ public class MessageReader implements IMulticastEventListener {
 
     private void connect() throws IOException {
         membership = channel.join(InetAddress.getByName(connection.getIp()),
-                NetworkInterface.getByName(intf),
+                getNetworkInterface(intf),
                 InetAddress.getByName(connection.getSource()));
 
         if (logger.isDebugEnabled())
