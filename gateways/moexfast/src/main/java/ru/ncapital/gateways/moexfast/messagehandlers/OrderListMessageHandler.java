@@ -28,6 +28,8 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
 
     private boolean publicTradesFromOrderList;
 
+    private String lastTradeId;
+
     public OrderListMessageHandler(MarketDataManager<T> marketDataManager, IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
 
@@ -109,23 +111,22 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
         }
 
         // trade
-        if (publicTradesFromOrderList && depthLevel != null && depthLevel.getTradeId() != null) {
-            if (publicTradesFromOrderList) {
-                PublicTrade<T> publicTrade = marketDataManager.createPublicTrade(exchangeSecurityId);
-                publicTrade.setMdEntryId(depthLevel.getMdEntryId());
-                publicTrade.setTradeId(depthLevel.getTradeId());
-                publicTrade.setLastPx(depthLevel.getMdEntryPx());
-                publicTrade.setIsBid(depthLevel.getIsBid());
-                publicTrade.getPerformanceData().updateFrom(depthLevel.getPerformanceData());
+        if (publicTradesFromOrderList && depthLevel != null && depthLevel.getTradeId() != lastTradeId) {
+            PublicTrade<T> publicTrade = marketDataManager.createPublicTrade(exchangeSecurityId);
+            publicTrade.setMdEntryId(depthLevel.getMdEntryId());
+            publicTrade.setTradeId(depthLevel.getTradeId());
+            publicTrade.setLastPx(depthLevel.getMdEntryPx());
+            publicTrade.setIsBid(depthLevel.getIsBid());
+            publicTrade.getPerformanceData().updateFrom(depthLevel.getPerformanceData());
+            lastTradeId = depthLevel.getTradeId();
 
-                // technical trade
-                if (depthLevel.getMdUpdateAction() == MdUpdateAction.INSERT) {
-                    publicTrade.setLastSize(depthLevel.getMdEntrySize());
-                    getDepthLevelList(exchangeSecurityId).remove(depthLevel);
-                    getPublicTradeList(exchangeSecurityId).add(publicTrade);
-                } else {
-                    depthLevel.setPublicTrade(publicTrade);
-                }
+            // technical trade
+            if (depthLevel.getMdUpdateAction() == MdUpdateAction.INSERT) {
+                publicTrade.setLastSize(depthLevel.getMdEntrySize());
+                getDepthLevelList(exchangeSecurityId).remove(depthLevel);
+                getPublicTradeList(exchangeSecurityId).add(publicTrade);
+            } else {
+                depthLevel.setPublicTrade(publicTrade);
             }
         }
     }
