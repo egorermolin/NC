@@ -201,7 +201,7 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
         if (isSnapshot) {
             SequenceNumber sequenceNumber = getSequenceNumber(exchangeSecurityId);
             synchronized (sequenceNumber) {
-                if (sequenceNumber.lastSeqNum != seqNum) {
+                if (sequenceNumber.lastSeqNum < seqNum) {
                     if (logger.get().isDebugEnabled())
                         logger.get().debug("OutOfSequence [Symbol: " + exchangeSecurityId + "][Expected: " + sequenceNumber.lastSeqNum + "][Received: " + seqNum + "]");
 
