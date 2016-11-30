@@ -475,7 +475,7 @@ public class MessageReader implements IMulticastEventListener {
                     break;
                 case FUT_INSTRUMENT_INCR_A:
                 case FUT_INSTRUMENT_INCR_B:
-                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("SecurityDefinition"), instrumentManager);
+                    messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("SecurityStatus"), instrumentManager);
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("SequenceReset"), instrumentManager);
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(null));
