@@ -111,13 +111,18 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
         }
 
         // trade
-        if (publicTradesFromOrderList && depthLevel != null && depthLevel.getTradeId() != null && depthLevel.getTradeId() != lastTradeId) {
+        if (publicTradesFromOrderList
+                && depthLevel != null
+                && depthLevel.getTradeId() != null
+                && !depthLevel.getTradeId().equals(lastTradeId)) {
+
             PublicTrade<T> publicTrade = marketDataManager.createPublicTrade(exchangeSecurityId);
             publicTrade.setMdEntryId(depthLevel.getMdEntryId());
             publicTrade.setTradeId(depthLevel.getTradeId());
             publicTrade.setLastPx(depthLevel.getMdEntryPx());
             publicTrade.setIsBid(depthLevel.getIsBid());
             publicTrade.getPerformanceData().updateFrom(depthLevel.getPerformanceData());
+
             lastTradeId = depthLevel.getTradeId();
 
             // technical trade
