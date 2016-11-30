@@ -84,8 +84,12 @@ public abstract class MarketDataManager<T> {
 
     public abstract PublicTrade<T> createPublicTrade(T exchangeSecurityId);
 
-    private T convertSecurityIdToExchangeSecurityId(String securityId) {
+    public T convertSecurityIdToExchangeSecurityId(String securityId) {
         return instrumentManager.getExchangeSecurityId(securityId);
+    }
+
+    public String convertExchangeSecurityIdToSecurityId(T exchangeSecurityId) {
+        return instrumentManager.getSecurityId(exchangeSecurityId);
     }
 
     public boolean isAllowedInstrument(T exchangeSecurityId) {
