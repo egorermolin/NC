@@ -11,7 +11,9 @@ import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
 import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
 import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
+import ru.ncapital.gateways.moexfast.domain.intf.IBBO;
 import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
+import ru.ncapital.gateways.moexfast.domain.intf.IPublicTrade;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerFactory;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 import ru.ncapital.gateways.moexfast.performance.IGatewayPerformanceLogger;
@@ -166,7 +168,7 @@ public abstract class MarketDataManager<T> {
     }
 
     public void onBBO(BBO<T> newBBO) {
-        long gatewayOutTime = 0;
+        long gatewayOutTime;
         if (logger.isTraceEnabled())
             logger.trace("onBBO " + newBBO.getSecurityId());
 
@@ -183,34 +185,40 @@ public abstract class MarketDataManager<T> {
                     marketDataHandler.onStatistics(currentBBO);
                 if (changed[2])
                     marketDataHandler.onTradingStatus(currentBBO);
+
+                logPerformance(currentBBO, gatewayOutTime);
             }
         }
-
-        logPerformance(currentBBO, gatewayOutTime);
     }
 
     public void onDepthLevels(DepthLevel<T>[] depthLevels) {
-        long gatewayOutTime = 0;
+        long gatewayOutTime;
         if (logger.isTraceEnabled())
             logger.trace("onDepthLevel " + depthLevels[0].getSecurityId());
 
         BBO<T> currentBBO = getOrCreateBBO(depthLevels[0].getExchangeSecurityId());
         synchronized (currentBBO) {
             List<IDepthLevel> depthLevelsToSend = new ArrayList<>();
-            orderDepthEngine.onDepthLevels(depthLevels, depthLevelsToSend);
+            List<IPublicTrade> publicTradesToSend = new ArrayList<>();
+            orderDepthEngine.onDepthLevels(depthLevels, depthLevelsToSend, publicTradesToSend);
 
             if (subscriptions.containsKey(currentBBO.getSecurityId())) {
                 gatewayOutTime = Utils.currentTimeInTicks();
                 marketDataHandler.onDepthLevels(depthLevelsToSend.toArray(new IDepthLevel[0]));
+                logPerformance(depthLevels, gatewayOutTime);
+
+                for (IPublicTrade publicTrade : publicTradesToSend) {
+                    gatewayOutTime = Utils.currentTimeInTicks();
+                    marketDataHandler.onPublicTrade(publicTrade);
+                    logPerformance(publicTrade, gatewayOutTime);
+                }
             }
         }
-
-        logPerformance(depthLevels, gatewayOutTime);
     }
 
 
     public void onPublicTrade(PublicTrade<T> publicTrade) {
-        long gatewayOutTime = 0;
+        long gatewayOutTime;
         if (logger.isTraceEnabled())
             logger.trace("onPublicTrade " + publicTrade.getSecurityId());
 
@@ -219,13 +227,12 @@ public abstract class MarketDataManager<T> {
             if (subscriptions.containsKey(currentBBO.getSecurityId())) {
                 gatewayOutTime = Utils.currentTimeInTicks();
                 marketDataHandler.onPublicTrade(publicTrade);
+                logPerformance(publicTrade, gatewayOutTime);
             }
         }
-
-        logPerformance(publicTrade, gatewayOutTime);
     }
 
-    private void logPerformance(BBO bbo, long gatewayOutTime) {
+    private void logPerformance(IBBO bbo, long gatewayOutTime) {
         if (performanceLogger == null)
             return;
 
@@ -236,11 +243,11 @@ public abstract class MarketDataManager<T> {
         performanceLogger.notifyBBOPerformance(bbo.getPerformanceData());
     }
 
-    private void logPerformance(DepthLevel[] depthLevels, long gatewayOutTime) {
+    private void logPerformance(IDepthLevel[] depthLevels, long gatewayOutTime) {
          if (performanceLogger == null)
             return;
 
-        for (DepthLevel depthLevel : depthLevels) {
+        for (IDepthLevel depthLevel : depthLevels) {
             if (depthLevel.getPerformanceData() == null)
                 continue;
 
@@ -249,7 +256,7 @@ public abstract class MarketDataManager<T> {
         }
     }
 
-    private void logPerformance(PublicTrade publicTrade, long gatewayOutTime) {
+    private void logPerformance(IPublicTrade publicTrade, long gatewayOutTime) {
         if (performanceLogger == null)
             return;
 

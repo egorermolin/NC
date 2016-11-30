@@ -11,6 +11,8 @@ public class PublicTrade<T> implements IPublicTrade {
 
     private T exchangeSecurityId;
 
+    private String mdEntryId;
+
     private String tradeId;
 
     private double lastPx;
@@ -34,6 +36,12 @@ public class PublicTrade<T> implements IPublicTrade {
 
     public T getExchangeSecurityId() {
         return exchangeSecurityId;
+    }
+
+    public String getMdEntryId() { return mdEntryId; }
+
+    public void setMdEntryId(String mdEntryId) {
+        this.mdEntryId = mdEntryId;
     }
 
     @Override

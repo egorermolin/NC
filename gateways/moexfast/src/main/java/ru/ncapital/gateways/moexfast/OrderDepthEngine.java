@@ -5,7 +5,9 @@ import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
+import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
 import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
+import ru.ncapital.gateways.moexfast.domain.intf.IPublicTrade;
 
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +43,7 @@ public abstract class OrderDepthEngine<T> {
         return depth;
     }
 
-    public void onDepthLevel(DepthLevel<T> depthLevel, List<IDepthLevel> depthLevelsToSend) {
+    public void onDepthLevel(DepthLevel<T> depthLevel, List<IDepthLevel> depthLevelsToSend, List<IPublicTrade> publicTradesToSend) {
         if (depthLevel.getMdUpdateAction() == MdUpdateAction.SNAPSHOT) {
             getOrderDepth(depthLevel.getExchangeSecurityId(), true).clearDepth();
             getOrderDepth(depthLevel.getExchangeSecurityId(), false).clearDepth();
@@ -49,11 +51,13 @@ public abstract class OrderDepthEngine<T> {
             getOrderDepth(depthLevel.getExchangeSecurityId(), depthLevel.getIsBid()).onDepthLevel(depthLevel);
         }
         depthLevelsToSend.add(depthLevel);
+        if (depthLevel.getPublicTrade() != null)
+            publicTradesToSend.add(depthLevel.getPublicTrade());
     }
 
-    public void onDepthLevels(DepthLevel<T>[] depthLevels, List<IDepthLevel> depthLevelsToSend) {
+    public void onDepthLevels(DepthLevel<T>[] depthLevels, List<IDepthLevel> depthLevelsToSend, List<IPublicTrade> publicTradesToSend) {
         for (DepthLevel<T> depthLevel : depthLevels)
-            onDepthLevel(depthLevel, depthLevelsToSend);
+            onDepthLevel(depthLevel, depthLevelsToSend, publicTradesToSend);
     }
 
     public boolean[] updateBBO(BBO<T> previousBBO, BBO<T> newBBO) {

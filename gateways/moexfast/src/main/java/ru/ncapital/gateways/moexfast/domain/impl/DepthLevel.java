@@ -26,6 +26,8 @@ public class DepthLevel<T> implements IDepthLevel {
 
     public String tradeId;
 
+    public PublicTrade<T> publicTrade;
+
     public DepthLevel(String securityId, T exchangeSecurityId) {
         this.securityId = securityId;
         this.exchangeSecurityId = exchangeSecurityId;
@@ -93,6 +95,14 @@ public class DepthLevel<T> implements IDepthLevel {
 
     public void setIsBid(boolean isBid) {
         this.isBid = isBid;
+    }
+
+    public PublicTrade<T> getPublicTrade() {
+        return publicTrade;
+    }
+
+    public void setPublicTrade(PublicTrade<T> publicTrade) {
+        this.publicTrade = publicTrade;
     }
 
     @Override
