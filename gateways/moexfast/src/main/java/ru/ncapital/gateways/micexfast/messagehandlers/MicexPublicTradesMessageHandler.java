@@ -38,7 +38,7 @@ public class MicexPublicTradesMessageHandler extends StatisticsMessageHandler<St
 
     @Override
     protected String getTradeId(GroupValue mdEntry) {
-        return mdEntry.getString("DealNumber");
+        return mdEntry.getString("MDEntryID");
     }
 
     @Override

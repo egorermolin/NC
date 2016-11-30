@@ -520,7 +520,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("SequenceReset"), marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("TradingSessionStatus"), marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST));
-                    multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.ORDER_LIST)));
+                    multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.ORDER_LIST)));
                     break;
 
                 // ========= //
