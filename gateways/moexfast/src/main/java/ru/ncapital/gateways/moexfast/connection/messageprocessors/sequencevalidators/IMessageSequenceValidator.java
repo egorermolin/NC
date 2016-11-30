@@ -5,6 +5,8 @@ import ru.ncapital.gateways.moexfast.connection.messageprocessors.StoredMdEntry;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
 
+import java.util.List;
+
 /**
  * Created by egore on 2/3/16.
  */
@@ -23,7 +25,7 @@ public interface IMessageSequenceValidator<T> {
 
     boolean isRecovering();
 
-    T[] getRecovering();
+    List<String> getRecovering();
 
     MessageHandlerType getType();
 

@@ -58,7 +58,6 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(sequenceValidator.isRecovering(380925L, 100, true)).thenReturn(true);
         Mockito.when(sequenceValidator.onSnapshotSeq(Mockito.eq(380922L), Mockito.anyInt())).thenReturn(true);
         Mockito.when(sequenceValidator.onSnapshotSeq(Mockito.eq(380925L), Mockito.anyInt())).thenReturn(true);
-        Mockito.when(sequenceValidator.getRecovering()).thenReturn(new Long[]{380922L, 380925L});
 
         Mockito.when(marketDataHandler.isAllowedUpdate(380922L)).thenReturn(true);
         Mockito.when(marketDataHandler.isAllowedUpdate(380925L)).thenReturn(true);

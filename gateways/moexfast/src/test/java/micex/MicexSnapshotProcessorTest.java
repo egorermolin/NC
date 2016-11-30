@@ -56,7 +56,6 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(sequenceValidator.isRecovering("SYMB2;CETS", 100, true)).thenReturn(true);
         Mockito.when(sequenceValidator.onSnapshotSeq(Mockito.eq("SYMB;CETS"), Mockito.anyInt())).thenReturn(true);
         Mockito.when(sequenceValidator.onSnapshotSeq(Mockito.eq("SYMB2;CETS"), Mockito.anyInt())).thenReturn(true);
-        Mockito.when(sequenceValidator.getRecovering()).thenReturn(new String[]{"SYMB;CETS", "SYMB2;CETS"});
 
         Mockito.when(marketDataHandler.isAllowedUpdate("SYMB;CETS")).thenReturn(true);
         Mockito.when(marketDataHandler.isAllowedUpdate("SYMB2;CETS")).thenReturn(true);

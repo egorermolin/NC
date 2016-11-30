@@ -228,8 +228,12 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
     }
 
     @Override
-    public T[] getRecovering() {
-        return (T[]) exchangeSecurityIdsToRecover.toArray();
+    public List<String> getRecovering() {
+        List<String> securityIdsToRecover = new ArrayList<>();
+        for (T exchangeSecurityId : exchangeSecurityIdsToRecover)
+            securityIdsToRecover.add(marketDataManager.convertExchangeSecurityIdToSecurityId(exchangeSecurityId));
+
+        return securityIdsToRecover;
     }
 
     public void setMarketDataManager(MarketDataManager<T> marketDataManager) {

@@ -140,17 +140,18 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
     }
 
     private void printRecoveringSecurityIds() {
-        T[] recoveringSecurityIds = sequenceValidator.getRecovering();
+        List<String> recoveringSecurityIds = sequenceValidator.getRecovering();
         StringBuilder sb = new StringBuilder("Recovering ");
-        if (recoveringSecurityIds != null && recoveringSecurityIds.length > 0) {
+        if (recoveringSecurityIds != null && recoveringSecurityIds.size() > 0) {
             wasRecovering = true;
             boolean first = true;
-            for (T s : recoveringSecurityIds) {
+            for (String recoveringSecurityId : recoveringSecurityIds) {
                 if (first)
                     first = false;
                 else
-                    sb.append(", ");
-                sb.append(s);
+                    sb.append(" ");
+
+                sb.append(recoveringSecurityId);
             }
 
             getLogger().info(sb.toString());
