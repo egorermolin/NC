@@ -64,8 +64,10 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
 
     @Override
     public boolean onSnapshotSeq(T exchangeSecurityId, int seqNum) {
+        String securityId = marketDataManager.convertExchangeSecurityIdToSecurityId(exchangeSecurityId);
+
         if (logger.get().isTraceEnabled())
-            logger.get().trace("SNAP -> " + exchangeSecurityId + " " + seqNum);
+            logger.get().trace("SNAP -> " + securityId + " " + seqNum);
 
         SequenceNumber sequenceNumber = getSequenceNumber(exchangeSecurityId);
         synchronized (sequenceNumber) {
@@ -77,8 +79,9 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
 
     @Override
     public boolean onIncrementalSeq(T exchangeSecurityId, int seqNum) {
+        String securityId = marketDataManager.convertExchangeSecurityIdToSecurityId(exchangeSecurityId);
         if (logger.get().isTraceEnabled())
-            logger.get().trace("INC -> " + exchangeSecurityId + " " + seqNum);
+            logger.get().trace("INC -> " + securityId + " " + seqNum);
 
         SequenceNumber sequenceNumber = getSequenceNumber(exchangeSecurityId);
         synchronized (sequenceNumber) {
@@ -87,14 +90,14 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
                     return false;
 
                 if (logger.get().isDebugEnabled())
-                    logger.get().debug("OutOfSequence [Symbol: " + exchangeSecurityId + "][Expected: " + (sequenceNumber.lastSeqNum + 1) + "][Received: " + seqNum + "]");
+                    logger.get().debug("OutOfSequence [SecurityId: " + securityId + "][Expected: " + (sequenceNumber.lastSeqNum + 1) + "][Received: " + seqNum + "]");
 
                 sequenceNumber.numberOfMissingSequences = seqNum - sequenceNumber.lastSeqNum - 1;
                 return false;
             } else {
                 if (isRecovering(exchangeSecurityId, seqNum, false)) {
                     if (logger.get().isDebugEnabled())
-                        logger.get().debug("InSequence [Symbol: " + exchangeSecurityId + "][Received: " + seqNum + "]");
+                        logger.get().debug("InSequence [SecurityId: " + securityId + "][Received: " + seqNum + "]");
 
                     sequenceNumber.numberOfMissingSequences = 0;
                 }
@@ -108,8 +111,9 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
 
     @Override
     public void storeIncremental(T exchangeSecurityId, int seqNum, GroupValue mdEntry, PerformanceData perfData, boolean lastFragment, boolean lastEntryInTransaction) {
+        String securityId = marketDataManager.convertExchangeSecurityIdToSecurityId(exchangeSecurityId);
         if (logger.get().isTraceEnabled())
-            logger.get().trace("STORE -> " + exchangeSecurityId + " " + seqNum);
+            logger.get().trace("STORE -> " + securityId + " " + seqNum);
 
         SequenceNumber sequenceNumber = getSequenceNumber(exchangeSecurityId);
         synchronized (sequenceNumber) {
@@ -124,14 +128,15 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
 
     @Override
     public void startRecovering(T exchangeSecurityId) {
+        String securityId = marketDataManager.convertExchangeSecurityIdToSecurityId(exchangeSecurityId);
         SequenceNumber sequenceNumber = getSequenceNumber(exchangeSecurityId);
         synchronized (sequenceNumber) {
             if (sequenceNumber.numberOfMissingSequences > 0) {
-                logger.get().info("Start Recovering " + exchangeSecurityId + " " + sequenceNumber.numberOfMissingSequences);
+                logger.get().info("Start Recovering [SecurityId: " + securityId + "][Gap: " + sequenceNumber.numberOfMissingSequences);
             } else if (sequenceNumber.numberOfMissingSequences == 0) {
-                logger.get().info("Start Recovering " + exchangeSecurityId + " FIRST");
+                logger.get().info("Start Recovering [SecurityId: " + securityId + "][FIRST]");
             } else {
-                logger.get().info("Start Recovering " + exchangeSecurityId + " RESET");
+                logger.get().info("Start Recovering [SecurityId: " + securityId + "][RESET]");
             }
         }
 
@@ -141,6 +146,7 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
 
     @Override
     public StoredMdEntry<T>[] stopRecovering(T exchangeSecurityId) {
+        String securityId = marketDataManager.convertExchangeSecurityIdToSecurityId(exchangeSecurityId);
         SequenceNumber sequenceNumber = getSequenceNumber(exchangeSecurityId);
         synchronized (sequenceNumber) {
             //check incrementals are in sequence
@@ -148,7 +154,7 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
             if (storedMdEntries == null || storedMdEntries.size() == 0) {
                 sequenceNumber.numberOfMissingSequences = 0;
 
-                logger.get().info("Stop Recovering " + exchangeSecurityId);
+                logger.get().info("Stop Recovering " + securityId);
 
                 exchangeSecurityIdsToRecover.remove(exchangeSecurityId);
                 marketDataManager.setRecovery(exchangeSecurityId, false, type.equals("OrderList"));
@@ -186,9 +192,9 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
 
         StoredMdEntry<T>[] mdEntriesToProcess = storedMdEntriesToProcess.remove(exchangeSecurityId);
         if (mdEntriesToProcess.length > 0)
-            logger.get().info("Stop Recovering " + exchangeSecurityId + " " + mdEntriesToProcess.length);
+            logger.get().info("Stop Recovering [SecurityId: " + securityId + "][Queue: " + mdEntriesToProcess.length + "]");
         else
-            logger.get().info("Stop Recovering " + exchangeSecurityId);
+            logger.get().info("Stop Recovering [SecurityId: " + securityId + "]");
 
         return mdEntriesToProcess;
     }
@@ -198,12 +204,13 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
         if (exchangeSecurityIdsToRecover.contains(exchangeSecurityId))
             return true;
 
+        String securityId = marketDataManager.convertExchangeSecurityIdToSecurityId(exchangeSecurityId);
         if (isSnapshot) {
             SequenceNumber sequenceNumber = getSequenceNumber(exchangeSecurityId);
             synchronized (sequenceNumber) {
                 if (sequenceNumber.lastSeqNum < seqNum) {
                     if (logger.get().isDebugEnabled())
-                        logger.get().debug("OutOfSequence [Symbol: " + exchangeSecurityId + "][Expected: " + sequenceNumber.lastSeqNum + "][Received: " + seqNum + "]");
+                        logger.get().debug("OutOfSequence [SecurityId: " + securityId + "][Expected: " + sequenceNumber.lastSeqNum + "][Received: " + seqNum + "]");
 
                     sequenceNumber.numberOfMissingSequences = seqNum - sequenceNumber.lastSeqNum;
                     startRecovering(exchangeSecurityId);

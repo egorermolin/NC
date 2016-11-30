@@ -11,10 +11,14 @@ import org.openfast.GroupValue;
 import org.openfast.Message;
 import org.openfast.SequenceValue;
 import ru.ncapital.gateways.micexfast.MicexGatewayModule;
+import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.StoredMdEntry;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * Created by egore on 1/14/16.
@@ -29,6 +33,7 @@ public class MicexMessageSequenceValidatorTest {
 
     @Before
     public void setup() {
+        ((MessageSequenceValidator) sequenceValidator).setMarketDataManager(mock(MarketDataManager.class));
     }
 
     private Message getIncrementalMock(int seqNum, int numMdEntries) {

@@ -12,8 +12,10 @@ import org.openfast.*;
 import org.openfast.codec.Coder;
 import ru.ncapital.gateways.micexfast.MicexGatewayModule;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.MicexIncrementalProcessor;
+import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IncrementalProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
@@ -47,6 +49,8 @@ public class MicexIncrementalProcessorTest {
     @Before
     @SuppressWarnings("unchecked")
     public void setup() {
+        ((MessageSequenceValidator) sequenceValidator).setMarketDataManager(mock(MarketDataManager.class));
+
         incrementalProcessor = new MicexIncrementalProcessor(marketDataHandler, sequenceValidator);
         incrementalProcessor.setIsPrimary(true);
 
