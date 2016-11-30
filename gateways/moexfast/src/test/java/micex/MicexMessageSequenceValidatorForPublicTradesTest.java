@@ -23,12 +23,12 @@ public class MicexMessageSequenceValidatorForPublicTradesTest {
 
     @Test
     public void testPublicTradesOutOfOrder() {
-        assert !sequenceValidator.isRecovering("AAA", false);
+        assert !sequenceValidator.isRecovering("AAA", 100, false);
         assert sequenceValidator.onIncrementalSeq("AAA", 100);
         assert sequenceValidator.onIncrementalSeq("AAA", 102);
         assert sequenceValidator.onIncrementalSeq("AAA", 101);
         assert sequenceValidator.onIncrementalSeq("AAA", 103);
         assert sequenceValidator.onIncrementalSeq("AAA", 105);
-        assert !sequenceValidator.isRecovering("AAA", false);
+        assert !sequenceValidator.isRecovering("AAA", 106, false);
     }
 }

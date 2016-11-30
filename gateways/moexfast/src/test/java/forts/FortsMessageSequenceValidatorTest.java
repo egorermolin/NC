@@ -54,22 +54,20 @@ public class FortsMessageSequenceValidatorTest {
 
     @Test
     public void testRecoveringSnapshot() {
-        assert !sequenceValidator.isRecovering(380922L, true);
-        sequenceValidator.startRecovering(380922L);
-        assert sequenceValidator.isRecovering(380922L, true);
+        assert sequenceValidator.isRecovering(380922L, 100, true);
         sequenceValidator.onSnapshotSeq(380922L, 100);
         sequenceValidator.stopRecovering(380922L);
-        assert !sequenceValidator.isRecovering(380922L, true);
+        assert !sequenceValidator.isRecovering(380922L, 100, true);
     }
 
     @Test
     public void testRecoveringIncremental() {
-        assert !sequenceValidator.isRecovering(380922L, false);
+        assert !sequenceValidator.isRecovering(380922L, 100, false);
         sequenceValidator.startRecovering(380922L);
-        assert sequenceValidator.isRecovering(380922L, false);
+        assert sequenceValidator.isRecovering(380922L, 100, false);
         sequenceValidator.onSnapshotSeq(380922L, 100);
         sequenceValidator.stopRecovering(380922L);
-        assert !sequenceValidator.isRecovering(380922L, false);
+        assert !sequenceValidator.isRecovering(380922L, 100, false);
     }
 
     @Test
@@ -106,7 +104,7 @@ public class FortsMessageSequenceValidatorTest {
         StoredMdEntry[] storedMdEntries = sequenceValidator.stopRecovering(380922L);
         assert storedMdEntries[0].getMdEntry().equals(mdEntry2);
         assert storedMdEntries[1].getMdEntry().equals(mdEntry3);
-        assert !sequenceValidator.isRecovering(380922L, false);
+        assert !sequenceValidator.isRecovering(380922L, 103, false);
     }
 
     @Test
@@ -122,7 +120,7 @@ public class FortsMessageSequenceValidatorTest {
 
         assert sequenceValidator.onSnapshotSeq(380922L, 100);
         assert sequenceValidator.stopRecovering(380922L) == null;
-        assert sequenceValidator.isRecovering(380922L, false);
+        assert sequenceValidator.isRecovering(380922L, 105, false);
     }
 
 }

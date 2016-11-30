@@ -121,6 +121,7 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
         int seqNum = readMessage.getInt("MsgSeqNum");
         long sendingTime = readMessage.getLong("SendingTime");
         char messageType = readMessage.getString("MessageType").charAt(0);
+        int rptSeqNum = readMessage.getInt("RptSeq");
 
         if (seqNum == 1 || messageType == '4') { // SequenceReset
             if (!resetSequence(sendingTime))
@@ -132,8 +133,7 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
 
         if (messageType == 'W') {
             T exchangeSecurityId = getExchangeSecurityId(readMessage);
-            return messageHandler.isAllowedUpdate(exchangeSecurityId)
-                    && sequenceValidator.isRecovering(exchangeSecurityId, true);
+            return messageHandler.isAllowedUpdate(exchangeSecurityId) && sequenceValidator.isRecovering(exchangeSecurityId, rptSeqNum, true);
         }
 
         return false;

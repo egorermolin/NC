@@ -54,8 +54,8 @@ public class FortsSnapshotProcessorTest {
 
         snapshotProcessor = new FortsSnapshotProcessor(marketDataHandler, sequenceValidator);
 
-        Mockito.when(sequenceValidator.isRecovering(380922L, true)).thenReturn(true);
-        Mockito.when(sequenceValidator.isRecovering(380925L, true)).thenReturn(true);
+        Mockito.when(sequenceValidator.isRecovering(380922L, 100, true)).thenReturn(true);
+        Mockito.when(sequenceValidator.isRecovering(380925L, 100, true)).thenReturn(true);
         Mockito.when(sequenceValidator.onSnapshotSeq(Mockito.eq(380922L), Mockito.anyInt())).thenReturn(true);
         Mockito.when(sequenceValidator.onSnapshotSeq(Mockito.eq(380925L), Mockito.anyInt())).thenReturn(true);
         Mockito.when(sequenceValidator.getRecovering()).thenReturn(new Long[]{380922L, 380925L});
@@ -78,7 +78,7 @@ public class FortsSnapshotProcessorTest {
         snapshotProcessor.handleMessage(message, context, coder);
 
         Mockito.verify(marketDataHandler).onSnapshot(Mockito.eq(message));
-        Mockito.verify(sequenceValidator).isRecovering(380922L, true);
+        Mockito.verify(sequenceValidator).isRecovering(380922L, 100, true);
         Mockito.verify(sequenceValidator).stopRecovering(380922L);
     }
 
@@ -105,8 +105,8 @@ public class FortsSnapshotProcessorTest {
         snapshotProcessor.handleMessage(message2, context, coder);
 
         Mockito.verify(marketDataHandler, times(2)).onSnapshot(messageCaptor.capture());
-        Mockito.verify(sequenceValidator).isRecovering(380922L, true);
-        Mockito.verify(sequenceValidator).isRecovering(380925L, true);
+        Mockito.verify(sequenceValidator).isRecovering(380922L, 100, true);
+        Mockito.verify(sequenceValidator).isRecovering(380925L, 100, true);
         Mockito.verify(sequenceValidator).stopRecovering(380922L);
         Mockito.verify(sequenceValidator).stopRecovering(380925L);
     }
@@ -136,6 +136,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message.getInt("RouteFirst")).thenReturn(1);
         Mockito.when(message.getInt("LastFragment")).thenReturn(1);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         snapshotProcessor.handleMessage(message, context, coder);
         snapshotProcessor.handleMessage(message, context, coder);
@@ -152,6 +153,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message.getInt("RouteFirst")).thenReturn(1);
         Mockito.when(message.getInt("LastFragment")).thenReturn(1);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         snapshotProcessor.handleMessage(message, context, coder);
 
@@ -169,6 +171,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message.getLong("SecurityID")).thenReturn(97516102L);
         Mockito.when(message.getInt("RouteFirst")).thenReturn(1);
         Mockito.when(message.getInt("LastFragment")).thenReturn(1);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         snapshotProcessor.handleMessage(message, context, coder);
         snapshotProcessor.handleMessage(message, context, coder);
@@ -187,6 +190,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message.getInt("LastFragment")).thenReturn(1);
         Mockito.when(message.getInt("RptSeq")).thenReturn(100);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         StoredMdEntry<String> incStoredMdEntry1 = (StoredMdEntry<String>) mock(StoredMdEntry.class);
         StoredMdEntry<String> incStoredMdEntry2 = (StoredMdEntry<String>) mock(StoredMdEntry.class);
@@ -223,6 +227,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message.getInt("LastFragment")).thenReturn(1);
         Mockito.when(message.getInt("RptSeq")).thenReturn(100);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         StoredMdEntry<String> incStoredMdEntry1 = (StoredMdEntry<String>) mock(StoredMdEntry.class);
         StoredMdEntry<String> incStoredMdEntry2 = (StoredMdEntry<String>) mock(StoredMdEntry.class);
@@ -259,6 +264,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message.getInt("LastFragment")).thenReturn(1);
         Mockito.when(message.getInt("RptSeq")).thenReturn(100);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         StoredMdEntry<String> incStoredMdEntry1 = (StoredMdEntry<String>) mock(StoredMdEntry.class);
         StoredMdEntry<String> incStoredMdEntry2 = (StoredMdEntry<String>) mock(StoredMdEntry.class);
@@ -296,6 +302,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message.getInt("LastFragment")).thenReturn(0);
         Mockito.when(message.getInt("RptSeq")).thenReturn(100);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         Message message2 = mock(Message.class);
         Mockito.when(message2.getString("MessageType")).thenReturn("W");
@@ -347,6 +354,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message.getInt("LastFragment")).thenReturn(0);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         Message message2 = mock(Message.class);
         Mockito.when(message2.getString("MessageType")).thenReturn("W");
@@ -356,6 +364,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message2.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message2.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("LastFragment")).thenReturn(0);
+        Mockito.when(message2.getInt("RptSeq")).thenReturn(100);
 
         Message message3 = mock(Message.class);
         Mockito.when(message3.getString("MessageType")).thenReturn("W");
@@ -364,6 +373,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message3.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message3.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message3.getInt("LastFragment")).thenReturn(1);
+        Mockito.when(message3.getInt("RptSeq")).thenReturn(100);
 
         snapshotProcessor.handleMessage(message, context, coder);
         Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
@@ -393,6 +403,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message.getInt("LastFragment")).thenReturn(0);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         Message message2 = mock(Message.class);
         Mockito.when(message2.getString("MessageType")).thenReturn("W");
@@ -402,6 +413,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message2.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message2.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("LastFragment")).thenReturn(0);
+        Mockito.when(message2.getInt("RptSeq")).thenReturn(100);
 
         Message message3 = mock(Message.class);
         Mockito.when(message3.getString("MessageType")).thenReturn("W");
@@ -410,8 +422,9 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message3.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message3.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message3.getInt("LastFragment")).thenReturn(1);
+        Mockito.when(message3.getInt("RptSeq")).thenReturn(100);
 
-        Mockito.when(sequenceValidator.isRecovering(380922L, true)).thenReturn(false);
+        Mockito.when(sequenceValidator.isRecovering(380922L, 100, true)).thenReturn(false);
 
         snapshotProcessor.handleMessage(message, context, coder);
         Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
@@ -423,7 +436,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message2));
         Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message3));
 
-        Mockito.when(sequenceValidator.isRecovering(380922L, true)).thenReturn(true);
+        Mockito.when(sequenceValidator.isRecovering(380922L, 100, true)).thenReturn(true);
 
         snapshotProcessor.handleMessage(message3, context, coder);
         Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.any(Message.class));
@@ -441,6 +454,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message.getInt("LastFragment")).thenReturn(0);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         Message message2 = mock(Message.class);
         Mockito.when(message2.getString("MessageType")).thenReturn("W");
@@ -449,6 +463,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message2.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message2.getInt("LastFragment")).thenReturn(1);
+        Mockito.when(message2.getInt("RptSeq")).thenReturn(100);
 
         Message message3 = mock(Message.class);
         Mockito.when(message3.getString("MessageType")).thenReturn("W");
@@ -457,6 +472,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message3.getInt("RouteFirst")).thenReturn(1);
         Mockito.when(message3.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message3.getInt("LastFragment")).thenReturn(0);
+        Mockito.when(message3.getInt("RptSeq")).thenReturn(100);
 
         snapshotProcessor.handleMessage(message, context, coder);
         Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
@@ -484,6 +500,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message.getInt("LastFragment")).thenReturn(0);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         Message message2 = mock(Message.class);
         Mockito.when(message2.getString("MessageType")).thenReturn("W");
@@ -492,6 +509,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message2.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message2.getInt("LastFragment")).thenReturn(1);
+        Mockito.when(message2.getInt("RptSeq")).thenReturn(100);
 
         snapshotProcessor.handleMessage(message, context, coder);
         Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
@@ -513,6 +531,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message.getInt("LastFragment")).thenReturn(0);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         Message message2 = mock(Message.class);
         Mockito.when(message2.getString("MessageType")).thenReturn("W");
@@ -522,6 +541,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message2.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message2.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("LastFragment")).thenReturn(0);
+        Mockito.when(message2.getInt("RptSeq")).thenReturn(100);
 
         Message message3 = mock(Message.class);
         Mockito.when(message3.getString("MessageType")).thenReturn("W");
@@ -530,6 +550,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message3.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message3.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message3.getInt("LastFragment")).thenReturn(1);
+        Mockito.when(message3.getInt("RptSeq")).thenReturn(100);
 
         snapshotProcessor.handleMessage(message, context, coder);
         Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));
@@ -570,6 +591,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message.getInt("LastFragment")).thenReturn(0);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         Message message2 = mock(Message.class);
         Mockito.when(message2.getString("MessageType")).thenReturn("W");
@@ -579,6 +601,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message2.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message2.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("LastFragment")).thenReturn(0);
+        Mockito.when(message2.getInt("RptSeq")).thenReturn(100);
 
         Message message3 = mock(Message.class);
         Mockito.when(message3.getString("MessageType")).thenReturn("W");
@@ -588,6 +611,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message3.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message3.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message3.getInt("LastFragment")).thenReturn(0);
+        Mockito.when(message3.getInt("RptSeq")).thenReturn(100);
 
         Message message4 = mock(Message.class);
         Mockito.when(message4.getString("MessageType")).thenReturn("W");
@@ -596,6 +620,7 @@ public class FortsSnapshotProcessorTest {
         Mockito.when(message4.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message4.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message4.getInt("LastFragment")).thenReturn(1);
+        Mockito.when(message4.getInt("RptSeq")).thenReturn(100);
 
         snapshotProcessor.handleMessage(message, context, coder);
         Mockito.verify(marketDataHandler, times(0)).onSnapshot(Mockito.eq(message));

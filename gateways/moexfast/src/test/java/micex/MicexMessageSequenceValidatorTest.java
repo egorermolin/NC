@@ -49,22 +49,20 @@ public class MicexMessageSequenceValidatorTest {
 
     @Test
     public void testRecoveringSnapshot() {
-        assert !sequenceValidator.isRecovering("SYMB:CETS", true);
-        sequenceValidator.startRecovering("SYMB:CETS");
-        assert sequenceValidator.isRecovering("SYMB:CETS", true);
+        assert sequenceValidator.isRecovering("SYMB:CETS", 100, true);
         sequenceValidator.onSnapshotSeq("SYMB:CETS", 100);
         sequenceValidator.stopRecovering("SYMB:CETS");
-        assert !sequenceValidator.isRecovering("SYMB:CETS", true);
+        assert !sequenceValidator.isRecovering("SYMB:CETS", 100, true);
     }
 
     @Test
     public void testRecoveringIncremental() {
-        assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB:CETS", 100, false);
         sequenceValidator.startRecovering("SYMB:CETS");
-        assert sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert sequenceValidator.isRecovering("SYMB:CETS", 100, false);
         sequenceValidator.onSnapshotSeq("SYMB:CETS", 100);
         sequenceValidator.stopRecovering("SYMB:CETS");
-        assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB:CETS", 101, false);
     }
 
     @Test
@@ -101,7 +99,7 @@ public class MicexMessageSequenceValidatorTest {
         StoredMdEntry[] storedMdEntries = sequenceValidator.stopRecovering("SYMB:CETS");
         assert storedMdEntries[0].getMdEntry().equals(mdEntry2);
         assert storedMdEntries[1].getMdEntry().equals(mdEntry3);
-        assert !sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB:CETS", 103, false);
     }
 
     @Test
@@ -117,7 +115,7 @@ public class MicexMessageSequenceValidatorTest {
 
         assert sequenceValidator.onSnapshotSeq("SYMB:CETS", 100);
         assert sequenceValidator.stopRecovering("SYMB:CETS") == null;
-        assert sequenceValidator.isRecovering("SYMB:CETS", false);
+        assert sequenceValidator.isRecovering("SYMB:CETS", 105, false);
     }
 
 }

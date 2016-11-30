@@ -52,8 +52,8 @@ public class MicexSnapshotProcessorTest {
 
         snapshotProcessor = new MicexSnapshotProcessor(marketDataHandler, sequenceValidator);
 
-        Mockito.when(sequenceValidator.isRecovering("SYMB;CETS", true)).thenReturn(true);
-        Mockito.when(sequenceValidator.isRecovering("SYMB2;CETS", true)).thenReturn(true);
+        Mockito.when(sequenceValidator.isRecovering("SYMB;CETS", 100, true)).thenReturn(true);
+        Mockito.when(sequenceValidator.isRecovering("SYMB2;CETS", 100, true)).thenReturn(true);
         Mockito.when(sequenceValidator.onSnapshotSeq(Mockito.eq("SYMB;CETS"), Mockito.anyInt())).thenReturn(true);
         Mockito.when(sequenceValidator.onSnapshotSeq(Mockito.eq("SYMB2;CETS"), Mockito.anyInt())).thenReturn(true);
         Mockito.when(sequenceValidator.getRecovering()).thenReturn(new String[]{"SYMB;CETS", "SYMB2;CETS"});
@@ -77,7 +77,7 @@ public class MicexSnapshotProcessorTest {
         snapshotProcessor.handleMessage(message, context, coder);
 
         Mockito.verify(marketDataHandler).onSnapshot(Mockito.eq(message));
-        Mockito.verify(sequenceValidator).isRecovering("SYMB;CETS", true);
+        Mockito.verify(sequenceValidator).isRecovering("SYMB;CETS", 100, true);
         Mockito.verify(sequenceValidator).stopRecovering("SYMB;CETS");
     }
 
@@ -106,8 +106,8 @@ public class MicexSnapshotProcessorTest {
         snapshotProcessor.handleMessage(message2, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(2)).onSnapshot(messageCaptor.capture());
-        Mockito.verify(sequenceValidator).isRecovering("SYMB;CETS", true);
-        Mockito.verify(sequenceValidator).isRecovering("SYMB2;CETS", true);
+        Mockito.verify(sequenceValidator).isRecovering("SYMB;CETS", 100, true);
+        Mockito.verify(sequenceValidator).isRecovering("SYMB2;CETS", 100, true);
         Mockito.verify(sequenceValidator).stopRecovering("SYMB;CETS");
         Mockito.verify(sequenceValidator).stopRecovering("SYMB2;CETS");
     }
@@ -139,6 +139,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message.getInt("RouteFirst")).thenReturn(1);
         Mockito.when(message.getInt("LastFragment")).thenReturn(1);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         snapshotProcessor.handleMessage(message, context, coder);
         snapshotProcessor.handleMessage(message, context, coder);
@@ -156,6 +157,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message.getInt("RouteFirst")).thenReturn(1);
         Mockito.when(message.getInt("LastFragment")).thenReturn(1);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         snapshotProcessor.handleMessage(message, context, coder);
 
@@ -174,6 +176,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message.getString("TradingSessionID")).thenReturn("CETS");
         Mockito.when(message.getInt("RouteFirst")).thenReturn(1);
         Mockito.when(message.getInt("LastFragment")).thenReturn(1);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         snapshotProcessor.handleMessage(message, context, coder);
         snapshotProcessor.handleMessage(message, context, coder);
@@ -276,6 +279,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message.getInt("LastFragment")).thenReturn(0);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         Message message2 = Mockito.mock(Message.class);
         Mockito.when(message2.getString("MessageType")).thenReturn("W");
@@ -286,6 +290,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message2.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message2.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("LastFragment")).thenReturn(0);
+        Mockito.when(message2.getInt("RptSeq")).thenReturn(100);
 
         Message message3 = Mockito.mock(Message.class);
         Mockito.when(message3.getString("MessageType")).thenReturn("W");
@@ -295,6 +300,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message3.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message3.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message3.getInt("LastFragment")).thenReturn(1);
+        Mockito.when(message3.getInt("RptSeq")).thenReturn(100);
 
         snapshotProcessor.handleMessage(message, context, coder);
         Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
@@ -345,7 +351,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message3.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message3.getInt("LastFragment")).thenReturn(1);
 
-        Mockito.when(sequenceValidator.isRecovering("SYMB;CETS", true)).thenReturn(false);
+        Mockito.when(sequenceValidator.isRecovering("SYMB;CETS", 100, true)).thenReturn(false);
 
         snapshotProcessor.handleMessage(message, context, coder);
         Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
@@ -357,7 +363,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message2));
         Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message3));
 
-        Mockito.when(sequenceValidator.isRecovering("SYMB;CETS", true)).thenReturn(true);
+        Mockito.when(sequenceValidator.isRecovering("SYMB;CETS", 100, true)).thenReturn(true);
 
         snapshotProcessor.handleMessage(message3, context, coder);
         Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.any(Message.class));
@@ -451,6 +457,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message.getInt("LastFragment")).thenReturn(0);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         Message message2 = Mockito.mock(Message.class);
         Mockito.when(message2.getString("MessageType")).thenReturn("W");
@@ -461,6 +468,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message2.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message2.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("LastFragment")).thenReturn(0);
+        Mockito.when(message2.getInt("RptSeq")).thenReturn(100);
 
         Message message3 = Mockito.mock(Message.class);
         Mockito.when(message3.getString("MessageType")).thenReturn("W");
@@ -470,6 +478,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message3.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message3.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message3.getInt("LastFragment")).thenReturn(1);
+        Mockito.when(message3.getInt("RptSeq")).thenReturn(100);
 
         snapshotProcessor.handleMessage(message, context, coder);
         Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));
@@ -511,6 +520,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message.getInt("LastFragment")).thenReturn(0);
         Mockito.when(message.getLong("SendingTime")).thenReturn(1L);
+        Mockito.when(message.getInt("RptSeq")).thenReturn(100);
 
         Message message2 = Mockito.mock(Message.class);
         Mockito.when(message2.getString("MessageType")).thenReturn("W");
@@ -521,6 +531,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message2.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message2.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message2.getInt("LastFragment")).thenReturn(0);
+        Mockito.when(message2.getInt("RptSeq")).thenReturn(100);
 
         Message message3 = Mockito.mock(Message.class);
         Mockito.when(message3.getString("MessageType")).thenReturn("W");
@@ -531,6 +542,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message3.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message3.getValue("LastFragment")).thenReturn(mock(FieldValue.class));
         Mockito.when(message3.getInt("LastFragment")).thenReturn(0);
+        Mockito.when(message3.getInt("RptSeq")).thenReturn(100);
 
         Message message4 = Mockito.mock(Message.class);
         Mockito.when(message4.getString("MessageType")).thenReturn("W");
@@ -540,6 +552,7 @@ public class MicexSnapshotProcessorTest {
         Mockito.when(message4.getValue("RouteFirst")).thenReturn(mock(FieldValue.class));
         Mockito.when(message4.getInt("RouteFirst")).thenReturn(0);
         Mockito.when(message4.getInt("LastFragment")).thenReturn(1);
+        Mockito.when(message4.getInt("RptSeq")).thenReturn(100);
 
         snapshotProcessor.handleMessage(message, context, coder);
         Mockito.verify(marketDataHandler, Mockito.times(0)).onSnapshot(Mockito.eq(message));

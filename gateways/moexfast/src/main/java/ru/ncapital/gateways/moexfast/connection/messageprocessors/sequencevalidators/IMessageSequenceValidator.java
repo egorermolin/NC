@@ -19,7 +19,7 @@ public interface IMessageSequenceValidator<T> {
 
     StoredMdEntry[] stopRecovering(T exchangeSecurityId);
 
-    boolean isRecovering(T exchangeSecurityId, boolean isSnapshot);
+    boolean isRecovering(T exchangeSecurityId, int seqNum, boolean isSnapshot);
 
     boolean isRecovering();
 

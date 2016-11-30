@@ -19,7 +19,7 @@ public class MessageSequenceValidatorForPublicTrades<T> extends MessageSequenceV
     }
 
     @Override
-    public boolean isRecovering(T exchangeSecurityId, boolean isSnapshot) {
+    public boolean isRecovering(T exchangeSecurityId, int seqNum, boolean isSnapshot) {
         return false;
     }
 }

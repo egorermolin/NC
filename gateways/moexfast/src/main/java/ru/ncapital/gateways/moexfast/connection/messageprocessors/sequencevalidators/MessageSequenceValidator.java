@@ -83,22 +83,16 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
         SequenceNumber sequenceNumber = getSequenceNumber(exchangeSecurityId);
         synchronized (sequenceNumber) {
             if (sequenceNumber.lastSeqNum + 1 != seqNum) {
-                if (isRecovering(exchangeSecurityId, false))
+                if (isRecovering(exchangeSecurityId, seqNum, false))
                     return false;
 
-                if (sequenceNumber.lastSeqNum > 0) {
-                    if (logger.get().isDebugEnabled())
-                        logger.get().debug("OutOfSequence [Symbol: " + exchangeSecurityId + "][Expected: " + (sequenceNumber.lastSeqNum + 1) + "][Received: " + seqNum + "]");
+                if (logger.get().isDebugEnabled())
+                    logger.get().debug("OutOfSequence [Symbol: " + exchangeSecurityId + "][Expected: " + (sequenceNumber.lastSeqNum + 1) + "][Received: " + seqNum + "]");
 
-                    sequenceNumber.numberOfMissingSequences = seqNum - sequenceNumber.lastSeqNum - 1;
-                } else {
-                    if (logger.get().isDebugEnabled())
-                        logger.get().debug("First message for [Symbol: " + exchangeSecurityId + "][Received: " + seqNum + "]");
-                }
-
+                sequenceNumber.numberOfMissingSequences = seqNum - sequenceNumber.lastSeqNum - 1;
                 return false;
             } else {
-                if (isRecovering(exchangeSecurityId, false)) {
+                if (isRecovering(exchangeSecurityId, seqNum, false)) {
                     if (logger.get().isDebugEnabled())
                         logger.get().debug("InSequence [Symbol: " + exchangeSecurityId + "][Received: " + seqNum + "]");
 
@@ -191,24 +185,27 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
         marketDataManager.setRecovery(exchangeSecurityId, false, type.equals("OrderList"));
 
         StoredMdEntry<T>[] mdEntriesToProcess = storedMdEntriesToProcess.remove(exchangeSecurityId);
-
-        logger.get().info("Stop Recovering " + exchangeSecurityId + ((mdEntriesToProcess.length > 0) ? (" " + mdEntriesToProcess.length) : ""));
+        if (mdEntriesToProcess.length > 0)
+            logger.get().info("Stop Recovering " + exchangeSecurityId + " " + mdEntriesToProcess.length);
+        else
+            logger.get().info("Stop Recovering " + exchangeSecurityId);
 
         return mdEntriesToProcess;
     }
 
     @Override
-    public boolean isRecovering(T exchangeSecurityId, boolean isSnapshot) {
+    public boolean isRecovering(T exchangeSecurityId, int seqNum, boolean isSnapshot) {
         if (exchangeSecurityIdsToRecover.contains(exchangeSecurityId))
             return true;
 
         if (isSnapshot) {
             SequenceNumber sequenceNumber = getSequenceNumber(exchangeSecurityId);
             synchronized (sequenceNumber) {
-                if (sequenceNumber.lastSeqNum == -1) {
+                if (sequenceNumber.lastSeqNum != seqNum) {
                     if (logger.get().isDebugEnabled())
-                        logger.get().debug("First message for " + exchangeSecurityId);
+                        logger.get().debug("OutOfSequence [Symbol: " + exchangeSecurityId + "][Expected: " + sequenceNumber.lastSeqNum + "][Received: " + seqNum + "]");
 
+                    sequenceNumber.numberOfMissingSequences = seqNum - sequenceNumber.lastSeqNum;
                     startRecovering(exchangeSecurityId);
                     return true;
                 }

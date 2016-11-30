@@ -113,7 +113,7 @@ public class FortsIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry2), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
 
-        assert !sequenceValidator.isRecovering(380922L, false);
+        assert !sequenceValidator.isRecovering(380922L, 101, false);
     }
 
 
@@ -149,7 +149,7 @@ public class FortsIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry2), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
 
-        assert !sequenceValidator.isRecovering(380922L, false);
+        assert !sequenceValidator.isRecovering(380922L, 101, false);
     }
 
     @Test
@@ -179,8 +179,8 @@ public class FortsIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry2), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
 
-        assert !sequenceValidator.isRecovering(380922L, false);
-        assert !sequenceValidator.isRecovering(380925L, false);
+        assert !sequenceValidator.isRecovering(380922L, 101, false);
+        assert !sequenceValidator.isRecovering(380925L, 201, false);
     }
 
     @Test
@@ -202,7 +202,7 @@ public class FortsIncrementalProcessorTest {
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
-        assert sequenceValidator.isRecovering(380922L, false);
+        assert sequenceValidator.isRecovering(380922L, 102, false);
 
         // ===
 
@@ -219,7 +219,7 @@ public class FortsIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(2)).flushIncrementals();
 
-        assert !sequenceValidator.isRecovering(380922L, false);
+        assert !sequenceValidator.isRecovering(380922L, 102, false);
     }
 
     @Test
@@ -245,7 +245,7 @@ public class FortsIncrementalProcessorTest {
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry12), Mockito.any(PerformanceData.class));
-        assert sequenceValidator.isRecovering(380922L, false);
+        assert sequenceValidator.isRecovering(380922L, 104, false);
 
         // ===
 
@@ -267,7 +267,7 @@ public class FortsIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry22), Mockito.any(PerformanceData.class));
 
-        assert !sequenceValidator.isRecovering(380922L, false);
+        assert !sequenceValidator.isRecovering(380922L, 104, false);
     }
 
     @Test
@@ -288,7 +288,7 @@ public class FortsIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message1, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
-        assert sequenceValidator.isRecovering(380922L, false);
+        assert sequenceValidator.isRecovering(380922L, 103, false);
 
         // ===
 
@@ -304,7 +304,7 @@ public class FortsIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
 
-        assert sequenceValidator.isRecovering(380922L, false);
+        assert sequenceValidator.isRecovering(380922L, 103, false);
 
         // ===
 
@@ -331,7 +331,7 @@ public class FortsIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message1, context, coder);
 
         Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
-        assert !sequenceValidator.isRecovering(380922L, false);
+        assert !sequenceValidator.isRecovering(380922L, 102, false);
 
         // ===
 
@@ -346,7 +346,7 @@ public class FortsIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message2, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
-        assert !sequenceValidator.isRecovering(380922L, false);
+        assert !sequenceValidator.isRecovering(380922L, 102, false);
 
         // ===
 
@@ -362,7 +362,7 @@ public class FortsIncrementalProcessorTest {
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry31), Mockito.any(PerformanceData.class));
 
-        assert !sequenceValidator.isRecovering(380922L, false);
+        assert !sequenceValidator.isRecovering(380922L, 102, false);
 
         // ===
 
@@ -377,7 +377,7 @@ public class FortsIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message4, context, coder);
 
         Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(entry41), Mockito.any(PerformanceData.class));
-        assert !sequenceValidator.isRecovering(380922L, false);
+        assert !sequenceValidator.isRecovering(380922L, 102, false);
     }
 
     @Ignore
@@ -401,7 +401,7 @@ public class FortsIncrementalProcessorTest {
             incrementalProcessor.handleMessage(message1, context, coder);
 
             Mockito.verify(marketDataHandler, Mockito.times(i % 2)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
-            assert !sequenceValidator.isRecovering(380922L, false);
+            assert !sequenceValidator.isRecovering(380922L, 99 + i + 1, false);
 
             // ===
 
@@ -416,7 +416,7 @@ public class FortsIncrementalProcessorTest {
             incrementalProcessor.handleMessage(message2, context, coder);
 
             Mockito.verify(marketDataHandler, Mockito.times(1 - i % 2)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
-            assert !sequenceValidator.isRecovering(380922L, false);
+            assert !sequenceValidator.isRecovering(380922L, 99 + i + 1, false);
         }
 
         // ===
@@ -432,7 +432,7 @@ public class FortsIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message3, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry31), Mockito.any(PerformanceData.class));
-        assert sequenceValidator.isRecovering(380922L, false);
+        assert sequenceValidator.isRecovering(380922L, 2, false);
 
         // ===
 
@@ -447,7 +447,7 @@ public class FortsIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message4, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry41), Mockito.any(PerformanceData.class));
-        assert sequenceValidator.isRecovering(380922L, false);
+        assert sequenceValidator.isRecovering(380922L, 2, false);
 
         sequenceValidator.onSnapshotSeq(380922L, 1);
         assert sequenceValidator.stopRecovering(380922L).length == 0;
@@ -472,7 +472,7 @@ public class FortsIncrementalProcessorTest {
             incrementalProcessor.handleMessage(message1, context, coder);
 
             Mockito.verify(marketDataHandler, Mockito.times(i % 2)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
-            assert !sequenceValidator.isRecovering(380922L, false);
+            assert !sequenceValidator.isRecovering(380922L, 99 + i + 1, false);
 
             // ===
 
@@ -487,7 +487,7 @@ public class FortsIncrementalProcessorTest {
             incrementalProcessor.handleMessage(message2, context, coder);
 
             Mockito.verify(marketDataHandler, Mockito.times(1 - i % 2)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
-            assert !sequenceValidator.isRecovering(380922L, false);
+            assert !sequenceValidator.isRecovering(380922L, 99 + i + 1, false);
         }
     }
 
@@ -510,7 +510,7 @@ public class FortsIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message1, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
-        assert !sequenceValidator.isRecovering(380922L, false);
+        assert !sequenceValidator.isRecovering(380922L, 102, false);
 
         // ===
 
@@ -525,7 +525,7 @@ public class FortsIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message2, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
-        assert !sequenceValidator.isRecovering(380922L, false);
+        assert !sequenceValidator.isRecovering(380922L, 102, false);
 
         // ===
 
@@ -544,7 +544,7 @@ public class FortsIncrementalProcessorTest {
         marketDataHandlerInOrder.verify(marketDataHandler).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
         marketDataHandlerInOrder.verify(marketDataHandler).onIncremental(Mockito.eq(entry31), Mockito.any(PerformanceData.class));
 
-        assert !sequenceValidator.isRecovering(380922L, false);
+        assert !sequenceValidator.isRecovering(380922L, 103, false);
 
         // ===
 
@@ -559,6 +559,6 @@ public class FortsIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message4, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry41), Mockito.any(PerformanceData.class));
-        assert !sequenceValidator.isRecovering(380922L, false);
+        assert !sequenceValidator.isRecovering(380922L, 103, false);
     }
 }

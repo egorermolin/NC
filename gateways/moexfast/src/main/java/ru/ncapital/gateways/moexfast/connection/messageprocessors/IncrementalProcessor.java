@@ -42,7 +42,7 @@ public abstract class IncrementalProcessor<T> extends Processor implements IIncr
                     messageHandler.onMarketReset();
                     continue;
                 }
-                int rptSeqNum = mdEntry.getInt("RptSeq");
+                int seqNum = mdEntry.getInt("RptSeq");
                 boolean lastEntryInTransaction = isLastEntryInTransaction(mdEntry);
 
                 checkTradeId(mdEntry);
@@ -56,8 +56,8 @@ public abstract class IncrementalProcessor<T> extends Processor implements IIncr
                 if (!messageHandler.isAllowedUpdate(exchangeSecurityId))
                     continue;
 
-                if (sequenceValidator.isRecovering(exchangeSecurityId, false)) {
-                    if (sequenceValidator.onIncrementalSeq(exchangeSecurityId, rptSeqNum)) {
+                if (sequenceValidator.isRecovering(exchangeSecurityId, seqNum, false)) {
+                    if (sequenceValidator.onIncrementalSeq(exchangeSecurityId, seqNum)) {
                         messageHandler.onIncremental(mdEntry, performanceData);
 
                         // finished recovering
@@ -71,13 +71,13 @@ public abstract class IncrementalProcessor<T> extends Processor implements IIncr
                                         storedMdEntryToProcess.getPerformanceData());
                             }
                     } else {
-                        sequenceValidator.storeIncremental(exchangeSecurityId, rptSeqNum, mdEntry, performanceData, lastFragment, lastEntryInTransaction);
+                        sequenceValidator.storeIncremental(exchangeSecurityId, seqNum, mdEntry, performanceData, lastFragment, lastEntryInTransaction);
                     }
                 } else {
-                    if (sequenceValidator.onIncrementalSeq(exchangeSecurityId, rptSeqNum)) {
+                    if (sequenceValidator.onIncrementalSeq(exchangeSecurityId, seqNum)) {
                         messageHandler.onIncremental(mdEntry, performanceData);
                     } else {
-                        sequenceValidator.storeIncremental(exchangeSecurityId, rptSeqNum, mdEntry, performanceData, lastFragment, lastEntryInTransaction);
+                        sequenceValidator.storeIncremental(exchangeSecurityId, seqNum, mdEntry, performanceData, lastFragment, lastEntryInTransaction);
                         sequenceValidator.startRecovering(exchangeSecurityId);
                     }
                 }

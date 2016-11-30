@@ -74,7 +74,7 @@ public class MicexIncrementalProcessorTest {
 
     @Test
     public void testIncrementalNotFirst() {
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 101, false);
 
         Message message = getIncermentalMock(1, 1);
         GroupValue entry1 = message.getSequence("GroupMDEntries").get(0);
@@ -90,12 +90,13 @@ public class MicexIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry1), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
 
-        assert sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert sequenceValidator.isRecovering("SYMB;CETS", 101, true);
+        assert sequenceValidator.isRecovering("SYMB;CETS", 102, false);
     }
 
     @Test
     public void testIncrementalFirst() {
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 1, false);
 
         Message message = getIncermentalMock(1, 1);
         GroupValue entry1 = message.getSequence("GroupMDEntries").get(0);
@@ -111,12 +112,13 @@ public class MicexIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry1), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
 
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 2, false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 2, false);
     }
 
     @Test
     public void testIncrementalFirst2() {
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 1, false);
 
         Message message = getIncermentalMock(1, 1);
         Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(null);
@@ -127,7 +129,8 @@ public class MicexIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onMarketReset();
         Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
 
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 0, true);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 1, false);
 
         message = getIncermentalMock(2, 1);
         GroupValue entry1 = message.getSequence("GroupMDEntries").get(0);
@@ -142,7 +145,8 @@ public class MicexIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry1), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(2)).flushIncrementals();
 
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 1, true);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 2, false);
     }
 
     @Test
@@ -180,7 +184,8 @@ public class MicexIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry2), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
 
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 100, false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 101, false);
     }
 
     @Test
@@ -212,8 +217,10 @@ public class MicexIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry2), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
 
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
-        assert !sequenceValidator.isRecovering("SYMB2;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 100, true);
+        assert !sequenceValidator.isRecovering("SYMB2;CETS", 200, true);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 101, false);
+        assert !sequenceValidator.isRecovering("SYMB2;CETS", 201, false);
     }
 
     @Test
@@ -236,7 +243,8 @@ public class MicexIncrementalProcessorTest {
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
-        assert sequenceValidator.isRecovering("SYMB;CETS", false);
+
+        assert sequenceValidator.isRecovering("SYMB;CETS", 102, false);
 
         // ===
 
@@ -254,7 +262,7 @@ public class MicexIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(2)).flushIncrementals();
 
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 102, false);
     }
 
     @Test
@@ -282,7 +290,7 @@ public class MicexIncrementalProcessorTest {
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry12), Mockito.any(PerformanceData.class));
-        assert sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert sequenceValidator.isRecovering("SYMB;CETS", 103, false);
 
         // ===
 
@@ -306,7 +314,7 @@ public class MicexIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry22), Mockito.any(PerformanceData.class));
 
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 102, false);
     }
 
     @Test
@@ -328,7 +336,7 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message1, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
-        assert sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert sequenceValidator.isRecovering("SYMB;CETS", 103, false);
 
         // ===
 
@@ -345,7 +353,7 @@ public class MicexIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
 
-        assert sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert sequenceValidator.isRecovering("SYMB;CETS", 101, false);
 
         // ===
 
@@ -373,7 +381,7 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message1, context, coder);
 
         Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 101, false);
 
         // ===
 
@@ -389,7 +397,7 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message2, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 101, false);
 
         // ===
 
@@ -406,7 +414,7 @@ public class MicexIncrementalProcessorTest {
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry31), Mockito.any(PerformanceData.class));
 
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 102, false);
 
         // ===
 
@@ -422,7 +430,7 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message4, context, coder);
 
         Mockito.verify(marketDataHandler).onIncremental(Mockito.eq(entry41), Mockito.any(PerformanceData.class));
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 102, false);
     }
 
     @Ignore
@@ -447,7 +455,7 @@ public class MicexIncrementalProcessorTest {
             incrementalProcessor.handleMessage(message1, context, coder);
 
             Mockito.verify(marketDataHandler, Mockito.times(i % 2)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
-            assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+            assert !sequenceValidator.isRecovering("SYMB;CETS", 99 + i + 1, false);
 
             // ===
 
@@ -463,7 +471,7 @@ public class MicexIncrementalProcessorTest {
             incrementalProcessor.handleMessage(message2, context, coder);
 
             Mockito.verify(marketDataHandler, Mockito.times(1 - i % 2)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
-            assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+            assert !sequenceValidator.isRecovering("SYMB;CETS", 99 + i + 1, false);
         }
 
         // ===
@@ -480,7 +488,7 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message3, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry31), Mockito.any(PerformanceData.class));
-        assert sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert sequenceValidator.isRecovering("SYMB;CETS", 2, false);
 
         // ===
 
@@ -496,7 +504,7 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message4, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry41), Mockito.any(PerformanceData.class));
-        assert sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert sequenceValidator.isRecovering("SYMB;CETS", 2, false);
 
         sequenceValidator.onSnapshotSeq("SYMB;CETS", 1);
         assert sequenceValidator.stopRecovering("SYMB;CETS").length == 0;
@@ -522,7 +530,7 @@ public class MicexIncrementalProcessorTest {
             incrementalProcessor.handleMessage(message1, context, coder);
 
             Mockito.verify(marketDataHandler, Mockito.times(i % 2)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
-            assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+            assert !sequenceValidator.isRecovering("SYMB;CETS", 99 + i + 1, false);
 
             // ===
 
@@ -538,7 +546,7 @@ public class MicexIncrementalProcessorTest {
             incrementalProcessor.handleMessage(message2, context, coder);
 
             Mockito.verify(marketDataHandler, Mockito.times(1 - i % 2)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
-            assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+            assert !sequenceValidator.isRecovering("SYMB;CETS", 99 + i + 1, false);
         }
     }
 
@@ -562,7 +570,7 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message1, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry11), Mockito.any(PerformanceData.class));
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 101, false);
 
         // ===
 
@@ -578,7 +586,7 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message2, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 102, false);
 
         // ===
 
@@ -598,7 +606,7 @@ public class MicexIncrementalProcessorTest {
         marketDataHandlerInOrder.verify(marketDataHandler).onIncremental(Mockito.eq(entry21), Mockito.any(PerformanceData.class));
         marketDataHandlerInOrder.verify(marketDataHandler).onIncremental(Mockito.eq(entry31), Mockito.any(PerformanceData.class));
 
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 103, false);
 
         // ===
 
@@ -614,7 +622,7 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.handleMessage(message4, context, coder);
 
         Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry41), Mockito.any(PerformanceData.class));
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 103, false);
     }
 
     @Test
@@ -656,7 +664,7 @@ public class MicexIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(2)).flushIncrementals();
         Mockito.verify(entry2, Mockito.times(1)).setString("DealNumber", null);
 
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 102, false);
     }
 
     @Test
@@ -698,6 +706,6 @@ public class MicexIncrementalProcessorTest {
         Mockito.verify(marketDataHandler, Mockito.times(2)).flushIncrementals();
         Mockito.verify(entry2, Mockito.times(0)).setString("DealNumber", null);
 
-        assert !sequenceValidator.isRecovering("SYMB;CETS", false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 102, false);
     }
 }
