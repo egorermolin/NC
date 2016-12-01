@@ -60,8 +60,13 @@ public class OrderDepth {
                     depthLevels.remove(previousDepthLevel.getMdEntryId());
                 }
 
-                depthLevelsSorted.add(depthLevel);
-                depthLevels.put(depthLevel.getMdEntryId(), depthLevel);
+                if (depthLevel.getPublicTrade() != null) {
+                    // technical trade
+                    depthLevel.getPublicTrade().setLastSize(depthLevel.getMdEntrySize());
+                } else {
+                    depthLevelsSorted.add(depthLevel);
+                    depthLevels.put(depthLevel.getMdEntryId(), depthLevel);
+                }
                 break;
             case UPDATE:
                 previousDepthLevel = depthLevels.get(depthLevel.getMdEntryId());

@@ -24,8 +24,6 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
 
     private Map<T, List<DepthLevel<T>>> depthLevelMap = new HashMap<>();
 
-    private Map<T, List<PublicTrade<T>>> publicTradeMap = new HashMap<>();
-
     private boolean publicTradesFromOrderList;
 
     private String lastTradeId;
@@ -53,15 +51,6 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
             depthLevelMap.put(exchangeSecurityId, depthLevelList);
         }
         return depthLevelList;
-    }
-
-    private List<PublicTrade<T>> getPublicTradeList(T exchangeSecurityId) {
-        List<PublicTrade<T>> publicTradeList = publicTradeMap.get(exchangeSecurityId);
-        if (publicTradeList == null) {
-            publicTradeList = new ArrayList<>();
-            publicTradeMap.put(exchangeSecurityId, publicTradeList);
-        }
-        return publicTradeList;
     }
 
     @Override
@@ -115,24 +104,14 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
                 && depthLevel != null
                 && depthLevel.getTradeId() != null
                 && !depthLevel.getTradeId().equals(lastTradeId)) {
-
+            lastTradeId = depthLevel.getTradeId();
             PublicTrade<T> publicTrade = marketDataManager.createPublicTrade(exchangeSecurityId);
             publicTrade.setMdEntryId(depthLevel.getMdEntryId());
-            publicTrade.setTradeId(depthLevel.getTradeId());
             publicTrade.setLastPx(depthLevel.getMdEntryPx());
             publicTrade.setIsBid(depthLevel.getIsBid());
+            publicTrade.setTradeId(depthLevel.getTradeId());
             publicTrade.getPerformanceData().updateFrom(depthLevel.getPerformanceData());
-
-            lastTradeId = depthLevel.getTradeId();
-
-            // technical trade
-            if (depthLevel.getMdUpdateAction() == MdUpdateAction.INSERT) {
-                publicTrade.setLastSize(depthLevel.getMdEntrySize());
-                getDepthLevelList(exchangeSecurityId).remove(depthLevel);
-                getPublicTradeList(exchangeSecurityId).add(publicTrade);
-            } else {
-                depthLevel.setPublicTrade(publicTrade);
-            }
+            depthLevel.setPublicTrade(publicTrade);
         }
     }
 
@@ -158,12 +137,7 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
             if (depthLevelList.size() > 0)
                 marketDataManager.onDepthLevels(depthLevelsToArray(depthLevelList));
 
-        for (List<PublicTrade<T>> publicTradeList : publicTradeMap.values())
-            for (PublicTrade<T> publicTrade : publicTradeList)
-                marketDataManager.onPublicTrade(publicTrade);
-
         depthLevelMap.clear();
-        publicTradeMap.clear();
     }
 
     protected abstract DepthLevel<T>[] depthLevelsToArray(List<DepthLevel<T>> list);
