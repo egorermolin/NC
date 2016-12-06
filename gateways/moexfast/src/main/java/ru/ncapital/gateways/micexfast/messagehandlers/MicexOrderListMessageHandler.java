@@ -26,6 +26,16 @@ public class MicexOrderListMessageHandler extends OrderListMessageHandler<String
     }
 
     @Override
+    protected long getMdFlags(GroupValue mdEntry) {
+        return 0;
+    }
+
+    @Override
+    protected boolean isOTC(GroupValue mdEntry) {
+        return false;
+    }
+
+    @Override
     protected DepthLevel<String>[] depthLevelsToArray(List<DepthLevel<String>> list) {
         @SuppressWarnings("unchecked")
         DepthLevel<String>[] array = new DepthLevel[list.size()];

@@ -26,6 +26,21 @@ public class FortsOrderListMessageHandler extends OrderListMessageHandler<Long> 
     }
 
     @Override
+    protected long getMdFlags(GroupValue mdEntry) {
+        if (mdEntry.getValue("MDFlags") == null)
+            return 0;
+
+        return mdEntry.getLong("MDFlags");
+    }
+
+    @Override
+    protected boolean isOTC(GroupValue mdEntry) {
+        long otc = getMdFlags(mdEntry) & 0x0004;
+
+        return otc != 0;
+    }
+
+    @Override
     protected DepthLevel<Long>[] depthLevelsToArray(List<DepthLevel<Long>> list) {
         @SuppressWarnings("unchecked")
         DepthLevel<Long>[] array = new DepthLevel[list.size()];

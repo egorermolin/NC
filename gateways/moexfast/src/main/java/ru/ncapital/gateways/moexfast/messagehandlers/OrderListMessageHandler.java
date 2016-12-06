@@ -78,6 +78,9 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
     @Override
     public void onIncrementalMdEntry(T exchangeSecurityId, GroupValue mdEntry, PerformanceData perfData) {
         DepthLevel<T> depthLevel = null;
+        if (isOTC(mdEntry))
+            return;
+        
         MdEntryType mdEntryType = getMdEntryType(mdEntry);
         switch (mdEntryType) {
             case BID:
@@ -89,6 +92,7 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
                 depthLevel.setMdEntrySize(depthLevel.getMdUpdateAction() == MdUpdateAction.DELETE ? 0.0 : getMdEntrySize(mdEntry));
                 depthLevel.setIsBid(mdEntryType == MdEntryType.BID);
                 depthLevel.setTradeId(getTradeId(mdEntry));
+                depthLevel.setMdFlags(getMdFlags(mdEntry));
                 depthLevel.getPerformanceData().updateFrom(perfData).setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
                 getDepthLevelList(exchangeSecurityId).add(depthLevel);
                 break;
@@ -114,6 +118,10 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
             depthLevel.setPublicTrade(publicTrade);
         }
     }
+
+    protected abstract long getMdFlags(GroupValue mdEntry);
+
+    protected abstract boolean isOTC(GroupValue mdEntry);
 
     @Override
     protected void onBeforeSnapshot(T exchangeSecurityId) {

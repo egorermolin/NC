@@ -173,10 +173,17 @@ public abstract class MarketDataManager<T> {
 
     public void onBBO(BBO<T> newBBO) {
         long gatewayOutTime;
+        BBO<T> currentBBO = getOrCreateBBO(newBBO.getExchangeSecurityId());
+        if (currentBBO.getSecurityId() == null) {
+            if (logger.isDebugEnabled())
+                logger.debug("onBBO unknown instrument " + currentBBO.getExchangeSecurityId());
+
+            return;
+        }
+
         if (logger.isTraceEnabled())
             logger.trace("onBBO " + newBBO.getSecurityId());
 
-        BBO<T> currentBBO = getOrCreateBBO(newBBO.getExchangeSecurityId());
         synchronized (currentBBO) {
             boolean[] changed = orderDepthEngine.updateBBO(currentBBO, newBBO);
 
@@ -197,10 +204,17 @@ public abstract class MarketDataManager<T> {
 
     public void onDepthLevels(DepthLevel<T>[] depthLevels) {
         long gatewayOutTime;
+        BBO<T> currentBBO = getOrCreateBBO(depthLevels[0].getExchangeSecurityId());
+        if (currentBBO.getSecurityId() == null) {
+            if (logger.isDebugEnabled())
+                logger.debug("onDepthLevel unknown instrument " + currentBBO.getExchangeSecurityId());
+
+            return;
+        }
+
         if (logger.isTraceEnabled())
             logger.trace("onDepthLevel " + depthLevels[0].getSecurityId());
 
-        BBO<T> currentBBO = getOrCreateBBO(depthLevels[0].getExchangeSecurityId());
         synchronized (currentBBO) {
             List<IDepthLevel> depthLevelsToSend = new ArrayList<>();
             List<IPublicTrade> publicTradesToSend = new ArrayList<>();
@@ -223,10 +237,17 @@ public abstract class MarketDataManager<T> {
 
     public void onPublicTrade(PublicTrade<T> publicTrade) {
         long gatewayOutTime;
+        BBO<T> currentBBO = getOrCreateBBO(publicTrade.getExchangeSecurityId());
+        if (currentBBO.getSecurityId() == null) {
+            if (logger.isDebugEnabled())
+                logger.debug("onPublicTrade unknown instrument " + currentBBO.getExchangeSecurityId());
+
+            return;
+        }
+
         if (logger.isTraceEnabled())
             logger.trace("onPublicTrade " + publicTrade.getSecurityId());
 
-        BBO<T> currentBBO = getOrCreateBBO(publicTrade.getExchangeSecurityId());
         synchronized (currentBBO) {
             if (subscriptions.containsKey(currentBBO.getSecurityId())) {
                 gatewayOutTime = Utils.currentTimeInTicks();

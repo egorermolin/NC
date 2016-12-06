@@ -26,6 +26,8 @@ public class DepthLevel<T> implements IDepthLevel {
 
     public String tradeId;
 
+    public long mdFlags;
+
     public PublicTrade<T> publicTrade;
 
     public DepthLevel(String securityId, T exchangeSecurityId) {
@@ -97,6 +99,14 @@ public class DepthLevel<T> implements IDepthLevel {
         this.isBid = isBid;
     }
 
+    public long getMdFlags() {
+        return mdFlags;
+    }
+
+    public void setMdFlags(long mdFlags) {
+        this.mdFlags = mdFlags;
+    }
+
     public PublicTrade<T> getPublicTrade() {
         return publicTrade;
     }
@@ -142,6 +152,7 @@ public class DepthLevel<T> implements IDepthLevel {
                 ", mdEntrySize=" + mdEntrySize +
                 ", tradeId=" + tradeId +
                 ", isBid=" + isBid +
+                ", mdFlags=" + mdFlags +
                 ", performanceData=" + performanceData +
                 '}';
     }
