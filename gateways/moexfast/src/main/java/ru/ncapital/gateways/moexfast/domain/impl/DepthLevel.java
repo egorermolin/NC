@@ -143,6 +143,7 @@ public class DepthLevel<T> implements IDepthLevel {
                 ", tradeId=" + tradeId +
                 ", isBid=" + isBid +
                 ", performanceData=" + performanceData +
+                ", publicTrade=" + publicTrade +
                 '}';
     }
 }
