@@ -9,6 +9,8 @@ import ru.ncapital.gateways.moexfast.connection.messageprocessors.ISnapshotProce
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.connection.multicast.MessageReader;
 import ru.ncapital.gateways.moexfast.connection.multicast.MessageReaderStarter;
+import ru.ncapital.gateways.moexfast.domain.impl.ChannelStatus;
+import ru.ncapital.gateways.moexfast.domain.intf.IChannelStatus;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 
 import java.io.IOException;
@@ -492,46 +494,29 @@ public class ConnectionManager {
         snapshotWatcherFutures.clear();
     }
 
-    private int checkMessageReaders() {
-        int running = 0;
-        int up = 0;
+    private IChannelStatus checkMessageReaders() {
+        ChannelStatus channelStatus = new ChannelStatus();
         long currentTime = Utils.currentTimeInTicks();
         for (MessageReader messageReader : messageReaders.values()) {
             if (messageReader.isRunning()) {
                 long lastReceivedTimestamp = messageReader.getLastReceivedTimestamp();
-                running++;
 
+                channelStatus.addChannel(ChannelStatus.convert(messageReader.getConnectionId()));
                 if (currentTime - lastReceivedTimestamp < feedDownTimeout) {
-                    up++;
+                    channelStatus.addChannelUp(ChannelStatus.convert(messageReader.getConnectionId()));
                 } else {
                     logger.warn("Message Reader [" + messageReader.getConnectionId() + "] is down since [" + Utils.convertTicksToTodayString(lastReceivedTimestamp) + "]");
                 }
             }
         }
-
-        if (running == 0 || up == 0)
-            return -1;
-
-        return running - up;
+        return channelStatus.checkAll();
     }
 
     private void startMessageReadersWatcher() {
         class MessageReadersWatchTask implements Runnable {
             @Override
             public void run() {
-                int result = checkMessageReaders();
-                if (result == 0) {
-                    marketDataManager.onFeedStatus(true, true);
-                } else {
-                    if (result < 0) {
-                        marketDataManager.onFeedStatus(false, true);
-                        if (restartOnAllFeedDown) {
-                            restart();
-                        }
-                    } else {
-                        marketDataManager.onFeedStatus(false, false);
-                    }
-                }
+                marketDataManager.onFeedStatus(checkMessageReaders().isChannelUp(IChannelStatus.ChannelType.All) > -1);
             }
         }
 

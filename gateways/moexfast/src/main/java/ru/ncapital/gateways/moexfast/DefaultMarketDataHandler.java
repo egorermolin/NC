@@ -104,7 +104,7 @@ public class DefaultMarketDataHandler implements IMarketDataHandler {
     }
 
     @Override
-    public void onFeedStatus(boolean up, boolean all) {
-        logger.info("onFeedStatus [" + (up ? "UP" : "DOWN") + "][" + (all ? "ALL" : "SOME") + "]");
+    public void onFeedStatus(boolean up) {
+        logger.info("onFeedStatus [" + (up ? "UP" : "DOWN") + "]");
     }
 }

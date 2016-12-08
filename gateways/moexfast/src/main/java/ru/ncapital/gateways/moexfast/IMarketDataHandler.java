@@ -20,5 +20,5 @@ public interface IMarketDataHandler {
 
     void onNews(INews news);
 
-    void onFeedStatus(boolean up, boolean all);
+    void onFeedStatus(boolean up);
 }

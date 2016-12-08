@@ -352,17 +352,13 @@ public abstract class MarketDataManager<T> {
         onBBO(bbo);
     }
 
-    public void onFeedStatus(boolean up, boolean all) {
+    public void onFeedStatus(boolean up) {
         boolean changed = false;
         if (feedStatusUP != up) {
             feedStatusUP = up;
             changed = true;
         }
-        if (feedStatusALL != all) {
-            feedStatusALL = all;
-            changed = true;
-        }
         if (changed)
-            marketDataHandler.onFeedStatus(up, all);
+            marketDataHandler.onFeedStatus(up);
     }
 }
