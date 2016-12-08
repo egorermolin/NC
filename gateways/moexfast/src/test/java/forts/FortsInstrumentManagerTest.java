@@ -16,7 +16,6 @@ import ru.ncapital.gateways.fortsfast.FortsMarketDataManager;
 import ru.ncapital.gateways.fortsfast.IFortsGatewayConfiguration;
 import ru.ncapital.gateways.fortsfast.domain.FortsInstrument;
 import ru.ncapital.gateways.moexfast.IMarketDataHandler;
-import ru.ncapital.gateways.moexfast.InstrumentManager;
 import ru.ncapital.gateways.moexfast.connection.ConnectionManager;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.intf.IInstrument;

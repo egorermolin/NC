@@ -141,7 +141,7 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
         }
 
         exchangeSecurityIdsToRecover.add(exchangeSecurityId);
-        marketDataManager.setRecovery(exchangeSecurityId, true, type.equals("OrderList"));
+        marketDataManager.setRecovery(exchangeSecurityId, true, getType().convert());
     }
 
     @Override
@@ -149,7 +149,7 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
         String securityId = marketDataManager.convertExchangeSecurityIdToSecurityId(exchangeSecurityId);
         SequenceNumber sequenceNumber = getSequenceNumber(exchangeSecurityId);
         synchronized (sequenceNumber) {
-            //check incrementals are in sequence
+            //check incremental messages are in sequence
             Map<Integer, StoredMdEntry<T>> storedMdEntries = storedMdEntriesByExchangeSecurityId.get(exchangeSecurityId);
             if (storedMdEntries == null || storedMdEntries.size() == 0) {
                 sequenceNumber.numberOfMissingSequences = 0;
@@ -157,7 +157,7 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
                 logger.get().info("Stop Recovering " + securityId);
 
                 exchangeSecurityIdsToRecover.remove(exchangeSecurityId);
-                marketDataManager.setRecovery(exchangeSecurityId, false, type.equals("OrderList"));
+                marketDataManager.setRecovery(exchangeSecurityId, false, getType().convert());
 
                 return null;
             }
@@ -188,7 +188,7 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
         }
 
         exchangeSecurityIdsToRecover.remove(exchangeSecurityId);
-        marketDataManager.setRecovery(exchangeSecurityId, false, type.equals("OrderList"));
+        marketDataManager.setRecovery(exchangeSecurityId, false, getType().convert());
 
         StoredMdEntry<T>[] mdEntriesToProcess = storedMdEntriesToProcess.remove(exchangeSecurityId);
         if (mdEntriesToProcess.length > 0)

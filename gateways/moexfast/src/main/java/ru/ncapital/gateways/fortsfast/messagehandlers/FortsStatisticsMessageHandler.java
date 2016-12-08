@@ -8,7 +8,6 @@ import org.openfast.SequenceValue;
 import ru.ncapital.gateways.fortsfast.domain.FortsInstrument;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
-import ru.ncapital.gateways.moexfast.domain.MdEntryType;
 import ru.ncapital.gateways.moexfast.messagehandlers.StatisticsMessageHandler;
 
 /**

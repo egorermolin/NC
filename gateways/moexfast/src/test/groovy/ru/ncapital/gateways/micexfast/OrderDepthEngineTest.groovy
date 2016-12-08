@@ -2,8 +2,8 @@ package ru.ncapital.gateways.micexfast
 
 import ru.ncapital.gateways.moexfast.OrderDepthEngine
 import ru.ncapital.gateways.moexfast.domain.MdUpdateAction
+import ru.ncapital.gateways.moexfast.domain.impl.BBO
 import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel
-import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade
 import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel
 import ru.ncapital.gateways.moexfast.domain.intf.IPublicTrade
 
@@ -19,6 +19,11 @@ class MicexOrderDepthEngineTest extends GroovyTestCase {
                 return new DepthLevel<String>(exchangeSecurityId, exchangeSecurityId) {
                     { setMdUpdateAction(MdUpdateAction.SNAPSHOT); }
                 };
+            }
+
+            @Override
+            protected boolean updateInRecovery(BBO<String> previousBBO, BBO<String> newBBO) {
+                return false
             }
         }
     }

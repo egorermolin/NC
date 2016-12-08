@@ -11,6 +11,7 @@ import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
 import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
+import ru.ncapital.gateways.moexfast.domain.intf.IChannelStatus;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 
 /**
@@ -49,6 +50,22 @@ public class MicexMarketDataManager extends MarketDataManager<String> {
                 return new DepthLevel<String>(exchangeSecurityId, exchangeSecurityId) {
                     { setMdUpdateAction(MdUpdateAction.SNAPSHOT); }
                 };
+            }
+
+            @Override
+            protected boolean updateInRecovery(BBO<String> previousBBO, BBO<String> newBBO) {
+                boolean changed = false;
+                for (IChannelStatus.ChannelType channelType :
+                        new IChannelStatus.ChannelType[] {
+                                IChannelStatus.ChannelType.OrderList,
+                                IChannelStatus.ChannelType.BBOAndStatistics}) {
+                    if (newBBO.isInRecoverySet(channelType) &&
+                            newBBO.isInRecovery(channelType) != previousBBO.isInRecovery(channelType)) {
+                        changed = true;
+                        previousBBO.setInRecovery(newBBO.isInRecovery(channelType), channelType);
+                    }
+                }
+                return changed;
             }
         };
     }

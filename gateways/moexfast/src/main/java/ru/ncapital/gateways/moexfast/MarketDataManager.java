@@ -12,6 +12,7 @@ import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
 import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
 import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
 import ru.ncapital.gateways.moexfast.domain.intf.IBBO;
+import ru.ncapital.gateways.moexfast.domain.intf.IChannelStatus;
 import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
 import ru.ncapital.gateways.moexfast.domain.intf.IPublicTrade;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerFactory;
@@ -346,9 +347,9 @@ public abstract class MarketDataManager<T> {
         getIncrementalProcessor(type).setIsPrimary(isPrimary);
     }
 
-    public void setRecovery(T exchangeSecurityId, boolean isUp, boolean orderList) {
+    public void setRecovery(T exchangeSecurityId, boolean inRecovery, IChannelStatus.ChannelType channelType) {
         BBO<T> bbo = createBBO(exchangeSecurityId);
-        bbo.setInRecovery(isUp, orderList ? 0 : 1);
+        bbo.setInRecovery(inRecovery, channelType);
         onBBO(bbo);
     }
 

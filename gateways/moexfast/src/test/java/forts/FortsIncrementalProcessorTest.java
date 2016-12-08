@@ -1,8 +1,5 @@
 package forts;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -11,15 +8,10 @@ import org.mockito.*;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openfast.*;
 import org.openfast.codec.Coder;
-import ru.ncapital.gateways.fortsfast.FortsGatewayModule;
-import ru.ncapital.gateways.fortsfast.FortsInstrumentManager;
 import ru.ncapital.gateways.fortsfast.FortsMarketDataManager;
 import ru.ncapital.gateways.fortsfast.connection.messageprocessors.FortsIncrementalProcessor;
-import ru.ncapital.gateways.moexfast.InstrumentManager;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IncrementalProcessor;
-import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidator;
-import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorFactory;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorForOrderList;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;

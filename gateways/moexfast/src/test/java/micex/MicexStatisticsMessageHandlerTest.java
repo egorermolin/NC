@@ -16,9 +16,7 @@ import ru.ncapital.gateways.micexfast.messagehandlers.MicexStatisticsMessageHand
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by egore on 11/6/16.

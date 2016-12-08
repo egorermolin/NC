@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
-import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
 import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
 import ru.ncapital.gateways.moexfast.domain.intf.IPublicTrade;
 
@@ -114,11 +113,8 @@ public abstract class OrderDepthEngine<T> {
             changed[2] = true;
             previousBBO.setTradingStatus(newBBO.getTradingStatus());
         }
-        for (int i : new int[] {0, 1}) {
-            if (newBBO.isInRecoverySet(i) && newBBO.isInRecovery(i) != previousBBO.isInRecovery(i)) {
-                changed[2] = true;
-                previousBBO.setInRecovery(newBBO.isInRecovery(i), i);
-            }
+        if (updateInRecovery(newBBO, previousBBO)) {
+            changed[2] = true;
         }
         if (newBBO.getPerformanceData() != null && !newBBO.getPerformanceData().equals(previousBBO.getPerformanceData())) {
             previousBBO.getPerformanceData().updateFrom(newBBO.getPerformanceData());
@@ -144,4 +140,6 @@ public abstract class OrderDepthEngine<T> {
     }
 
     public abstract DepthLevel<T> createSnapshotDepthLevel(T exchangeSecurityId);
+
+    protected abstract boolean updateInRecovery(BBO<T> previousBBO, BBO<T> newBBO);
 }

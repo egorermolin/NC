@@ -1,7 +1,11 @@
 package ru.ncapital.gateways.moexfast.domain.impl;
 
 import ru.ncapital.gateways.moexfast.domain.intf.IBBO;
+import ru.ncapital.gateways.moexfast.domain.intf.IChannelStatus;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by egore on 12/7/15.
@@ -37,9 +41,9 @@ public class BBO<T> implements IBBO {
 
     private boolean empty;
 
-    private boolean[] inRecovery = new boolean[] {false, false};
+    private Map<IChannelStatus.ChannelType, Boolean> inRecovery = new HashMap<>();
 
-    private boolean[] isInRecoverySet = new boolean[] {false, false};
+    private Map<IChannelStatus.ChannelType, Boolean> isInRecoverySet = new HashMap<>();
 
     public BBO(String securityId, T exchangeSecurityId) {
         this.securityId = securityId;
@@ -167,18 +171,18 @@ public class BBO<T> implements IBBO {
     }
 
     @Override
-    public boolean isInRecovery(int i) {
-        return inRecovery[i];
+    public boolean isInRecovery(IChannelStatus.ChannelType channelType) {
+        return inRecovery.get(channelType);
     }
 
     @Override
-    public boolean isInRecoverySet(int i) {
-        return isInRecoverySet[i];
+    public boolean isInRecoverySet(IChannelStatus.ChannelType channelType) {
+        return isInRecoverySet.get(channelType);
     }
 
-    public void setInRecovery(boolean inRecovery, int i) {
-        this.inRecovery[i] = inRecovery;
-        this.isInRecoverySet[i] = true;
+    public void setInRecovery(boolean inRecovery, IChannelStatus.ChannelType channelType) {
+        this.inRecovery.put(channelType, inRecovery);
+        this.isInRecoverySet.put(channelType, true);
     }
 
     @Override
@@ -197,7 +201,10 @@ public class BBO<T> implements IBBO {
                 ", highPx=" + highPx +
                 ", openPx=" + openPx +
                 ", closePx=" + closePx +
-                ", inRecovery=" + inRecovery[0] + inRecovery[1] +
+                ", inRecoveryOrderList=" + inRecovery.get(IChannelStatus.ChannelType.OrderList) +
+                ", inRecoveryBBOAndStatistics=" + inRecovery.get(IChannelStatus.ChannelType.BBOAndStatistics) +
+                ", inRecoveryBBO=" + inRecovery.get(IChannelStatus.ChannelType.BBO) +
+                ", inRecoveryStatistics=" + inRecovery.get(IChannelStatus.ChannelType.Statistics) +
                 ", tradingStatus='" + tradingStatus + '\'' +
                 '}';
     }

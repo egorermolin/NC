@@ -32,7 +32,7 @@ public interface IBBO {
 
     PerformanceData getPerformanceData();
 
-    boolean isInRecovery(int i);
+    boolean isInRecovery(IChannelStatus.ChannelType channelType);
 
-    boolean isInRecoverySet(int i);
+    boolean isInRecoverySet(IChannelStatus.ChannelType channelType);
 }

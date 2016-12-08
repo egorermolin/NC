@@ -15,7 +15,6 @@ import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.connection.Connection;
 import ru.ncapital.gateways.moexfast.connection.ConnectionId;
-import ru.ncapital.gateways.moexfast.connection.multicast.utils.ListNetIntf;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 
 import java.io.BufferedWriter;

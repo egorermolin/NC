@@ -4,16 +4,14 @@ import com.google.inject.Singleton;
 import ru.ncapital.gateways.fortsfast.connection.messageprocessors.FortsIncrementalProcessor;
 import ru.ncapital.gateways.fortsfast.connection.messageprocessors.FortsSnapshotProcessor;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
-import ru.ncapital.gateways.moexfast.InstrumentManager;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.OrderDepthEngine;
-import ru.ncapital.gateways.moexfast.connection.messageprocessors.HeartbeatProcessor;
-import ru.ncapital.gateways.moexfast.connection.messageprocessors.NewsProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
 import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
+import ru.ncapital.gateways.moexfast.domain.intf.IChannelStatus;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 
 /**
@@ -52,6 +50,23 @@ public class FortsMarketDataManager extends MarketDataManager<Long> {
                 return new DepthLevel<Long>(getInstrumentManager().getSecurityId(exchangeSecurityId), exchangeSecurityId) {
                     { setMdUpdateAction(MdUpdateAction.SNAPSHOT); }
                 };
+            }
+
+            @Override
+            protected boolean updateInRecovery(BBO<Long> previousBBO, BBO<Long> newBBO) {
+                boolean changed = false;
+                for (IChannelStatus.ChannelType channelType :
+                        new IChannelStatus.ChannelType[] {
+                                IChannelStatus.ChannelType.OrderList,
+                                IChannelStatus.ChannelType.BBO,
+                                IChannelStatus.ChannelType.Statistics}) {
+                    if (newBBO.isInRecoverySet(channelType) &&
+                            newBBO.isInRecovery(channelType) != previousBBO.isInRecovery(channelType)) {
+                        changed = true;
+                        previousBBO.setInRecovery(newBBO.isInRecovery(channelType), channelType);
+                    }
+                }
+                return changed;
             }
         };
     }

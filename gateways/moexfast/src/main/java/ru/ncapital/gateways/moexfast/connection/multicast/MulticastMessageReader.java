@@ -1,9 +1,6 @@
 package ru.ncapital.gateways.moexfast.connection.multicast;
 
 import org.apache.log4j.*;
-import ru.ncapital.gateways.fortsfast.FortsConfigurationManager;
-import ru.ncapital.gateways.fortsfast.FortsNullGatewayConfiguration;
-import ru.ncapital.gateways.micexfast.MicexGatewayManager;
 import ru.ncapital.gateways.micexfast.MicexInstrumentManager;
 import ru.ncapital.gateways.moexfast.ConfigurationManager;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;

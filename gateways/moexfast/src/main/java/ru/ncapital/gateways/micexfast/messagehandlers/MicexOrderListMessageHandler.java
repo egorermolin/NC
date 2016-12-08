@@ -8,12 +8,9 @@ import org.openfast.SequenceValue;
 import ru.ncapital.gateways.micexfast.MicexMarketDataManager;
 import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
-import ru.ncapital.gateways.moexfast.domain.MdEntryType;
-import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
 import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
 import ru.ncapital.gateways.moexfast.messagehandlers.OrderListMessageHandler;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

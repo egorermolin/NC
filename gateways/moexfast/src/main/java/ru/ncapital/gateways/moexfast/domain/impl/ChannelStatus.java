@@ -49,15 +49,17 @@ public class ChannelStatus implements IChannelStatus {
             case FOND_STATISTICS_INCR_B:
             case FOND_STATISTICS_SNAP_A:
             case FOND_STATISTICS_SNAP_B:
-            case FUT_STATISTICS_INCR_A:
-            case FUT_STATISTICS_INCR_B:
-            case FUT_STATISTICS_SNAP_A:
-            case FUT_STATISTICS_SNAP_B:
+                return ChannelType.BBOAndStatistics;
             case FUT_ORDER_BOOK_INCR_A:
             case FUT_ORDER_BOOK_INCR_B:
             case FUT_ORDER_BOOK_SNAP_A:
             case FUT_ORDER_BOOK_SNAP_B:
-                return ChannelType.BBOAndStatistics;
+                return ChannelType.BBO;
+            case FUT_STATISTICS_INCR_A:
+            case FUT_STATISTICS_INCR_B:
+            case FUT_STATISTICS_SNAP_A:
+            case FUT_STATISTICS_SNAP_B:
+                return ChannelType.Statistics;
             case CURR_PUB_TRADES_INCR_A:
             case CURR_PUB_TRADES_INCR_B:
             case CURR_PUB_TRADES_SNAP_A:
