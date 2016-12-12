@@ -153,7 +153,7 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
             if (storedMdEntries == null || storedMdEntries.size() == 0) {
                 sequenceNumber.numberOfMissingSequences = 0;
 
-                logger.get().info("Stop Recovering " + convertExchangeSecurityIdToSecurityId(exchangeSecurityId));
+                logger.get().info("Stop Recovering [SecurityId: " + convertExchangeSecurityIdToSecurityId(exchangeSecurityId) + "]");
 
                 exchangeSecurityIdsToRecover.remove(exchangeSecurityId);
                 marketDataManager.setRecovery(exchangeSecurityId, false, getType().convert());
