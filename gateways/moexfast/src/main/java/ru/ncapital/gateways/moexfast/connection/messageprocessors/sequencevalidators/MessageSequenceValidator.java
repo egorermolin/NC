@@ -18,7 +18,7 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
     protected ThreadLocal<Logger> logger = new ThreadLocal<Logger>() {
         @Override
         protected Logger initialValue() {
-            return LoggerFactory.getLogger(Thread.currentThread().getName() + "-SequenceValidator");
+            return LoggerFactory.getLogger(Thread.currentThread().getName() + "-" + type + "-SequenceValidator");
         }
     };
 
