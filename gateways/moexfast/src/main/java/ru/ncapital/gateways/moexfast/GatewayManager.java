@@ -30,6 +30,7 @@ public abstract class GatewayManager implements IGatewayManager {
 
         // hack to avoid circular injection
         instrumentManager.setMarketDataManager(marketDataManager);
+        instrumentManager.setConnectionManager(connectionManager);
         marketDataManager.setInstrumentManager(instrumentManager);
 
         instrumentManager.setGatewayManager(this);

@@ -1,14 +1,17 @@
 package ru.ncapital.gateways.moexfast;
 
+import cli.System.Runtime.InteropServices.ComTypes.CONNECTDATA;
 import org.openfast.Context;
 import org.openfast.Message;
 import org.openfast.codec.Coder;
+import ru.ncapital.gateways.moexfast.connection.ConnectionManager;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.BaseProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.SequenceArray;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.impl.Instrument;
 import ru.ncapital.gateways.moexfast.domain.intf.IInstrument;
+import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -43,6 +46,8 @@ public abstract class InstrumentManager<T> extends BaseProcessor implements IPro
     private long timeOfLastSequenceReset;
 
     private IMarketDataHandler marketDataHandler;
+
+    private ConnectionManager connectionManager;
 
     public InstrumentManager<T> configure(IGatewayConfiguration configuration) {
         this.marketDataHandler = configuration.getMarketDataHandler();
@@ -189,6 +194,7 @@ public abstract class InstrumentManager<T> extends BaseProcessor implements IPro
                         getLogger().debug("Received " + newInstrument.getId());
 
                     sendToClient(newInstrument, newInstrument.getTradingStatus());
+                    recover(newInstrument.getExchangeSecurityId());
                 }
                 checkInstrumentFinish();
                 break;
@@ -201,6 +207,12 @@ public abstract class InstrumentManager<T> extends BaseProcessor implements IPro
 
                 break;
         }
+    }
+
+    private void recover(T exchangeSecurityId) {
+        for (MessageHandlerType type : new MessageHandlerType[] {MessageHandlerType.ORDER_BOOK, MessageHandlerType.ORDER_LIST, MessageHandlerType.STATISTICS})
+            if (marketDataManager.getSnapshotProcessor(type) != null)
+                marketDataManager.getSnapshotProcessor(type).getSequenceValidator().startRecovering(exchangeSecurityId);
     }
 
     private void checkInstrumentFinish() {
@@ -254,5 +266,9 @@ public abstract class InstrumentManager<T> extends BaseProcessor implements IPro
             return instrument.getSecurityId();
         else
             return null;
+    }
+
+    public void setConnectionManager(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
     }
 }

@@ -10,7 +10,7 @@ import java.util.*;
 /**
  * Created by egore on 1/11/16.
  */
-public abstract class SnapshotProcessor<T> extends Processor implements ISnapshotProcessor {
+public abstract class SnapshotProcessor<T> extends Processor implements ISnapshotProcessor<T> {
 
     private Map<T, Map<Integer, Message>> fragmentedSnapshots = new HashMap<>();
 

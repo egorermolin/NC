@@ -37,11 +37,11 @@ public abstract class MarketDataManager<T> {
 
     private IMarketDataHandler marketDataHandler;
 
-    protected ISnapshotProcessor snapshotProcessorForOrderList;
+    protected ISnapshotProcessor<T> snapshotProcessorForOrderList;
 
-    protected ISnapshotProcessor snapshotProcessorForStatistics;
+    protected ISnapshotProcessor<T> snapshotProcessorForStatistics;
 
-    protected ISnapshotProcessor snapshotProcessorForOrderBook;
+    protected ISnapshotProcessor<T> snapshotProcessorForOrderBook;
 
     protected IIncrementalProcessor incrementalProcessorForOrderList;
 
@@ -140,18 +140,6 @@ public abstract class MarketDataManager<T> {
         if (exchangeSecurityId == null) {
             logger.warn("Instrument not found [" + subscription.getSubscriptionKey() + "]");
             return false;
-        }
-
-        if (!snapshotProcessorForOrderBook.getSequenceValidator().hasBeenRecovered(exchangeSecurityId)) {
-             snapshotProcessorForOrderBook.getSequenceValidator().startRecovering(exchangeSecurityId);
-        }
-
-        if (!snapshotProcessorForStatistics.getSequenceValidator().hasBeenRecovered(exchangeSecurityId)) {
-            snapshotProcessorForStatistics.getSequenceValidator().startRecovering(exchangeSecurityId);
-        }
-
-        if (!snapshotProcessorForOrderList.getSequenceValidator().hasBeenRecovered(exchangeSecurityId)) {
-            snapshotProcessorForOrderList.getSequenceValidator().startRecovering(exchangeSecurityId);
         }
 
         BBO<T> currentBBO = getOrCreateBBO(exchangeSecurityId);
@@ -315,7 +303,7 @@ public abstract class MarketDataManager<T> {
         return newsProcessor;
     }
 
-    public ISnapshotProcessor getSnapshotProcessor(MessageHandlerType type) {
+    public ISnapshotProcessor<T> getSnapshotProcessor(MessageHandlerType type) {
         switch (type) {
             case ORDER_LIST:
                 return snapshotProcessorForOrderList;
