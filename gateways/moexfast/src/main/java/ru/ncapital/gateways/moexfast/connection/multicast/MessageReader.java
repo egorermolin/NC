@@ -234,6 +234,10 @@ public class MessageReader implements IMulticastEventListener {
         this.connectionId = connectionId;
         this.asynch = configurationManager.isAsynchChannelReader();
         this.connection = configurationManager.getConnection(connectionId);
+        this.logger = LoggerFactory.getLogger(connectionId.getConnectionId() + "-MessageReader");
+
+        if (logger.isDebugEnabled())
+            logger.debug("Created [Connection: " + connectionId.getConnectionId() + "]");
 
         boolean fortsOrderList = false;
         switch (this.connectionId) {
@@ -257,11 +261,6 @@ public class MessageReader implements IMulticastEventListener {
 
         this.marketDataManager = marketDataManager;
         this.instrumentManager = instumentManager;
-
-        this.logger = LoggerFactory.getLogger(connectionId.getConnectionId() + "-MessageReader");
-
-        if (logger.isDebugEnabled())
-            logger.debug("Created [Connection: " + connectionId.getConnectionId() + "]");
     }
 
     public DatagramChannel openChannel() throws IOException {
