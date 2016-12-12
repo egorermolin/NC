@@ -47,10 +47,6 @@ public class ConnectionManager {
 
     private long feedDownTimeout;
 
-    private boolean restartOnAllFeedDown;
-
-    private boolean publicTradesFromOrderList;
-
     private AtomicBoolean shuttingDown = new AtomicBoolean(false);
 
     @Inject
@@ -66,13 +62,11 @@ public class ConnectionManager {
             }
         }
         this.feedDownTimeout = configurationManager.getFeedDownTimeout();
-        this.restartOnAllFeedDown = configurationManager.restartOnAllFeedDown();
     }
 
 
     public ConnectionManager configure(IGatewayConfiguration configuration) {
         this.marketType = configuration.getMarketType();
-        this.publicTradesFromOrderList = configuration.publicTradesFromOrdersList();
         return this;
     }
 
@@ -382,12 +376,10 @@ public class ConnectionManager {
             startSnapshot(type);
         }
 
-        if (isListenSnapshotChannelOnlyIfNeeded) {
-            snapshotProcessorsToWatch.add(marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_LIST));
-            snapshotProcessorsToWatch.add(marketDataManager.getSnapshotProcessor(MessageHandlerType.STATISTICS));
-            if (marketType == MarketType.FUT)
-                snapshotProcessorsToWatch.add(marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_BOOK));
-        }
+        if (isListenSnapshotChannelOnlyIfNeeded)
+            for (MessageHandlerType type : new MessageHandlerType[] {MessageHandlerType.ORDER_LIST, MessageHandlerType.ORDER_BOOK, MessageHandlerType.STATISTICS})
+                if (marketDataManager.getSnapshotProcessor(type) != null)
+                    snapshotProcessorsToWatch.add(marketDataManager.getSnapshotProcessor(type));
     }
 
     public void onInstrumentDownloadFinished() {
@@ -521,7 +513,7 @@ public class ConnectionManager {
         }
 
         messageReadersWatcherFuture = scheduledService.scheduleAtFixedRate(
-                new MessageReadersWatchTask(), feedDownTimeout / 10 + 10_000_000L, 1_000_000L, TimeUnit.MICROSECONDS
+                new MessageReadersWatchTask(), feedDownTimeout / 10 + 10_000_000L, 10_000_000L, TimeUnit.MICROSECONDS
         );
     }
 
