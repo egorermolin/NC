@@ -355,11 +355,11 @@ public abstract class MarketDataManager<T> {
     }
 
     public void onFeedStatus(boolean up) {
-        if (getLogger().isDebugEnabled())
-            getLogger().debug("Feed Status [Current: " + (feedStatusUP ? "UP" : "DOWN") + "][Received: " + (up ? "UP" : "DOWN") + "]");
-
         boolean changed = false;
         if (feedStatusUP != up) {
+            if (getLogger().isDebugEnabled())
+                getLogger().debug("Feed Status [Current: " + (feedStatusUP ? "UP" : "DOWN") + "][Received: " + (up ? "UP" : "DOWN") + "]");
+
             feedStatusUP = up;
             changed = true;
         }
