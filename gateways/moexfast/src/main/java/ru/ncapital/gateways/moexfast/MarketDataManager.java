@@ -360,6 +360,9 @@ public abstract class MarketDataManager<T> {
     public void setRecovery(T exchangeSecurityId, boolean inRecovery, IChannelStatus.ChannelType channelType) {
         BBO<T> bbo = createBBO(exchangeSecurityId);
         bbo.setInRecovery(inRecovery, channelType);
+        if (getLogger().isDebugEnabled())
+            getLogger().debug("Recovery updated [SecurityId: " + bbo.getSecurityId() + "][" + channelType + "]" + (inRecovery ? "[R]" : ""));
+
         onBBO(bbo);
     }
 

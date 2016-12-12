@@ -60,10 +60,13 @@ public class FortsMarketDataManager extends MarketDataManager<Long> {
                                 IChannelStatus.ChannelType.OrderList,
                                 IChannelStatus.ChannelType.BBO,
                                 IChannelStatus.ChannelType.Statistics}) {
-                    if (newBBO.isInRecoverySet(channelType) &&
-                            newBBO.isInRecovery(channelType) != previousBBO.isInRecovery(channelType)) {
-                        changed = true;
-                        previousBBO.setInRecovery(newBBO.isInRecovery(channelType), channelType);
+
+                    if (newBBO.isInRecoverySet(channelType)) {
+                        if (!previousBBO.isInRecoverySet(channelType) ||
+                                (previousBBO.isInRecoverySet(channelType) && newBBO.isInRecovery(channelType) != previousBBO.isInRecovery(channelType))) {
+                            changed = true;
+                            previousBBO.setInRecovery(newBBO.isInRecovery(channelType), channelType);
+                        }
                     }
                 }
                 return changed;
