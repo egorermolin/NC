@@ -144,13 +144,13 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
         if (getLogger().isDebugEnabled())
             getLogger().debug("Check sequence for message " + readMessage);
 
-        if (seqNum == 1 || messageType == '4') { // SequenceReset
+        if (seqNum == 1/* || messageType == '4'*/) { // SequenceReset
             if (resetSequence(sendingTime)) {
                 if (getLogger().isDebugEnabled())
-                    if (seqNum == 1)
+                    //if (seqNum == 1)
                         getLogger().debug("Received snapshot [FIRST]");
-                    else
-                        getLogger().debug("Received snapshot [RESET]");
+                    // else
+                       // getLogger().debug("Received snapshot [RESET]");
             } else
                 return false;
         } else {
