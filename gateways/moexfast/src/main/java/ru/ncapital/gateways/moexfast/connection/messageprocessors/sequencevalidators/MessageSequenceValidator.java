@@ -173,7 +173,9 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
                             currentSeqNum = mdEntrySeqNum;
                             mdEntriesToProcess.add(mdEntry);
                         } else {
-                            // out of sequence
+                            if (logger.get().isDebugEnabled())
+                                logger.get().debug("OutOfSequence on Stop Recovering [SecurityId: " + securityId + "][Expected: " + (currentSeqNum + 1) + "][Received: " + mdEntrySeqNum + "]");
+
                             return null;
                         }
                     }

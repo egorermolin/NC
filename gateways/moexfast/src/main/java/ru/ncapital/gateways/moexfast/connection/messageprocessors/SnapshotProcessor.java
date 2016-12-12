@@ -56,26 +56,40 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
         }
     }
 
-    private boolean checkMessages(Map<Integer, Message> messages) {
+    private boolean checkMessages(T exchangeSecurityId, Map<Integer, Message> messages) {
         // check seqNum integrity
         int lastSeqNum = 0;
         for (int seqNum : messages.keySet()) {
             if (lastSeqNum == 0) {
                 lastSeqNum = seqNum;
                 if (messages.get(seqNum).getValue("RouteFirst") != null
-                        && messages.get(seqNum).getInt("RouteFirst") != 1)
-                    // missing first fragment
+                        && messages.get(seqNum).getInt("RouteFirst") != 1) {
+
+                    if (getLogger().isDebugEnabled())
+                        getLogger().debug("Missing snapshot [ExchangeSecurityId: " + exchangeSecurityId + "][FIRST]");
+
                     return false;
+                }
             } else if (lastSeqNum + 1 < seqNum) {
-                // missing message, giving up
+                if (getLogger().isDebugEnabled())
+                    getLogger().debug("Missing snapshot [ExchangeSecurityId: " + exchangeSecurityId + "][Expected: " + (lastSeqNum + 1) + "][Received: " + seqNum + "]");
+
                 return false;
             } else {
                 lastSeqNum = seqNum;
             }
         }
 
-        return messages.get(lastSeqNum).getValue("LastFragment") == null
-                || messages.get(lastSeqNum).getInt("LastFragment") == 1;
+        if (messages.get(lastSeqNum).getValue("LastFragment") != null
+                && messages.get(lastSeqNum).getInt("LastFragment") != 1) {
+
+            if (getLogger().isDebugEnabled())
+                getLogger().debug("Missing snapshot [ExchangeSecurityId: " + exchangeSecurityId + "][LAST]");
+
+            return false;
+        }
+
+        return true;
     }
 
     @Override
@@ -87,6 +101,9 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
         boolean firstFragment = readMessage.getValue("RouteFirst") == null || readMessage.getInt("RouteFirst") == 1;
         boolean lastFragment = readMessage.getValue("LastFragment") == null || readMessage.getInt("LastFragment") == 1;
 
+        if (getLogger().isDebugEnabled())
+            getLogger().debug("Received snapshot [ExchangeSecurityId: " + exchangeSecurityId + "][MsgSeqNum: " + seqNum + "][RptSeqNum: " + rptSeqNum + "]" + (firstFragment ? "[FIRST]" : "") + (lastFragment ? "[LAST]" : ""));
+
         if (firstFragment)
             fragmentedSnapshots.put(exchangeSecurityId, Collections.synchronizedMap(new TreeMap<Integer, Message>()));
 
@@ -97,7 +114,7 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
         messages.put(seqNum, readMessage);
 
         if (lastFragment) {
-            if (checkMessages(messages)) {
+            if (checkMessages(exchangeSecurityId, messages)) {
                 processSnapshotsAndIncrementals(exchangeSecurityId, rptSeqNum, messages.values());
             } else {
                 fragmentedSnapshots.remove(exchangeSecurityId);
@@ -107,6 +124,9 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
 
     private synchronized boolean resetSequence(long sendingTime) {
         if (timeOfLastSequenceReset < sendingTime) {
+            if (getLogger().isDebugEnabled())
+                getLogger().debug("Reset snapshot");
+
             // new snapshot cycle
             timeOfLastSequenceReset = sendingTime;
             reset();
@@ -123,6 +143,12 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
         char messageType = readMessage.getString("MessageType").charAt(0);
 
         if (seqNum == 1 || messageType == '4') { // SequenceReset
+            if (getLogger().isDebugEnabled())
+                if (seqNum == 1)
+                    getLogger().debug("Received snapshot [FIRST]");
+                else
+                    getLogger().debug("Received snapshot [RESET]");
+
             if (!resetSequence(sendingTime))
                 return false;
         } else {
