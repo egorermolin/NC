@@ -235,22 +235,24 @@ public class MessageReader implements IMulticastEventListener {
         this.asynch = configurationManager.isAsynchChannelReader();
         this.connection = configurationManager.getConnection(connectionId);
 
+        boolean fortsOrderList = false;
         switch (this.connectionId) {
             case FUT_ORDER_LIST_INCR_A:
             case FUT_ORDER_LIST_SNAP_A:
-                this.intf = configurationManager.getPrimaryNetworkInterface(true);
-                break;
             case FUT_ORDER_LIST_INCR_B:
             case FUT_ORDER_LIST_SNAP_B:
-                this.intf = configurationManager.getSecondaryNetworkInterface(true);
-                break;
-            default:
-                if (connectionId.isPrimary())
-                    this.intf = configurationManager.getPrimaryNetworkInterface(false);
-                else
-                    this.intf = configurationManager.getSecondaryNetworkInterface(false);
+                fortsOrderList = true;
                 break;
         }
+
+        if (connectionId.isPrimary())
+            this.intf = configurationManager.getPrimaryNetworkInterface(fortsOrderList);
+        else
+            this.intf = configurationManager.getSecondaryNetworkInterface(fortsOrderList);
+
+        if (this.intf == null)
+            return;
+
         this.fastTemplatesFile = configurationManager.getFastTemplatesFile();
 
         this.marketDataManager = marketDataManager;
@@ -295,6 +297,11 @@ public class MessageReader implements IMulticastEventListener {
     }
 
     public void start() {
+        if (intf == null) {
+            logger.info("Network interface is not configured for " + connectionId.toString());
+            return;
+        }
+
         logger.info("START " + toString());
         receivedTimestamp = Utils.currentTimeInTicks();
 

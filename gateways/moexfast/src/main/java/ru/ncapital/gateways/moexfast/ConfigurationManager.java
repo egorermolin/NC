@@ -59,6 +59,9 @@ public abstract class ConfigurationManager {
             return networkInterfacePart.replace(";", "");
         }
 
+        if (orderList)
+            return null;
+
         if (networkInterface.contains(";"))
             if (!networkInterface.split(";")[0].isEmpty())
                 return networkInterface.split(";")[0];
@@ -75,6 +78,9 @@ public abstract class ConfigurationManager {
 
             return networkInterfacePart.replace(";", "");
         }
+
+        if (orderList)
+            return null;
 
         if (networkInterface.contains(";"))
             if (!networkInterface.split(";")[1].isEmpty())
