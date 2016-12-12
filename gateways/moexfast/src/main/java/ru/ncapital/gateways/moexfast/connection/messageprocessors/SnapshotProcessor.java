@@ -66,13 +66,13 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
                         && messages.get(seqNum).getInt("RouteFirst") != 1) {
 
                     if (getLogger().isDebugEnabled())
-                        getLogger().debug("Missing snapshot [ExchangeSecurityId: " + exchangeSecurityId + "][FIRST]");
+                        getLogger().debug("Missing snapshot [SecurityId: " + sequenceValidator.convertExchangeSecurityIdToSecurityId(exchangeSecurityId) + "][FIRST]");
 
                     return false;
                 }
             } else if (lastSeqNum + 1 < seqNum) {
                 if (getLogger().isDebugEnabled())
-                    getLogger().debug("Missing snapshot [ExchangeSecurityId: " + exchangeSecurityId + "][Expected: " + (lastSeqNum + 1) + "][Received: " + seqNum + "]");
+                    getLogger().debug("Missing snapshot [SecurityId: " + sequenceValidator.convertExchangeSecurityIdToSecurityId(exchangeSecurityId) + "][Expected: " + (lastSeqNum + 1) + "][Received: " + seqNum + "]");
 
                 return false;
             } else {
@@ -84,7 +84,7 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
                 && messages.get(lastSeqNum).getInt("LastFragment") != 1) {
 
             if (getLogger().isDebugEnabled())
-                getLogger().debug("Missing snapshot [ExchangeSecurityId: " + exchangeSecurityId + "][LAST]");
+                getLogger().debug("Missing snapshot [SecurityId: " + sequenceValidator.convertExchangeSecurityIdToSecurityId(exchangeSecurityId) + "][LAST]");
 
             return false;
         }
@@ -102,7 +102,7 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
         boolean lastFragment = readMessage.getValue("LastFragment") == null || readMessage.getInt("LastFragment") == 1;
 
         if (getLogger().isDebugEnabled())
-            getLogger().debug("Received snapshot [ExchangeSecurityId: " + exchangeSecurityId + "][MsgSeqNum: " + seqNum + "][RptSeqNum: " + rptSeqNum + "]" + (firstFragment ? "[FIRST]" : "") + (lastFragment ? "[LAST]" : ""));
+            getLogger().debug("Received snapshot [SecurityId: " + sequenceValidator.convertExchangeSecurityIdToSecurityId(exchangeSecurityId) + "][MsgSeqNum: " + seqNum + "][RptSeqNum: " + rptSeqNum + "]" + (firstFragment ? "[FIRST]" : "") + (lastFragment ? "[LAST]" : ""));
 
         if (firstFragment)
             fragmentedSnapshots.put(exchangeSecurityId, Collections.synchronizedMap(new TreeMap<Integer, Message>()));

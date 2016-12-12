@@ -31,5 +31,5 @@ public interface IMessageSequenceValidator<T> {
 
     void onMarketReset();
 
-    boolean hasBeenRecovered(T exchangeSecurityId);
+    String convertExchangeSecurityIdToSecurityId(T exchangeSecurityId);
 }
