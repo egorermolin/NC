@@ -188,6 +188,19 @@ public class BBO<T> implements IBBO {
         this.isInRecoverySet.put(channelType, true);
     }
 
+    public String toStringRecovery(String securityId) {
+        return (securityId == null ? "" : "securityId='" + securityId + '\'') +
+                (isInRecoverySet.containsKey(IChannelStatus.ChannelType.OrderList) ?
+                        ("inRecoveryOrderList=" + inRecovery.get(IChannelStatus.ChannelType.OrderList)) : ", N/A") +
+                (isInRecoverySet.containsKey(IChannelStatus.ChannelType.BBOAndStatistics) ?
+                        (", inRecoveryBBOAndStatistics=" + inRecovery.get(IChannelStatus.ChannelType.BBOAndStatistics)) : ", N/A") +
+                (isInRecoverySet.containsKey(IChannelStatus.ChannelType.BBO) ?
+                        (", inRecoveryBBO=" + inRecovery.get(IChannelStatus.ChannelType.BBO)) : ", N/A") +
+                (isInRecoverySet.containsKey(IChannelStatus.ChannelType.Statistics) ?
+                        (", inRecoveryStatistics=" + inRecovery.get(IChannelStatus.ChannelType.Statistics)) : ", N/A");
+
+    }
+
     @Override
     public String toString() {
         return "BBO{" +
@@ -204,10 +217,7 @@ public class BBO<T> implements IBBO {
                 ", highPx=" + highPx +
                 ", openPx=" + openPx +
                 ", closePx=" + closePx +
-                ", inRecoveryOrderList=" + inRecovery.get(IChannelStatus.ChannelType.OrderList) +
-                ", inRecoveryBBOAndStatistics=" + inRecovery.get(IChannelStatus.ChannelType.BBOAndStatistics) +
-                ", inRecoveryBBO=" + inRecovery.get(IChannelStatus.ChannelType.BBO) +
-                ", inRecoveryStatistics=" + inRecovery.get(IChannelStatus.ChannelType.Statistics) +
+                ", " + toStringRecovery(securityId) +
                 ", tradingStatus='" + tradingStatus + '\'' +
                 '}';
     }

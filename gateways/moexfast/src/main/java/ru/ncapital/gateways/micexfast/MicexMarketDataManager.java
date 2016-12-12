@@ -59,10 +59,13 @@ public class MicexMarketDataManager extends MarketDataManager<String> {
                         new IChannelStatus.ChannelType[] {
                                 IChannelStatus.ChannelType.OrderList,
                                 IChannelStatus.ChannelType.BBOAndStatistics}) {
-                    if (newBBO.isInRecoverySet(channelType) &&
-                            newBBO.isInRecovery(channelType) != previousBBO.isInRecovery(channelType)) {
-                        changed = true;
-                        previousBBO.setInRecovery(newBBO.isInRecovery(channelType), channelType);
+
+                    if (newBBO.isInRecoverySet(channelType)) {
+                        if (!previousBBO.isInRecoverySet(channelType) ||
+                                (previousBBO.isInRecoverySet(channelType) && newBBO.isInRecovery(channelType) != previousBBO.isInRecovery(channelType))) {
+                            changed = true;
+                            previousBBO.setInRecovery(newBBO.isInRecovery(channelType), channelType);
+                        }
                     }
                 }
                 return changed;

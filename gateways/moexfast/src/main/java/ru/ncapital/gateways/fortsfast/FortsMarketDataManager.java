@@ -55,6 +55,9 @@ public class FortsMarketDataManager extends MarketDataManager<Long> {
             @Override
             protected boolean updateInRecovery(BBO<Long> previousBBO, BBO<Long> newBBO) {
                 boolean changed = false;
+                if (getLogger().isDebugEnabled())
+                    getLogger().debug("Updating Recovery for [" + previousBBO.toStringRecovery(previousBBO.getSecurityId()) + "] from [" + newBBO.toStringRecovery(newBBO.getSecurityId()) + "]");
+
                 for (IChannelStatus.ChannelType channelType :
                         new IChannelStatus.ChannelType[] {
                                 IChannelStatus.ChannelType.OrderList,
