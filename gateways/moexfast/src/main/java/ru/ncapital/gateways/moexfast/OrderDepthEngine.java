@@ -113,7 +113,7 @@ public abstract class OrderDepthEngine<T> {
             changed[2] = true;
             previousBBO.setTradingStatus(newBBO.getTradingStatus());
         }
-        if (updateInRecovery(newBBO, previousBBO)) {
+        if (updateInRecovery(previousBBO, newBBO)) {
             changed[2] = true;
         }
         if (newBBO.getPerformanceData() != null && !newBBO.getPerformanceData().equals(previousBBO.getPerformanceData())) {
