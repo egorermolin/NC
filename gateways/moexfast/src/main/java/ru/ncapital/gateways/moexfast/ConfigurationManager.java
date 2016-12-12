@@ -107,7 +107,7 @@ public abstract class ConfigurationManager {
         }
 
         try {
-            if (convertNetworkInterface(getPrimaryNetworkInterface(true)) == null)
+            if (getPrimaryNetworkInterface(true) != null && convertNetworkInterface(getPrimaryNetworkInterface(true)) == null)
                 throw new RuntimeException("Invalid Primary Interface For Order List" + getPrimaryNetworkInterface(true));
         } catch (Exception e) {
             LoggerFactory.getLogger("ConfigurationManager").error(e.toString(), e);
@@ -115,7 +115,7 @@ public abstract class ConfigurationManager {
         }
 
         try {
-            if (convertNetworkInterface(getSecondaryNetworkInterface(true)) == null)
+            if (getSecondaryNetworkInterface(true) != null && convertNetworkInterface(getSecondaryNetworkInterface(true)) == null)
                 throw new RuntimeException("Invalid Secondary Interface For Order List" + getSecondaryNetworkInterface(true));
         } catch (Exception e) {
             LoggerFactory.getLogger("ConfigurationManager").error(e.toString(), e);
