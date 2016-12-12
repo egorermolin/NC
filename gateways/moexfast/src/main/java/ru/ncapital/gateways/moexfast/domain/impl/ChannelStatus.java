@@ -82,7 +82,10 @@ public class ChannelStatus implements IChannelStatus {
         if (type == null)
             return;
 
-        channelStatuses.putIfAbsent(type, -1);
+        if (channelStatuses.containsKey(type))
+            return;
+
+        channelStatuses.put(type, -1);
     }
 
     public void addChannelUp(ChannelType type) {
