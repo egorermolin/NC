@@ -30,4 +30,6 @@ public interface IMessageSequenceValidator<T> {
     MessageHandlerType getType();
 
     void onMarketReset();
+
+    boolean hasBeenRecovered(T exchangeSecurityId);
 }

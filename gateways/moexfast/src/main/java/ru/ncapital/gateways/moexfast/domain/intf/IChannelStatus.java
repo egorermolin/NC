@@ -5,7 +5,7 @@ package ru.ncapital.gateways.moexfast.domain.intf;
  */
 public interface IChannelStatus {
     enum ChannelType {
-          Instrument, BBOAndStatistics, BBO, Statistics, PublicTrade, OrderList, All
+          Instrument, BBOAndStatistics, BBO, Statistics, PublicTrade, OrderList, Snapshot, All
     }
 
     // -1: A and B down

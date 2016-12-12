@@ -67,8 +67,6 @@ public abstract class MarketDataManager<T> {
 
     private boolean feedStatusUP = false;
 
-    private boolean feedStatusALL = true;
-
     public MarketDataManager configure(IGatewayConfiguration configuration) {
         marketDataHandler = configuration.getMarketDataHandler();
         performanceLogger = configuration.getPerformanceLogger();
@@ -128,6 +126,7 @@ public abstract class MarketDataManager<T> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     boolean subscribe(Subscription subscription) {
         if (logger.isTraceEnabled())
             logger.trace("onSubscribe " + subscription.getSubscriptionKey());
@@ -137,14 +136,25 @@ public abstract class MarketDataManager<T> {
                 logger.debug("Added subscription for " + subscription.getSubscriptionKey());
         }
 
-        BBO<T> currentBBO = getOrCreateBBO(
-                convertSecurityIdToExchangeSecurityId(subscription.getSubscriptionKey()));
-
-        if (currentBBO == null) {
+        T exchangeSecurityId = convertSecurityIdToExchangeSecurityId(subscription.getSubscriptionKey());
+        if (exchangeSecurityId == null) {
             logger.warn("Instrument not found [" + subscription.getSubscriptionKey() + "]");
             return false;
         }
 
+        if (!snapshotProcessorForOrderBook.getSequenceValidator().hasBeenRecovered(exchangeSecurityId)) {
+             snapshotProcessorForOrderBook.getSequenceValidator().startRecovering(exchangeSecurityId);
+        }
+
+        if (!snapshotProcessorForStatistics.getSequenceValidator().hasBeenRecovered(exchangeSecurityId)) {
+            snapshotProcessorForStatistics.getSequenceValidator().startRecovering(exchangeSecurityId);
+        }
+
+        if (!snapshotProcessorForOrderList.getSequenceValidator().hasBeenRecovered(exchangeSecurityId)) {
+            snapshotProcessorForOrderList.getSequenceValidator().startRecovering(exchangeSecurityId);
+        }
+
+        BBO<T> currentBBO = getOrCreateBBO(exchangeSecurityId);
         synchronized (currentBBO) {
             List<IDepthLevel> depthLevelsToSend = new ArrayList<>();
             orderDepthEngine.getDepthLevels(currentBBO.getExchangeSecurityId(), depthLevelsToSend);

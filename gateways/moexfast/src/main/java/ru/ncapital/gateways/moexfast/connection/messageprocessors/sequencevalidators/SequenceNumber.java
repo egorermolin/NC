@@ -7,7 +7,7 @@ package ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalid
 class SequenceNumber<T> {
     T exchangeSecurityId;
 
-    int lastSeqNum = 0;
+    int lastSeqNum = -1;
 
     int numberOfMissingSequences = 0;
 }

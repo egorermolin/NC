@@ -521,7 +521,7 @@ public class ConnectionManager {
         }
 
         messageReadersWatcherFuture = scheduledService.scheduleAtFixedRate(
-                new MessageReadersWatchTask(), 2 * feedDownTimeout / 10L, 1_000_000L, TimeUnit.MICROSECONDS
+                new MessageReadersWatchTask(), feedDownTimeout, 1_000_000L, TimeUnit.MICROSECONDS
         );
     }
 

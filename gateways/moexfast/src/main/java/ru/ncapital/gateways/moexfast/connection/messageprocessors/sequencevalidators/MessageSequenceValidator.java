@@ -236,6 +236,16 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
         return securityIdsToRecover;
     }
 
+    @Override
+    public boolean hasBeenRecovered(T exchangeSecurityId) {
+        SequenceNumber sequenceNumber = getSequenceNumber(exchangeSecurityId);
+        long lastSeqNum;
+        synchronized (sequenceNumber) {
+            lastSeqNum = sequenceNumber.lastSeqNum;
+        }
+        return lastSeqNum >= 0;
+    }
+
     public void setMarketDataManager(MarketDataManager<T> marketDataManager) {
         this.marketDataManager = marketDataManager;
     }

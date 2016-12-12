@@ -113,44 +113,10 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.setIsPrimary(true);
         incrementalProcessor.handleMessage(message, context, coder);
 
-        Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry1), Mockito.any(PerformanceData.class));
+        Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry1), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
 
-        assert !sequenceValidator.isRecovering("SYMB;CETS", 2, false);
-        assert !sequenceValidator.isRecovering("SYMB;CETS", 2, false);
-    }
-
-    @Test
-    public void testIncrementalFirst2() {
-        assert !sequenceValidator.isRecovering("SYMB;CETS", 1, false);
-
-        Message message = getIncermentalMock(1, 1);
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(null);
-
-        incrementalProcessor.setIsPrimary(true);
-        incrementalProcessor.handleMessage(message, context, coder);
-
-        Mockito.verify(marketDataHandler, Mockito.times(1)).onMarketReset();
-        Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
-
-        assert !sequenceValidator.isRecovering("SYMB;CETS", 0, true);
-        assert !sequenceValidator.isRecovering("SYMB;CETS", 1, false);
-
-        message = getIncermentalMock(2, 1);
-        GroupValue entry1 = message.getSequence("GroupMDEntries").get(0);
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("Symbol")).thenReturn("SYMB");
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getString("TradingSessionID")).thenReturn("CETS");
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getInt("RptSeq")).thenReturn(1);
-        Mockito.when(message.getSequence("GroupMDEntries").get(0).getValue("RptSeq")).thenReturn(mock(FieldValue.class));
-
-        incrementalProcessor.setIsPrimary(true);
-        incrementalProcessor.handleMessage(message, context, coder);
-
-        Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry1), Mockito.any(PerformanceData.class));
-        Mockito.verify(marketDataHandler, Mockito.times(2)).flushIncrementals();
-
-        assert !sequenceValidator.isRecovering("SYMB;CETS", 1, true);
-        assert !sequenceValidator.isRecovering("SYMB;CETS", 2, false);
+        assert sequenceValidator.isRecovering("SYMB;CETS", 2, false);
     }
 
     @Test
