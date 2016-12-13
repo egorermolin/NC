@@ -125,7 +125,7 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
     private synchronized boolean resetSequence(long sendingTime) {
         if (timeOfLastSequenceReset < sendingTime) {
             if (getLogger().isDebugEnabled())
-                getLogger().debug("Reset snapshot");
+                getLogger().debug("Reset Snapshot");
 
             // new snapshot cycle
             timeOfLastSequenceReset = sendingTime;
@@ -138,11 +138,12 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
 
     @Override
     protected boolean checkSequence(Message readMessage) {
+        if (getLogger().isTraceEnabled())
+            getLogger().trace(readMessage.toString());
+
         int seqNum = readMessage.getInt("MsgSeqNum");
         long sendingTime = readMessage.getLong("SendingTime");
         char messageType = readMessage.getString("MessageType").charAt(0);
-        if (getLogger().isTraceEnabled())
-            getLogger().trace(readMessage.toString());
 
         if (seqNum == 1) { // SequenceReset
             if (!resetSequence(sendingTime))
@@ -194,7 +195,7 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
     }
 
     @Override
-    public IMessageSequenceValidator getSequenceValidator() {
+    public IMessageSequenceValidator<T> getSequenceValidator() {
         return sequenceValidator;
     }
 

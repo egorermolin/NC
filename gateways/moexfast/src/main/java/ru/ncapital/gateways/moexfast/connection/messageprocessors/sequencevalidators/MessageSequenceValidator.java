@@ -192,10 +192,7 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
         marketDataManager.setRecovery(exchangeSecurityId, false, getType().convert());
 
         StoredMdEntry<T>[] mdEntriesToProcess = storedMdEntriesToProcess.remove(exchangeSecurityId);
-        if (mdEntriesToProcess.length > 0)
-            logger.get().info("Stop Recovering [SecurityId: " + convertExchangeSecurityIdToSecurityId(exchangeSecurityId) + "][Queue: " + mdEntriesToProcess.length + "]");
-        else
-            logger.get().info("Stop Recovering [SecurityId: " + convertExchangeSecurityIdToSecurityId(exchangeSecurityId) + "]");
+        logger.get().info("Stop Recovering [SecurityId: " + convertExchangeSecurityIdToSecurityId(exchangeSecurityId) + "][Queue: " + mdEntriesToProcess.length + "]");
 
         return mdEntriesToProcess;
     }
@@ -232,7 +229,6 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
         List<String> securityIdsToRecover = new ArrayList<>();
         for (T exchangeSecurityId : exchangeSecurityIdsToRecover)
             securityIdsToRecover.add(convertExchangeSecurityIdToSecurityId(exchangeSecurityId));
-
         return securityIdsToRecover;
     }
 
