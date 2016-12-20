@@ -118,7 +118,7 @@ public abstract class MarketDataManager<T> {
                     DepthLevel<T> depthLevel = createDepthLevel(exchangeSecurityId);
                     depthLevel.setMdUpdateAction(MdUpdateAction.SNAPSHOT);
 
-                    onDepthLevels(new DepthLevel[]{ depthLevel });
+                    onDepthLevels(new DepthLevel[]{ depthLevel }, true);
                     break;
                 default:
                     break;
@@ -171,6 +171,10 @@ public abstract class MarketDataManager<T> {
     }
 
     public void onBBO(BBO<T> newBBO) {
+        onBBO(newBBO, false);
+    }
+
+    public void onBBO(BBO<T> newBBO, boolean isSnapshot) {
         long gatewayOutTime;
         BBO<T> currentBBO = getOrCreateBBO(newBBO.getExchangeSecurityId());
         if (currentBBO.getSecurityId() == null) {
@@ -184,7 +188,21 @@ public abstract class MarketDataManager<T> {
             logger.trace("onBBO " + newBBO.getSecurityId());
 
         synchronized (currentBBO) {
+            if (isSnapshot) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Before Snapshot [SecurityId: " + currentBBO.getSecurityId() + "]");
+                    logger.debug(currentBBO.toString());
+                }
+            }
+
             boolean[] changed = orderDepthEngine.updateBBO(currentBBO, newBBO);
+
+            if (isSnapshot) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("After Snapshot [SecurityId: " + currentBBO.getSecurityId() + "]");
+                    logger.debug(currentBBO.toString());
+                }
+            }
 
             if (subscriptions.containsKey(currentBBO.getSecurityId())) {
                 gatewayOutTime = Utils.currentTimeInTicks();
@@ -202,6 +220,10 @@ public abstract class MarketDataManager<T> {
     }
 
     public void onDepthLevels(DepthLevel<T>[] depthLevels) {
+        onDepthLevels(depthLevels, false);
+    }
+
+    public void onDepthLevels(DepthLevel<T>[] depthLevels, boolean isSnapshot) {
         long gatewayOutTime;
         BBO<T> currentBBO = getOrCreateBBO(depthLevels[0].getExchangeSecurityId());
         if (currentBBO.getSecurityId() == null) {
@@ -214,10 +236,35 @@ public abstract class MarketDataManager<T> {
         if (logger.isTraceEnabled())
             logger.trace("onDepthLevel " + depthLevels[0].getSecurityId());
 
+        List<IDepthLevel> depthLevelsBeforeUpdate;
+        List<IDepthLevel> depthLevelsAfterUpdate;
+
         synchronized (currentBBO) {
+            if (isSnapshot) {
+                depthLevelsBeforeUpdate = new ArrayList<>();
+                orderDepthEngine.getDepthLevels(depthLevels[0].getExchangeSecurityId(), depthLevelsBeforeUpdate);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Before Snapshot [SecurityId: " + currentBBO.getSecurityId() + "]");
+                    for (IDepthLevel depthLevel : depthLevelsBeforeUpdate) {
+                        logger.debug(depthLevel.toString());
+                    }
+                }
+            }
+
             List<IDepthLevel> depthLevelsToSend = new ArrayList<>();
             List<IPublicTrade> publicTradesToSend = new ArrayList<>();
             orderDepthEngine.onDepthLevels(depthLevels, depthLevelsToSend, publicTradesToSend);
+
+            if (isSnapshot) {
+                depthLevelsAfterUpdate = new ArrayList<>();
+                orderDepthEngine.getDepthLevels(depthLevels[0].getExchangeSecurityId(), depthLevelsAfterUpdate);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("After Snapshot [SecurityId: " + currentBBO.getSecurityId() + "]");
+                    for (IDepthLevel depthLevel : depthLevelsAfterUpdate) {
+                        logger.debug(depthLevel.toString());
+                    }
+                }
+            }
 
             if (subscriptions.containsKey(currentBBO.getSecurityId())) {
                 gatewayOutTime = Utils.currentTimeInTicks();

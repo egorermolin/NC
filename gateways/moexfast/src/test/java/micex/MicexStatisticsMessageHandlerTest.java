@@ -60,7 +60,7 @@ public class MicexStatisticsMessageHandlerTest {
 
         messageHandler.onSnapshot(readMessage);
 
-        verify(marketDataManager).onBBO(bbo.capture());
+        verify(marketDataManager).onBBO(bbo.capture(), eq(true));
         assert bbo.getValue().isEmpty();
     }
 }

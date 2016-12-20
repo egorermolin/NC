@@ -47,7 +47,7 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
 
     @Override
     protected void onAfterSnapshot(T exchangeSecurityId) {
-        marketDataManager.onBBO(bbo);
+        marketDataManager.onBBO(bbo, true);
     }
 
     @Override

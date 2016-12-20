@@ -134,7 +134,7 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
     protected void onAfterSnapshot(T exchangeSecurityId) {
         for (List<DepthLevel<T>> depthLevelList : depthLevelMap.values())
             if (depthLevelList.size() > 0)
-                marketDataManager.onDepthLevels(depthLevelsToArray(depthLevelList));
+                marketDataManager.onDepthLevels(depthLevelsToArray(depthLevelList), true);
 
         depthLevelMap.clear();
     }
