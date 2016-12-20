@@ -168,22 +168,18 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
             for (int receivedSeqNum : receivedSnapshots) {
                 if (receivedSeqNum == lastSeqNum + 1)
                     lastSeqNum = receivedSeqNum;
-                else
+                else {
+                    if (getLogger().isDebugEnabled())
+                        getLogger().debug("OutOfSequence on SequenceReset [Expected: " + (lastSeqNum + 1) + "][Received: " + receivedSeqNum + "]");
+
                     break;
+                }
             }
 
             if (lastSeqNum == seqNum) {
                 if (allSnapshotsReceived == 0)
                     allSnapshotsReceived = 1;
-            } else
-                if (getLogger().isDebugEnabled()) {
-                    StringBuilder sb = new StringBuilder("Received");
-                    for (int receivedSeqNum : receivedSnapshots) {
-                        sb.append(' ').append(receivedSeqNum);
-                    }
-                    sb.append(" : ").append(seqNum);
-                    getLogger().debug(sb.toString());
-                }
+            }
         }
 
         return false;
