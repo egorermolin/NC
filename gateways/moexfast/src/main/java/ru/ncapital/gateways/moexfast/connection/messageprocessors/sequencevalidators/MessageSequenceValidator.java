@@ -225,10 +225,10 @@ public class MessageSequenceValidator<T> implements IMessageSequenceValidator<T>
     }
 
     @Override
-    public List<String> getRecovering() {
-        List<String> securityIdsToRecover = new ArrayList<>();
+    public List<T> getRecovering() {
+        List<T> securityIdsToRecover = new ArrayList<>();
         for (T exchangeSecurityId : exchangeSecurityIdsToRecover)
-            securityIdsToRecover.add(convertExchangeSecurityIdToSecurityId(exchangeSecurityId));
+            securityIdsToRecover.add(exchangeSecurityId);
         return securityIdsToRecover;
     }
 

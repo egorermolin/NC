@@ -25,7 +25,7 @@ public interface IMessageSequenceValidator<T> {
 
     boolean isRecovering();
 
-    List<String> getRecovering();
+    List<T> getRecovering();
 
     MessageHandlerType getType();
 

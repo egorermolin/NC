@@ -14,9 +14,9 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
 
     private Map<T, Map<Integer, Message>> fragmentedSnapshots = new HashMap<>();
 
-    private long timeOfLastSequenceReset = 0;
+    private Set<Integer> receivedSnapshots = new TreeSet<>();
 
-    private boolean wasRecovering;
+    private long timeOfLastSequenceReset = 0;
 
     private IMessageHandler<T> messageHandler;
 
@@ -129,7 +129,7 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
 
             // new snapshot cycle
             timeOfLastSequenceReset = sendingTime;
-            reset();
+            reset(receivedSnapshots.size() > 0);
         } else
             return false;
 
@@ -153,45 +153,60 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
                 return false;
         }
 
+        receivedSnapshots.add(seqNum);
+
         if (messageType == 'W') {
             T exchangeSecurityId = getExchangeSecurityId(readMessage);
             int rptSeqNum = readMessage.getInt("RptSeq");
             return messageHandler.isAllowedUpdate(exchangeSecurityId) && sequenceValidator.isRecovering(exchangeSecurityId, rptSeqNum, true);
         }
 
+        if (messageType == '7') {
+            int lastSeqNum = 0;
+            for (int receivedSeqNum : receivedSnapshots) {
+                if (receivedSeqNum + 1 == lastSeqNum)
+                    lastSeqNum = receivedSeqNum;
+                else
+                    break;
+            }
+
+            if (lastSeqNum != seqNum)
+                receivedSnapshots.clear();
+        }
+
         return false;
     }
 
-    private void printRecoveringSecurityIds() {
-        List<String> recoveringSecurityIds = sequenceValidator.getRecovering();
-        StringBuilder sb = new StringBuilder("Recovering ");
-        if (recoveringSecurityIds != null && recoveringSecurityIds.size() > 0) {
-            wasRecovering = true;
-            boolean first = true;
-            for (String recoveringSecurityId : recoveringSecurityIds) {
-                if (first)
-                    first = false;
-                else
-                    sb.append(" ");
-
-                sb.append(recoveringSecurityId);
+    private void printRecoveringSecurityIds(boolean stopRecovering) {
+        List<T> recoveringExchangeSecurityIds = sequenceValidator.getRecovering();
+        boolean hasRecoveringExchangeSecurityIds = recoveringExchangeSecurityIds.size() > 0;
+        if (hasRecoveringExchangeSecurityIds) {
+            StringBuilder sb = new StringBuilder();
+            if (stopRecovering) {
+                sb.append("Stop Recovering for instruments which did not receive snapshot");
+                for (T recoveringExchangeSecurityId : recoveringExchangeSecurityIds) {
+                    sequenceValidator.stopRecovering(recoveringExchangeSecurityId);
+                }
+            } else {
+                sb.append("Continue Recovering for instruments which did not receive snapshot");
+                for (T recoveringExchangeSecurityId : recoveringExchangeSecurityIds) {
+                    sb.append(" ").append(sequenceValidator.convertExchangeSecurityIdToSecurityId(recoveringExchangeSecurityId));
+                }
             }
-
             getLogger().info(sb.toString());
-        } else {
-            if (wasRecovering) {
-                getLogger().info("Finished Recovering");
-                wasRecovering = false;
-            }
         }
+
+        if (hasRecoveringExchangeSecurityIds && sequenceValidator.getRecovering().isEmpty())
+            getLogger().info("Finished Recovering");
     }
 
     @Override
-    public void reset() {
+    public void reset(boolean allSnapshotsReceived) {
         sequenceArray.clear();
         fragmentedSnapshots.clear();
+
         if (sequenceValidator.isRecovering())
-            printRecoveringSecurityIds();
+            printRecoveringSecurityIds(allSnapshotsReceived);
     }
 
     @Override
