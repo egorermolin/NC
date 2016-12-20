@@ -194,6 +194,7 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
                 sb.append("Stopped Recovering for instruments which did not receive snapshot");
                 for (T recoveringExchangeSecurityId : recoveringExchangeSecurityIds) {
                     sequenceValidator.stopRecovering(recoveringExchangeSecurityId);
+                    sb.append(" ").append(sequenceValidator.convertExchangeSecurityIdToSecurityId(recoveringExchangeSecurityId));
                 }
             } else {
                 sb.append("Continue Recovering for instruments which did not receive snapshot");
@@ -215,6 +216,7 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
 
     @Override
     public void reset() {
+        receivedSnapshots.clear();
         sequenceArray.clear();
         fragmentedSnapshots.clear();
 
