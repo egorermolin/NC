@@ -16,7 +16,7 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
 
     private Set<Integer> receivedSnapshots = new TreeSet<>();
 
-    private boolean allSnapshotsReceived = false;
+    private int allSnapshotsReceived = -1;
 
     private long timeOfLastSequenceReset = 0;
 
@@ -172,9 +172,10 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
                     break;
             }
 
-            if (lastSeqNum == seqNum)
-                allSnapshotsReceived = true;
-            else
+            if (lastSeqNum == seqNum) {
+                if (allSnapshotsReceived == 0)
+                    allSnapshotsReceived = 1;
+            } else
                 if (getLogger().isDebugEnabled()) {
                     StringBuilder sb = new StringBuilder("Received");
                     for (int receivedSeqNum : receivedSnapshots) {
@@ -188,13 +189,13 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
         return false;
     }
 
-    private void printRecoveringSecurityIds(boolean stopRecovering) {
+    private void printRecoveringSecurityIds(int stopRecovering) {
         List<T> recoveringExchangeSecurityIds = sequenceValidator.getRecovering();
         boolean hasRecoveringExchangeSecurityIds = recoveringExchangeSecurityIds.size() > 0;
         if (hasRecoveringExchangeSecurityIds) {
             StringBuilder sb = new StringBuilder();
-            if (stopRecovering) {
-                sb.append("Stop Recovering for instruments which did not receive snapshot");
+            if (stopRecovering > 0) {
+                sb.append("Stopped Recovering for instruments which did not receive snapshot");
                 for (T recoveringExchangeSecurityId : recoveringExchangeSecurityIds) {
                     sequenceValidator.stopRecovering(recoveringExchangeSecurityId);
                 }
@@ -212,6 +213,11 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
     }
 
     @Override
+    public void start() {
+        allSnapshotsReceived = 0;
+    }
+
+    @Override
     public void reset() {
         sequenceArray.clear();
         fragmentedSnapshots.clear();
@@ -219,7 +225,8 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
         if (sequenceValidator.isRecovering())
             printRecoveringSecurityIds(allSnapshotsReceived);
 
-        allSnapshotsReceived = false;
+        if (allSnapshotsReceived == 1)
+            allSnapshotsReceived = 0;
     }
 
     @Override

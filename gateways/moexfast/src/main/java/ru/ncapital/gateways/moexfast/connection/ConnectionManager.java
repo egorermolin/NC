@@ -447,6 +447,7 @@ public class ConnectionManager {
             public void run() {
                 synchronized (sequenceValidator) {
                     if (isRecovering == null) {
+                        snapshotProcessorToWatch.start();
                         isRecovering = new AtomicBoolean(sequenceValidator.isRecovering());
                         if (!isRecovering.get()) {
                             stopSnapshot(sequenceValidator.getType());
