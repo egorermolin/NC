@@ -8,10 +8,7 @@ import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
 import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by egore on 12/17/15.
@@ -27,22 +24,27 @@ public class OrderDepth {
 
     public OrderDepth(boolean isBid) {
         this.isBid = isBid;
-        if (isBid)
-        this.depthLevelsSorted = TreeMultiset.create(new Comparator<IDepthLevel>() {
-            @Override
-            public int compare(IDepthLevel depthLevel, IDepthLevel depthLevel1) {
-                return depthLevel1.compareTo(depthLevel);
-            }
-        });
-        else
-        this.depthLevelsSorted = TreeMultiset.create(new Comparator<IDepthLevel>() {
-            @Override
-            public int compare(IDepthLevel depthLevel, IDepthLevel depthLevel1) {
-                return depthLevel.compareTo(depthLevel1);
-            }
-        });
+        this.depthLevelsSorted = TreeMultiset.create(getComparator(isBid));
         this.depthLevels = new HashMap<>();
         this.logger = LoggerFactory.getLogger((isBid ? "Bid" : "Offer") + "OrderDepth");
+    }
+
+    private Comparator<IDepthLevel> getComparator(boolean isBid) {
+        if (isBid) {
+            return new Comparator<IDepthLevel>() {
+                @Override
+                public int compare(IDepthLevel depthLevel, IDepthLevel depthLevel1) {
+                    return depthLevel1.compareTo(depthLevel);
+                }
+            };
+        } else {
+            return new Comparator<IDepthLevel>() {
+                @Override
+                public int compare(IDepthLevel depthLevel, IDepthLevel depthLevel1) {
+                    return depthLevel.compareTo(depthLevel1);
+                }
+            };
+        }
     }
 
     public void onDepthLevel(DepthLevel depthLevel) {
@@ -129,8 +131,10 @@ public class OrderDepth {
         }
     }
 
-    public void extractDepthLevels(List<IDepthLevel> depthLevels) {
-        depthLevels.addAll(this.depthLevels.values());
+    public void extractDepthLevels(List<IDepthLevel> depthLevelsToSend) {
+        List<IDepthLevel> depthLevelsTmp = new ArrayList<>(depthLevels.values());
+        Collections.sort(depthLevelsTmp, getComparator(isBid));
+        depthLevelsToSend.addAll(depthLevelsTmp);
     }
 
     public void clearDepth() {
