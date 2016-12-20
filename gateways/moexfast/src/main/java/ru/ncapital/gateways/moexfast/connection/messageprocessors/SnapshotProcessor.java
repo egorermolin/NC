@@ -16,6 +16,8 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
 
     private Set<Integer> receivedSnapshots = new TreeSet<>();
 
+    private boolean allSnapshotsReceived = false;
+
     private long timeOfLastSequenceReset = 0;
 
     private IMessageHandler<T> messageHandler;
@@ -129,7 +131,7 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
 
             // new snapshot cycle
             timeOfLastSequenceReset = sendingTime;
-            reset(receivedSnapshots.size() > 0);
+            reset();
         } else
             return false;
 
@@ -161,17 +163,26 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
             return messageHandler.isAllowedUpdate(exchangeSecurityId) && sequenceValidator.isRecovering(exchangeSecurityId, rptSeqNum, true);
         }
 
-        if (messageType == '7') {
+        if (messageType == '4') {
             int lastSeqNum = 0;
             for (int receivedSeqNum : receivedSnapshots) {
-                if (receivedSeqNum + 1 == lastSeqNum)
+                if (receivedSeqNum == lastSeqNum + 1)
                     lastSeqNum = receivedSeqNum;
                 else
                     break;
             }
 
-            if (lastSeqNum != seqNum)
-                receivedSnapshots.clear();
+            if (lastSeqNum == seqNum)
+                allSnapshotsReceived = true;
+            else
+                if (getLogger().isDebugEnabled()) {
+                    StringBuilder sb = new StringBuilder("Received");
+                    for (int receivedSeqNum : receivedSnapshots) {
+                        sb.append(' ').append(receivedSeqNum);
+                    }
+                    sb.append(" : ").append(seqNum);
+                    getLogger().debug(sb.toString());
+                }
         }
 
         return false;
@@ -201,12 +212,14 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
     }
 
     @Override
-    public void reset(boolean allSnapshotsReceived) {
+    public void reset() {
         sequenceArray.clear();
         fragmentedSnapshots.clear();
 
         if (sequenceValidator.isRecovering())
             printRecoveringSecurityIds(allSnapshotsReceived);
+
+        allSnapshotsReceived = false;
     }
 
     @Override

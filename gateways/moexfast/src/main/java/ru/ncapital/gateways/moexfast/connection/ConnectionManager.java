@@ -450,7 +450,7 @@ public class ConnectionManager {
                         isRecovering = new AtomicBoolean(sequenceValidator.isRecovering());
                         if (!isRecovering.get()) {
                             stopSnapshot(sequenceValidator.getType());
-                            snapshotProcessorToWatch.reset(true);
+                            snapshotProcessorToWatch.reset();
                         }
                     }
 
@@ -460,7 +460,7 @@ public class ConnectionManager {
                     } else {
                         if (isRecovering.getAndSet(false)) {
                             stopSnapshot(sequenceValidator.getType());
-                            snapshotProcessorToWatch.reset(true);
+                            snapshotProcessorToWatch.reset();
                         }
                     }
                 }

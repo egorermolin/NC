@@ -6,7 +6,7 @@ package ru.ncapital.gateways.moexfast.connection.messageprocessors;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 
 public interface ISnapshotProcessor<T> extends IProcessor {
-    void reset(boolean allSnapshotReceived);
+    void reset();
 
     IMessageSequenceValidator<T> getSequenceValidator();
 }
