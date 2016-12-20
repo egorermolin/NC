@@ -456,8 +456,10 @@ public class ConnectionManager {
                     }
 
                     if (sequenceValidator.isRecovering()) {
-                        if (!isRecovering.getAndSet(true))
+                        if (!isRecovering.getAndSet(true)) {
+                            snapshotProcessorToWatch.start();
                             startSnapshot(sequenceValidator.getType());
+                        }
                     } else {
                         if (isRecovering.getAndSet(false)) {
                             stopSnapshot(sequenceValidator.getType());

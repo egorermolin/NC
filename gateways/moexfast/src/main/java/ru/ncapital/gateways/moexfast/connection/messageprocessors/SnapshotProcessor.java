@@ -177,20 +177,20 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
             }
 
             if (lastSeqNum == seqNum) {
-                if (allSnapshotsReceived == 0)
-                    allSnapshotsReceived = 1;
+                if (allSnapshotsReceived >= 0)
+                    allSnapshotsReceived += 1;
             }
         }
 
         return false;
     }
 
-    private void printRecoveringSecurityIds(int stopRecovering) {
+    private void printRecoveringSecurityIds(boolean stopRecovering) {
         List<T> recoveringExchangeSecurityIds = sequenceValidator.getRecovering();
         boolean hasRecoveringExchangeSecurityIds = recoveringExchangeSecurityIds.size() > 0;
         if (hasRecoveringExchangeSecurityIds) {
             StringBuilder sb = new StringBuilder();
-            if (stopRecovering > 0) {
+            if (stopRecovering) {
                 sb.append("Stopped Recovering for instruments which did not receive snapshot");
                 for (T recoveringExchangeSecurityId : recoveringExchangeSecurityIds) {
                     sequenceValidator.stopRecovering(recoveringExchangeSecurityId);
@@ -219,10 +219,7 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
         fragmentedSnapshots.clear();
 
         if (sequenceValidator.isRecovering())
-            printRecoveringSecurityIds(allSnapshotsReceived);
-
-        if (allSnapshotsReceived == 1)
-            allSnapshotsReceived = 0;
+            printRecoveringSecurityIds(allSnapshotsReceived >= 3);
     }
 
     @Override
