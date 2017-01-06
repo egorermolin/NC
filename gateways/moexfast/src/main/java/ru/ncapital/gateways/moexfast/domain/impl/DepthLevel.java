@@ -157,4 +157,9 @@ public class DepthLevel<T> implements IDepthLevel {
                 ", publicTrade=" + publicTrade +
                 '}';
     }
+
+    @Override
+    public String toShortString() {
+        return (isBid ? "B" : "S") + mdEntryId + " " + mdEntrySize + "@" + mdEntrySize + " at " + performanceData.getExchangeTime();
+    }
 }

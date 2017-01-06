@@ -188,8 +188,8 @@ public class BBO<T> implements IBBO {
         this.isInRecoverySet.put(channelType, true);
     }
 
-    public String toStringRecovery(String securityId) {
-        return (securityId == null ? "" : "securityId='" + securityId + '\'') +
+    private String toStringRecovery() {
+        return
                 (isInRecoverySet.containsKey(IChannelStatus.ChannelType.OrderList) ?
                         ("inRecoveryOrderList=" + inRecovery.get(IChannelStatus.ChannelType.OrderList)) : ", N/A") +
                 (isInRecoverySet.containsKey(IChannelStatus.ChannelType.BBOAndStatistics) ?
@@ -217,7 +217,7 @@ public class BBO<T> implements IBBO {
                 ", highPx=" + highPx +
                 ", openPx=" + openPx +
                 ", closePx=" + closePx +
-                ", " + toStringRecovery(securityId) +
+                ", " + toStringRecovery() +
                 ", tradingStatus='" + tradingStatus + '\'' +
                 '}';
     }

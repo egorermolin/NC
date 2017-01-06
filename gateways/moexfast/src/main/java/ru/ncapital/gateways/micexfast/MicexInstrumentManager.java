@@ -158,8 +158,8 @@ public class MicexInstrumentManager extends InstrumentManager<String> {
             instrument.setDescription(readMessage.getString("SecurityDesc"));
 
         if (readMessage.getValue("MinPriceIncrement") != null) {
-            instrument.setTickSize(readMessage.getDouble("MinPriceIncrement"));
-            instrument.setMultiplier(readMessage.getDouble("FaceValue") / instrument.getTickSize());
+            instrument.setTickSize(readMessage.getBigDecimal("MinPriceIncrement").doubleValue());
+            instrument.setMultiplier(readMessage.getBigDecimal("FaceValue").doubleValue() / instrument.getTickSize());
         }
 
         if (readMessage.getSequence("MarketSegmentGrp") != null && readMessage.getSequence("MarketSegmentGrp").getLength() > 0) {

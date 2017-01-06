@@ -22,4 +22,6 @@ public interface IDepthLevel extends Comparable<IDepthLevel>{
     boolean getIsBid();
 
     PerformanceData getPerformanceData();
+
+    String toShortString();
 }

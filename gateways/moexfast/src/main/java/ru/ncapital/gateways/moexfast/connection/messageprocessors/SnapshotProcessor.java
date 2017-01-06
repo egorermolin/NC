@@ -14,7 +14,7 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
 
     private Map<T, Map<Integer, Message>> fragmentedSnapshots = new HashMap<>();
 
-    private Set<Integer> receivedSnapshots = new TreeSet<>();
+    private final Set<Integer> receivedSnapshots = Collections.synchronizedSortedSet(new TreeSet<>());
 
     private int allSnapshotsReceived = -1;
 
@@ -164,21 +164,23 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
         }
 
         if (messageType == '4') {
-            int lastSeqNum = 0;
-            for (int receivedSeqNum : receivedSnapshots) {
-                if (receivedSeqNum == lastSeqNum + 1)
-                    lastSeqNum = receivedSeqNum;
-                else {
-                    if (getLogger().isDebugEnabled())
-                        getLogger().debug("OutOfSequence on SequenceReset [Expected: " + (lastSeqNum + 1) + "][Received: " + receivedSeqNum + "]");
+            synchronized (receivedSnapshots) {
+                int lastSeqNum = 0;
+                for (int receivedSeqNum : receivedSnapshots) {
+                    if (receivedSeqNum == lastSeqNum + 1)
+                        lastSeqNum = receivedSeqNum;
+                    else {
+                        if (getLogger().isDebugEnabled())
+                            getLogger().debug("OutOfSequence on SequenceReset [Expected: " + (lastSeqNum + 1) + "][Received: " + receivedSeqNum + "]");
 
-                    break;
+                        break;
+                    }
                 }
-            }
 
-            if (lastSeqNum == seqNum) {
-                if (allSnapshotsReceived >= 0)
-                    allSnapshotsReceived += 1;
+                if (lastSeqNum == seqNum) {
+                    if (allSnapshotsReceived >= 0)
+                        allSnapshotsReceived += 1;
+                }
             }
         }
 

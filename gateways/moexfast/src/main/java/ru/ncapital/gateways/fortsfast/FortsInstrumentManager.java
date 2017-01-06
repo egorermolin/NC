@@ -93,15 +93,15 @@ public class FortsInstrumentManager extends InstrumentManager<Long> {
             instrument.setLotSize(readMessage.getInt("ContractMultiplier"));
 
         if (readMessage.getValue("MinPriceIncrement") != null)
-            instrument.setTickSize(readMessage.getDouble("MinPriceIncrement"));
+            instrument.setTickSize(readMessage.getBigDecimal("MinPriceIncrement").doubleValue());
 
         if (readMessage.getValue("MaturityDate") != null)
             instrument.setMaturityDate(String.valueOf(readMessage.getInt("MaturityDate")));
 
         if (readMessage.getValue("MinPriceIncrement") != null
                 && readMessage.getValue("MinPriceIncrementAmount") != null)
-            instrument.setMultiplier(readMessage.getDouble("MinPriceIncrement")
-                    / readMessage.getDouble("MinPriceIncrementAmount"));
+            instrument.setMultiplier(readMessage.getBigDecimal("MinPriceIncrement").doubleValue()
+                    / readMessage.getBigDecimal("MinPriceIncrementAmount").doubleValue());
 
         instrument.setTradingStatus(getTradingStatus(readMessage));
 

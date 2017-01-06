@@ -89,11 +89,11 @@ public abstract class AMessageHandler<T> implements IMessageHandler<T> {
     }
 
     protected double getMdEntryPx(GroupValue mdEntry) {
-        return mdEntry.getDouble("MDEntryPx");
+        return mdEntry.getBigDecimal("MDEntryPx").doubleValue();
     }
 
     protected double getMdEntrySize(GroupValue mdEntry) {
-        return mdEntry.getDouble("MDEntrySize");
+        return mdEntry.getBigDecimal("MDEntrySize").doubleValue();
     }
 
     protected abstract String getTradeId(GroupValue mdEntry);

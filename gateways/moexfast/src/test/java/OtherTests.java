@@ -30,6 +30,17 @@ import static junit.framework.TestCase.assertEquals;
 public class OtherTests {
     ScheduledFuture<?> futureTask ;
 
+    @Test
+    public void testDecimal() {
+        long mantissa = 6148123412L;
+        int exponent = -5;
+
+        DecimalValue dv = new DecimalValue(mantissa, exponent);
+
+        System.out.println(dv.toString());
+        System.out.println(dv.toBigDecimal().doubleValue());
+    }
+
     @Ignore
     @Test
     public void testDecode() throws FileNotFoundException {

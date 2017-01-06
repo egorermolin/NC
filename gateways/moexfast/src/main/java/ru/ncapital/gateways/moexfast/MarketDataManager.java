@@ -190,7 +190,7 @@ public abstract class MarketDataManager<T> {
         synchronized (currentBBO) {
             if (isSnapshot) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Before Snapshot [SecurityId: " + currentBBO.getSecurityId() + "]");
+                    logger.debug("Before BBO Snapshot [SecurityId: " + currentBBO.getSecurityId() + "]");
                     logger.debug(currentBBO.toString());
                 }
             }
@@ -199,7 +199,7 @@ public abstract class MarketDataManager<T> {
 
             if (isSnapshot) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("After Snapshot [SecurityId: " + currentBBO.getSecurityId() + "]");
+                    logger.debug("After BBO Snapshot [SecurityId: " + currentBBO.getSecurityId() + "]");
                     logger.debug(currentBBO.toString());
                 }
             }
@@ -244,10 +244,11 @@ public abstract class MarketDataManager<T> {
                 depthLevelsBeforeUpdate = new ArrayList<>();
                 orderDepthEngine.getDepthLevels(depthLevels[0].getExchangeSecurityId(), depthLevelsBeforeUpdate);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Before Snapshot [SecurityId: " + currentBBO.getSecurityId() + "]");
+                    StringBuilder sb = new StringBuilder("Before Depth Snapshot [SecurityId: ").append(currentBBO.getSecurityId()).append("]\n");
                     for (IDepthLevel depthLevel : depthLevelsBeforeUpdate) {
-                        logger.debug(depthLevel.toString());
+                        sb.append(depthLevel.toShortString()).append('\n');
                     }
+                    logger.debug(sb.toString());
                 }
             }
 
@@ -259,10 +260,11 @@ public abstract class MarketDataManager<T> {
                 depthLevelsAfterUpdate = new ArrayList<>();
                 orderDepthEngine.getDepthLevels(depthLevels[0].getExchangeSecurityId(), depthLevelsAfterUpdate);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("After Snapshot [SecurityId: " + currentBBO.getSecurityId() + "]");
+                    StringBuilder sb = new StringBuilder("Before Depth Snapshot [SecurityId: ").append(currentBBO.getSecurityId()).append("]\n");
                     for (IDepthLevel depthLevel : depthLevelsAfterUpdate) {
-                        logger.debug(depthLevel.toString());
+                        sb.append(depthLevel.toShortString()).append('\n');
                     }
+                    logger.debug(sb.toString());
                 }
             }
 
