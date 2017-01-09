@@ -1,5 +1,6 @@
 package ru.ncapital.gateways.moexfast.domain.impl;
 
+import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
 import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
@@ -160,6 +161,9 @@ public class DepthLevel<T> implements IDepthLevel {
 
     @Override
     public String toShortString() {
-        return (isBid ? "B" : "S") + mdEntryId + " " + mdEntrySize + "@" + mdEntrySize + " at " + performanceData.getExchangeTime();
+        if (mdUpdateAction == MdUpdateAction.SNAPSHOT)
+            return "SNAPSHOT";
+
+        return (isBid ? "B" : "S") + mdEntryId + " " + mdEntrySize + "@" + mdEntryPx + " at " + Utils.convertTicksToTodayString(performanceData.getExchangeTime());
     }
 }

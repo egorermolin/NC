@@ -244,9 +244,9 @@ public abstract class MarketDataManager<T> {
                 depthLevelsBeforeUpdate = new ArrayList<>();
                 orderDepthEngine.getDepthLevels(depthLevels[0].getExchangeSecurityId(), depthLevelsBeforeUpdate);
                 if (logger.isDebugEnabled()) {
-                    StringBuilder sb = new StringBuilder("Before Depth Snapshot [SecurityId: ").append(currentBBO.getSecurityId()).append("]\n");
+                    StringBuilder sb = new StringBuilder("Before Depth Snapshot [SecurityId: ").append(currentBBO.getSecurityId()).append("]");
                     for (IDepthLevel depthLevel : depthLevelsBeforeUpdate) {
-                        sb.append(depthLevel.toShortString()).append('\n');
+                        sb.append('\n').append(depthLevel.toShortString());
                     }
                     logger.debug(sb.toString());
                 }
@@ -260,9 +260,9 @@ public abstract class MarketDataManager<T> {
                 depthLevelsAfterUpdate = new ArrayList<>();
                 orderDepthEngine.getDepthLevels(depthLevels[0].getExchangeSecurityId(), depthLevelsAfterUpdate);
                 if (logger.isDebugEnabled()) {
-                    StringBuilder sb = new StringBuilder("Before Depth Snapshot [SecurityId: ").append(currentBBO.getSecurityId()).append("]\n");
+                    StringBuilder sb = new StringBuilder("Before Depth Snapshot [SecurityId: ").append(currentBBO.getSecurityId()).append("]");
                     for (IDepthLevel depthLevel : depthLevelsAfterUpdate) {
-                        sb.append(depthLevel.toShortString()).append('\n');
+                        sb.append('\n').append(depthLevel.toShortString());
                     }
                     logger.debug(sb.toString());
                 }
