@@ -162,11 +162,15 @@ public abstract class MarketDataManager<T> {
         BBO<T> bbo = bbosByExchangeSecurityId.get(exchangeSecurityId);
         if (bbo == null) {
             bbo = createBBO(exchangeSecurityId);
+            if (bbo.getSecurityId() == null)
+                return null;
+
             if (bbosByExchangeSecurityId.putIfAbsent(exchangeSecurityId, bbo) == null)
                 return bbo;
 
             return bbosByExchangeSecurityId.get(exchangeSecurityId);
         }
+
         return bbo;
     }
 
@@ -177,7 +181,7 @@ public abstract class MarketDataManager<T> {
     public void onBBO(BBO<T> newBBO, boolean isSnapshot) {
         long gatewayOutTime;
         BBO<T> currentBBO = getOrCreateBBO(newBBO.getExchangeSecurityId());
-        if (currentBBO.getSecurityId() == null) {
+        if (currentBBO == null || currentBBO.getSecurityId() == null) {
             if (logger.isDebugEnabled())
                 logger.debug("onBBO unknown instrument " + currentBBO.getExchangeSecurityId());
 
@@ -226,7 +230,7 @@ public abstract class MarketDataManager<T> {
     public void onDepthLevels(DepthLevel<T>[] depthLevels, boolean isSnapshot) {
         long gatewayOutTime;
         BBO<T> currentBBO = getOrCreateBBO(depthLevels[0].getExchangeSecurityId());
-        if (currentBBO.getSecurityId() == null) {
+        if (currentBBO == null || currentBBO.getSecurityId() == null) {
             if (logger.isDebugEnabled())
                 logger.debug("onDepthLevel unknown instrument " + currentBBO.getExchangeSecurityId());
 
@@ -286,7 +290,7 @@ public abstract class MarketDataManager<T> {
     public void onPublicTrade(PublicTrade<T> publicTrade) {
         long gatewayOutTime;
         BBO<T> currentBBO = getOrCreateBBO(publicTrade.getExchangeSecurityId());
-        if (currentBBO.getSecurityId() == null) {
+        if (currentBBO == null || currentBBO.getSecurityId() == null) {
             if (logger.isDebugEnabled())
                 logger.debug("onPublicTrade unknown instrument " + currentBBO.getExchangeSecurityId());
 
