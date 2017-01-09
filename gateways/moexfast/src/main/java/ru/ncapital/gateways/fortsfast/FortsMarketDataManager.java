@@ -35,9 +35,9 @@ public class FortsMarketDataManager extends MarketDataManager<Long> {
         snapshotProcessorForStatistics = new FortsSnapshotProcessor(messageHandlerForStatistics, sequenceValidatorForStatistics);
         snapshotProcessorForOrderBook = new FortsSnapshotProcessor(messageHandlerForOrderBook, sequenceValidatorForOrderBook);
 
-        incrementalProcessorForOrderList = new FortsIncrementalProcessor(messageHandlerForOrderList, sequenceValidatorForOrderList);
-        incrementalProcessorForStatistics = new FortsIncrementalProcessor(messageHandlerForStatistics, sequenceValidatorForStatistics);
-        incrementalProcessorForOrderBook = new FortsIncrementalProcessor(messageHandlerForOrderBook, sequenceValidatorForOrderBook);
+        incrementalProcessorForOrderList = new FortsIncrementalProcessor(messageHandlerForOrderList, sequenceValidatorForOrderList, configuration);
+        incrementalProcessorForStatistics = new FortsIncrementalProcessor(messageHandlerForStatistics, sequenceValidatorForStatistics, configuration);
+        incrementalProcessorForOrderBook = new FortsIncrementalProcessor(messageHandlerForOrderBook, sequenceValidatorForOrderBook, configuration);
 
         return this;
     }

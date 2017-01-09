@@ -3,6 +3,7 @@ package ru.ncapital.gateways.moexfast.connection.messageprocessors;
 import org.openfast.GroupValue;
 import org.openfast.Message;
 import org.openfast.SequenceValue;
+import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
@@ -17,16 +18,39 @@ public abstract class IncrementalProcessor<T> extends Processor implements IIncr
 
     private IMessageHandler<T> messageHandler;
 
-    public IncrementalProcessor(IMessageHandler<T> messageHandler, IMessageSequenceValidator<T> sequenceValidator) {
+    private final Utils.SecondFractionFactor sendingTimeFractionFactor;
+
+    public IncrementalProcessor(IMessageHandler<T> messageHandler, IMessageSequenceValidator<T> sequenceValidator, IGatewayConfiguration configuration) {
         this.messageHandler = messageHandler;
         this.sequenceValidator = sequenceValidator;
+
+        switch(configuration.getVersion()) {
+            case V2016:
+                sendingTimeFractionFactor = Utils.SecondFractionFactor.MILLISECONDS;
+                break;
+            case V2017:
+            default:
+                sendingTimeFractionFactor = Utils.SecondFractionFactor.MICROSECONDS;
+                break;
+        }
+    }
+
+    private long convertSendingTimeToTicks(long sendingTime) {
+        switch (sendingTimeFractionFactor) {
+            case MICROSECONDS:
+                return Utils.convertTodayToTicks(sendingTime % 1_00_00_00_000_000L);
+            case MILLISECONDS:
+                return Utils.convertTodayToTicks((sendingTime % 1_00_00_00_000L) * 1_000L);
+            default:
+                return 0;
+        }
     }
 
     @Override
     protected void processMessage(Message readMessage) {
         long inTimestamp = getInTimestamp();
         long dequeTimestamp = Utils.currentTimeInTicks();
-        long sendingTime = Utils.convertTodayToTicks((readMessage.getLong("SendingTime") % 1_00_00_00_000L) * 1_000L);
+        long sendingTime = convertSendingTimeToTicks(readMessage.getLong("SendingTime"));
         boolean lastFragment = isLastFragment(readMessage);
 
         synchronized (sequenceValidator) {

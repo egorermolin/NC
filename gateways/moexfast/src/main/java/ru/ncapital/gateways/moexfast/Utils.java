@@ -6,10 +6,21 @@ import org.slf4j.Logger;
 import java.util.Calendar;
 import java.util.TimeZone;
 
+import static java.lang.Math.round;
+
 /**
  * Created by egore on 2/3/16.
  */
 public class Utils {
+    public enum SecondFractionFactor {
+        MILLISECONDS(1000.0), MICROSECONDS(1.0), NANOSECONDS(0.001);
+
+        protected final double value;
+
+        SecondFractionFactor(double value) {
+            this.value = value;
+        }
+    }
 
     private static boolean USING_DOT_NET = true;
 
@@ -87,14 +98,14 @@ public class Utils {
     }
 
     /*
-         CONVERT TODAY (HHMMSSsssmmm) to TODAY_MICROS (micros since midnight)
+         CONVERT TODAY (HHMMSSssssss) to TODAY_MICROS (micros since midnight)
     */
     public static long convertTodayToTicks(long today) {
         return convertTodayMicrosToTicks(convertTodayToTodayMicros(today));
     }
 
     /*
-         CONVERT TODAY (HHMMSSsssmmm) to TODAY_MICROS (micros since midnight)
+         CONVERT TODAY (HHMMSSssssss) to TODAY_MICROS (micros since midnight)
     */
     public static long convertTodayToTodayMicros(long today) {
         long aboveSeconds = today / 1_000_000L;
@@ -104,19 +115,19 @@ public class Utils {
     }
 
     /*
-         GET ENTRY (HHMMSSsssmmm) in TICKS (ticks since 1 JAN 0001)
+         GET ENTRY (HHMMSSssssss) in TICKS (ticks since 1 JAN 0001)
     */
-    public static long getEntryTimeInTicks(GroupValue mdEntry) {
-        long entryTime = getEntryTimeInTodayMicros(mdEntry);
+    public static long getEntryTimeInTicks(GroupValue mdEntry, SecondFractionFactor factor) {
+        long entryTime = getEntryTimeInTodayMicros(mdEntry, factor);
 
         return entryTime == 0 ? Utils.currentTimeInTicks() : Utils.convertTodayMicrosToTicks(entryTime);
     }
 
     /*
-         GET ENTRY (HHMMSSsssmmm) in TODAY_MICROS (micros since midnight)
+         GET ENTRY (HHMMSSssssss) in TODAY_MICROS (micros since midnight)
     */
-    public static long getEntryTimeInTodayMicros(GroupValue mdEntry) {
-        long entryTimeToday = mdEntry.getValue("MDEntryTime") != null ? mdEntry.getInt("MDEntryTime") * 1_000L : 0;
+    public static long getEntryTimeInTodayMicros(GroupValue mdEntry, SecondFractionFactor factor) {
+        long entryTimeToday = mdEntry.getValue("MDEntryTime") != null ? round(mdEntry.getLong("MDEntryTime") * factor.value) : 0;
         long entryTimeMicros = mdEntry.getValue("OrigTime") != null ? mdEntry.getInt("OrigTime") : 0;
 
         return convertTodayToTodayMicros(entryTimeToday + entryTimeMicros);

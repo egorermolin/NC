@@ -7,6 +7,10 @@ import ru.ncapital.gateways.moexfast.performance.IGatewayPerformanceLogger;
  * Created by egore on 16.02.2016.
  */
 public interface IGatewayConfiguration {
+    enum Version {
+        V2016, V2017
+    }
+
     IMarketDataHandler getMarketDataHandler();
 
     String getFastTemplatesFile();
@@ -28,4 +32,6 @@ public interface IGatewayConfiguration {
     boolean restartOnAllFeedDown();
 
     boolean publicTradesFromOrdersList();
+
+    Version getVersion();
 }

@@ -10,6 +10,7 @@ import org.openfast.*;
 import org.openfast.codec.Coder;
 import ru.ncapital.gateways.fortsfast.FortsMarketDataManager;
 import ru.ncapital.gateways.fortsfast.connection.messageprocessors.FortsIncrementalProcessor;
+import ru.ncapital.gateways.moexfast.NullGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IncrementalProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidatorForOrderList;
@@ -45,7 +46,7 @@ public class FortsIncrementalProcessorTest {
     @Before
     @SuppressWarnings("unchecked")
     public void setup() {
-        incrementalProcessor = new FortsIncrementalProcessor(marketDataHandler, sequenceValidator);
+        incrementalProcessor = new FortsIncrementalProcessor(marketDataHandler, sequenceValidator, new NullGatewayConfiguration());
         incrementalProcessor.setIsPrimary(true);
 
         sequenceValidator.setMarketDataManager(marketDataManager);

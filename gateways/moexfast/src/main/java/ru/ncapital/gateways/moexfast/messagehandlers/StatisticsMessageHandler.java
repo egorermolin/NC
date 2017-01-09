@@ -21,8 +21,20 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
 
     private MdEntryHandler<T> mdEntryHandler = new MdEntryHandler<>(this);
 
+    private final Utils.SecondFractionFactor mdEntryFractionFactor;
+
     public StatisticsMessageHandler(MarketDataManager<T> marketDataManager, IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
+
+        switch(configuration.getVersion()) {
+            case V2016:
+                mdEntryFractionFactor = Utils.SecondFractionFactor.MILLISECONDS;
+                break;
+            case V2017:
+            default:
+                mdEntryFractionFactor = Utils.SecondFractionFactor.NANOSECONDS;
+                break;
+        }
     }
 
     @Override
@@ -143,7 +155,7 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
             case LAST:
                 bbo.setLastPx(getMdEntryPx(mdEntry));
                 bbo.setLastSize(getMdEntrySize(mdEntry));
-                bbo.getPerformanceData().setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
+                bbo.getPerformanceData().setExchangeTime(Utils.getEntryTimeInTicks(mdEntry, mdEntryFractionFactor));
                 break;
             case LOW:
                 bbo.setLowPx(getMdEntryPx(mdEntry));
@@ -165,7 +177,7 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
                 publicTrade.setLastPx(getMdEntryPx(mdEntry));
                 publicTrade.setLastSize(getMdEntrySize(mdEntry));
                 publicTrade.setIsBid(getTradeIsBid(mdEntry));
-                publicTrade.getPerformanceData().setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
+                publicTrade.getPerformanceData().setExchangeTime(Utils.getEntryTimeInTicks(mdEntry, mdEntryFractionFactor));
                 break;
             default:
                 break;

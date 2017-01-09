@@ -13,6 +13,7 @@ import org.openfast.codec.Coder;
 import ru.ncapital.gateways.micexfast.MicexGatewayModule;
 import ru.ncapital.gateways.micexfast.connection.messageprocessors.MicexIncrementalProcessor;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
+import ru.ncapital.gateways.moexfast.NullGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IncrementalProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.MessageSequenceValidator;
@@ -51,7 +52,7 @@ public class MicexIncrementalProcessorTest {
     public void setup() {
         ((MessageSequenceValidator) sequenceValidator).setMarketDataManager(mock(MarketDataManager.class));
 
-        incrementalProcessor = new MicexIncrementalProcessor(marketDataHandler, sequenceValidator);
+        incrementalProcessor = new MicexIncrementalProcessor(marketDataHandler, sequenceValidator, new NullGatewayConfiguration());
         incrementalProcessor.setIsPrimary(true);
 
         Mockito.when(marketDataHandler.isAllowedUpdate("SYMB;CETS")).thenReturn(true);

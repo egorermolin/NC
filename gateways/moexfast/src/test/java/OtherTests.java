@@ -84,10 +84,21 @@ public class OtherTests {
 
         Mockito.when(mdEntry.getValue("MDEntryTime")).thenReturn(Mockito.mock(FieldValue.class));
         Mockito.when(mdEntry.getValue("OrigTime")).thenReturn(Mockito.mock(FieldValue.class));
-        Mockito.when(mdEntry.getInt("MDEntryTime")).thenReturn(110908000);
+        Mockito.when(mdEntry.getLong("MDEntryTime")).thenReturn(110908000L);
         Mockito.when(mdEntry.getInt("OrigTime")).thenReturn(555444);
 
-        Assert.assertEquals(40148555444L, Utils.getEntryTimeInTodayMicros(mdEntry));
+        Assert.assertEquals(40148555444L, Utils.getEntryTimeInTodayMicros(mdEntry, Utils.SecondFractionFactor.MILLISECONDS));
+    }
+
+    @Test
+    public void testGetMdEntryTimeInNsec() {
+        GroupValue mdEntry = Mockito.mock(GroupValue.class);
+
+        Mockito.when(mdEntry.getValue("MDEntryTime")).thenReturn(Mockito.mock(FieldValue.class));
+        Mockito.when(mdEntry.getValue("OrigTime")).thenReturn(null);
+        Mockito.when(mdEntry.getLong("MDEntryTime")).thenReturn(110908555444333L);
+
+        Assert.assertEquals(40148555444L, Utils.getEntryTimeInTodayMicros(mdEntry, Utils.SecondFractionFactor.NANOSECONDS));
     }
 
     @Test
@@ -164,7 +175,7 @@ public class OtherTests {
         assert MessageHandlerType.ORDER_LIST.equals("OrderList");
         assert MessageHandlerType.STATISTICS.equals("Statistics");
     }
-
+/*
     public static void main(String[] args) {
         ExecutorService executor = Executors.newCachedThreadPool();
 
@@ -193,5 +204,5 @@ public class OtherTests {
         }
 
         executor.shutdown();
-    }
+    }*/
 }

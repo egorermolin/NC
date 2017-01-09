@@ -4,6 +4,7 @@ import org.openfast.GroupValue;
 import org.openfast.Message;
 import org.openfast.SequenceValue;
 import ru.ncapital.gateways.fortsfast.domain.FortsInstrument;
+import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IncrementalProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
@@ -12,8 +13,8 @@ import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
  * Created by Egor on 30-Sep-16.
  */
 public class FortsIncrementalProcessor extends IncrementalProcessor<Long> {
-    public FortsIncrementalProcessor(IMessageHandler<Long> messageHandler, IMessageSequenceValidator<Long> sequenceValidator) {
-        super(messageHandler, sequenceValidator);
+    public FortsIncrementalProcessor(IMessageHandler<Long> messageHandler, IMessageSequenceValidator<Long> sequenceValidator, IGatewayConfiguration configuration) {
+        super(messageHandler, sequenceValidator, configuration);
     }
 
     @Override

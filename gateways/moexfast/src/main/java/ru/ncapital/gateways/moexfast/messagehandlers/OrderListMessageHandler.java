@@ -28,10 +28,21 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
 
     private String lastTradeId;
 
+    private final Utils.SecondFractionFactor mdEntryFractionFactor;
+
     public OrderListMessageHandler(MarketDataManager<T> marketDataManager, IGatewayConfiguration configuration) {
         super(marketDataManager, configuration);
 
         this.publicTradesFromOrderList = configuration.publicTradesFromOrdersList();
+        switch(configuration.getVersion()) {
+            case V2016:
+                mdEntryFractionFactor = Utils.SecondFractionFactor.MILLISECONDS;
+                break;
+            case V2017:
+            default:
+                mdEntryFractionFactor = Utils.SecondFractionFactor.NANOSECONDS;
+                break;
+        }
     }
 
     @Override
@@ -65,12 +76,12 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
                 depthLevel.setMdEntryPx(getMdEntryPx(mdEntry));
                 depthLevel.setMdEntrySize(getMdEntrySize(mdEntry));
                 depthLevel.setIsBid(mdEntryType == MdEntryType.BID);
-                depthLevel.getPerformanceData().setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
+                depthLevel.getPerformanceData().setExchangeTime(Utils.getEntryTimeInTicks(mdEntry, mdEntryFractionFactor));
                 getDepthLevelList(exchangeSecurityId).add(depthLevel);
                 break;
             case EMPTY:
                 depthLevel = getDepthLevelList(exchangeSecurityId).get(0);
-                depthLevel.getPerformanceData().setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
+                depthLevel.getPerformanceData().setExchangeTime(Utils.getEntryTimeInTicks(mdEntry, mdEntryFractionFactor));
                 break;
         }
     }
@@ -93,7 +104,7 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
                 depthLevel.setIsBid(mdEntryType == MdEntryType.BID);
                 depthLevel.setTradeId(getTradeId(mdEntry));
                 depthLevel.setMdFlags(getMdFlags(mdEntry));
-                depthLevel.getPerformanceData().updateFrom(perfData).setExchangeTime(Utils.getEntryTimeInTicks(mdEntry));
+                depthLevel.getPerformanceData().updateFrom(perfData).setExchangeTime(Utils.getEntryTimeInTicks(mdEntry, mdEntryFractionFactor));
                 getDepthLevelList(exchangeSecurityId).add(depthLevel);
                 break;
             case EMPTY:

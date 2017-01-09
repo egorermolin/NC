@@ -4,6 +4,7 @@ import org.openfast.GroupValue;
 import org.openfast.Message;
 import org.openfast.SequenceValue;
 import ru.ncapital.gateways.micexfast.domain.MicexInstrument;
+import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.IncrementalProcessor;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
@@ -15,8 +16,8 @@ public class MicexIncrementalProcessor extends IncrementalProcessor<String> {
 
     private String lastDealNumber;
 
-    public MicexIncrementalProcessor(IMessageHandler<String> messageHandler, IMessageSequenceValidator<String> sequenceValidator) {
-        super(messageHandler, sequenceValidator);
+    public MicexIncrementalProcessor(IMessageHandler<String> messageHandler, IMessageSequenceValidator<String> sequenceValidator, IGatewayConfiguration configuration) {
+        super(messageHandler, sequenceValidator, configuration);
     }
 
     @Override

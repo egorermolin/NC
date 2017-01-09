@@ -61,4 +61,9 @@ public class NullGatewayConfiguration implements IGatewayConfiguration {
     public boolean publicTradesFromOrdersList() {
         return false;
     }
+
+    @Override
+    public Version getVersion() {
+        return Version.V2017;
+    }
 }
