@@ -14,7 +14,7 @@ public abstract class SnapshotProcessor<T> extends Processor implements ISnapsho
 
     private Map<T, Map<Integer, Message>> fragmentedSnapshots = new HashMap<>();
 
-    private final Set<Integer> receivedSnapshots = Collections.synchronizedSortedSet(new TreeSet<>());
+    private final Set<Integer> receivedSnapshots = Collections.synchronizedSortedSet(new TreeSet<Integer>());
 
     private int allSnapshotsReceived = -1;
 
