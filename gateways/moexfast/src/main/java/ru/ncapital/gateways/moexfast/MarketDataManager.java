@@ -170,7 +170,6 @@ public abstract class MarketDataManager<T> {
 
             return bbosByExchangeSecurityId.get(exchangeSecurityId);
         }
-
         return bbo;
     }
 
