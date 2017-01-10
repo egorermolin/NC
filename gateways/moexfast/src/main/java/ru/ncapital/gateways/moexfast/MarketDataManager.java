@@ -182,7 +182,7 @@ public abstract class MarketDataManager<T> {
         BBO<T> currentBBO = getOrCreateBBO(newBBO.getExchangeSecurityId());
         if (currentBBO == null || currentBBO.getSecurityId() == null) {
             if (logger.isDebugEnabled())
-                logger.debug("onBBO unknown instrument " + currentBBO.getExchangeSecurityId());
+                logger.debug("onBBO unknown instrument " + newBBO.getExchangeSecurityId());
 
             return;
         }
@@ -192,18 +192,18 @@ public abstract class MarketDataManager<T> {
 
         synchronized (currentBBO) {
             if (isSnapshot) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Before BBO Snapshot [SecurityId: " + currentBBO.getSecurityId() + "]");
-                    logger.debug(currentBBO.toString());
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Before BBO Snapshot [SecurityId: " + currentBBO.getSecurityId() + "]");
+                    logger.trace(currentBBO.toString());
                 }
             }
 
             boolean[] changed = orderDepthEngine.updateBBO(currentBBO, newBBO);
 
             if (isSnapshot) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("After BBO Snapshot [SecurityId: " + currentBBO.getSecurityId() + "]");
-                    logger.debug(currentBBO.toString());
+                if (logger.isTraceEnabled()) {
+                    logger.trace("After BBO Snapshot [SecurityId: " + currentBBO.getSecurityId() + "]");
+                    logger.trace(currentBBO.toString());
                 }
             }
 
@@ -231,7 +231,7 @@ public abstract class MarketDataManager<T> {
         BBO<T> currentBBO = getOrCreateBBO(depthLevels[0].getExchangeSecurityId());
         if (currentBBO == null || currentBBO.getSecurityId() == null) {
             if (logger.isDebugEnabled())
-                logger.debug("onDepthLevel unknown instrument " + currentBBO.getExchangeSecurityId());
+                logger.debug("onDepthLevel unknown instrument " + depthLevels[0].getExchangeSecurityId());
 
             return;
         }
@@ -246,12 +246,12 @@ public abstract class MarketDataManager<T> {
             if (isSnapshot) {
                 depthLevelsBeforeUpdate = new ArrayList<>();
                 orderDepthEngine.getDepthLevels(depthLevels[0].getExchangeSecurityId(), depthLevelsBeforeUpdate);
-                if (logger.isDebugEnabled()) {
+                if (logger.isTraceEnabled()) {
                     StringBuilder sb = new StringBuilder("Before Depth Snapshot [SecurityId: ").append(currentBBO.getSecurityId()).append("]");
                     for (IDepthLevel depthLevel : depthLevelsBeforeUpdate) {
                         sb.append('\n').append(depthLevel.toShortString());
                     }
-                    logger.debug(sb.toString());
+                    logger.trace(sb.toString());
                 }
             }
 
@@ -262,12 +262,12 @@ public abstract class MarketDataManager<T> {
             if (isSnapshot) {
                 depthLevelsAfterUpdate = new ArrayList<>();
                 orderDepthEngine.getDepthLevels(depthLevels[0].getExchangeSecurityId(), depthLevelsAfterUpdate);
-                if (logger.isDebugEnabled()) {
-                    StringBuilder sb = new StringBuilder("Before Depth Snapshot [SecurityId: ").append(currentBBO.getSecurityId()).append("]");
+                if (logger.isTraceEnabled()) {
+                    StringBuilder sb = new StringBuilder("After Depth Snapshot [SecurityId: ").append(currentBBO.getSecurityId()).append("]");
                     for (IDepthLevel depthLevel : depthLevelsAfterUpdate) {
                         sb.append('\n').append(depthLevel.toShortString());
                     }
-                    logger.debug(sb.toString());
+                    logger.trace(sb.toString());
                 }
             }
 
@@ -291,7 +291,7 @@ public abstract class MarketDataManager<T> {
         BBO<T> currentBBO = getOrCreateBBO(publicTrade.getExchangeSecurityId());
         if (currentBBO == null || currentBBO.getSecurityId() == null) {
             if (logger.isDebugEnabled())
-                logger.debug("onPublicTrade unknown instrument " + currentBBO.getExchangeSecurityId());
+                logger.debug("onPublicTrade unknown instrument " + publicTrade.getExchangeSecurityId());
 
             return;
         }
