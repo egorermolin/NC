@@ -114,10 +114,10 @@ public class MicexIncrementalProcessorTest {
         incrementalProcessor.setIsPrimary(true);
         incrementalProcessor.handleMessage(message, context, coder);
 
-        Mockito.verify(marketDataHandler, Mockito.times(0)).onIncremental(Mockito.eq(entry1), Mockito.any(PerformanceData.class));
+        Mockito.verify(marketDataHandler, Mockito.times(1)).onIncremental(Mockito.eq(entry1), Mockito.any(PerformanceData.class));
         Mockito.verify(marketDataHandler, Mockito.times(1)).flushIncrementals();
 
-        assert sequenceValidator.isRecovering("SYMB;CETS", 2, false);
+        assert !sequenceValidator.isRecovering("SYMB;CETS", 2, false);
     }
 
     @Test
