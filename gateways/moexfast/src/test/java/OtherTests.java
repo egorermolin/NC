@@ -17,11 +17,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by egore on 27.01.2016.
@@ -29,6 +34,19 @@ import static junit.framework.TestCase.assertEquals;
 @RunWith(MockitoJUnitRunner.class)
 public class OtherTests {
     ScheduledFuture<?> futureTask ;
+
+    @Test
+    public void testEntryDate() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        Date date = new Date();
+        long ldate = Long.valueOf(dateFormat.format(date).toString());
+
+        assertEquals(0, Utils.convertDateToTodayMicros(0));
+        assertEquals(0, Utils.convertDateToTodayMicros(ldate));
+        // assertTrue(Utils.convertDateToTodayMicros(20170101) < 0);
+        assertEquals(- 86400000L * 1000, Utils.convertDateToTodayMicros(ldate - 1));
+        assertEquals(86400000L * 1000, Utils.convertDateToTodayMicros(ldate + 1));
+    }
 
     @Test
     public void testDecimal() {

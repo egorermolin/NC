@@ -50,6 +50,27 @@ public class Utils {
         TODAY_IN_MILLIS_SINCE_JANUARY_1ST_1970 = cal.getTimeInMillis();
     }
 
+    public static long convertDateToTodayMicros(long date) {
+        if (date == 0)
+            return 0;
+
+        Calendar cal = Calendar.getInstance();
+        long year = date / 1_00_00;
+        long month = (date % 1_00_00) / 1_00;
+        long day = date % 1_00;
+
+        cal.setTimeZone(TimeZone.getTimeZone("GMT"));
+        cal.set(Calendar.YEAR, (int) year);
+        cal.set(Calendar.MONTH, (int) month - 1);
+        cal.set(Calendar.DAY_OF_MONTH, (int) day);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+
+        return (cal.getTimeInMillis() - TODAY_IN_MILLIS_SINCE_JANUARY_1ST_1970) * 1_000;
+    }
+
     public static String convertTicksToTodayString(long ticks) {
         return convertTodayMicrosToTodayString(convertTicksToTodayMicros(ticks));
     }
@@ -119,8 +140,9 @@ public class Utils {
     */
     public static long getEntryTimeInTicks(GroupValue mdEntry, SecondFractionFactor factor) {
         long entryTime = getEntryTimeInTodayMicros(mdEntry, factor);
+        long entryDate = getEntryDateInTodayMicros(mdEntry);
 
-        return entryTime == 0 ? Utils.currentTimeInTicks() : Utils.convertTodayMicrosToTicks(entryTime);
+        return entryTime == 0 ? Utils.currentTimeInTicks() : Utils.convertTodayMicrosToTicks(entryTime + entryDate);
     }
 
     /*
@@ -131,6 +153,15 @@ public class Utils {
         long entryTimeMicros = mdEntry.getValue("OrigTime") != null ? mdEntry.getInt("OrigTime") : 0;
 
         return convertTodayToTodayMicros(entryTimeToday + entryTimeMicros);
+    }
+
+    /*
+     GET ENTRY (YYYYMMDD) in TODAY_MICROS (micros since today)
+    */
+    public static long getEntryDateInTodayMicros(GroupValue mdEntry) {
+        long entryTimeDate = mdEntry.getValue("MDEntryDate") != null ? mdEntry.getLong("MDEntryDate") : 0;
+
+        return convertDateToTodayMicros(entryTimeDate);
     }
 
     public static void printStackTrace(Exception e, Logger logger, String message) {
