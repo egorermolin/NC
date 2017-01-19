@@ -92,6 +92,8 @@ public class OrderDepth {
                 } else {
                     depthLevelsSorted.remove(previousDepthLevel);
                     depthLevels.remove(previousDepthLevel.getMdEntryId());
+                    // keep original price of the order
+                    depthLevel.setMdEntryPx(previousDepthLevel.getMdEntryPx());
                     if (depthLevel.getPublicTrade() != null)
                         depthLevel.getPublicTrade().setLastSize(previousDepthLevel.getMdEntrySize());
                 }
