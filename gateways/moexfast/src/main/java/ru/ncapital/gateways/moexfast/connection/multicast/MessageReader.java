@@ -76,6 +76,10 @@ public class MessageReader implements IMulticastEventListener {
 
         private Executor executor = Executors.newSingleThreadExecutor();
 
+        public boolean isActive() {
+            return active;
+        }
+
         public void initStatistics() {
             active = true;
             for (int i = 0; i < NUMBER_OF_LISTS; ++i)
@@ -446,26 +450,28 @@ public class MessageReader implements IMulticastEventListener {
         }
 
         if (instrumentManager == null && marketDataManager == null) {
-            registerMessageHandler(new MessageHandler() {
-                @Override
-                public void handleMessage(Message readMessage, Context context, Coder coder) {
-                    long decodedTimeInTodayMicros = Utils.currentTimeInTodayMicros();
-                    long receivedTimeInTodayMicros = Utils.convertTicksToTodayMicros(inTimestamp.get());
-                    long sendingTimeInTodayMicros = Utils.convertTodayToTodayMicros(readMessage.getLong("SendingTime") % 1_00_00_00_000_000L);
+            if (stats.isActive()) {
+                registerMessageHandler(new MessageHandler() {
+                    @Override
+                    public void handleMessage(Message readMessage, Context context, Coder coder) {
+                        long decodedTimeInTodayMicros = Utils.currentTimeInTodayMicros();
+                        long receivedTimeInTodayMicros = Utils.convertTicksToTodayMicros(inTimestamp.get());
+                        long sendingTimeInTodayMicros = Utils.convertTodayToTodayMicros(readMessage.getLong("SendingTime") % 1_00_00_00_000_000L);
 
-                    if (readMessage.getString("MessageType").equals("X")) {
-                        SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
-                        for (int i = 0; i < mdEntries.getLength(); ++i) {
-                            long entryTimeInTodayMicros = Utils.getEntryTimeInTodayMicros(mdEntries.get(i), Utils.SecondFractionFactor.NANOSECONDS);
+                        if (readMessage.getString("MessageType").equals("X")) {
+                            SequenceValue mdEntries = readMessage.getSequence("GroupMDEntries");
+                            for (int i = 0; i < mdEntries.getLength(); ++i) {
+                                long entryTimeInTodayMicros = Utils.getEntryTimeInTodayMicros(mdEntries.get(i), Utils.SecondFractionFactor.NANOSECONDS);
 
-                            stats.addItem(readMessage.getInt("MsgSeqNum"),
-                                    entryTimeInTodayMicros, sendingTimeInTodayMicros,
-                                    receivedTimeInTodayMicros, decodedTimeInTodayMicros
-                            );
+                                stats.addItem(readMessage.getInt("MsgSeqNum"),
+                                        entryTimeInTodayMicros, sendingTimeInTodayMicros,
+                                        receivedTimeInTodayMicros, decodedTimeInTodayMicros
+                                );
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
             multicastInputStream.setInTimestamp(initAndGetInTimestamp(null));
         } else {
             switch (connectionId) {
