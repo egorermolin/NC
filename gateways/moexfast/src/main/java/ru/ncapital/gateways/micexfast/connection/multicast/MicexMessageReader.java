@@ -1,6 +1,8 @@
 package ru.ncapital.gateways.micexfast.connection.multicast;
 
 import org.apache.log4j.Level;
+import org.openfast.Message;
+import org.openfast.SequenceValue;
 import ru.ncapital.gateways.micexfast.MicexConfigurationManager;
 import ru.ncapital.gateways.micexfast.MicexGatewayManager;
 import ru.ncapital.gateways.micexfast.MicexInstrumentManager;
@@ -90,4 +92,10 @@ public class MicexMessageReader extends MessageReader {
 
         mr.start();
     }
+
+    @Override
+    protected SequenceValue getMdEntries(Message readMessage) {
+        return readMessage.getSequence("GroupMDEntries");
+    }
+
 }

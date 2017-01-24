@@ -1,6 +1,8 @@
 package ru.ncapital.gateways.fortsfast.connection.multicast;
 
 import org.apache.log4j.Level;
+import org.openfast.Message;
+import org.openfast.SequenceValue;
 import ru.ncapital.gateways.fortsfast.FortsConfigurationManager;
 import ru.ncapital.gateways.fortsfast.FortsNullGatewayConfiguration;
 import ru.ncapital.gateways.micexfast.MicexGatewayManager;
@@ -89,5 +91,10 @@ public class FortsMessageReader extends MessageReader {
         }
 
         mr.start();
+    }
+
+    @Override
+    protected SequenceValue getMdEntries(Message readMessage) {
+        return readMessage.getSequence("MDEntries");
     }
 }

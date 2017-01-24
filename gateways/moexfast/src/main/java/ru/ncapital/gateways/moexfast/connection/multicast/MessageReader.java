@@ -724,4 +724,7 @@ public class MessageReader implements IMulticastEventListener {
         return connectionId.getConnectionId();
     }
 
+    protected SequenceValue getMdEntries(Message readMessage) {
+        throw new RuntimeException("Not Implemented");
+    }
 }
