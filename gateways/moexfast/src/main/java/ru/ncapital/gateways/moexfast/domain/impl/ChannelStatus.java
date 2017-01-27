@@ -17,57 +17,33 @@ public class ChannelStatus implements IChannelStatus {
         switch (connectionId) {
             case CURR_INSTRUMENT_INCR_A:
             case CURR_INSTRUMENT_INCR_B:
-            // case CURR_INSTRUMENT_SNAP_A:
-            //case CURR_INSTRUMENT_SNAP_B:
             case FOND_INSTRUMENT_INCR_A:
             case FOND_INSTRUMENT_INCR_B:
-            // case FOND_INSTRUMENT_SNAP_A:
-            // case FOND_INSTRUMENT_SNAP_B:
             case FUT_INSTRUMENT_INCR_A:
             case FUT_INSTRUMENT_INCR_B:
-            // case FUT_INSTRUMENT_SNAP_A:
-            // case FUT_INSTRUMENT_SNAP_B:
                 return ChannelType.Instrument;
             case CURR_ORDER_LIST_INCR_A:
             case CURR_ORDER_LIST_INCR_B:
-            // case CURR_ORDER_LIST_SNAP_A:
-            // case CURR_ORDER_LIST_SNAP_B:
             case FOND_ORDER_LIST_INCR_A:
             case FOND_ORDER_LIST_INCR_B:
-            // case FOND_ORDER_LIST_SNAP_A:
-            // case FOND_ORDER_LIST_SNAP_B:
             case FUT_ORDER_LIST_INCR_A:
             case FUT_ORDER_LIST_INCR_B:
-            // case FUT_ORDER_LIST_SNAP_A:
-            // case FUT_ORDER_LIST_SNAP_B:
                 return ChannelType.OrderList;
             case CURR_STATISTICS_INCR_A:
             case CURR_STATISTICS_INCR_B:
-            // case CURR_STATISTICS_SNAP_A:
-            // case CURR_STATISTICS_SNAP_B:
             case FOND_STATISTICS_INCR_A:
             case FOND_STATISTICS_INCR_B:
-            // case FOND_STATISTICS_SNAP_A:
-            // case FOND_STATISTICS_SNAP_B:
                 return ChannelType.BBOAndStatistics;
             case FUT_ORDER_BOOK_INCR_A:
             case FUT_ORDER_BOOK_INCR_B:
-            // case FUT_ORDER_BOOK_SNAP_A:
-            // case FUT_ORDER_BOOK_SNAP_B:
                 return ChannelType.BBO;
             case FUT_STATISTICS_INCR_A:
             case FUT_STATISTICS_INCR_B:
-            // case FUT_STATISTICS_SNAP_A:
-            // case FUT_STATISTICS_SNAP_B:
                 return ChannelType.Statistics;
             case CURR_PUB_TRADES_INCR_A:
             case CURR_PUB_TRADES_INCR_B:
-            // case CURR_PUB_TRADES_SNAP_A:
-            // case CURR_PUB_TRADES_SNAP_B:
             case FOND_PUB_TRADES_INCR_A:
             case FOND_PUB_TRADES_INCR_B:
-            // case FOND_PUB_TRADES_SNAP_A:
-            // case FOND_PUB_TRADES_SNAP_B:
                 return ChannelType.PublicTrade;
         }
         return null;

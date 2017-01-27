@@ -172,7 +172,10 @@ public class BBO<T> implements IBBO {
 
     @Override
     public boolean isInRecovery(IChannelStatus.ChannelType channelType) {
-        return inRecovery.get(channelType);
+        if (inRecovery.containsKey(channelType))
+            return inRecovery.get(channelType);
+
+        return false;
     }
 
     @Override
