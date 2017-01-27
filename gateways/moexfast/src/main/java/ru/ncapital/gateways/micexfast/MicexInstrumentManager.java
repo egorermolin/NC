@@ -67,7 +67,7 @@ public class MicexInstrumentManager extends InstrumentManager<String> {
         if (allowedTradingSessionIds.isEmpty() || allowedTradingSessionIds.contains(TradingSessionId.convert(micexInstrument.getTradingSessionId()))) {
         } else {
             if (getLogger().isTraceEnabled())
-                getLogger().trace("Ignored by TradingSessionId: " + instrument.getId());
+                getLogger().trace("Ignored by TradingSessionId: " + instrument.getId() + ", " + micexInstrument.getTradingSessionId());
 
             addInstrumentToIgnored(instrument);
             return false;
@@ -79,7 +79,7 @@ public class MicexInstrumentManager extends InstrumentManager<String> {
         if (allowedProductTypes.isEmpty() || allowedProductTypes.contains(micexInstrument.getProductType())) {
         } else {
             if (getLogger().isTraceEnabled())
-                getLogger().trace("Ignored by ProductType " + instrument.getId());
+                getLogger().trace("Ignored by ProductType: " + instrument.getId() + ", " + micexInstrument.getProductType());
 
             addInstrumentToIgnored(instrument);
             return false;
