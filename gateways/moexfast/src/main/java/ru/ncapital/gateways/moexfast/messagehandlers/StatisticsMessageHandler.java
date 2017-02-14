@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.Utils;
+import ru.ncapital.gateways.moexfast.connection.MarketType;
 import ru.ncapital.gateways.moexfast.domain.MdEntryType;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
@@ -28,11 +29,19 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
 
         switch(configuration.getVersion()) {
             case V2016:
-                mdEntryFractionFactor = Utils.SecondFractionFactor.MILLISECONDS;
+                if (configuration.getMarketType() == MarketType.FUT)
+                    mdEntryFractionFactor = Utils.SecondFractionFactor.MILLISECONDS;
+                else
+                    mdEntryFractionFactor = Utils.SecondFractionFactor.MICROSECONDS;
+
                 break;
             case V2017:
             default:
-                mdEntryFractionFactor = Utils.SecondFractionFactor.NANOSECONDS;
+                if (configuration.getMarketType() == MarketType.FUT)
+                    mdEntryFractionFactor = Utils.SecondFractionFactor.NANOSECONDS;
+                else
+                    mdEntryFractionFactor = Utils.SecondFractionFactor.MICROSECONDS;
+
                 break;
         }
     }

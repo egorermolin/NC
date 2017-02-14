@@ -93,6 +93,12 @@ public abstract class AMessageHandler<T> implements IMessageHandler<T> {
     }
 
     protected double getMdEntrySize(GroupValue mdEntry) {
+        if (mdEntry.getValue("MDEntrySize") == null)
+            return 0.0;
+
+        if (getMdUpdateAction(mdEntry) == MdUpdateAction.DELETE)
+            return 0.0;
+
         return mdEntry.getBigDecimal("MDEntrySize").doubleValue();
     }
 

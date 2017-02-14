@@ -13,7 +13,7 @@ import static java.lang.Math.round;
  */
 public class Utils {
     public enum SecondFractionFactor {
-        MILLISECONDS(1000.0), MICROSECONDS(1.0), NANOSECONDS(0.001);
+        SECONDS(1_000_000.0), MILLISECONDS(1_000.0), MICROSECONDS(1.0), NANOSECONDS(0.001);
 
         protected final double value;
 

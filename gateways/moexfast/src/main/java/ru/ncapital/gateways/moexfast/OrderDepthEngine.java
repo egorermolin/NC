@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
+import ru.ncapital.gateways.moexfast.domain.impl.PublicTrade;
 import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
 import ru.ncapital.gateways.moexfast.domain.intf.IPublicTrade;
 
@@ -23,20 +24,23 @@ public abstract class OrderDepthEngine<T> {
 
     private Map<T, OrderDepth> offers;
 
-    public OrderDepthEngine() {
+    private IGatewayConfiguration configuration;
+
+    public OrderDepthEngine(IGatewayConfiguration configuration) {
         this.bids = new HashMap<>();
         this.offers = new HashMap<>();
+        this.configuration = configuration;
     }
 
     private OrderDepth getOrderDepth(T exchangeSecurityId, boolean isBid) {
         OrderDepth depth = isBid ? bids.get(exchangeSecurityId) : offers.get(exchangeSecurityId);
         if (depth == null) {
             if (isBid) {
-                bids.put(exchangeSecurityId, depth = new OrderDepth(true));
-                offers.put(exchangeSecurityId, new OrderDepth(false));
+                bids.put(exchangeSecurityId, depth = new OrderDepth(true, configuration));
+                offers.put(exchangeSecurityId, new OrderDepth(false, configuration));
             } else {
-                bids.put(exchangeSecurityId, new OrderDepth(true));
-                offers.put(exchangeSecurityId, depth = new OrderDepth(false));
+                bids.put(exchangeSecurityId, new OrderDepth(true, configuration));
+                offers.put(exchangeSecurityId, depth = new OrderDepth(false, configuration));
             }
         }
         return depth;
@@ -59,7 +63,7 @@ public abstract class OrderDepthEngine<T> {
             onDepthLevel(depthLevel, depthLevelsToSend, publicTradesToSend);
     }
 
-    public boolean[] updateBBO(BBO<T> previousBBO, BBO<T> newBBO) {
+    boolean[] updateBBO(BBO<T> previousBBO, BBO<T> newBBO) {
         if (logger.isTraceEnabled())
             logger.trace("Updating BBO: " + previousBBO + " from " + newBBO);
 
@@ -126,7 +130,7 @@ public abstract class OrderDepthEngine<T> {
         return changed;
     }
 
-    public void getDepthLevels(T exchangeSecurityId, List<IDepthLevel> depthLevelsToSend) {
+    void getDepthLevels(T exchangeSecurityId, List<IDepthLevel> depthLevelsToSend) {
         depthLevelsToSend.add(createSnapshotDepthLevel(exchangeSecurityId));
 
         OrderDepth bidDepth = bids.get(exchangeSecurityId);
@@ -139,7 +143,31 @@ public abstract class OrderDepthEngine<T> {
             offerDepth.extractDepthLevels(depthLevelsToSend);
     }
 
-    public abstract DepthLevel<T> createSnapshotDepthLevel(T exchangeSecurityId);
+    protected void updateDepthLevelFromPublicTrade(PublicTrade<T> publicTrade) {
+        if (publicTrade == null || publicTrade.getMdEntryId() == null)
+            return;
+
+        DepthLevel depthLevel = getOrderDepth(publicTrade.getExchangeSecurityId(), publicTrade.isBid())
+                .getDepthLevel(publicTrade.getMdEntryId());
+
+        if (depthLevel == null) {
+            if (logger.isTraceEnabled())
+                logger.trace("DepthLevel not found for PublicTrade: " + publicTrade);
+
+            return;
+        }
+
+        if (logger.isTraceEnabled())
+            logger.trace("DepthLevel found for PublicTrade: " + publicTrade);
+
+        depthLevel.setTradeId(publicTrade.getTradeId());
+    }
+
+    protected void onPublicTrade(PublicTrade<T> publicTrade) {
+        // do nothing by default
+    }
 
     protected abstract boolean updateInRecovery(BBO<T> previousBBO, BBO<T> newBBO);
+
+    protected abstract DepthLevel<T> createSnapshotDepthLevel(T exchangeSecurityId);
 }

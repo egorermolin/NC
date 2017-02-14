@@ -10,6 +10,8 @@ public interface IPublicTrade {
 
     String getTradeId();
 
+    String getMdEntryId();
+
     double getLastPx();
 
     double getLastSize();

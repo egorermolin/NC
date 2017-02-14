@@ -4,6 +4,7 @@ import com.google.common.collect.SortedMultiset;
 import com.google.common.collect.TreeMultiset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.ncapital.gateways.moexfast.connection.MarketType;
 import ru.ncapital.gateways.moexfast.domain.impl.BBO;
 import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
 import ru.ncapital.gateways.moexfast.domain.intf.IDepthLevel;
@@ -13,7 +14,7 @@ import java.util.*;
 /**
  * Created by egore on 12/17/15.
  */
-public class OrderDepth {
+class OrderDepth {
     private Map<String, IDepthLevel> depthLevels;
 
     private SortedMultiset<IDepthLevel> depthLevelsSorted;
@@ -22,11 +23,14 @@ public class OrderDepth {
 
     private Logger logger;
 
-    public OrderDepth(boolean isBid) {
+    private IGatewayConfiguration configuration;
+
+    OrderDepth(boolean isBid, IGatewayConfiguration configuration) {
         this.isBid = isBid;
         this.depthLevelsSorted = TreeMultiset.create(getComparator(isBid));
         this.depthLevels = new HashMap<>();
         this.logger = LoggerFactory.getLogger((isBid ? "Bid" : "Offer") + "OrderDepth");
+        this.configuration = configuration;
     }
 
     private Comparator<IDepthLevel> getComparator(boolean isBid) {
@@ -47,7 +51,7 @@ public class OrderDepth {
         }
     }
 
-    public void onDepthLevel(DepthLevel depthLevel) {
+    void onDepthLevel(DepthLevel depthLevel) {
         if (logger.isTraceEnabled())
             logger.trace("onDepthLevel: " + depthLevel.toString());
 
@@ -64,7 +68,8 @@ public class OrderDepth {
 
                 if (depthLevel.getPublicTrade() != null) {
                     // technical trade
-                    depthLevel.getPublicTrade().setLastSize(depthLevel.getMdEntrySize());
+                    if (logger.isDebugEnabled())
+                        logger.debug("Technical trade " + depthLevel);
                 } else {
                     depthLevelsSorted.add(depthLevel);
                     depthLevels.put(depthLevel.getMdEntryId(), depthLevel);
@@ -77,10 +82,12 @@ public class OrderDepth {
                 } else {
                     depthLevelsSorted.remove(previousDepthLevel);
                     depthLevels.remove(previousDepthLevel.getMdEntryId());
-                    // keep original price of the order
-                    depthLevel.setMdEntryPx(previousDepthLevel.getMdEntryPx());
-                    if (depthLevel.getPublicTrade() != null)
-                        depthLevel.getPublicTrade().setLastSize(previousDepthLevel.getMdEntrySize() - depthLevel.getMdEntrySize());
+                    if (configuration.getMarketType() == MarketType.FUT && configuration.getVersion() == IGatewayConfiguration.Version.V2016) {
+                        // keep original price of the order
+                        depthLevel.setMdEntryPx(previousDepthLevel.getMdEntryPx());
+                        if (depthLevel.getPublicTrade() != null)
+                           depthLevel.getPublicTrade().setLastSize(previousDepthLevel.getMdEntrySize() - depthLevel.getMdEntrySize());
+                    }
                 }
                 depthLevelsSorted.add(depthLevel);
                 depthLevels.put(depthLevel.getMdEntryId(), depthLevel);
@@ -92,55 +99,29 @@ public class OrderDepth {
                 } else {
                     depthLevelsSorted.remove(previousDepthLevel);
                     depthLevels.remove(previousDepthLevel.getMdEntryId());
-                    // keep original price of the order
-                    depthLevel.setMdEntryPx(previousDepthLevel.getMdEntryPx());
-                    if (depthLevel.getPublicTrade() != null)
-                        depthLevel.getPublicTrade().setLastSize(previousDepthLevel.getMdEntrySize());
+                    if (configuration.getMarketType() == MarketType.FUT && configuration.getVersion() == IGatewayConfiguration.Version.V2016) {
+                        // keep original price of the order
+                        depthLevel.setMdEntryPx(previousDepthLevel.getMdEntryPx());
+                        if (depthLevel.getPublicTrade() != null)
+                             depthLevel.getPublicTrade().setLastSize(previousDepthLevel.getMdEntrySize());
+                    }
                 }
                 break;
         }
     }
 
-    public void extractBBO(BBO bbo) {
-        if (isBid) {
-            if (depthLevelsSorted.size() > 0) {
-                bbo.setBidPx(depthLevelsSorted.firstEntry().getElement().getMdEntryPx());
-                bbo.setBidSize(0.0);
-                for (IDepthLevel dl : depthLevelsSorted) {
-                    if (Double.compare(dl.getMdEntryPx(), bbo.getBidPx()) != 0)
-                        break;
-
-                    bbo.setBidSize(bbo.getBidSize() + dl.getMdEntrySize());
-                }
-            } else {
-                bbo.setBidPx(0.0);
-                bbo.setBidSize(0.0);
-            }
-        } else {
-            if (depthLevelsSorted.size() > 0) {
-                bbo.setOfferPx(depthLevelsSorted.firstEntry().getElement().getMdEntryPx());
-                bbo.setOfferSize(0.0);
-                for (IDepthLevel dl : depthLevelsSorted) {
-                    if (Double.compare(dl.getMdEntryPx(), bbo.getOfferPx()) != 0)
-                        break;
-
-                    bbo.setOfferSize(bbo.getOfferSize() + dl.getMdEntrySize());
-                }
-            } else {
-                bbo.setOfferPx(0.0);
-                bbo.setOfferSize(0.0);
-            }
-        }
-    }
-
-    public void extractDepthLevels(List<IDepthLevel> depthLevelsToSend) {
+    void extractDepthLevels(List<IDepthLevel> depthLevelsToSend) {
         List<IDepthLevel> depthLevelsTmp = new ArrayList<>(depthLevels.values());
         Collections.sort(depthLevelsTmp, getComparator(isBid));
         depthLevelsToSend.addAll(depthLevelsTmp);
     }
 
-    public void clearDepth() {
+    void clearDepth() {
         depthLevels.clear();
         depthLevelsSorted.clear();
+    }
+
+    DepthLevel getDepthLevel(String mdEntryId) {
+        return (DepthLevel) depthLevels.get(mdEntryId);
     }
 }

@@ -5,6 +5,7 @@ import org.openfast.Message;
 import org.openfast.SequenceValue;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.Utils;
+import ru.ncapital.gateways.moexfast.connection.MarketType;
 import ru.ncapital.gateways.moexfast.connection.messageprocessors.sequencevalidators.IMessageSequenceValidator;
 import ru.ncapital.gateways.moexfast.messagehandlers.IMessageHandler;
 import ru.ncapital.gateways.moexfast.performance.PerformanceData;
@@ -30,7 +31,11 @@ public abstract class IncrementalProcessor<T> extends Processor implements IIncr
                 break;
             case V2017:
             default:
-                sendingTimeFractionFactor = Utils.SecondFractionFactor.MICROSECONDS;
+                if (configuration.getMarketType() == MarketType.FUT)
+                    sendingTimeFractionFactor = Utils.SecondFractionFactor.MILLISECONDS;
+                else
+                    sendingTimeFractionFactor = Utils.SecondFractionFactor.MICROSECONDS;
+
                 break;
         }
     }

@@ -43,8 +43,8 @@ public class FortsMarketDataManager extends MarketDataManager<Long> {
     }
 
     @Override
-    protected OrderDepthEngine<Long> createDepthEngine() {
-        return new OrderDepthEngine<Long>() {
+    protected OrderDepthEngine<Long> createDepthEngine(IGatewayConfiguration configuration) {
+        return new OrderDepthEngine<Long>(configuration) {
             @Override
             public DepthLevel<Long> createSnapshotDepthLevel(Long exchangeSecurityId) {
                 return new DepthLevel<Long>(getInstrumentManager().getSecurityId(exchangeSecurityId), exchangeSecurityId) {

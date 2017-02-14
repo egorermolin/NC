@@ -42,6 +42,11 @@ public class MicexPublicTradesMessageHandler extends StatisticsMessageHandler<St
     }
 
     @Override
+    protected String getMdEntryId(GroupValue mdEntry) {
+        return String.valueOf(mdEntry.getLong("RefOrderID"));
+    }
+
+    @Override
     protected SequenceValue getMdEntries(Message readMessage) {
         return readMessage.getSequence("GroupMDEntries");
     }

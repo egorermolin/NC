@@ -23,6 +23,22 @@ public class FortsOrderListMessageHandler extends OrderListMessageHandler<Long> 
     }
 
     @Override
+    protected double getLastPx(GroupValue mdEntry) {
+        if (mdEntry.getValue("LastPx") == null)
+            return 0;
+
+        return mdEntry.getDouble("LastPx");
+    }
+
+    @Override
+    protected long getLastSize(GroupValue mdEntry) {
+        if (mdEntry.getValue("LastQty") == null)
+            return 0;
+
+        return mdEntry.getLong("LastQty");
+    }
+
+    @Override
     protected long getMdFlags(GroupValue mdEntry) {
         if (mdEntry.getValue("MDFlags") == null)
             return 0;

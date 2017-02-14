@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import ru.ncapital.gateways.moexfast.IGatewayConfiguration;
 import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.Utils;
+import ru.ncapital.gateways.moexfast.connection.MarketType;
 import ru.ncapital.gateways.moexfast.domain.MdEntryType;
 import ru.ncapital.gateways.moexfast.domain.MdUpdateAction;
 import ru.ncapital.gateways.moexfast.domain.impl.DepthLevel;
@@ -36,11 +37,19 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
         this.publicTradesFromOrderList = configuration.publicTradesFromOrdersList();
         switch(configuration.getVersion()) {
             case V2016:
-                mdEntryFractionFactor = Utils.SecondFractionFactor.MILLISECONDS;
+                if (configuration.getMarketType() == MarketType.FUT)
+                    mdEntryFractionFactor = Utils.SecondFractionFactor.MILLISECONDS;
+                else
+                    mdEntryFractionFactor = Utils.SecondFractionFactor.MICROSECONDS;
+
                 break;
             case V2017:
             default:
-                mdEntryFractionFactor = Utils.SecondFractionFactor.NANOSECONDS;
+                if (configuration.getMarketType() == MarketType.FUT)
+                    mdEntryFractionFactor = Utils.SecondFractionFactor.NANOSECONDS;
+                else
+                    mdEntryFractionFactor = Utils.SecondFractionFactor.MICROSECONDS;
+
                 break;
         }
     }
@@ -88,19 +97,18 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
 
     @Override
     public void onIncrementalMdEntry(T exchangeSecurityId, GroupValue mdEntry, PerformanceData perfData) {
-        DepthLevel<T> depthLevel = null;
         if (isOTC(mdEntry))
             return;
-        
+
+        DepthLevel<T> depthLevel = marketDataManager.createDepthLevel(exchangeSecurityId);
         MdEntryType mdEntryType = getMdEntryType(mdEntry);
         switch (mdEntryType) {
             case BID:
             case OFFER:
-                depthLevel = marketDataManager.createDepthLevel(exchangeSecurityId);
                 depthLevel.setMdUpdateAction(getMdUpdateAction(mdEntry));
                 depthLevel.setMdEntryId(getMdEntryId(mdEntry));
                 depthLevel.setMdEntryPx(getMdEntryPx(mdEntry));
-                depthLevel.setMdEntrySize(depthLevel.getMdUpdateAction() == MdUpdateAction.DELETE ? 0.0 : getMdEntrySize(mdEntry));
+                depthLevel.setMdEntrySize(getMdEntrySize(mdEntry));
                 depthLevel.setIsBid(mdEntryType == MdEntryType.BID);
                 depthLevel.setTradeId(getTradeId(mdEntry));
                 depthLevel.setMdFlags(getMdFlags(mdEntry));
@@ -112,23 +120,41 @@ public abstract class OrderListMessageHandler<T> extends AMessageHandler<T> {
                 depthLevel.setMdUpdateAction(MdUpdateAction.SNAPSHOT);
                 getDepthLevelList(exchangeSecurityId).add(depthLevel);
                 break;
+            default:
+                depthLevel = null;
+                break;
         }
 
         // trade
-        if (publicTradesFromOrderList
-                && depthLevel != null
-                && depthLevel.getTradeId() != null
-                && !depthLevel.getTradeId().equals(lastTradeId)) {
-            lastTradeId = depthLevel.getTradeId();
+        if (publicTradesFromOrderList && isTrade(depthLevel)) {
             PublicTrade<T> publicTrade = marketDataManager.createPublicTrade(exchangeSecurityId);
             publicTrade.setMdEntryId(depthLevel.getMdEntryId());
-            publicTrade.setLastPx(depthLevel.getMdEntryPx());
+            publicTrade.setLastPx(getLastPx(mdEntry));
+            publicTrade.setLastSize(getLastSize(mdEntry));
             publicTrade.setIsBid(depthLevel.getIsBid());
             publicTrade.setTradeId(depthLevel.getTradeId());
             publicTrade.getPerformanceData().updateFrom(depthLevel.getPerformanceData());
             depthLevel.setPublicTrade(publicTrade);
         }
     }
+
+    private boolean isTrade(DepthLevel<T> depthLevel) {
+        if (depthLevel == null)
+            return false;
+
+        if (depthLevel.getTradeId() == null)
+            return false;
+
+        if (depthLevel.getTradeId().equals(lastTradeId))
+            return false;
+
+        lastTradeId = depthLevel.getTradeId();
+        return true;
+    }
+
+    protected abstract double getLastPx(GroupValue mdEntry);
+
+    protected abstract long getLastSize(GroupValue mdEntry);
 
     protected abstract long getMdFlags(GroupValue mdEntry);
 

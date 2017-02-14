@@ -33,7 +33,7 @@ public abstract class MarketDataManager<T> {
 
     private Logger logger = getLogger();
 
-    private OrderDepthEngine<T> orderDepthEngine = createDepthEngine();
+    private OrderDepthEngine<T> orderDepthEngine;
 
     private IMarketDataHandler marketDataHandler;
 
@@ -72,10 +72,11 @@ public abstract class MarketDataManager<T> {
         performanceLogger = configuration.getPerformanceLogger();
         heartbeatProcessor = new HeartbeatProcessor();
         newsProcessor = new NewsProcessor(marketDataHandler);
+        orderDepthEngine = createDepthEngine(configuration);
         return this;
     }
 
-    protected abstract OrderDepthEngine<T> createDepthEngine();
+    protected abstract OrderDepthEngine<T> createDepthEngine(IGatewayConfiguration configuration);
 
     public abstract BBO<T> createBBO(T exchangeSecurityId);
 
@@ -300,6 +301,8 @@ public abstract class MarketDataManager<T> {
             logger.trace("onPublicTrade " + publicTrade.getSecurityId());
 
         synchronized (currentBBO) {
+            orderDepthEngine.onPublicTrade(publicTrade);
+
             if (subscriptions.containsKey(currentBBO.getSecurityId())) {
                 gatewayOutTime = Utils.currentTimeInTicks();
                 marketDataHandler.onPublicTrade(publicTrade);

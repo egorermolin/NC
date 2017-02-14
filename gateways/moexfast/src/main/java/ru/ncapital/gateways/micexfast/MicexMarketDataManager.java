@@ -43,8 +43,8 @@ public class MicexMarketDataManager extends MarketDataManager<String> {
     }
 
     @Override
-    protected OrderDepthEngine<String> createDepthEngine() {
-        return new OrderDepthEngine<String>() {
+    protected OrderDepthEngine<String> createDepthEngine(IGatewayConfiguration configuration) {
+        return new OrderDepthEngine<String>(configuration) {
             @Override
             public DepthLevel<String> createSnapshotDepthLevel(String exchangeSecurityId) {
                 return new DepthLevel<String>(exchangeSecurityId, exchangeSecurityId) {
@@ -69,6 +69,11 @@ public class MicexMarketDataManager extends MarketDataManager<String> {
                     }
                 }
                 return changed;
+            }
+
+            @Override
+            public void onPublicTrade(PublicTrade<String> publicTrade) {
+                updateDepthLevelFromPublicTrade(publicTrade);
             }
         };
     }

@@ -1,5 +1,6 @@
 package ru.ncapital.gateways.micexfast
 
+import ru.ncapital.gateways.moexfast.IGatewayConfiguration
 import ru.ncapital.gateways.moexfast.OrderDepthEngine
 import ru.ncapital.gateways.moexfast.domain.MdUpdateAction
 import ru.ncapital.gateways.moexfast.domain.impl.BBO
@@ -12,8 +13,8 @@ import ru.ncapital.gateways.moexfast.domain.intf.IPublicTrade
  */
 class MicexOrderDepthEngineTest extends GroovyTestCase {
     
-    static OrderDepthEngine<String> getOrderDepthEngine() {
-        return new OrderDepthEngine<String>() {
+    static OrderDepthEngine<String> getOrderDepthEngine(IGatewayConfiguration configuration) {
+        return new OrderDepthEngine<String>(configuration) {
             @Override
             DepthLevel<String> createSnapshotDepthLevel(String exchangeSecurityId) {
                 return new DepthLevel<String>(exchangeSecurityId, exchangeSecurityId) {
@@ -42,7 +43,7 @@ class MicexOrderDepthEngineTest extends GroovyTestCase {
     }
     
     void testOnDepthLevelTradedPartially() {
-        OrderDepthEngine de = getOrderDepthEngine()
+        OrderDepthEngine de = getOrderDepthEngine(new MicexNullGatewayConfiguration())
         List<IDepthLevel> toSendDL = new ArrayList<>()
         List<IPublicTrade> toSendPT = new ArrayList<>()
 
@@ -57,7 +58,7 @@ class MicexOrderDepthEngineTest extends GroovyTestCase {
     }
 
     void testOnDepthLevelTradedPartially2() {
-        OrderDepthEngine de = getOrderDepthEngine()
+        OrderDepthEngine de = getOrderDepthEngine(new MicexNullGatewayConfiguration())
         List<IDepthLevel> toSendDL = new ArrayList<>()
         List<IPublicTrade> toSendPT = new ArrayList<>()
 
@@ -71,7 +72,7 @@ class MicexOrderDepthEngineTest extends GroovyTestCase {
     }
 
     void testOnDepthLevelTradedFully() {
-        OrderDepthEngine de = getOrderDepthEngine()
+        OrderDepthEngine de = getOrderDepthEngine(new MicexNullGatewayConfiguration())
         List<IDepthLevel> toSendDL = new ArrayList<>()
         List<IPublicTrade> toSendPT = new ArrayList<>()
 

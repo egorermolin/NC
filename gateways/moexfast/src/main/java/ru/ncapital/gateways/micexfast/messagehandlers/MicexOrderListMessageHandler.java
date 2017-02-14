@@ -23,6 +23,16 @@ public class MicexOrderListMessageHandler extends OrderListMessageHandler<String
     }
 
     @Override
+    protected double getLastPx(GroupValue mdEntry) {
+        throw new UnsupportedOperationException("LastPx not supported for MICEX");
+    }
+
+    @Override
+    protected long getLastSize(GroupValue mdEntry) {
+        throw new UnsupportedOperationException("LastSize not supported for MICEX");
+    }
+
+    @Override
     protected long getMdFlags(GroupValue mdEntry) {
         return 0;
     }
@@ -60,7 +70,10 @@ public class MicexOrderListMessageHandler extends OrderListMessageHandler<String
 
     @Override
     protected String getTradeId(GroupValue mdEntry) {
-        return mdEntry.getString("DealNumber");
+        if (gatewayConfiguration.getVersion() == IGatewayConfiguration.Version.V2016)
+            return mdEntry.getString("DealNumber");
+
+        return null;
     }
 
     @Override

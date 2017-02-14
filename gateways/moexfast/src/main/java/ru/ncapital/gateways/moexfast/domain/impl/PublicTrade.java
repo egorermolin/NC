@@ -38,6 +38,7 @@ public class PublicTrade<T> implements IPublicTrade {
         return exchangeSecurityId;
     }
 
+    @Override
     public String getMdEntryId() { return mdEntryId; }
 
     public void setMdEntryId(String mdEntryId) {
@@ -91,6 +92,7 @@ public class PublicTrade<T> implements IPublicTrade {
                 "securityId='" + securityId + '\'' +
                 ", exchangeSecurityId='" + exchangeSecurityId + '\'' +
                 ", tradeId=" + tradeId +
+                ", mdEntryId=" + mdEntryId +
                 ", isBid=" + isBid +
                 ", lastPx=" + lastPx +
                 ", lastSize=" + lastSize +
