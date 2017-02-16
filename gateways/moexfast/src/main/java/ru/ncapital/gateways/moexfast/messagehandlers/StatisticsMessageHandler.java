@@ -29,18 +29,14 @@ public abstract class StatisticsMessageHandler<T> extends AMessageHandler<T> {
 
         switch(configuration.getVersion()) {
             case V2016:
-                if (configuration.getMarketType() == MarketType.FUT)
-                    mdEntryFractionFactor = Utils.SecondFractionFactor.MILLISECONDS;
-                else
-                    mdEntryFractionFactor = Utils.SecondFractionFactor.MICROSECONDS;
-
+                mdEntryFractionFactor = Utils.SecondFractionFactor.MILLISECONDS;
                 break;
             case V2017:
             default:
                 if (configuration.getMarketType() == MarketType.FUT)
                     mdEntryFractionFactor = Utils.SecondFractionFactor.NANOSECONDS;
                 else
-                    mdEntryFractionFactor = Utils.SecondFractionFactor.MICROSECONDS;
+                    mdEntryFractionFactor = Utils.SecondFractionFactor.MILLISECONDS;
 
                 break;
         }

@@ -81,6 +81,9 @@ public abstract class AMessageHandler<T> implements IMessageHandler<T> {
     }
 
     protected MdUpdateAction getMdUpdateAction(GroupValue mdEntry) {
+        if (mdEntry.getValue("MDUpdateAction") == null) // snapshot
+            return MdUpdateAction.INSERT;
+
         return MdUpdateAction.convert(mdEntry.getString("MDUpdateAction").charAt(0));
     }
 
