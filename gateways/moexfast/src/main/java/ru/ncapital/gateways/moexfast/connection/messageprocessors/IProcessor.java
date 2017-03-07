@@ -8,5 +8,7 @@ import org.openfast.MessageHandler;
 public interface IProcessor extends MessageHandler {
     void setIsPrimary(boolean isPrimary);
 
+    void setPrimaryAlive(boolean alive);
+
     ThreadLocal<Long> getInTimestampHolder();
 }

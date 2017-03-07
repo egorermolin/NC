@@ -15,20 +15,18 @@ import ru.ncapital.gateways.moexfast.MarketDataManager;
 import ru.ncapital.gateways.moexfast.Utils;
 import ru.ncapital.gateways.moexfast.connection.Connection;
 import ru.ncapital.gateways.moexfast.connection.ConnectionId;
+import ru.ncapital.gateways.moexfast.connection.messageprocessors.IProcessor;
 import ru.ncapital.gateways.moexfast.messagehandlers.MessageHandlerType;
 
-import java.io.BufferedWriter;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.*;
 import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.MembershipKey;
-import java.util.*;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -36,171 +34,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class MessageReader implements IMulticastEventListener {
 
-    protected class Statistics {
+    protected MessageReaderStatistics statistics;
 
-        private static final int NUMBER_OF_LISTS = 100;
-
-        private class StatisticsItem {
-            // ALL TIMES IN TODAY MICROS (micros since midnight)
-
-            private int seqNum;
-
-            private long entrTime;
-
-            private long sendTime;
-
-            private long recvTime;
-
-            private long decdTime;
-
-            private StatisticsItem(int seqNum, long entrTime, long sendTime, long recvTime, long decdTime) {
-                this.seqNum = seqNum;
-                this.entrTime = entrTime;
-                this.sendTime = sendTime;
-                this.recvTime = recvTime;
-                this.decdTime = decdTime;
-            }
-        }
-
-        private List<List<StatisticsItem>> allItems = new ArrayList<>();
-
-        private List<StatisticsItem> currentItems;
-
-        private int currentItemsPos = 0;
-
-        private long total = 0;
-
-        private BufferedWriter writer;
-
-        private boolean active = false;
-
-        private Executor executor = Executors.newSingleThreadExecutor();
-
-        public boolean isActive() {
-            return active;
-        }
-
-        public void initStatistics() {
-            active = true;
-            for (int i = 0; i < NUMBER_OF_LISTS; ++i)
-                allItems.add(new ArrayList<StatisticsItem>());
-            currentItems = allItems.get(0);
-        }
-
-        public void initStatisticsWritingToFile(String filename) {
-            if (!active)
-                return;
-
-            try {
-                writer = new BufferedWriter(new FileWriter(filename, false));
-            } catch (IOException e) {
-                System.err.println("FAILED TO OPEN FILE " + e.toString());
-                writer = null;
-            }
-        }
-
-        public synchronized void addItem(int seqNum, long entrTime, long sendTime, long recvTime, long decdTime) {
-            if (!active)
-                return;
-
-            currentItems.add(new StatisticsItem(seqNum, entrTime, sendTime, recvTime, decdTime));
-        }
-
-        public void dump() {
-            if (active) {
-                int pos = currentItemsPos;
-
-                logger.info(pos + " " + Utils.currentTimeInTodayMicros());
-
-                List<StatisticsItem> lastItems = initNextAvaiableItems();
-
-                calculateAndWriteToFile(pos, lastItems);
-            }
-        }
-
-        private synchronized List<StatisticsItem> initNextAvaiableItems() {
-            List<StatisticsItem> itemsToDump = currentItems;
-
-            if (currentItemsPos + 1 == NUMBER_OF_LISTS)
-                currentItemsPos = 0;
-
-            currentItems = allItems.get(++currentItemsPos);
-            currentItems.clear();
-
-            return itemsToDump;
-        }
-
-        private void calculateAndWriteToFile(int pos, List<StatisticsItem> items) {
-            if (items.isEmpty())
-                return;
-
-            class CalculateAndWriteTask implements Runnable {
-                private int pos;
-
-                private List<StatisticsItem> items;
-
-                private CalculateAndWriteTask(int pos, List<StatisticsItem> items) {
-                    this.pos = pos;
-                    this.items = items;
-                }
-
-                @Override
-                public void run() {
-                    StringBuilder sb = new StringBuilder();
-                    List<Long> latenciesEntrToRecv = new ArrayList<>();
-                    List<Long> latenciesEntrToSend = new ArrayList<>();
-
-                    for (StatisticsItem item : items) {
-                        latenciesEntrToRecv.add(item.recvTime - item.entrTime);
-                        latenciesEntrToSend.add(item.sendTime - item.entrTime);
-                    }
-
-                    Collections.sort(latenciesEntrToRecv);
-                    Collections.sort(latenciesEntrToSend);
-
-                    total += items.size();
-                    sb.append("[Total: ").append(total).append("]");
-                    sb.append("[Last: ").append(items.size()).append("]");
-                    sb.append("[MinL: ").append(String.format("%d", latenciesEntrToRecv.get(0))).append("");
-                    sb.append("|").append(String.format("%d", latenciesEntrToSend.get(0))).append("]");
-                    sb.append("[MedL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() / 2))).append("");
-                    sb.append("|").append(String.format("%d", latenciesEntrToSend.get(latenciesEntrToSend.size() / 2))).append("]");
-                    sb.append("[MaxL: ").append(String.format("%d", latenciesEntrToRecv.get(latenciesEntrToRecv.size() - 1))).append("");
-                    sb.append("|").append(String.format("%d", latenciesEntrToSend.get(latenciesEntrToSend.size() - 1))).append("]");
-
-                    logger.info(pos + " " + Utils.currentTimeInTodayMicros() + " " + sb.toString());
-
-                    if (writer == null)
-                        return;
-
-                    try {
-                        writer.write(sb.toString());
-                        writer.newLine();
-
-                        for (StatisticsItem item : items) {
-                            writer.write(new StringBuilder()
-                                    .append(item.seqNum).append(";")
-                                    .append(item.entrTime).append(";")
-                                    .append(item.sendTime).append(";")
-                                    .append(item.recvTime).append(";")
-                                    .append(item.decdTime).append(";")
-                                    .append(item.recvTime - item.entrTime).append(";")
-                                    .append(item.sendTime - item.entrTime).append(";").toString());
-
-                            writer.newLine();
-                        }
-                        writer.flush();
-                    } catch (IOException e) {
-                        System.err.println("FAILED TO WRITE TO FILE " + e.toString());
-                    }
-                }
-            }
-
-            executor.execute(new CalculateAndWriteTask(pos, items));
-        }
-    }
-
-    protected Statistics stats = new Statistics();
+    private IProcessor processor;
 
     private Connection connection;
 
@@ -239,6 +75,7 @@ public class MessageReader implements IMulticastEventListener {
         this.asynch = configurationManager.isAsynchChannelReader();
         this.connection = configurationManager.getConnection(connectionId);
         this.logger = LoggerFactory.getLogger(connectionId.getConnectionId() + "-MessageReader");
+        this.statistics = new MessageReaderStatistics(this.logger);
 
         if (logger.isDebugEnabled())
             logger.debug("Created [Connection: " + connectionId.getConnectionId() + "]");
@@ -265,6 +102,14 @@ public class MessageReader implements IMulticastEventListener {
 
         this.marketDataManager = marketDataManager;
         this.instrumentManager = instumentManager;
+    }
+
+    private void setProcessor(IProcessor processor) {
+        this.processor = processor;
+    }
+
+    public IProcessor getProcessor() {
+        return this.processor;
     }
 
     public DatagramChannel openChannel() throws IOException {
@@ -450,7 +295,7 @@ public class MessageReader implements IMulticastEventListener {
         }
 
         if (instrumentManager == null && marketDataManager == null) {
-            if (stats.isActive()) {
+            if (statistics.isActive()) {
                 registerMessageHandler(new MessageHandler() {
                     @Override
                     public void handleMessage(Message readMessage, Context context, Coder coder) {
@@ -463,7 +308,7 @@ public class MessageReader implements IMulticastEventListener {
                             for (int i = 0; i < mdEntries.getLength(); ++i) {
                                 long entryTimeInTodayMicros = Utils.getEntryTimeInTodayMicros(mdEntries.get(i), Utils.SecondFractionFactor.NANOSECONDS);
 
-                                stats.addItem(readMessage.getInt("MsgSeqNum"),
+                                statistics.addItem(readMessage.getInt("MsgSeqNum"),
                                         entryTimeInTodayMicros, sendingTimeInTodayMicros,
                                         receivedTimeInTodayMicros, decodedTimeInTodayMicros
                                 );
@@ -483,6 +328,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("f"), instrumentManager);
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(null));
+                    setProcessor(instrumentManager);
                     break;
                 case FUT_INSTRUMENT_INCR_A:
                 case FUT_INSTRUMENT_INCR_B:
@@ -490,6 +336,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("SequenceReset"), instrumentManager);
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(null));
+                    setProcessor(instrumentManager);
                     break;
 
                 // ========= //
@@ -500,6 +347,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("d"), instrumentManager);
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(null));
+                    setProcessor(instrumentManager);
                     break;
                 case FUT_INSTRUMENT_SNAP_A:
                 case FUT_INSTRUMENT_SNAP_B:
@@ -507,6 +355,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("SequenceReset"), instrumentManager);
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(null));
+                    setProcessor(instrumentManager);
                     break;
 
                 // ========= //
@@ -516,6 +365,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-OLR-CURR"), marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.ORDER_LIST)));
+                    setProcessor(marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST));
                     break;
                 case FOND_ORDER_LIST_INCR_A:
                     marketDataManager.setIncrementalProcessorIsPrimary(MessageHandlerType.ORDER_LIST, true);
@@ -523,6 +373,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-OLR-FOND"), marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.ORDER_LIST)));
+                    setProcessor(marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST));
                     break;
                 case FUT_ORDER_LIST_INCR_A:
                     marketDataManager.setIncrementalProcessorIsPrimary(MessageHandlerType.ORDER_LIST, true);
@@ -532,6 +383,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("TradingSessionStatus"), marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST));
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.ORDER_LIST)));
+                    setProcessor(marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_LIST));
                     break;
 
                 // ========= //
@@ -540,12 +392,14 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("W-OLS-CURR"), marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_LIST));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.ORDER_LIST)));
+                    setProcessor(marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_LIST));
                     break;
                 case FOND_ORDER_LIST_SNAP_A:
                 case FOND_ORDER_LIST_SNAP_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("W-OLS-FOND"), marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_LIST));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.ORDER_LIST)));
+                    setProcessor(marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_LIST));
                     break;
                 case FUT_ORDER_LIST_SNAP_A:
                 case FUT_ORDER_LIST_SNAP_B:
@@ -554,6 +408,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("TradingSessionStatus"), marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_LIST));
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.ORDER_LIST)));
+                    setProcessor(marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_LIST));
                     break;
 
                 // ========= //
@@ -563,6 +418,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-MSR-CURR"), marketDataManager.getIncrementalProcessor(MessageHandlerType.STATISTICS));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.STATISTICS)));
+                    setProcessor(marketDataManager.getIncrementalProcessor(MessageHandlerType.STATISTICS));
                     break;
                 case FOND_STATISTICS_INCR_A:
                     marketDataManager.setIncrementalProcessorIsPrimary(MessageHandlerType.STATISTICS, true);
@@ -570,6 +426,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-MSR-FOND"), marketDataManager.getIncrementalProcessor(MessageHandlerType.STATISTICS));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.STATISTICS)));
+                    setProcessor(marketDataManager.getIncrementalProcessor(MessageHandlerType.STATISTICS));
                     break;
                 case FUT_STATISTICS_INCR_A:
                     marketDataManager.setIncrementalProcessorIsPrimary(MessageHandlerType.STATISTICS, true);
@@ -579,6 +436,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("TradingSessionStatus"), marketDataManager.getIncrementalProcessor(MessageHandlerType.STATISTICS));
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.STATISTICS)));
+                    setProcessor(marketDataManager.getIncrementalProcessor(MessageHandlerType.STATISTICS));
                     break;
 
                 // ========= //
@@ -589,6 +447,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("W-Generic"), marketDataManager.getSnapshotProcessor(MessageHandlerType.STATISTICS));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.STATISTICS)));
+                    setProcessor(marketDataManager.getSnapshotProcessor(MessageHandlerType.STATISTICS));
                     break;
                 case FUT_STATISTICS_SNAP_A:
                 case FUT_STATISTICS_SNAP_B:
@@ -597,6 +456,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("TradingSessionStatus"), marketDataManager.getSnapshotProcessor(MessageHandlerType.STATISTICS));
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.STATISTICS)));
+                    setProcessor(marketDataManager.getSnapshotProcessor(MessageHandlerType.STATISTICS));
                     break;
 
                 // ========= //
@@ -606,6 +466,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-TLR-CURR"), marketDataManager.getIncrementalProcessor(MessageHandlerType.PUBLIC_TRADES));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.PUBLIC_TRADES)));
+                    setProcessor(marketDataManager.getIncrementalProcessor(MessageHandlerType.PUBLIC_TRADES));
                     break;
                 case FOND_PUB_TRADES_INCR_A:
                     marketDataManager.setIncrementalProcessorIsPrimary(MessageHandlerType.PUBLIC_TRADES, true);
@@ -613,6 +474,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("X-TLR-FOND"), marketDataManager.getIncrementalProcessor(MessageHandlerType.PUBLIC_TRADES));
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("0"), marketDataManager.getHeartbeatProcessor());
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.PUBLIC_TRADES)));
+                    setProcessor(marketDataManager.getIncrementalProcessor(MessageHandlerType.PUBLIC_TRADES));
                     break;
 
                 // ========= //
@@ -624,6 +486,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("TradingSessionStatus"), marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_BOOK));
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getIncrementalProcessorInTimestamp(MessageHandlerType.ORDER_BOOK)));
+                    setProcessor(marketDataManager.getIncrementalProcessor(MessageHandlerType.ORDER_BOOK));
                     break;
                 case FUT_ORDER_BOOK_SNAP_A:
                 case FUT_ORDER_BOOK_SNAP_B:
@@ -632,6 +495,7 @@ public class MessageReader implements IMulticastEventListener {
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("TradingSessionStatus"), marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_BOOK));
                     multicastInputStream.setInTimestamp(initAndGetInTimestamp(marketDataManager.getSnapshotProcessorInTimestamp(MessageHandlerType.ORDER_BOOK)));
+                    setProcessor(marketDataManager.getSnapshotProcessor(MessageHandlerType.ORDER_BOOK));
                     break;
 
                 // ========= //
@@ -639,6 +503,7 @@ public class MessageReader implements IMulticastEventListener {
                 case FUT_NEWS_INCR_B:
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("News"), marketDataManager.getNewsProcessor());
                     messageReader.addMessageHandler(messageReader.getTemplateRegistry().get("Heartbeat"), marketDataManager.getHeartbeatProcessor());
+                    setProcessor(marketDataManager.getNewsProcessor());
                     break;
             }
         }

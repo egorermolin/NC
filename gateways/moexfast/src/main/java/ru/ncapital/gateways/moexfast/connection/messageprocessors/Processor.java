@@ -21,12 +21,20 @@ abstract class Processor extends BaseProcessorWithMessageBackup implements IProc
         }
     }
 
+    private boolean isMessageFromPrimary() {
+        if (isPrimaryAlive())
+            return isPrimary();
+
+        // primary channel is dead, make backup act like primary
+        return true;
+    }
+
     protected boolean checkSequence(Message readMessage) {
         if (readMessage == null)
             return false;
 
         int seqNum = readMessage.getInt("MsgSeqNum");
-        if (isPrimary()) {
+        if (isMessageFromPrimary()) {
             switch (sequenceArray.checkSequence(seqNum)) {
                 case IN_SEQUENCE:
                     break;

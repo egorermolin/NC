@@ -64,18 +64,18 @@ public class MicexMessageReader extends MessageReader {
             return;
         }
 
-        final MicexMessageReader mr = new MicexMessageReader(ConnectionId.convert(args[0]), configurationManager, null, null);
+        final MicexMessageReader messageReader = new MicexMessageReader(ConnectionId.convert(args[0]), configurationManager, null, null);
         boolean statistics = false;
         switch (args[4]) {
             case "trace":
             case "debug":
-                mr.init(args[4]);
+                messageReader.init(args[4]);
                 break;
             case "stats":
-                mr.init("info");
-                mr.stats.initStatistics();
+                messageReader.init("info");
+                messageReader.statistics.initStatistics();
                 if (args.length > 5) {
-                    mr.stats.initStatisticsWritingToFile(args[5]);
+                    messageReader.statistics.initStatisticsWritingToFile(args[5]);
                 }
                 statistics = true;
                 break;
@@ -85,12 +85,12 @@ public class MicexMessageReader extends MessageReader {
             Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
-                    mr.stats.dump();
+                    messageReader.statistics.dump();
                 }
             }, 1, 1, TimeUnit.SECONDS);
         }
 
-        mr.start();
+        messageReader.start();
     }
 
     @Override

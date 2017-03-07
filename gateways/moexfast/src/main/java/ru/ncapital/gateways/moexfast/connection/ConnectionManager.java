@@ -498,8 +498,14 @@ public class ConnectionManager {
 
                 channelStatus.addChannel(ChannelStatus.convert(messageReader.getConnectionId()));
                 if (currentTime - lastReceivedTimestamp < feedDownTimeout) {
+                    if (messageReader.getConnectionId().isPrimary())
+                        messageReader.getProcessor().setPrimaryAlive(true);
+
                     channelStatus.addChannelUp(ChannelStatus.convert(messageReader.getConnectionId()));
                 } else {
+                    if (messageReader.getConnectionId().isPrimary())
+                        messageReader.getProcessor().setPrimaryAlive(false);
+
                     logger.warn("Message Reader [" + messageReader.getConnectionId() + "] is down since [" + Utils.convertTicksToTodayString(lastReceivedTimestamp) + "]");
                 }
             }

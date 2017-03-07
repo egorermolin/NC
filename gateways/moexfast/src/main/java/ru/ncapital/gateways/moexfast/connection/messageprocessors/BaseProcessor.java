@@ -28,6 +28,12 @@ public class BaseProcessor {
         }
     };
 
+    private boolean isPrimaryAlive = true;
+
+    public Logger getLogger() {
+        return logger.get();
+    }
+
     Long getInTimestamp() {
         return inTimestamp.get();
     }
@@ -35,6 +41,8 @@ public class BaseProcessor {
     boolean isPrimary() {
         return isPrimary.get();
     }
+
+    boolean isPrimaryAlive() { return isPrimaryAlive; }
 
     public ThreadLocal<Long> getInTimestampHolder() {
         return inTimestamp;
@@ -44,7 +52,8 @@ public class BaseProcessor {
         this.isPrimary.set(isPrimary);
     }
 
-    public Logger getLogger() {
-        return logger.get();
+    public void setPrimaryAlive(boolean alive) {
+        isPrimaryAlive = alive;
     }
+
 }

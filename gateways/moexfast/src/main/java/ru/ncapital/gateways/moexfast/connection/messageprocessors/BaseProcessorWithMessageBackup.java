@@ -12,16 +12,13 @@ public class BaseProcessorWithMessageBackup extends BaseProcessor {
 
     private Map<Integer, Message> backupCache = Collections.synchronizedMap(new HashMap<Integer, Message>());
 
-    private boolean backupCacheQueueFull = false;
-
     void addBackupMessage(int seqNum, Message readMessage) {
+        if (backupCacheQueue.size() == 100)
+            backupCache.remove(backupCacheQueue.poll());
+
         backupCacheQueue.add(seqNum);
         backupCache.put(seqNum, readMessage);
-        if (backupCacheQueueFull)
-            backupCache.remove(backupCacheQueue.poll());
-        else // keep size at 100
-            backupCacheQueueFull = backupCacheQueue.size() > 100;
-    }
+   }
 
     Message getBackupMessage(int seqNum) {
         return backupCache.get(seqNum);
