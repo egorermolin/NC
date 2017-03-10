@@ -110,6 +110,6 @@ public abstract class AMessageHandler<T> implements IMessageHandler<T> {
     protected abstract SequenceValue getMdEntries(Message readMessage);
 
     protected final boolean getTradeIsBid(GroupValue mdEntry) {
-        return mdEntry.getString("OrderSide").charAt(0) == '1';
+        return mdEntry.getString("OrderSide").charAt(0) == 'B';
     }
 }
