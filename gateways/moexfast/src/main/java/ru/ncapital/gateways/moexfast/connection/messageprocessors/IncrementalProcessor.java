@@ -26,16 +26,12 @@ public abstract class IncrementalProcessor<T> extends Processor implements IIncr
         this.sequenceValidator = sequenceValidator;
 
         switch(configuration.getVersion()) {
-            case V2016:
-                sendingTimeFractionFactor = Utils.SecondFractionFactor.MILLISECONDS;
-                break;
             case V2017:
             default:
                 if (configuration.getMarketType() == MarketType.FUT)
                     sendingTimeFractionFactor = Utils.SecondFractionFactor.MILLISECONDS;
                 else
                     sendingTimeFractionFactor = Utils.SecondFractionFactor.MICROSECONDS;
-
                 break;
         }
     }

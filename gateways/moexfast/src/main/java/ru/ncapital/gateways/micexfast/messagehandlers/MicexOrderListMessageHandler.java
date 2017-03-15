@@ -70,9 +70,6 @@ public class MicexOrderListMessageHandler extends OrderListMessageHandler<String
 
     @Override
     protected String getTradeId(GroupValue mdEntry) {
-        if (gatewayConfiguration.getVersion() == IGatewayConfiguration.Version.V2016)
-            return mdEntry.getString("DealNumber");
-
         return null;
     }
 

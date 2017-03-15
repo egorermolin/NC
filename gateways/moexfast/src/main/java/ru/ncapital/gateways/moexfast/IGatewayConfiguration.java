@@ -8,7 +8,7 @@ import ru.ncapital.gateways.moexfast.performance.IGatewayPerformanceLogger;
  */
 public interface IGatewayConfiguration {
     enum Version {
-        V2016, V2017
+        V2017
     }
 
     IMarketDataHandler getMarketDataHandler();
