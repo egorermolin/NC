@@ -147,7 +147,7 @@ public abstract class OrderDepthEngine<T> {
         if (publicTrade == null || publicTrade.getMdEntryId() == null)
             return;
 
-        DepthLevel depthLevel = getOrderDepth(publicTrade.getExchangeSecurityId(), publicTrade.isBid())
+        DepthLevel depthLevel = getOrderDepth(publicTrade.getExchangeSecurityId(), !publicTrade.isBid())
                 .getDepthLevel(publicTrade.getMdEntryId());
 
         if (depthLevel == null) {
