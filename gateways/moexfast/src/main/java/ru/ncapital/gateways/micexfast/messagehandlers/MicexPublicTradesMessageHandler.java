@@ -43,6 +43,9 @@ public class MicexPublicTradesMessageHandler extends StatisticsMessageHandler<St
 
     @Override
     protected String getMdEntryId(GroupValue mdEntry) {
+        if (mdEntry.getValue("RefOrderID") == null)
+            return "0";
+
         return String.valueOf(mdEntry.getLong("RefOrderID"));
     }
 
